@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <!--Naviation_Calendar-->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/nav"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:id="@+id/navigation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#FFFFFF"
+            android:gravity="center"
+            android:importantForAccessibility="no"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <LinearLayout
+                android:id="@+id/nav_calendar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:padding="16dp"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <ImageButton
+                    android:id="@+id/calendar_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@android:color/transparent"
+                    android:maxWidth="32dp"
+                    android:maxHeight="32dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_navi_calendar_selected" />
+
+                <TextView
+                    android:id="@+id/calendar_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/pretendard_regular"
+                    android:gravity="center"
+                    android:text="캘린더"
+                    android:textColor="@color/elixir_orange"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/nav_recipe"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:padding="16dp"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <ImageButton
+                    android:id="@+id/recipe_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@android:color/transparent"
+                    android:maxWidth="32dp"
+                    android:maxHeight="32dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_recipe_default" />
+
+                <TextView
+                    android:id="@+id/recipe_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/pretendard_regular"
+                    android:gravity="center"
+                    android:text="레시피"
+                    android:textColor="@color/elixir_gray"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/nav_challenge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:padding="16dp"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <ImageButton
+                    android:id="@+id/challenge_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@android:color/transparent"
+                    android:maxWidth="32dp"
+                    android:maxHeight="32dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_navi_challenge_normal" />
+
+                <TextView
+                    android:id="@+id/challenge_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/pretendard_regular"
+                    android:gravity="center"
+                    android:text="챌린지"
+                    android:textColor="@color/elixir_gray"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/nav_mypage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <ImageButton
+                    android:id="@+id/mypage_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@android:color/transparent"
+                    android:maxWidth="32dp"
+                    android:maxHeight="32dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_navi_mypage_normal" />
+
+                <TextView
+                    android:id="@+id/mypage_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/pretendard_regular"
+                    android:text="마이페이지"
+                    android:textColor="@color/elixir_gray"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>
+
+
