@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.prolificinteractive.materialcalendarview.MaterialCalendarView
+        android:id="@+id/calendarView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:layout_marginTop="30dp"
+        app:mcv_tileSize="42dp"
+        app:mcv_tileWidth="match_parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:mcv_arrowColor="@color/elixir_darkgray"
+        app:mcv_selectionColor="@color/elixir_orange"
+        app:mcv_showOtherDates="all" />
+
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/bottomsheet"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:descendantFocusability="beforeDescendants"
+        android:focusableInTouchMode="true"
+        app:backgroundTint="#FDCFA7"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+        app:behavior_peekHeight="120dp"
+        app:behavior_expandedOffset="30dp"
+        app:behavior_fitToContents="false"
+        app:behavior_halfExpandedRatio="0.5"
+        app:cardCornerRadius="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:paddingTop="25dp"
+                android:paddingLeft="130dp"
+                android:paddingRight="130dp"
+                android:src="@drawable/png_handle"/>
+        </LinearLayout>
+
+        <!-- 여기에 BottomSheet 내용을 추가하세요 -->
+
+    </androidx.cardview.widget.CardView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

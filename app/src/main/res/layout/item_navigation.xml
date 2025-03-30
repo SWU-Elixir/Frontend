@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -27,8 +26,10 @@
                 android:id="@+id/nav_calendar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="4dp"
-                android:padding="16dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:paddingLeft="22dp"
+                android:paddingRight="22dp"
                 android:orientation="vertical"
                 android:gravity="center">
 
@@ -38,10 +39,11 @@
                     android:layout_height="wrap_content"
                     android:adjustViewBounds="true"
                     android:background="@android:color/transparent"
-                    android:maxWidth="32dp"
-                    android:maxHeight="32dp"
+                    android:maxWidth="36dp"
+                    android:maxHeight="36dp"
                     android:scaleType="fitCenter"
-                    android:src="@drawable/ic_navi_calendar_selected" />
+                    android:src="@drawable/ic_navi_calendar_selected"
+                    android:contentDescription="Calendar icon"/>
 
                 <TextView
                     android:id="@+id/calendar_title"
@@ -58,8 +60,10 @@
                 android:id="@+id/nav_recipe"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="4dp"
-                android:padding="16dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:paddingLeft="22dp"
+                android:paddingRight="22dp"
                 android:orientation="vertical"
                 android:gravity="center">
 
@@ -69,10 +73,11 @@
                     android:layout_height="wrap_content"
                     android:adjustViewBounds="true"
                     android:background="@android:color/transparent"
-                    android:maxWidth="32dp"
-                    android:maxHeight="32dp"
+                    android:maxWidth="36dp"
+                    android:maxHeight="36dp"
                     android:scaleType="fitCenter"
-                    android:src="@drawable/ic_recipe_default" />
+                    android:src="@drawable/ic_recipe_default"
+                    android:contentDescription="Recipe icon"/>
 
                 <TextView
                     android:id="@+id/recipe_title"
@@ -89,8 +94,10 @@
                 android:id="@+id/nav_challenge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="4dp"
-                android:padding="16dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:paddingLeft="22dp"
+                android:paddingRight="22dp"
                 android:orientation="vertical"
                 android:gravity="center">
 
@@ -100,10 +107,11 @@
                     android:layout_height="wrap_content"
                     android:adjustViewBounds="true"
                     android:background="@android:color/transparent"
-                    android:maxWidth="32dp"
-                    android:maxHeight="32dp"
+                    android:maxWidth="36dp"
+                    android:maxHeight="36dp"
                     android:scaleType="fitCenter"
-                    android:src="@drawable/ic_navi_challenge_normal" />
+                    android:src="@drawable/ic_navi_challenge_normal"
+                    android:contentDescription="Challenge icon"/>
 
                 <TextView
                     android:id="@+id/challenge_title"
@@ -120,9 +128,10 @@
                 android:id="@+id/nav_mypage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="4dp"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
                 android:orientation="vertical"
                 android:gravity="center">
 
@@ -132,10 +141,11 @@
                     android:layout_height="wrap_content"
                     android:adjustViewBounds="true"
                     android:background="@android:color/transparent"
-                    android:maxWidth="32dp"
-                    android:maxHeight="32dp"
+                    android:maxWidth="36dp"
+                    android:maxHeight="36dp"
                     android:scaleType="fitCenter"
-                    android:src="@drawable/ic_navi_mypage_normal" />
+                    android:src="@drawable/ic_navi_mypage_normal"
+                    android:contentDescription="Mypage icon"/>
 
                 <TextView
                     android:id="@+id/mypage_title"

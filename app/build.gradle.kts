@@ -68,4 +68,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     // Material Components 라이브러리 추가
     implementation (libs.material)
+    // calendarview 라이브러리 추가
+    implementation ("com.github.prolificinteractive:material-calendarview:1.6.0")
 }

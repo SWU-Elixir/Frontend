@@ -4,4 +4,15 @@
     <style name="Theme.Elixir" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:colorPrimary">@color/transparency</item>
     </style>
+
+    <style name="CalendarHeaderTextAppearance">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="BottomNavStyle" parent="Widget.MaterialComponents.BottomNavigationView">
+        <item name="android:background">@color/white</item>
+        <item name="itemIconTint">@color/elixir_orange</item>
+        <item name="itemTextColor">@color/elixir_orange</item>
+    </style>
 </resources>

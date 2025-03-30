@@ -25,7 +25,8 @@
         </activity>
         <activity
             android:name=".NavigationActivity"
-            android:exported="true" />
+            android:exported="true"
+            android:theme="@style/Theme.Elixir"/>
     </application>
 
 </manifest>
