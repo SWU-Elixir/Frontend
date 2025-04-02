@@ -70,4 +70,6 @@ dependencies {
     implementation (libs.material)
     // calendarview 라이브러리 추가
     implementation ("com.github.prolificinteractive:material-calendarview:1.6.0")
+    // flexboxLayout 라이브러리 추가
+    implementation ("com.google.android.flexbox:flexbox:3.0.0")
 }

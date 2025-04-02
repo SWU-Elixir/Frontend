@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/white">
 
     <com.prolificinteractive.materialcalendarview.MaterialCalendarView
         android:id="@+id/calendarView"
@@ -17,6 +18,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:mcv_arrowColor="@color/elixir_darkgray"
         app:mcv_selectionColor="@color/elixir_orange"
+        app:mcv_dateTextAppearance="@color/black"
         app:mcv_showOtherDates="all" />
 
 
@@ -47,6 +49,18 @@
                 android:paddingLeft="130dp"
                 android:paddingRight="130dp"
                 android:src="@drawable/png_handle"/>
+
+            <ListView
+                android:id="@+id/listview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:dividerHeight="10dp"
+                android:divider="@color/transparency"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                />
         </LinearLayout>
 
         <!-- 여기에 BottomSheet 내용을 추가하세요 -->

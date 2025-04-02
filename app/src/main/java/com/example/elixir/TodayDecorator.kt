@@ -16,7 +16,10 @@ class TodayDecorator(private val context: Context, private val drawable: Drawabl
     }
 
     override fun decorate(view: DayViewFacade) {
+        // 오늘 날짜의 배경을 변경
         view.setBackgroundDrawable(drawable)
-        view.addSpan(ForegroundColorSpan(textColor))
+        // 오늘 날짜의 글씨 색상 변경
+        //view.addSpan(ForegroundColorSpan(textColor))
     }
+
 }

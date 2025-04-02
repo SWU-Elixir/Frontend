@@ -16,6 +16,7 @@ class NavigationActivity : AppCompatActivity() {
     lateinit var recipeButton: ImageButton
     lateinit var challengeButton: ImageButton
     lateinit var mypageButton: ImageButton
+    lateinit var chatbotButton:ImageButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,6 +31,7 @@ class NavigationActivity : AppCompatActivity() {
         recipeButton = findViewById(R.id.recipe_icon)
         challengeButton = findViewById(R.id.challenge_icon)
         mypageButton = findViewById(R.id.mypage_icon)
+        chatbotButton = findViewById(R.id.chatbot_icon)
 
         setupButtonListeners()
     }
@@ -48,6 +50,11 @@ class NavigationActivity : AppCompatActivity() {
         challengeButton.setOnClickListener {
             //replaceFragment(ChallengeFragment())
             Toast.makeText(this, "챌린지 탭 선택됨", Toast.LENGTH_SHORT).show()
+        }
+
+        chatbotButton.setOnClickListener {
+            //replaceFragment(MyPageFragment())
+            Toast.makeText(this, "챗봇 탭 선택됨", Toast.LENGTH_SHORT).show()
         }
 
         mypageButton.setOnClickListener {
