@@ -11,6 +11,8 @@
     <string name="rule_pw">영문 대소문자, 숫자, 특수문자(.!@#$%)를 혼합하여 8~20자 이내로 입력해주세요.</string>
     <string name="nickname">별명</string>
     <string name="img_profile">프로필 사진</string>
+    <string name="birth_year">출생년도</string>
+    <string name="birth_year_hint">----</string>
 
     <!-- 툴바 -->
     <string name="back">뒤로 가기</string>
@@ -92,8 +94,8 @@
     <string name="content_inflam">몸속 염증을 줄여서 건강을 지키고 면역력을 높이는 데 도움</string>
 
     <!-- Not selected -->
-    <string name="selected_not">선택 안함</string>
-    <string name="n_a">해당 없음</string>
+    <string name="selected_not">선택안함</string>
+    <string name="n_a">해당없음</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

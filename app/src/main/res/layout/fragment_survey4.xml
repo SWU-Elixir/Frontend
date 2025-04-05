@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".Survey4Fragment">
+
+    <!-- 질문 4 -->
+    <TextView
+        android:id="@+id/q4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/list_reason"
+        android:layout_marginVertical="20dp"
+        android:fontFamily="@font/pretendard_bold"
+        android:text="@string/survey_q4"
+        android:textColor="@color/black"
+        android:textSize="22sp"/>
+
+    <!-- 저속노화 이유 선택 리스트 -->
+    <LinearLayout
+        android:id="@+id/list_reason"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/q4"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:orientation="vertical">
+        <!-- 선택 1. 항산화 -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/reason1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="5dp"
+            android:padding="16dp"
+            android:background="@drawable/selector_prefer">
+            <!-- 이모지: 근육 -->
+            <TextView
+                android:id="@+id/ic_reason1"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:text="@string/ic_antiox"
+                android:textAlignment="center"
+                android:textColor="@color/black"
+                android:textSize="32sp"
+                android:fontFamily="@font/pretendard_regular"/>
+            <!-- 텍스트 -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/text_reason1"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginHorizontal="16dp"
+                app:layout_constraintStart_toEndOf="@id/ic_reason1">
+                <TextView
+                    android:id="@+id/title_antiox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:text="@string/title_antiox"
+                    android:textAlignment="viewStart"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/pretendard_regular"/>
+                <TextView
+                    android:id="@+id/content_antiox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/title_antiox"
+                    android:text="@string/content_antiox"
+                    android:textAlignment="viewStart"
+                    android:textColor="@color/black"
+                    android:textSize="12sp"
+                    android:fontFamily="@font/pretendard_thin"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- 선택 2. 혈당 -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/reason2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="5dp"
+            android:padding="16dp"
+            android:background="@drawable/selector_prefer">
+            <!-- 이모지: 밥 -->
+            <TextView
+                android:id="@+id/ic_reason2"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:text="@string/ic_blood"
+                android:textAlignment="center"
+                android:textColor="@color/black"
+                android:textSize="32sp"
+                android:fontFamily="@font/pretendard_regular"/>
+            <!-- 텍스트 -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/text_reason2"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginHorizontal="16dp"
+                app:layout_constraintStart_toEndOf="@id/ic_reason2">
+                <TextView
+                    android:id="@+id/title_blood"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintBottom_toTopOf="@id/content_blood"
+                    android:text="@string/title_blood"
+                    android:textAlignment="viewStart"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/pretendard_regular"/>
+                <TextView
+                    android:id="@+id/content_blood"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/title_blood"
+                    android:text="@string/content_blood"
+                    android:textAlignment="viewStart"
+                    android:textColor="@color/black"
+                    android:textSize="12sp"
+                    android:fontFamily="@font/pretendard_thin"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- 선택 3. 염증 -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/reason3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="5dp"
+            android:padding="16dp"
+            android:background="@drawable/selector_prefer">
+            <!-- 이모지: 근육 -->
+            <TextView
+                android:id="@+id/ic_reason3"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/text_reason3"
+                android:text="@string/ic_inflam"
+                android:textAlignment="center"
+                android:textColor="@color/black"
+                android:textSize="32sp"
+                android:fontFamily="@font/pretendard_regular"/>
+            <!-- 텍스트 -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/text_reason3"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginHorizontal="16dp"
+                app:layout_constraintStart_toEndOf="@id/ic_reason3">
+                <TextView
+                    android:id="@+id/title_reason3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:text="@string/title_inflam"
+                    android:textAlignment="viewStart"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/pretendard_regular"/>
+                <TextView
+                    android:id="@+id/content_reason3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/title_reason3"
+                    android:text="@string/content_inflam"
+                    android:textAlignment="viewStart"
+                    android:textColor="@color/black"
+                    android:textSize="12sp"
+                    android:fontFamily="@font/pretendard_thin"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- 선택 4.   -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/reason4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="5dp"
+            android:padding="16dp"
+            android:background="@drawable/selector_prefer">
+            <!-- 이모지: 밥 -->
+            <TextView
+                android:id="@+id/ic_reason4"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:text="@string/ic_no_recommend"
+                android:textAlignment="center"
+                android:textColor="@color/black"
+                android:textSize="32sp"
+                android:fontFamily="@font/pretendard_regular"/>
+            <!-- 텍스트 -->
+            <TextView
+                android:id="@+id/title_reason4"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginHorizontal="16dp"
+                app:layout_constraintStart_toEndOf="@id/ic_reason4"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:text="@string/title_no_recommend"
+                android:textAlignment="viewStart"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:fontFamily="@font/pretendard_regular"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
