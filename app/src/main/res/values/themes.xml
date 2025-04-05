@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <style name="Theme.Elixir" parent="android:Theme.Material.Light.NoActionBar">
+    <!-- 상태바 투명하게, 타이틀바 없애기 -->
+    <style name="Theme.Elixir" parent="Theme.AppCompat.Light">
         <item name="android:colorPrimary">@color/transparency</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
     </style>
 </resources>
