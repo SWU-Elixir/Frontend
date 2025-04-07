@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".SignupInfoFragment">
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -17,11 +17,12 @@
             android:fontFamily="@font/pretendard_bold"
             android:textColor="@color/black"
             android:textSize="18sp"
+            android:textStyle="bold"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/regist_id"/>
+            app:layout_constraintBottom_toTopOf="@id/layout_id"/>
 
         <LinearLayout
-            android:id="@+id/regist_id"
+            android:id="@+id/layout_id"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginVertical="5dp"
@@ -30,7 +31,7 @@
             app:layout_constraintBottom_toTopOf="@id/rule_enter_id">
             <!-- 아이디 입력 -->
             <EditText
-                android:id="@+id/edit_text_id"
+                android:id="@+id/regist_id"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -70,7 +71,7 @@
             android:fontFamily="@font/pretendard_thin"
             android:textColor="@color/elixir_orange"
             android:textSize="12sp"
-            app:layout_constraintTop_toBottomOf="@id/regist_id"
+            app:layout_constraintTop_toBottomOf="@id/layout_id"
             app:layout_constraintBottom_toTopOf="@id/text_pw"/>
 
         <!-- 비밀번호 입력 -->
@@ -83,11 +84,12 @@
             android:fontFamily="@font/pretendard_bold"
             android:textColor="@color/black"
             android:textSize="18sp"
+            android:textStyle="bold"
             app:layout_constraintTop_toBottomOf="@id/rule_enter_id"
-            app:layout_constraintBottom_toTopOf="@id/edit_text_pw"/>
+            app:layout_constraintBottom_toTopOf="@id/regist_pw"/>
 
         <EditText
-            android:id="@+id/edit_text_pw"
+            android:id="@+id/regist_pw"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_textbox"
@@ -115,8 +117,9 @@
             android:fontFamily="@font/pretendard_thin"
             android:textColor="@color/elixir_orange"
             android:textSize="12sp"
-            app:layout_constraintTop_toBottomOf="@id/edit_text_pw"
+            app:layout_constraintTop_toBottomOf="@id/regist_pw"
             app:layout_constraintBottom_toTopOf="@id/check_pw"/>
+
         <!-- 비밀번호 확인 -->
         <EditText
             android:id="@+id/check_pw"
@@ -147,11 +150,12 @@
             android:fontFamily="@font/pretendard_bold"
             android:textColor="@color/black"
             android:textSize="18sp"
+            android:textStyle="bold"
             app:layout_constraintTop_toBottomOf="@id/check_pw"
-            app:layout_constraintBottom_toTopOf="@id/edit_text_nick"/>
+            app:layout_constraintBottom_toTopOf="@id/regist_nick"/>
 
         <EditText
-            android:id="@+id/edit_text_nick"
+            android:id="@+id/regist_nick"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_textbox"
@@ -179,11 +183,12 @@
             android:fontFamily="@font/pretendard_bold"
             android:textColor="@color/black"
             android:textSize="18sp"
-            app:layout_constraintTop_toBottomOf="@id/edit_text_nick"
-            app:layout_constraintBottom_toTopOf="@id/img_profile"/>
+            android:textStyle="bold"
+            app:layout_constraintTop_toBottomOf="@id/regist_nick"
+            app:layout_constraintBottom_toTopOf="@id/regist_profile"/>
 
         <ImageView
-            android:id="@+id/img_profile"
+            android:id="@+id/regist_profile"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginVertical="5dp"
@@ -204,7 +209,8 @@
             android:fontFamily="@font/pretendard_bold"
             android:textColor="@color/black"
             android:textSize="18sp"
-            app:layout_constraintTop_toBottomOf="@id/img_profile"
+            android:textStyle="bold"
+            app:layout_constraintTop_toBottomOf="@id/regist_profile"
             app:layout_constraintBottom_toTopOf="@id/select_sex"/>
 
         <!-- 성별 선택 버튼 -->
@@ -276,45 +282,34 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:text="@string/birth_year"
-            android:fontFamily="@font/pretendard_bold"
             android:textColor="@color/black"
             android:textSize="18sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/pretendard_bold"
             app:layout_constraintTop_toBottomOf="@id/select_sex"
             app:layout_constraintBottom_toTopOf="@id/birth_year"/>
 
-        <com.google.android.material.textfield.TextInputLayout
+        <Spinner
             android:id="@+id/birth_year"
-            android:layout_width="wrap_content"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_textbox"
             android:layout_marginVertical="5dp"
+            android:background="@drawable/bg_spinner_year"
+            android:popupBackground="@color/white"
+            android:textAlignment="viewStart"
             app:layout_constraintTop_toBottomOf="@id/text_birth"
             app:layout_constraintBottom_toTopOf="@id/btn_next"
-            app:layout_constraintStart_toStartOf="parent"
-            style="@style/Widget.AppCompat.Spinner.DropDown">
-
-            <AutoCompleteTextView
-                android:id="@+id/autoCompleteYear"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="50dp"
-                android:hint="@string/birth_year_hint"
-                android:textColor="@color/black"
-                android:textSize="16sp"
-
-                android:inputType="number"
-                android:focusable="false" />
-        </com.google.android.material.textfield.TextInputLayout>
+            app:layout_constraintStart_toStartOf="parent"/>
 
         <!-- 다음 버튼 -->
         <Button
             android:id="@+id/btn_next"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginVertical="10dp"
+            android:layout_marginVertical="20dp"
             android:background="@drawable/bg_btn_filled"
             style="@style/Widget.AppCompat.Button.Borderless"
-            android:text="@string/login"
+            android:text="@string/next"
             android:textSize="16sp"
             android:textColor="@color/white"
             android:fontFamily="@font/pretendard_regular"
