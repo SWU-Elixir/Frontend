@@ -1,3 +1,36 @@
 <resources>
     <string name="app_name">Elixir</string>
+
+    <string name="navi_calendar">캘린더</string>
+    <string name="navi_recipe">레시피</string>">
+    <string name="navi_challenge">챌린지</string>
+    <string name="navi_chatbot">챗봇</string>
+    <string name="navi_mypage">마이페이지</string>
+
+    <string-array name="custom_weekdays">
+        <item>S</item>
+        <item>M</item>
+        <item>T</item>
+        <item>W</item>
+        <item>T</item>
+        <item>F</item>
+        <item>S</item>
+    </string-array>
+
+    <string-array name="custom_months">
+        <item>01</item>
+        <item>02</item>
+        <item>03</item>
+        <item>04</item>
+        <item>05</item>
+        <item>06</item>
+        <item>07</item>
+        <item>08</item>
+        <item>09</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+    </string-array>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

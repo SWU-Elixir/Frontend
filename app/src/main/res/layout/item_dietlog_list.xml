@@ -12,22 +12,25 @@
         android:orientation="horizontal"
         android:padding="10dp">
         <ImageView
-            android:id="@+id/mealPicture"
+            android:id="@+id/dietPicture"
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:layout_gravity="center"
             android:background="@drawable/bg_dietlog_picture"
-            android:src="@drawable/ic_dietlog_morning"/>
+            android:src="@color/elixir_gray"
+            android:scaleType="centerCrop"
+            android:clipToOutline="true"
+            tools:ignore="ContentDescription,UnusedAttribute" />
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginRight="16dp"
-            android:layout_marginLeft="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="10dp"
             android:layout_gravity="center"
             android:layout_weight="1"
             android:orientation="vertical">
             <TextView
-                android:id="@+id/mealTimesText"
+                android:id="@+id/dietTimesText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="아침/점심/저녁/간식"
@@ -35,7 +38,7 @@
                 android:fontFamily="@font/pretendard_thin"
                 android:textSize="12sp"/>
             <TextView
-                android:id="@+id/mealNameText"
+                android:id="@+id/dietNameText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="제목"
@@ -45,22 +48,23 @@
                 android:textSize="18sp"/>
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/mealIngredientList"
+                android:id="@+id/dietIngredientList"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:clipToPadding="false"
                 android:orientation="horizontal"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:listitem="@layout/item_dietlog_item"/>
+                tools:listitem="@layout/item_dietlog_list_indeterminate"/>
 
 
         </LinearLayout>
         <ImageView
-            android:id="@+id/mealScore"
+            android:id="@+id/dietScore"
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:layout_gravity="center"
-            android:src="@drawable/ic_dietlog_number1"/>
+            android:src="@drawable/ic_dietlog_number1"
+            tools:ignore="ContentDescription" />
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

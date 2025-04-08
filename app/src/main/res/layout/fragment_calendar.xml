@@ -10,20 +10,21 @@
         android:id="@+id/calendarView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="8dp"
         android:layout_marginTop="30dp"
-        app:mcv_tileSize="42dp"
-        app:mcv_tileWidth="match_parent"
+        android:padding="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:mcv_arrowColor="@color/elixir_darkgray"
-        app:mcv_selectionColor="@color/elixir_orange"
         app:mcv_dateTextAppearance="@color/black"
-        app:mcv_showOtherDates="all" />
-
+        app:mcv_headerTextAppearance="@style/CalendarWidgetHeader"
+        app:mcv_selectionColor="@color/elixir_orange"
+        app:mcv_showOtherDates="all"
+        app:mcv_tileSize="42dp"
+        app:mcv_tileWidth="match_parent"
+        app:mcv_weekDayTextAppearance="@style/TextAppearance.AppCompat.Body1" />
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/bottomsheet"
+        android:id="@+id/bottomSheet"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -31,7 +32,7 @@
         android:focusableInTouchMode="true"
         app:backgroundTint="#FDCFA7"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
-        app:behavior_peekHeight="120dp"
+        app:behavior_peekHeight="140dp"
         app:behavior_expandedOffset="30dp"
         app:behavior_fitToContents="false"
         app:behavior_halfExpandedRatio="0.5"
@@ -48,10 +49,11 @@
                 android:paddingTop="25dp"
                 android:paddingLeft="130dp"
                 android:paddingRight="130dp"
-                android:src="@drawable/png_handle"/>
+                android:src="@drawable/png_handle"
+                tools:ignore="ContentDescription" />
 
             <ListView
-                android:id="@+id/listview"
+                android:id="@+id/dietLogList"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:dividerHeight="10dp"
@@ -60,11 +62,39 @@
                 android:paddingRight="16dp"
                 android:paddingTop="8dp"
                 android:paddingBottom="8dp"
+                android:visibility="visible"
+                />
+            <TextView
+                android:id="@+id/emptyDietText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="기록된 식단이 없습니다."
+                android:textAlignment="center"
+                android:gravity="center"
+                android:layout_marginTop="110dp"
+                android:visibility="gone"
+                android:textColor="@color/white"
+                android:fontFamily="@font/pretendard_regular"
+                android:textSize="16sp"
                 />
         </LinearLayout>
 
-        <!-- 여기에 BottomSheet 내용을 추가하세요 -->
-
     </androidx.cardview.widget.CardView>
+
+    <!-- Floating Action Button (항상 맨 위에 위치) -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="110dp"
+        android:layout_marginEnd="16dp"
+        android:layout_gravity="bottom|end"
+        android:clickable="true"
+        android:tint="@color/white"
+        android:translationZ="8dp"
+        android:elevation="8dp"
+        android:visibility="gone"
+        android:src="@drawable/ic_write"
+        app:backgroundTint="@color/elixir_orange" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

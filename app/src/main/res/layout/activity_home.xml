@@ -14,14 +14,13 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
 
-    <!--Naviation_Calendar-->
+    <!--Navigation-->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/nav"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <LinearLayout
-            android:id="@+id/navigation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="#FFFFFF"
@@ -36,28 +35,28 @@
                 android:id="@+id/nav_calendar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingTop="15dp"
-                android:paddingBottom="15dp"
-                android:paddingLeft="12dp"
-                android:paddingRight="12dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="20dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
                 android:orientation="vertical"
                 android:gravity="center">
 
                 <ImageButton
-                    android:id="@+id/calendar_icon"
+                    android:id="@+id/calendar_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:adjustViewBounds="true"
                     android:background="@android:color/transparent"
-                    android:maxWidth="45dp"
-                    android:maxHeight="45dp"
-                    android:paddingTop="5dp"
-                    android:paddingLeft="5dp"
-                    android:paddingRight="5dp"
+                    android:maxWidth="50dp"
+                    android:maxHeight="50dp"
+                    android:paddingTop="10dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
                     android:paddingBottom="8dp"
                     android:scaleType="fitCenter"
-                    android:src="@drawable/ic_navi_calendar_noraml"
-                    android:contentDescription="Calendar icon"/>
+                    android:src="@drawable/ic_navi_calendar_normal"
+                    tools:ignore="ContentDescription"/>
 
                 <TextView
                     android:id="@+id/calendar_title"
@@ -65,37 +64,37 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/pretendard_regular"
                     android:gravity="center"
-                    android:text="캘린더"
+                    android:text="@string/navi_calendar"
                     android:textColor="@color/elixir_gray"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"/>
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/nav_recipe"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingTop="15dp"
-                android:paddingBottom="15dp"
-                android:paddingLeft="12dp"
-                android:paddingRight="12dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="20dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
                 android:orientation="vertical"
                 android:gravity="center">
 
                 <ImageButton
-                    android:id="@+id/recipe_icon"
+                    android:id="@+id/recipe_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:adjustViewBounds="true"
                     android:background="@android:color/transparent"
-                    android:maxWidth="45dp"
-                    android:maxHeight="45dp"
-                    android:paddingTop="5dp"
-                    android:paddingLeft="5dp"
-                    android:paddingRight="5dp"
+                    android:maxWidth="50dp"
+                    android:maxHeight="50dp"
+                    android:paddingTop="10dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
                     android:paddingBottom="8dp"
                     android:scaleType="fitCenter"
-                    android:src="@drawable/ic_recipe_default"
-                    android:contentDescription="Recipe icon"/>
+                    android:src="@drawable/ic_navi_recipe_normal"
+                    tools:ignore="ContentDescription"/>
 
                 <TextView
                     android:id="@+id/recipe_title"
@@ -103,7 +102,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/pretendard_regular"
                     android:gravity="center"
-                    android:text="레시피"
+                    android:text="@string/navi_recipe"
                     android:textColor="@color/elixir_gray"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -112,28 +111,28 @@
                 android:id="@+id/nav_challenge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingTop="15dp"
-                android:paddingBottom="15dp"
-                android:paddingLeft="12dp"
-                android:paddingRight="12dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="20dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
                 android:orientation="vertical"
                 android:gravity="center">
 
                 <ImageButton
-                    android:id="@+id/challenge_icon"
+                    android:id="@+id/challenge_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:adjustViewBounds="true"
                     android:background="@android:color/transparent"
-                    android:maxWidth="45dp"
-                    android:maxHeight="45dp"
-                    android:paddingTop="5dp"
-                    android:paddingLeft="5dp"
-                    android:paddingRight="5dp"
+                    android:maxWidth="50dp"
+                    android:maxHeight="50dp"
+                    android:paddingTop="10dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
                     android:paddingBottom="8dp"
                     android:scaleType="fitCenter"
                     android:src="@drawable/ic_navi_challenge_normal"
-                    android:contentDescription="Challenge icon"/>
+                    tools:ignore="ContentDescription"/>
 
                 <TextView
                     android:id="@+id/challenge_title"
@@ -141,7 +140,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/pretendard_regular"
                     android:gravity="center"
-                    android:text="챌린지"
+                    android:text="@string/navi_challenge"
                     android:textColor="@color/elixir_gray"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -150,28 +149,28 @@
                 android:id="@+id/nav_chatbot"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingTop="15dp"
-                android:paddingBottom="15dp"
-                android:paddingLeft="12dp"
-                android:paddingRight="12dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="20dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
                 android:orientation="vertical"
                 android:gravity="center">
 
                 <ImageButton
-                    android:id="@+id/chatbot_icon"
+                    android:id="@+id/chatbot_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:adjustViewBounds="true"
                     android:background="@android:color/transparent"
-                    android:maxWidth="45dp"
-                    android:maxHeight="45dp"
-                    android:paddingTop="5dp"
-                    android:paddingLeft="5dp"
-                    android:paddingRight="5dp"
+                    android:maxWidth="50dp"
+                    android:maxHeight="50dp"
+                    android:paddingTop="10dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
                     android:paddingBottom="8dp"
                     android:scaleType="fitCenter"
                     android:src="@drawable/ic_navi_chatbot_normal"
-                    android:contentDescription="Chatbot icon"/>
+                    tools:ignore="ContentDescription"/>
 
                 <TextView
                     android:id="@+id/chatbot_title"
@@ -179,7 +178,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/pretendard_regular"
                     android:gravity="center"
-                    android:text="챗봇"
+                    android:text="@string/navi_chatbot"
                     android:textColor="@color/elixir_gray"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -188,35 +187,35 @@
                 android:id="@+id/nav_mypage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingTop="15dp"
-                android:paddingBottom="15dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="20dp"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
                 android:orientation="vertical"
                 android:gravity="center">
 
                 <ImageButton
-                    android:id="@+id/mypage_icon"
+                    android:id="@+id/mypage_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:adjustViewBounds="true"
                     android:background="@android:color/transparent"
-                    android:maxWidth="45dp"
-                    android:maxHeight="45dp"
-                    android:paddingTop="5dp"
-                    android:paddingLeft="5dp"
-                    android:paddingRight="5dp"
+                    android:maxWidth="50dp"
+                    android:maxHeight="50dp"
+                    android:paddingTop="10dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
                     android:paddingBottom="8dp"
                     android:scaleType="fitCenter"
                     android:src="@drawable/ic_navi_mypage_normal"
-                    android:contentDescription="Mypage icon"/>
+                    tools:ignore="ContentDescription"/>
 
                 <TextView
                     android:id="@+id/mypage_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/pretendard_regular"
-                    android:text="마이페이지"
+                    android:text="@string/navi_mypage"
                     android:textColor="@color/elixir_gray"
                     android:textSize="12sp" />
             </LinearLayout>

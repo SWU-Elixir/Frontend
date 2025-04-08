@@ -27,7 +27,7 @@ class DietLogAdapter(
         val holder: ViewHolder
 
         if (convertView == null) {
-            view = LayoutInflater.from(context).inflate(R.layout.item_dietlog, parent, false)
+            view = LayoutInflater.from(context).inflate(R.layout.item_dietlog_list, parent, false)
             holder = ViewHolder(view)
             view.tag = holder
         } else {
@@ -37,19 +37,19 @@ class DietLogAdapter(
 
         val item = getItem(position)
 
-        holder.mealTimesText.text = item.mealTimes
+        holder.dietTimesText.text = item.dietTimes
         // 점수(Score)에 따라 아이콘 변경
-        val PictureRes = when (item.mealTimes) {
+        val pictureRes = item.dietImageRes ?: when (item.dietTimes) {
             "아침" -> R.drawable.ic_dietlog_morning
             "점심" -> R.drawable.ic_dietlog_lunch
             "저녁" -> R.drawable.ic_dietlog_dinner
             "간식" -> R.drawable.ic_dietlog_snack
-            else -> R.drawable.ic_dietlog_morning // 기본 아이콘
+            else -> R.color.elixir_gray // 기본 아이콘
         }
-        holder.mealPicture.setImageResource(PictureRes)
-        holder.mealNameText.text = item.mealName
+        holder.dietPicture.setImageResource(pictureRes)
+        holder.dietNameText.text = item.dietName
         // 점수(Score)에 따라 아이콘 변경
-        val iconRes = when (item.score) {
+        val iconRes = when (item.dietScore) {
             1 -> R.drawable.ic_dietlog_number1
             2 -> R.drawable.ic_dietlog_number2
             3 -> R.drawable.ic_dietlog_number3
@@ -57,20 +57,18 @@ class DietLogAdapter(
             5 -> R.drawable.ic_dietlog_number5
             else -> R.drawable.ic_dietlog_number1 // 기본 아이콘
         }
-        holder.mealScoreIcon.setImageResource(iconRes)
+        holder.dietScoreIcon.setImageResource(iconRes)
 
         // 재료 목록 RecyclerView 설정
-        holder.mealIngredientList.layoutManager = FlexboxLayoutManager(context)
-        holder.mealIngredientList.adapter = IngredientAdapter(item.ingredients)
+        holder.dietIngredientList.layoutManager = FlexboxLayoutManager(context)
+        holder.dietIngredientList.adapter = DietLogIngredientAdapter(item.dietIngredients)
 
         val layoutManager: FlexboxLayoutManager = FlexboxLayoutManager(context)
         layoutManager.setFlexDirection(FlexDirection.COLUMN)
         layoutManager.setJustifyContent(JustifyContent.FLEX_END)
 
-
-
         // 클릭 이벤트 설정
-        //view.setOnClickListener { onItemClick(item) }
+        view.setOnClickListener { onItemClick(item) }
 
         return view
     }
@@ -82,10 +80,10 @@ class DietLogAdapter(
     }
 
     private class ViewHolder(view: View) {
-        val mealTimesText: TextView = view.findViewById(R.id.mealTimesText)
-        val mealNameText: TextView = view.findViewById(R.id.mealNameText)
-        val mealIngredientList: RecyclerView = view.findViewById(R.id.mealIngredientList)
-        val mealScoreIcon: ImageView = view.findViewById(R.id.mealScore)
-        val mealPicture: ImageView = view.findViewById(R.id.mealPicture)
+        val dietTimesText: TextView = view.findViewById(R.id.dietTimesText)
+        val dietNameText: TextView = view.findViewById(R.id.dietNameText)
+        val dietIngredientList: RecyclerView = view.findViewById(R.id.dietIngredientList)
+        val dietScoreIcon: ImageView = view.findViewById(R.id.dietScore)
+        val dietPicture: ImageView = view.findViewById(R.id.dietPicture)
     }
 }
