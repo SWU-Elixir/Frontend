@@ -72,4 +72,5 @@ dependencies {
     implementation(libs.androidx.fragment.ktx)
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
+    implementation (libs.logging.interceptor)
 }
