@@ -38,8 +38,8 @@ class ToolbarActivity : AppCompatActivity() {
                     AlertExitDialogFragment(this).show()
                 }
 
-                // 정보 입력 프래그먼트 띄워주기
-                setFragment(SignupInfoFragment())
+                // 계정 생성 프래그먼트 띄워주기
+                setFragment(CreateAccountFragment())
             }
         }
     }

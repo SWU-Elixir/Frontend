@@ -62,7 +62,6 @@ class LoginActivity : AppCompatActivity() {
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
             intent.putExtra("mode", 1)
             startActivity(intent)
-            //finish()
         }
     }
 

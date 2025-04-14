@@ -6,12 +6,29 @@ import androidx.lifecycle.ViewModel
 class UserInfoViewModel : ViewModel() {
     private val signupData = SignupData()
 
-    // 정보 입력
-    fun setBasicInfo(id: String, password: String, nickname: String, profileImage: String, sex: String, birthYear: Int) {
-        signupData.id = id
-        signupData.pw = password
-        signupData.nickname = nickname
-        signupData.profileImage = profileImage
+    // 회원가입 단계 설정 (계정 생성 제외)
+    var currentStep = 0
+    val maxStep = 4  // 마지막 단계 번호
+
+    // 완료 단계 배열
+    private val _completedSteps = mutableSetOf<Int>()
+    val completedSteps: Set<Int> get() = _completedSteps
+
+    fun completeStep(step: Int) {
+        _completedSteps.add(step)
+        currentStep = step + 1
+    }
+
+    // 계정 생성
+    fun setAccount(email: String, pw: String) {
+        signupData.id = email
+        signupData.pw = pw
+    }
+
+    // 프로필 생성
+    fun setProfile(img: String, nick: String, sex: String, birthYear: Int) {
+        signupData.profileImage = img
+        signupData.nickname = nick
         signupData.sex = sex
         signupData.birthYear = birthYear
     }

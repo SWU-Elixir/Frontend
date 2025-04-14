@@ -10,7 +10,7 @@ import androidx.core.content.res.ResourcesCompat
 
 class AlertExitDialogFragment(private val act: Activity) {
     @SuppressLint("InflateParams")
-    val dialogView = LayoutInflater.from(act).inflate(R.layout.dialog_exit_confirm, null, false)
+    val dialogView = LayoutInflater.from(act).inflate(R.layout.dialog_exit_confirm, null, false)!!
     fun show(){
         val dialog = AlertDialog.Builder(act)
             .setView(dialogView)

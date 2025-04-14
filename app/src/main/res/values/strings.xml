@@ -4,14 +4,16 @@
     <string name="login">로그인</string>
     <string name="signup">회원가입</string>
     <string name="email">이메일</string>
-    <string name="error_email">이메일이나 비밀번호가 일치하지 않습니다.</string>
+    <string name="email_hint">example@example.com</string>
+    <string name="error_login">이메일이나 비밀번호가 일치하지 않습니다.</string>
     <string name="auto_login">자동 로그인</string>
     <string name="pw">비밀번호</string>
     <string name="check_pw">비밀번호 확인</string>
     <string name="find_pw">비밀번호 찾기</string>
-    <string name="duplicate">중복 확인</string>
-    <string name="rule_id">6~12자 영문, 숫자로 입력해주세요.</string>
-    <string name="rule_pw">영문 대소문자, 숫자, 특수문자(.!@#$%)를 혼합하여 8~20자 이내로 입력해주세요.</string>
+    <string name="check">확인</string>
+    <string name="error_email">올바른 형식으로 입력해주세요</string>
+    <string name="error_pw">비밀번호는 영문 대소문자, 숫자, 특수문자(.!@#$%)를 혼합하여 8~20자 이내로 입력해주세요</string>
+    <string name="incorrect_pw">비밀번호가 일치하지 않습니다.</string>
     <string name="nickname">별명</string>
     <string name="img_profile">프로필 사진</string>
     <string name="birth_year">출생년도</string>
@@ -28,6 +30,19 @@
     <string name="alert_exit_title">정말 돌아가시겠어요?</string>
     <string name="alert_exit_message">작성하신 내용은 저장되지 않습니다.</string>
 
+    <!-- 회원가입 : 계정 생성 -->
+    <string name="create_account">계정 생성</string>
+    <string name="exist_account">이미 계정이 있나요?</string>
+
+    <!-- 회원가입 : 계정 생성 -->
+    <string name="set_profile">프로필 설정</string>
+
+    <!-- 회원가입: 성별 -->
+    <string name="sex">성별</string>
+    <string name="female">여성</string>
+    <string name="male">남성</string>
+    <string name="other">기타</string>
+
     <!-- 회원가입: 설문 단계 -->
     <string name="num_1">1</string>
     <string name="num_2">2</string>
@@ -39,13 +54,6 @@
     <string name="survey_q2">선호하는 식단 스타일은\n알려주세요.</string>
     <string name="survey_q3">관심있는 레시피 종류를\n알려주세요.</string>
     <string name="survey_q4">저속노화를 하게 된 이유를\n알려주세요.</string>
-
-    <!-- 회원가입: 성별 -->
-    <string name="sex">성별</string>
-    <string name="female">여성</string>
-    <string name="male">남성</string>
-    <string name="other">기타</string>
-
     <!-- 회원가입: 질문 1(알러지) -->
     <string name="allergy_egg">알류</string>
     <string name="allergy_milk">우유</string>
