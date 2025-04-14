@@ -23,64 +23,62 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- 제목 + 검색 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginTop="10dp">
-
-                <TextView
-                    android:id="@+id/recommendationTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:text="오늘의 추천 레시피는?"
-                    android:textSize="20sp"
-                    android:textColor="@color/black"
-                    android:fontFamily="@font/pretendard_bold"
-                    android:textStyle="bold" />
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_weight="1" />
-
+                android:layout_marginTop="15dp">
+                <!-- 뒤로가기 아이콘 -->
                 <ImageButton
-                    android:id="@+id/searchButton"
+                    android:id="@+id/backButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_recipe_search"
+                    android:src="@drawable/ic_back"
+                    android:layout_gravity="center"
                     android:adjustViewBounds="true"
                     android:background="@android:color/transparent"
-                    android:maxWidth="50dp"
-                    android:maxHeight="50dp"
-                    android:padding="10dp"
+                    android:maxWidth="30dp"
+                    android:maxHeight="30dp"
+                    android:paddingEnd="6dp"
                     android:scaleType="fitCenter"
                     tools:ignore="ContentDescription, SpeakableTextPresentCheck" />
+                <!-- 검색 바 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_recipe_searchbar"
+                    android:orientation="horizontal"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:gravity="center_vertical">
+
+                    <!-- 검색창 -->
+                    <EditText
+                        android:id="@+id/searchEditText"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:hint="검색어를 입력하세요"
+                        android:background="@android:color/transparent"
+                        android:paddingStart="8dp"
+                        android:textSize="14sp" />
+
+                    <!-- 검색 아이콘 -->
+                    <ImageButton
+                        android:id="@+id/searchButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_recipe_search"
+                        android:adjustViewBounds="true"
+                        android:background="@android:color/transparent"
+                        android:maxWidth="40dp"
+                        android:maxHeight="40dp"
+                        android:paddingTop="5dp"
+                        android:paddingBottom="5dp"
+                        android:scaleType="fitCenter"
+                        tools:ignore="ContentDescription, SpeakableTextPresentCheck" />
+                </LinearLayout>
             </LinearLayout>
-
-            <!-- 추천 ViewPager -->
-            <androidx.viewpager2.widget.ViewPager2
-                android:id="@+id/recommendationList"
-                android:layout_width="match_parent"
-                android:layout_height="225dp"
-                android:clipToPadding="false"
-                android:clipChildren="false"
-                android:overScrollMode="never"/>
-
-            <!-- 인디케이터 -->
-            <com.tbuonomo.viewpagerdotsindicator.SpringDotsIndicator
-                android:id="@+id/indicator"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:dotsColor="@color/elixir_orange"
-                app:dotsCornerRadius="4dp"
-                app:dotsSize="8dp"
-                app:dotsSpacing="6dp"
-                android:layout_marginTop="-20dp"
-                app:dotsStrokeColor="@color/elixir_orange"
-                android:layout_gravity="center" />
 
             <LinearLayout
                 android:layout_marginTop="20dp"
@@ -121,7 +119,6 @@
                     />
 
             </LinearLayout>
-
             <!-- 레시피 전체 리스트 RecyclerView -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recipeList"

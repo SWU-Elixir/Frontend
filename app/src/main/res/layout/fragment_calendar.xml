@@ -11,17 +11,18 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
+        android:theme="@style/CalenderViewCustom"
         android:padding="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:mcv_arrowColor="@color/elixir_darkgray"
+        app:mcv_arrowColor="@color/elixir_orange"
         app:mcv_dateTextAppearance="@color/black"
         app:mcv_headerTextAppearance="@style/CalendarWidgetHeader"
         app:mcv_selectionColor="@color/elixir_orange"
         app:mcv_showOtherDates="all"
         app:mcv_tileSize="42dp"
         app:mcv_tileWidth="match_parent"
-        app:mcv_weekDayTextAppearance="@style/TextAppearance.AppCompat.Body1" />
+        app:mcv_weekDayTextAppearance="@style/CalendarWeekDayStyle" />
 
     <androidx.cardview.widget.CardView
         android:id="@+id/bottomSheet"
@@ -94,7 +95,7 @@
         android:translationZ="8dp"
         android:elevation="8dp"
         android:visibility="gone"
-        android:src="@drawable/ic_write"
+        android:src="@drawable/ic_dietlog_write"
         app:backgroundTint="@color/elixir_orange" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

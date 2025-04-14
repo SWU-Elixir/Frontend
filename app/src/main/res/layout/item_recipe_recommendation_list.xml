@@ -10,15 +10,36 @@
         android:layout_width="match_parent"
         android:layout_height="220dp"
         app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
         android:background="@color/white">
 
-        <ImageView
-            android:id="@+id/recipeImage"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="centerCrop"
-            android:src="@color/elixir_gray"
-            tools:ignore="ContentDescription" />
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="220dp">
+
+
+            <!-- 이미지뷰 -->
+            <ImageView
+                android:id="@+id/recipeImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@color/elixir_gray"
+                tools:ignore="ContentDescription" />
+
+            <!-- 그라데이션 오버레이 -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_gravity="top"
+                android:background="@drawable/bg_gradient_top_overlay"/>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:layout_gravity="bottom"
+                android:background="@drawable/bg_gradient_bottom_overlay"/>
+        </FrameLayout>
+
 
         <ImageButton
             android:id="@+id/bookmarkButton"
@@ -32,7 +53,7 @@
             android:maxHeight="45dp"
             android:padding="8dp"
             android:scaleType="fitCenter"
-            tools:ignore="ContentDescription" />
+            android:contentDescription="북마크"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -41,14 +62,41 @@
             android:layout_gravity="bottom"
             android:padding="16dp">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/categoryList"
-                android:layout_width="match_parent"
+            <LinearLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:clipToPadding="false"
-                android:orientation="horizontal"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:listitem="@layout/item_recipe_recommendation_list_category"/>
+                android:orientation="horizontal">
+                    <TextView
+                        android:id="@+id/category_slow_aging"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="저속노화"
+                        android:textSize="10sp"
+                        android:background="@drawable/bg_recipe_indeterminate"
+                        android:paddingTop="1dp"
+                        android:paddingBottom="1dp"
+                        android:paddingStart="6dp"
+                        android:paddingEnd="6dp"
+                        android:layout_marginEnd="5dp"
+                        android:textColor="@color/elixir_orange"
+                        android:fontFamily="@font/pretendard_regular"
+                        tools:ignore="MissingConstraints" />
+                <TextView
+                    android:id="@+id/category_type"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="종류"
+                    android:textSize="10sp"
+                    android:background="@drawable/bg_recipe_indeterminate"
+                    android:paddingTop="1dp"
+                    android:paddingBottom="1dp"
+                    android:paddingStart="6dp"
+                    android:paddingEnd="6dp"
+                    android:textColor="@color/elixir_orange"
+                    android:fontFamily="@font/pretendard_regular"
+                    tools:ignore="MissingConstraints" />
+
+            </LinearLayout>
             <TextView
                 android:id="@+id/recipeNameText"
                 android:layout_width="wrap_content"

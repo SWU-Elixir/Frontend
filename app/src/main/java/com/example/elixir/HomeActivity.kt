@@ -65,13 +65,11 @@ class HomeActivity : AppCompatActivity() {
         calendarButton.setOnClickListener {
             updateSelectedButton(calendarButton, calendarTitle)
             replaceFragment(CalendarFragment())
-            Toast.makeText(this, "캘린더 탭 선택됨", Toast.LENGTH_SHORT).show()
         }
 
         recipeButton.setOnClickListener {
             updateSelectedButton(recipeButton, recipeTitle)
             replaceFragment(RecipeListFragment())
-            Toast.makeText(this, "레시피 탭 선택됨", Toast.LENGTH_SHORT).show()
         }
 
         challengeButton.setOnClickListener {

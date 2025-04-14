@@ -1,52 +1,31 @@
 package com.example.elixir
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Spinner
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.viewpager2.widget.ViewPager2
-import com.tbuonomo.viewpagerdotsindicator.SpringDotsIndicator
+import com.google.android.flexbox.FlexDirection
+import com.google.android.flexbox.FlexboxLayoutManager
+import com.google.android.flexbox.JustifyContent
 
-data class RecipeItem(
-    val recipeTitle: String,              // 레시피 이름
-    val categorySlowAging: String,   // 레시피 카테고리
-    val categoryType: String,
-    val recipeIngredients: List<String>, // 사용된 재료 목록
-    val recipeImageRes: Int? = null,     // 레시피 이미지 리소스 ID (nullable)
 
-    val timeHours: Int,                  // 조리 시간 (시간 단위)
-    val timeMinutes: Int,                // 조리 시간 (분 단위)
-    val difficulty: String,              // 난이도 (예: 쉬움, 중간, 어려움)
-
-    var isBookmarked: Boolean = false,   // 북마크 여부
-    var isLiked: Boolean = false,        // 좋아요 클릭 여부
-    val likeCount: Int                   // 좋아요 수
-)
-
-data class RecommendationRecipeItem(
-    val recipeTitle: String,              // 레시피 이름
-    val categorySlowAging: String,   // 레시피 카테고리
-    val categoryType: String,
-    val recipeIngredients: List<String>, // 사용된 재료 목록
-    val recipeImageRes: Int? = null,     // 레시피 이미지 리소스 ID (nullable)
-    var isBookmarked: Boolean = false,   // 북마크 여부
-)
-
-class RecipeListFragment : Fragment() {
+class SearchListFragment : Fragment() {
 
     private lateinit var searchButton: ImageButton
-
-    private lateinit var recommendationViewPager: ViewPager2
-    private lateinit var recommendationAdapter: RecipeRecommendationListAdapter
-    private lateinit var dotsIndicator:SpringDotsIndicator
+    private lateinit var backButton: ImageButton
+    private lateinit var searchEditText: EditText
 
     private lateinit var recipeListView: RecyclerView
     private lateinit var recipeListAdapter: RecipeListAdapter
@@ -60,16 +39,32 @@ class RecipeListFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_recipe, container, false)
+        val view = inflater.inflate(R.layout.fragment_recipe_search_list, container, false)
 
+        backButton = view.findViewById(R.id.backButton)
         searchButton = view.findViewById(R.id.searchButton)
-        recommendationViewPager = view.findViewById(R.id.recommendationList)
-        dotsIndicator = view.findViewById(R.id.indicator)
-        recipeListView = view.findViewById(R.id.recipeList)
+        searchEditText = view.findViewById(R.id.searchEditText)
 
         methodSpinner = view.findViewById(R.id.spinner_difficulty)
         typeSpinner = view.findViewById(R.id.spinner_type)
         resetButton = view.findViewById(R.id.resetButton)
+
+        recipeListView = view.findViewById(R.id.recipeList)
+
+        // 전달받은 값 꺼내기
+        val keyword = arguments?.getString("search_keyword")
+        // EditText에 미리 입력값 세팅
+        searchEditText.setText(keyword)
+
+        // 텍스트 변경 감지
+        searchEditText.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                Log.d("EditText", "입력된 값: ${s.toString()}")
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
 
         fun updateResetButtonVisibility() {
             val isMethodSelected = methodSpinner.selectedItemPosition != 0
@@ -126,8 +121,6 @@ class RecipeListFragment : Fragment() {
             resetSpinners()
             updateResetButtonVisibility()
         }
-
-
 
 
         // 더미 데이터 추가
@@ -212,47 +205,6 @@ class RecipeListFragment : Fragment() {
             )
         )
 
-        val sampleRecommendationRecipes = listOf(
-                RecommendationRecipeItem(
-                    recipeTitle = "블루베리 요거트 스무디",
-                    categorySlowAging = "항산화 강화",
-                    categoryType = "음료/차",
-                    recipeIngredients = listOf("블루베리", "요거트", "아몬드"),
-                    recipeImageRes = R.drawable.png_recipe_sample,
-                    isBookmarked = false
-                ),
-        RecommendationRecipeItem(
-            recipeTitle = "견과류 토마토 샐러드",
-            categorySlowAging = "항산화 강화",
-            categoryType = "샐러드",
-            recipeIngredients = listOf("방울토마토", "호두", "잣", "시금치"),
-            recipeImageRes = R.drawable.png_recipe_sample,
-            isBookmarked = true
-        ),
-        RecommendationRecipeItem(
-            recipeTitle = "그릭요거트 과일볼",
-            categorySlowAging = "항산화 강화",
-            categoryType = "간식",
-            recipeIngredients = listOf("그릭요거트", "블루베리", "딸기"),
-            recipeImageRes = R.drawable.png_recipe_sample,
-            isBookmarked = false
-        )
-        )
-
-        // 어댑터 설정
-        recommendationAdapter = RecipeRecommendationListAdapter(sampleRecommendationRecipes)
-        recommendationViewPager.adapter = recommendationAdapter
-        recommendationViewPager.setPageTransformer { page, position ->
-            val absPos = kotlin.math.abs(position)
-            page.scaleY = 0.85f + (1 - absPos) * 0.15f
-            page.scaleX = 0.85f + (1 - absPos) * 0.15f
-            page.translationX = -position * 40  // 간격 조절
-        }
-
-        // ViewPager2에 어댑터를 설정한 후에 DotsIndicator를 설정합니다.
-        dotsIndicator.setViewPager2(recommendationViewPager)
-
-
         // RecyclerView에 LinearLayoutManager 설정
         recipeListView.layoutManager = LinearLayoutManager(requireContext())
 
@@ -270,29 +222,44 @@ class RecipeListFragment : Fragment() {
         )
         recipeListView.adapter = recipeListAdapter
 
-
-
-        searchButton.setOnClickListener {
-            Log.e("RecipeFragment", "검색 버튼 클릭")
-            val transaction = parentFragmentManager.beginTransaction()
-            transaction.replace(R.id.searchContainer, SearchFragment())
-            transaction.addToBackStack(null)
-            transaction.commit()
+        // 뒤로가기: 프래그먼트 닫기 (BackStack)
+        backButton.setOnClickListener {
+            parentFragmentManager.popBackStack()
         }
 
-//        // ViewPager 아이템 클릭 이벤트 처리
-//        viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-//            override fun onPageSelected(position: Int) {
-//                super.onPageSelected(position)
-//                val selectedRecipe = sampleRecipes[position]
-//                Log.d("RecipeFragment", "선택된 레시피 이름: ${selectedRecipe.recipeName}")
-//                // 여기에 상세 화면 이동 또는 다른 동작 추가 가능
-//            }
-//        })
+        // 검색 버튼 → 프래그먼트 닫고 다른 곳에 새 프래그먼트 띄우기
+        searchButton.setOnClickListener {
+            // EditText에서 텍스트 가져오기
+            val keyword = searchEditText.text.toString().trim()
+
+            if (keyword.isNotEmpty()) {
+                // 원하는 로직 실행: 예시로 로그 출력
+                Log.d("SearchFragment", "검색어: $keyword")
+
+                // 새로운 프래그먼트 생성 + Bundle 전달
+                val searchListFragment = SearchListFragment()
+                val bundle = Bundle().apply {
+                    putString("search_keyword", keyword)
+                }
+                searchListFragment.arguments = bundle
+
+                // 현재 프래그먼트 닫기
+                parentFragmentManager.popBackStack()
+
+                // 새로운 프래그먼트로 전환
+                val transaction = parentFragmentManager.beginTransaction()
+                transaction.replace(R.id.fragmentContainer, searchListFragment)
+                transaction.addToBackStack(null)
+                transaction.commit()
+
+            } else {
+                Toast.makeText(requireContext(), "검색어를 입력하세요", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+
 
         return view
-
-
     }
 
     private fun resetSpinners() {
@@ -304,5 +271,4 @@ class RecipeListFragment : Fragment() {
 
         // 필요하다면 다른 스피너들에 대해서도 동일한 작업을 수행
     }
-
 }
