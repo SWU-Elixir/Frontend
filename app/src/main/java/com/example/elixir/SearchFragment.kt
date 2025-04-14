@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Toast
@@ -43,9 +44,20 @@ class SearchFragment : Fragment() {
         val userInput = searchEditText.text.toString()
 
         // 텍스트 변경 감지
+        // searchButton은 onCreateView 또는 onViewCreated에서 미리 findViewById로 초기화되어 있어야 함
         searchEditText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
-                Log.d("EditText", "입력된 값: ${s.toString()}")
+                val input = s.toString().trim()
+
+                if (input.isNotEmpty()) {
+                    // 입력이 있으면 검색 아이콘 변경 (예: 활성화된 아이콘)
+                    searchButton.setImageResource(R.drawable.ic_delete)
+                } else {
+                    // 입력이 없으면 기본 아이콘으로 복구
+                    searchButton.setImageResource(R.drawable.ic_recipe_search)
+                }
+
+                Log.d("EditText", "입력된 값: $input")
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -76,31 +88,37 @@ class SearchFragment : Fragment() {
             parentFragmentManager.popBackStack()
         }
 
-        // 검색 버튼 → 프래그먼트 닫고 다른 곳에 새 프래그먼트 띄우기
         searchButton.setOnClickListener {
-            val keyword = searchEditText.text.toString().trim()
+            searchEditText.setText("")
+        }
+        searchEditText.setOnEditorActionListener { v, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                val keyword = searchEditText.text.toString().trim()
 
-            if (keyword.isNotEmpty()) {
-                Log.d("SearchFragment", "검색어: $keyword")
+                if (keyword.isNotEmpty()) {
+                    Toast.makeText(requireContext(), "검색어: $keyword", Toast.LENGTH_SHORT).show()
+                    Log.d("SearchFragment", "입력된 검색어: $keyword")
 
-                // 새로운 프래그먼트 생성 + Bundle 전달
-                val searchListFragment = SearchListFragment()
-                val bundle = Bundle().apply {
-                    putString("search_keyword", keyword)
+                    // 현재 프래그먼트 닫기
+                    parentFragmentManager.popBackStack()
+
+                    // 새로운 프래그먼트로 전환
+                    val searchResultFragment = SearchListFragment().apply {
+                        arguments = Bundle().apply {
+                            putString("search_keyword", keyword)
+                        }
+                    }
+
+                    parentFragmentManager.beginTransaction()
+                        .replace(R.id.fragmentContainer, searchResultFragment)
+                        .addToBackStack(null)
+                        .commit()
+                } else {
+                    Toast.makeText(requireContext(), "검색어를 입력하세요", Toast.LENGTH_SHORT).show()
                 }
-                searchListFragment.arguments = bundle
-
-                // 현재 프래그먼트 닫기
-                parentFragmentManager.popBackStack()
-
-                // 새로운 프래그먼트로 전환
-                val transaction = parentFragmentManager.beginTransaction()
-                transaction.replace(R.id.fragmentContainer, searchListFragment)
-                transaction.addToBackStack(null)
-                transaction.commit()
-
+                true // 이벤트 소비
             } else {
-                Toast.makeText(requireContext(), "검색어를 입력하세요", Toast.LENGTH_SHORT).show()
+                false // 다른 키는 처리하지 않음
             }
         }
 
