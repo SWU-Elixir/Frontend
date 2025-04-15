@@ -1,22 +1,37 @@
 package com.example.elixir
 
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 // 사용자 정보 뷰 모델 (회원가입, 정보 수정)
 class UserInfoViewModel : ViewModel() {
-    private val signupData = SignupData()
+    private val signupData = SignupData(null, null, null, null, null, null, null, null, null, null)
 
     // 회원가입 단계 설정 (계정 생성 제외)
     var currentStep = 0
     val maxStep = 4  // 마지막 단계 번호
 
-    // 완료 단계 배열
-    private val _completedSteps = mutableSetOf<Int>()
-    val completedSteps: Set<Int> get() = _completedSteps
+    // 단계별 정보 입력 완료 여부
+    val completedStep = MutableLiveData(
+        mutableMapOf(
+            0 to false,
+            1 to false,
+            2 to false,
+            3 to false,
+            4 to false
+        )
+    )
 
-    fun completeStep(step: Int) {
-        _completedSteps.add(step)
-        currentStep = step + 1
+    // 완료 단계 추가
+    fun updateCompletedStep(step: Int, status: Boolean) {
+        val map = completedStep.value ?: mutableMapOf()
+        map[step] = status
+        completedStep.value = map
+    }
+
+    // 현재 단계가 완료됐는지
+    fun isStepCompleted(): Boolean {
+        return completedStep.value?.get(currentStep) == true
     }
 
     // 계정 생성
