@@ -28,5 +28,30 @@
         <item name="android:paddingHorizontal" tools:targetApi="o">10dp</item>
         <item name="android:paddingVertical" tools:targetApi="o">5dp</item>
         <item name="rippleColor">@color/elixir_orange</item>
+
+    <style name="BottomNavStyle" parent="Widget.MaterialComponents.BottomNavigationView">
+        <item name="android:background">@color/white</item>
+        <item name="itemIconTint">@color/elixir_orange</item>
+        <item name="itemTextColor">@color/elixir_orange</item>
     </style>
+
+    <!-- 연, 월을 표시하는 헤더에 적용되는 스타일 -->
+    <style name="CalendarWidgetHeader">
+        <item name="android:fontFamily">@font/pretendard_bold</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="CalendarWeekDayStyle" parent="TextAppearance.AppCompat.Medium">
+        <item name="android:fontFamily">@font/pretendard_bold</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/black</item> <!-- 원하는 요일 텍스트 색상 -->
+    </style>
+
+    <!-- 캘린더의 날짜(Day)의 스타일 설정 -->
+    <style name="CalenderViewCustom" parent="Theme.AppCompat">
+        <item name="android:textColor">@drawable/calendar_selector_textcolor</item>
+    </style>
+
 </resources>

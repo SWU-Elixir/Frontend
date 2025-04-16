@@ -69,8 +69,17 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
     implementation(libs.androidx.fragment.ktx)
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation (libs.logging.interceptor)
+    
+    // Material Components 라이브러리 추가
+    implementation (libs.material)
+    // calendarview 라이브러리 추가
+    implementation ("com.github.prolificinteractive:material-calendarview:1.6.0")
+    // flexboxLayout 라이브러리 추가
+    implementation ("com.google.android.flexbox:flexbox:3.0.0")
+    implementation("com.tbuonomo:dotsindicator:5.1.0")
 }

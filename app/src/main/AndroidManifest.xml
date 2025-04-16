@@ -28,6 +28,9 @@
             android:name=".MainActivity"
             android:exported="false">
         </activity>
+            android:name=".HomeActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Elixir"/>
     </application>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />

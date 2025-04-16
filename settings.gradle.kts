@@ -16,6 +16,8 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // calendarview 라이브러리 추가
+        maven { url = java.net.URI("https://jitpack.io") }
     }
 }
 
