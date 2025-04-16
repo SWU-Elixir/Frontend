@@ -1,5 +1,6 @@
-package com.example.elixir
+package com.example.elixir.signup
 
+import com.example.elixir.login.LoginService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit

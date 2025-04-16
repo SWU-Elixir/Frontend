@@ -1,10 +1,10 @@
-package com.example.elixir
+package com.example.elixir.signup
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import com.example.elixir.databinding.FragmentSurvey2Binding
 
 class Survey2Fragment : Fragment() {

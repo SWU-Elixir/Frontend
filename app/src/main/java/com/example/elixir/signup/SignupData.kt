@@ -1,4 +1,4 @@
-package com.example.elixir
+package com.example.elixir.signup
 
 data class SignupData(
     var id: String?,

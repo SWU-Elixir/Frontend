@@ -1,16 +1,17 @@
-package com.example.elixir
+package com.example.elixir.signup
 
 import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.fragment.app.Fragment
+import com.example.elixir.R
 import com.example.elixir.databinding.FragmentSettingProfileBinding
 
 class SettingProfileFragment : Fragment() {
@@ -82,7 +83,8 @@ class SettingProfileFragment : Fragment() {
         // 초기값 (1990년)
         profileBinding.birthYear.setSelection(birthYears.indexOf("1990"))
         // 선택 리스너 : Int로 변환해서 저장
-        profileBinding.birthYear.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        profileBinding.birthYear.onItemSelectedListener = object :
+            AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 birthYear = parent.getItemAtPosition(position).toString().toInt()
                 checkAllValid()

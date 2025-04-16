@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import com.example.elixir.databinding.ActivityToolbarBinding
+import com.example.elixir.signup.CreateAccountFragment
 
 class ToolbarActivity : AppCompatActivity() {
     // 선언부

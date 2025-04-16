@@ -1,13 +1,13 @@
-package com.example.elixir
+package com.example.elixir.signup
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.GONE
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import com.example.elixir.R
 import com.example.elixir.databinding.FragmentSignupBinding
 
 class SignupFragment : Fragment() {
@@ -92,7 +92,7 @@ class SignupFragment : Fragment() {
                         signupBinding.btnNext.isEnabled = false
                     }
                 }
-                signupBinding.surveyStep.visibility = GONE
+                signupBinding.surveyStep.visibility = View.GONE
             }
             1 -> Survey1Fragment().apply {
                 listener = object : OnChipCompletedListener {

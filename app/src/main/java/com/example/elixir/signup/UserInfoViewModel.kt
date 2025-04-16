@@ -1,4 +1,4 @@
-package com.example.elixir
+package com.example.elixir.signup
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel

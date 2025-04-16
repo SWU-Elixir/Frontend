@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".Survey2Fragment">
+    tools:context=".signup.Survey2Fragment">
 
     <!-- question 2 -->
     <TextView

@@ -1,16 +1,16 @@
-package com.example.elixir
+package com.example.elixir.signup
 
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Patterns
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getDrawable
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import com.example.elixir.R
 import com.example.elixir.databinding.FragmentCreateAccountBinding
 
 class CreateAccountFragment : Fragment() {
@@ -68,13 +68,13 @@ class CreateAccountFragment : Fragment() {
                 if (isEmailValid(email)) {
                     accountBinding.errorEmail.visibility = View.GONE
                     accountBinding.registEmail.setCompoundDrawablesWithIntrinsicBounds(null, null,
-                        getDrawable(requireContext(), R.drawable.ic_check), null)
+                        ContextCompat.getDrawable(requireContext(), R.drawable.ic_check), null)
                 }
                 // 만약 유효하지 않다면 X 표시와 함께 에러 메세지 띄워주기
                 else {
                     accountBinding.errorEmail.visibility = View.VISIBLE
                     accountBinding.registEmail.setCompoundDrawablesWithIntrinsicBounds(null, null,
-                        getDrawable(requireContext(), R.drawable.ic_not), null)
+                        ContextCompat.getDrawable(requireContext(), R.drawable.ic_not), null)
                 }
                 // 다음 버튼 활성화 여부
                 updateNextButton()
@@ -96,14 +96,14 @@ class CreateAccountFragment : Fragment() {
                 if(isPwValid(pw)) {
                     accountBinding.errorPw.visibility = View.GONE
                     accountBinding.registPw.setCompoundDrawablesWithIntrinsicBounds(null, null,
-                        getDrawable(requireContext(), R.drawable.ic_check), null)
+                        ContextCompat.getDrawable(requireContext(), R.drawable.ic_check), null)
                     accountBinding.checkPw.visibility = View.VISIBLE
                 }
                 // 만약 유효하지 않다면 X 표시와 함께 에러 메세지 띄워주기
                 else {
                     accountBinding.errorPw.visibility = View.VISIBLE
                     accountBinding.registPw.setCompoundDrawablesWithIntrinsicBounds(null, null,
-                        getDrawable(requireContext(), R.drawable.ic_not), null)
+                        ContextCompat.getDrawable(requireContext(), R.drawable.ic_not), null)
                 }
                 // 다음 버튼 활성화 여부
                 updateNextButton()
@@ -111,7 +111,7 @@ class CreateAccountFragment : Fragment() {
         })
 
         // 비밀번호 일치 확인
-        accountBinding.checkPw.addTextChangedListener (object : TextWatcher{
+        accountBinding.checkPw.addTextChangedListener (object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
             }
 
@@ -126,13 +126,13 @@ class CreateAccountFragment : Fragment() {
                 if(incorrectPw(pw, checkPw)) {
                     accountBinding.incorrectPw.visibility = View.GONE
                     accountBinding.checkPw.setCompoundDrawablesWithIntrinsicBounds(null, null,
-                        getDrawable(requireContext(), R.drawable.ic_check), null)
+                        ContextCompat.getDrawable(requireContext(), R.drawable.ic_check), null)
                 }
                 // 만약 일치하지 않는다면 X 표시와 함께 에러 메세지 띄워주기
                 else {
                     accountBinding.incorrectPw.visibility = View.VISIBLE
                     accountBinding.checkPw.setCompoundDrawablesWithIntrinsicBounds(null, null,
-                        getDrawable(requireContext(), R.drawable.ic_not), null)
+                        ContextCompat.getDrawable(requireContext(), R.drawable.ic_not), null)
                 }
                 // 다음 버튼 활성화 여부
                 updateNextButton()

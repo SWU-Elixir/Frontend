@@ -1,4 +1,4 @@
-package com.example.elixir
+package com.example.elixir.signup
 
 interface OnChipCompletedListener {
     fun onChipSelected(isValid: Boolean)

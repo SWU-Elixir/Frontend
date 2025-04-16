@@ -1,4 +1,4 @@
-package com.example.elixir
+package com.example.elixir.login
 
 import android.content.Intent
 import android.os.Bundle
@@ -7,6 +7,8 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
+import com.example.elixir.signup.RetrofitClient
+import com.example.elixir.ToolbarActivity
 import com.example.elixir.databinding.ActivityLoginBinding
 import retrofit2.Call
 
