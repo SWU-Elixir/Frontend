@@ -52,7 +52,7 @@
 
     <!-- 회원가입: 질문 -->
     <string name="survey_q1">알레르기 반응이 있는 식품을\n모두 선택해주세요.</string>
-    <string name="survey_q2">선호하는 식단 스타일은\n알려주세요.</string>
+    <string name="survey_q2">선호하는 식단 스타일을\n알려주세요.</string>
     <string name="survey_q3">관심있는 레시피 종류를\n알려주세요.</string>
     <string name="survey_q4">저속노화를 하게 된 이유를\n알려주세요.</string>
     <!-- 회원가입: 질문 1(알러지) -->
@@ -90,14 +90,14 @@
     <string name="content_noting">특별히 선호하는 식단 없음</string>
 
     <!-- 회원가입: 질문 3(관심 레시피) -->
-    <string name="diet_korean">한식</string>
-    <string name="diet_japanese">일식</string>
-    <string name="diet_chinese">중식</string>
-    <string name="diet_western">양식</string>
-    <string name="dessert">디저트</string>
-    <string name="beverage">음료/차</string>
-    <string name="sauce">양념/소스/잼</string>
-    <string name="diet_n_a">특별히 없음</string>
+    <string name="diet_korean">🇰🇷 한식</string>
+    <string name="diet_japanese">🇯🇵 일식</string>
+    <string name="diet_chinese">🇨🇳 중식</string>
+    <string name="diet_western">🇺🇸 양식</string>
+    <string name="dessert">🍰 디저트</string>
+    <string name="beverage">🧃 음료/차</string>
+    <string name="sauce">🍯 양념/소스/잼</string>
+    <string name="diet_n_a">❌ 특별히 없음</string>
     
     <!-- 회원가입: 질문 4(식단) -->
     <!-- icon -->

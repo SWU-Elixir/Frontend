@@ -17,7 +17,8 @@
             android:exported="false" />
         <activity
             android:name=".login.LoginActivity"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.Elixir.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -31,7 +32,8 @@
         <activity
             android:name=".HomeActivity"
             android:exported="true"
-            android:theme="@style/Theme.Elixir"/>
+            android:theme="@style/Theme.Elixir">
+        </activity>
     </application>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />

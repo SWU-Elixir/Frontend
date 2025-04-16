@@ -71,6 +71,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginVertical="5dp"
+            android:layout_marginStart="10dp"
             android:text="@string/error_login"
             android:textSize="12sp"
             android:textColor="@color/elixir_orange"
@@ -78,33 +79,20 @@
             app:layout_constraintTop_toBottomOf="@id/enter_pw"
             app:layout_constraintStart_toStartOf="parent" />
 
-        <!-- 자동 로그인 -->
-        <CheckBox
-            android:id="@+id/auto_login"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:buttonTint="@color/elixir_orange"
-            android:text="@string/auto_login"
-            android:textSize="12sp"
-            android:textColor="@color/black"
-            android:fontFamily="@font/pretendard_regular"
-            app:layout_constraintTop_toBottomOf="@id/error_login"
-            app:layout_constraintBottom_toTopOf="@id/btn_login"
-            app:layout_constraintStart_toStartOf="parent" />
-
         <!-- 비밀번호 찾기 -->
         <TextView
             android:id="@+id/find_pw"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="20dp"
             android:text="@string/find_pw"
             android:textSize="12sp"
             android:textColor="@color/elixir_darkgray"
             android:fontFamily="@font/pretendard_regular"
             app:layout_constraintTop_toBottomOf="@id/error_login"
             app:layout_constraintBottom_toTopOf="@id/btn_login"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBaseline_toBaselineOf="@id/auto_login"/>
+            app:layout_constraintEnd_toEndOf="parent"/>
 
 
         <!-- 로그인 버튼 -->
@@ -112,7 +100,7 @@
             android:id="@+id/btn_login"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/auto_login"
+            app:layout_constraintTop_toBottomOf="@id/btn_login"
             app:layout_constraintBottom_toTopOf="@id/btn_signup"
             android:layout_marginVertical="10dp"
             android:background="@drawable/bg_rect_filled_orange"
