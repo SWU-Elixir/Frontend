@@ -27,18 +27,14 @@
         android:layout_marginBottom="100dp"
         app:chipSpacingHorizontal="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/q1"
-        tools:layout_editor_absoluteX="0dp">
+        app:layout_constraintTop_toBottomOf="@id/q1">
 
         <com.google.android.material.chip.Chip
             android:id="@+id/allergy_egg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/pretendard_regular"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="6dp"
+            style="@style/ChipStyle"
             android:text="@string/allergy_egg"
-            android:textColor="@color/black"
             android:textSize="16sp"
             app:chipIconVisible="false" />
 
@@ -46,187 +42,161 @@
             android:id="@+id/allergy_milk"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/pretendard_regular"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="6dp"
+            style="@style/ChipStyle"
             android:text="@string/allergy_milk"
-            android:textColor="@color/black"
-            android:textSize="16sp" />
+            android:textSize="16sp"/>
 
         <com.google.android.material.chip.Chip
             android:id="@+id/allergy_buckwheat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/pretendard_regular"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="6dp"
+            style="@style/ChipStyle"
             android:text="@string/allergy_buckwheat"
-            android:textColor="@color/black"
             android:textSize="16sp" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/allergy_peanut"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/pretendard_regular"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="6dp"
+            style="@style/ChipStyle"
             android:text="@string/allergy_peanut"
-            android:textColor="@color/black"
             android:textSize="16sp" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/allergy_soybean"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/pretendard_regular"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="6dp"
+            style="@style/ChipStyle"
             android:text="@string/allergy_soybean"
-            android:textColor="@color/black"
             android:textSize="16sp" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/allergy_wheat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/pretendard_regular"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="6dp"
+            style="@style/ChipStyle"
             android:text="@string/allergy_wheat"
-            android:textColor="@color/black"
             android:textSize="16sp" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/allergy_mackerel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/pretendard_regular"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="6dp"
+            style="@style/ChipStyle"
             android:text="@string/allergy_mackerel"
-            android:textColor="@color/black"
             android:textSize="16sp" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/allergy_crab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/pretendard_regular"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="6dp"
+            style="@style/ChipStyle"
             android:text="@string/allergy_crab"
-            android:textColor="@color/black"
             android:textSize="16sp" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/allergy_shrimp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/pretendard_regular"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="6dp"
+            style="@style/ChipStyle"
             android:text="@string/allergy_shrimp"
-            android:textColor="@color/black"
             android:textSize="16sp" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/allergy_pig"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/pretendard_regular"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="6dp"
+            style="@style/ChipStyle"
             android:text="@string/allergy_pig"
-            android:textColor="@color/black"
             android:textSize="16sp" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/allergy_peach"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/pretendard_regular"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="6dp"
+            style="@style/ChipStyle"
             android:text="@string/allergy_peach"
-            android:textColor="@color/black"
+            android:textSize="16sp" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/allergy_dioxide"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/ChipStyle"
+            android:text="@string/allergy_dioxide"
+            android:textSize="16sp" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/allergy_walnut"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/ChipStyle"
+            android:text="@string/allergy_walnut"
+            android:textSize="16sp" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/allergy_chicken"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/ChipStyle"
+            android:text="@string/allergy_chicken"
             android:textSize="16sp" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/allergy_tomato"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/pretendard_regular"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="6dp"
+            style="@style/ChipStyle"
             android:text="@string/allergy_tomato"
-            android:textColor="@color/black"
             android:textSize="16sp" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/allergy_cow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/pretendard_regular"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="6dp"
+            style="@style/ChipStyle"
             android:text="@string/allergy_cow"
-            android:textColor="@color/black"
             android:textSize="16sp" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/allergy_squid"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/pretendard_regular"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="6dp"
+            style="@style/ChipStyle"
             android:text="@string/allergy_squid"
-            android:textColor="@color/black"
             android:textSize="16sp" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/allergy_seashell"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            style="@style/ChipStyle"
             android:fontFamily="@font/pretendard_regular"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="6dp"
             android:text="@string/allergy_seashell"
-            android:textColor="@color/black"
             android:textSize="16sp" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/allergy_oyster"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/pretendard_regular"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="6dp"
+            style="@style/ChipStyle"
             android:text="@string/allergy_oyster"
-            android:textColor="@color/black"
             android:textSize="16sp" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/allergy_pinenut"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/pretendard_regular"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="6dp"
+            style="@style/ChipStyle"
             android:text="@string/allergy_pinenut"
-            android:textColor="@color/black"
-            android:textSize="16sp" />
+            android:textSize="16sp"/>
 
         <com.google.android.material.chip.Chip
             android:id="@+id/n_a"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/pretendard_regular"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="6dp"
+            style="@style/ChipStyle"
             android:text="@string/n_a"
-            android:textColor="@color/black"
             android:textSize="16sp" />
 
     </com.google.android.material.chip.ChipGroup>

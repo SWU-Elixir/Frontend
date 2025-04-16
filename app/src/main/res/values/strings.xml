@@ -67,6 +67,9 @@
     <string name="allergy_pig">돼지고기</string>
     <string name="allergy_peach">복숭아</string>
     <string name="allergy_tomato">토마토</string>
+    <string name="allergy_dioxide">아황산류</string>
+    <string name="allergy_walnut">호두</string>
+    <string name="allergy_chicken">닭고기</string>
     <string name="allergy_cow">쇠고기</string>
     <string name="allergy_squid">오징어</string>
     <string name="allergy_seashell">조개류</string>
@@ -80,13 +83,21 @@
     <string name="ic_mix">🥪</string>
     <string name="ic_no_prefer">🍽️</string>
     <!-- 텍스트 -->
-    <string name="content_meat">🍖\t고기 위주의 식단</string>
+    <string name="content_meat">고기 위주의 식단</string>
     <string name="content_vegetable">채소 위주의 식단</string>
     <string name="content_meat_vegetable">고기와 채소가 어우러진 혼합식 식단</string>
     <string name="content_noting">특별히 선호하는 식단 없음</string>
 
     <!-- 회원가입: 질문 3(관심 레시피) -->
-
+    <string name="diet_korean">한식</string>
+    <string name="diet_japanese">일식</string>
+    <string name="diet_chinese">중식</string>
+    <string name="diet_western">양식</string>
+    <string name="dessert">디저트</string>
+    <string name="beverage">음료/차</string>
+    <string name="sauce">양념/소스/잼</string>
+    <string name="diet_n_a">특별히 없음</string>
+    
     <!-- 회원가입: 질문 4(식단) -->
     <!-- icon -->
     <string name="ic_antiox">💪</string>

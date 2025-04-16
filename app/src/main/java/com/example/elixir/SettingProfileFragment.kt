@@ -4,7 +4,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -17,11 +16,11 @@ import com.example.elixir.databinding.FragmentSettingProfileBinding
 class SettingProfileFragment : Fragment() {
     private lateinit var profileBinding: FragmentSettingProfileBinding
     var listener: OnProfileCompletedListener? = null
-    
+
     private lateinit var img: String
     private lateinit var nick: String
     private lateinit var sex: String
-    private var birthYear: Int = 0
+    private var birthYear: Int = 1990
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -82,8 +81,6 @@ class SettingProfileFragment : Fragment() {
 
         // 초기값 (1990년)
         profileBinding.birthYear.setSelection(birthYears.indexOf("1990"))
-        birthYear = 1990
-
         // 선택 리스너 : Int로 변환해서 저장
         profileBinding.birthYear.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
@@ -112,7 +109,6 @@ class SettingProfileFragment : Fragment() {
         }
     }
     fun checkAllValid() {
-        Log.d("SettingProfileFragment", "nick=$nick, img=$img, sex=$sex, birthYear=$birthYear")
         if (img.isNotBlank() && nick.isNotBlank() && sex.isNotBlank() && birthYear != 0) {
             listener?.onProfileCompleted(img, nick, sex, birthYear)
         } else {

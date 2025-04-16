@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
@@ -91,8 +92,19 @@ class SignupFragment : Fragment() {
                         signupBinding.btnNext.isEnabled = false
                     }
                 }
+                signupBinding.surveyStep.visibility = GONE
             }
-            1 -> Survey1Fragment()
+            1 -> Survey1Fragment().apply {
+                listener = object : OnChipCompletedListener {
+                    override fun onChipSelected(isValid: Boolean) {
+                        signupBinding.btnNext.isEnabled = true
+                    }
+
+                    override fun onChipSelectedNot(isValid: Boolean) {
+                        signupBinding.btnNext.isEnabled = false
+                    }
+                }
+            }
             2 -> Survey2Fragment()
             3 -> Survey3Fragment()
             4 -> Survey4Fragment()
