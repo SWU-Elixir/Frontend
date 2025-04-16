@@ -97,12 +97,17 @@ class SignupFragment : Fragment() {
             1 -> Survey1Fragment().apply {
                 listener = object : OnChipCompletedListener {
                     override fun onChipSelected(isValid: Boolean) {
+                        // 버튼 활성화, 색상은 주황색으로
                         signupBinding.btnNext.isEnabled = true
+                        signupBinding.btnNext.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), R.color.elixir_orange))
                     }
 
                     override fun onChipSelectedNot(isValid: Boolean) {
+                        // 버튼 비활성화, 색상은 회색으로
                         signupBinding.btnNext.isEnabled = false
+                        signupBinding.btnNext.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), R.color.elixir_gray))
                     }
+
                 }
             }
             2 -> Survey2Fragment()

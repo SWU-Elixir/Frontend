@@ -6,7 +6,10 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
+import com.example.elixir.R
 import com.example.elixir.signup.RetrofitClient
 import com.example.elixir.ToolbarActivity
 import com.example.elixir.databinding.ActivityLoginBinding
@@ -22,6 +25,7 @@ class LoginActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         super.onCreate(savedInstanceState)
+        installSplashScreen()
 
         // 초기화
         // 바인딩 정의
@@ -35,17 +39,12 @@ class LoginActivity : AppCompatActivity() {
         loginBinding.btnLogin.setOnClickListener {
             val email = loginBinding.enterEmail.text.toString()
             val password = loginBinding.enterPw.text.toString()
-            val autoLogin = loginBinding.autoLogin.isChecked
 
             //login(email, password)
 
             // 로그인 성공 시
             if (checkLogin(email, password)) {
                 Toast.makeText(this, "로그인 성공!", Toast.LENGTH_SHORT).show()
-
-                if (autoLogin) {
-                    saveAutoLogin(email, password)
-                }
 
                 /* CalenderActivity로 이동
                 startActivity(Intent(this, CalendarActivity::class.java))

@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- 상태바 투명하게, 타이틀바 없애기 -->
-    <style name="Theme.Elixir" parent="Theme.MaterialComponents.Light">
+    <style name="Theme.Elixir" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="android:colorPrimary">@color/transparency</item>
         <item name="windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
         <item name="android:windowSoftInputMode">adjustResize</item>
     </style>
 
@@ -11,6 +12,14 @@
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">75dp</item>
     </style>
+
+    <!-- 스플래시 화면 -->
+    <style name="Theme.Elixir.Splash" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/logo_elixir</item>
+        <item name="windowSplashScreenBackground">@color/white</item>
+        <item name="postSplashScreenTheme">@style/Theme.Elixir</item>
+    </style>
+
 
     <!-- 칩 텍스트 커스텀 -->
     <style name="CustomChipText" parent="TextAppearance.MaterialComponents.Caption">
@@ -28,6 +37,7 @@
         <item name="android:paddingHorizontal" tools:targetApi="o">10dp</item>
         <item name="android:paddingVertical" tools:targetApi="o">5dp</item>
         <item name="rippleColor">@color/elixir_orange</item>
+    </style>
 
     <style name="BottomNavStyle" parent="Widget.MaterialComponents.BottomNavigationView">
         <item name="android:background">@color/white</item>
@@ -53,5 +63,4 @@
     <style name="CalenderViewCustom" parent="Theme.AppCompat">
         <item name="android:textColor">@drawable/calendar_selector_textcolor</item>
     </style>
-
 </resources>
