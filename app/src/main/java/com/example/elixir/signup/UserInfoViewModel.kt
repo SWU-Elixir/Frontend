@@ -1,0 +1,75 @@
+package com.example.elixir.signup
+
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+
+// 사용자 정보 뷰 모델 (회원가입, 정보 수정)
+class UserInfoViewModel : ViewModel() {
+    private val signupData = SignupData(null, null, null, null, null, null, null, null, null, null)
+
+    // 회원가입 단계 설정 (계정 생성 제외)
+    var currentStep = 0
+    val maxStep = 4  // 마지막 단계 번호
+
+    // 단계별 정보 입력 완료 여부
+    val completedStep = MutableLiveData(
+        mutableMapOf(
+            0 to false,
+            1 to false,
+            2 to false,
+            3 to false,
+            4 to false
+        )
+    )
+
+    // 완료 단계 추가
+    fun updateCompletedStep(step: Int, status: Boolean) {
+        val map = completedStep.value ?: mutableMapOf()
+        map[step] = status
+        completedStep.value = map
+    }
+
+    // 현재 단계가 완료됐는지
+    fun isStepCompleted(): Boolean {
+        return completedStep.value?.get(currentStep) == true
+    }
+
+    // 계정 생성
+    fun setAccount(email: String, pw: String) {
+        signupData.id = email
+        signupData.pw = pw
+    }
+
+    // 프로필 생성
+    fun setProfile(img: String, nick: String, sex: String, birthYear: Int) {
+        signupData.profileImage = img
+        signupData.nickname = nick
+        signupData.sex = sex
+        signupData.birthYear = birthYear
+    }
+
+    // 설문조사 - 알러지
+    fun setAllergies(allergies: List<String>) {
+        signupData.allergies = allergies
+    }
+
+    // 설문조사 - 선호 식단
+    fun setPreferredDiets(diets: List<String>) {
+        signupData.preferredDiets = diets
+    }
+
+    // 설문조사 - 선호 레시피
+    fun setPreferredRecipes(recipes: List<String>) {
+        signupData.preferredRecipes = recipes
+    }
+
+    // 설문조사 - 저속노화 이유
+    fun setSignupReason(reason: String) {
+        signupData.signupReason = reason
+    }
+
+    // 정보 가져 오기
+    fun getFinalSignupData(): SignupData {
+        return signupData
+    }
+}

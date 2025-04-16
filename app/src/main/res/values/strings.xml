@@ -1,6 +1,126 @@
 <resources>
     <string name="app_name">Elixir</string>
 
+    <!-- 로그인/회원가입 관련 -->
+    <string name="login">로그인</string>
+    <string name="signup">회원가입</string>
+    <string name="email">이메일</string>
+    <string name="email_hint">example@example.com</string>
+    <string name="error_login">이메일이나 비밀번호가 일치하지 않습니다.</string>
+    <string name="auto_login">자동 로그인</string>
+    <string name="pw">비밀번호</string>
+    <string name="check_pw">비밀번호 확인</string>
+    <string name="find_pw">비밀번호 찾기</string>
+    <string name="check">확인</string>
+    <string name="error_email">올바른 형식으로 입력해주세요</string>
+    <string name="error_pw">비밀번호는 영문 대소문자, 숫자, 특수문자(.!@#$%)를 혼합하여 8~20자 이내로 입력해주세요</string>
+    <string name="incorrect_pw">비밀번호가 일치하지 않습니다.</string>
+    <string name="nickname">별명</string>
+    <string name="img_profile">프로필 사진</string>
+    <string name="birth_year">출생년도</string>
+    <string name="birth_year_hint">----</string>
+
+    <!-- 툴바 -->
+    <string name="back">뒤로 가기</string>
+    <string name="more">더보기</string>
+    <string name="next">다음</string>
+    <string name="prev">이전</string>
+    <string name="start">엘릭서 시작하기!</string>
+
+    <!-- 돌아가기 다이얼로그 -->
+    <string name="alert_exit_title">정말 돌아가시겠어요?</string>
+    <string name="alert_exit_message">작성하신 내용은 저장되지 않습니다.</string>
+
+    <!-- 회원가입 : 계정 생성 -->
+    <string name="create_account">계정 생성</string>
+    <string name="exist_account">이미 계정이 있나요?</string>
+
+    <!-- 회원가입 : 계정 생성 -->
+    <string name="set_profile">프로필 설정</string>
+
+    <!-- 회원가입: 성별 -->
+    <string name="sex">성별</string>
+    <string name="female">여성</string>
+    <string name="male">남성</string>
+    <string name="other">기타</string>
+
+    <!-- 회원가입: 설문 단계 -->
+    <string name="num_1">1</string>
+    <string name="num_2">2</string>
+    <string name="num_3">3</string>
+    <string name="num_4">4</string>
+
+    <!-- 회원가입: 질문 -->
+    <string name="survey_q1">알레르기 반응이 있는 식품을\n모두 선택해주세요.</string>
+    <string name="survey_q2">선호하는 식단 스타일은\n알려주세요.</string>
+    <string name="survey_q3">관심있는 레시피 종류를\n알려주세요.</string>
+    <string name="survey_q4">저속노화를 하게 된 이유를\n알려주세요.</string>
+    <!-- 회원가입: 질문 1(알러지) -->
+    <string name="allergy_egg">알류</string>
+    <string name="allergy_milk">우유</string>
+    <string name="allergy_buckwheat">메밀</string>
+    <string name="allergy_peanut">땅콩</string>
+    <string name="allergy_soybean">대두</string>
+    <string name="allergy_wheat">밀</string>
+    <string name="allergy_mackerel">고등어</string>
+    <string name="allergy_crab">게</string>
+    <string name="allergy_shrimp">새우</string>
+    <string name="allergy_pig">돼지고기</string>
+    <string name="allergy_peach">복숭아</string>
+    <string name="allergy_tomato">토마토</string>
+    <string name="allergy_dioxide">아황산류</string>
+    <string name="allergy_walnut">호두</string>
+    <string name="allergy_chicken">닭고기</string>
+    <string name="allergy_cow">쇠고기</string>
+    <string name="allergy_squid">오징어</string>
+    <string name="allergy_seashell">조개류</string>
+    <string name="allergy_oyster">굴, 전복, 홍합</string>
+    <string name="allergy_pinenut">잣</string>
+
+    <!-- 회원가입: 질문 2(식단) -->
+    <!-- 이모지 -->
+    <string name="ic_meat">🍖</string>
+    <string name="ic_vegetable">🥬</string>
+    <string name="ic_mix">🥪</string>
+    <string name="ic_no_prefer">🍽️</string>
+    <!-- 텍스트 -->
+    <string name="content_meat">고기 위주의 식단</string>
+    <string name="content_vegetable">채소 위주의 식단</string>
+    <string name="content_meat_vegetable">고기와 채소가 어우러진 혼합식 식단</string>
+    <string name="content_noting">특별히 선호하는 식단 없음</string>
+
+    <!-- 회원가입: 질문 3(관심 레시피) -->
+    <string name="diet_korean">한식</string>
+    <string name="diet_japanese">일식</string>
+    <string name="diet_chinese">중식</string>
+    <string name="diet_western">양식</string>
+    <string name="dessert">디저트</string>
+    <string name="beverage">음료/차</string>
+    <string name="sauce">양념/소스/잼</string>
+    <string name="diet_n_a">특별히 없음</string>
+    
+    <!-- 회원가입: 질문 4(식단) -->
+    <!-- icon -->
+    <string name="ic_antiox">💪</string>
+    <string name="ic_blood">🍚</string>
+    <string name="ic_inflam">🩺</string>
+    <string name="ic_no_recommend">✨</string>
+
+    <!-- title -->
+    <string name="title_antiox">항산화 강화</string>
+    <string name="title_blood">혈당 조절</string>
+    <string name="title_inflam">염증 감소</string>
+    <string name="title_no_recommend">특별히 없음</string>
+
+    <!-- content -->
+    <string name="content_antiox">몸속 나쁜 활성산소를 없애서 세포가 늙거나 손상되는 걸 막아줌</string>
+    <string name="content_blood">혈당이 너무 오르거나 내려가지 않게 도와줘 당뇨를 예방</string>
+    <string name="content_inflam">몸속 염증을 줄여서 건강을 지키고 면역력을 높이는 데 도움</string>
+
+    <!-- Not selected -->
+    <string name="selected_not">선택안함</string>
+    <string name="n_a">해당없음</string>
+
     <string name="navi_calendar">캘린더</string>
     <string name="navi_recipe">레시피</string>">
     <string name="navi_challenge">챌린지</string>
