@@ -74,12 +74,13 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation (libs.logging.interceptor)
+    implementation (libs.androidx.core.splashscreen)
     
     // Material Components 라이브러리 추가
     implementation (libs.material)
     // calendarview 라이브러리 추가
-    implementation ("com.github.prolificinteractive:material-calendarview:1.6.0")
+    implementation (libs.material.calendarview)
     // flexboxLayout 라이브러리 추가
-    implementation ("com.google.android.flexbox:flexbox:3.0.0")
-    implementation("com.tbuonomo:dotsindicator:5.1.0")
+    implementation (libs.flexbox)
+    implementation(libs.dotsindicator)
 }

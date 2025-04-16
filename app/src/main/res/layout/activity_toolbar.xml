@@ -24,7 +24,7 @@
             android:paddingVertical="24dp"
             android:paddingStart="16dp"
             android:paddingEnd="24dp"
-            android:src="@drawable/ic_back"
+            android:src="@drawable/ic_back_arrow"
             app:layout_constraintEnd_toStartOf="@id/title"
             app:layout_constraintStart_toStartOf="parent"
             android:contentDescription="@string/back"
