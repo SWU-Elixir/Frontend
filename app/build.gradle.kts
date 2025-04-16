@@ -38,6 +38,7 @@ android {
     }
     buildFeatures {
         compose = true
+        viewBinding = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -66,4 +67,11 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    // Material Components 라이브러리 추가
+    implementation (libs.material)
+    // calendarview 라이브러리 추가
+    implementation ("com.github.prolificinteractive:material-calendarview:1.6.0")
+    // flexboxLayout 라이브러리 추가
+    implementation ("com.google.android.flexbox:flexbox:3.0.0")
+    implementation("com.tbuonomo:dotsindicator:5.1.0")
 }

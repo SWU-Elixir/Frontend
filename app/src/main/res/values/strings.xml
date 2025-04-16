@@ -1,3 +1,62 @@
 <resources>
     <string name="app_name">Elixir</string>
+
+    <string name="navi_calendar">캘린더</string>
+    <string name="navi_recipe">레시피</string>">
+    <string name="navi_challenge">챌린지</string>
+    <string name="navi_chatbot">챗봇</string>
+    <string name="navi_mypage">마이페이지</string>
+
+    <string-array name="custom_weekdays">
+        <item>S</item>
+        <item>M</item>
+        <item>T</item>
+        <item>W</item>
+        <item>T</item>
+        <item>F</item>
+        <item>S</item>
+    </string-array>
+
+    <string-array name="custom_months">
+        <item>01</item>
+        <item>02</item>
+        <item>03</item>
+        <item>04</item>
+        <item>05</item>
+        <item>06</item>
+        <item>07</item>
+        <item>08</item>
+        <item>09</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+    </string-array>
+
+    <string-array name="ingredient_list">
+        <item>식재료</item>
+        <item>계란</item>
+        <item>소고기</item>
+        <item>닭고기</item>
+    </string-array>
+
+    <string-array name="method_list">
+        <item>저속노화</item>
+        <item>향산화 강화</item>
+        <item>혈당 조절</item>
+        <item>염증 감소</item>
+    </string-array>
+
+    <string-array name="type_list">
+        <item>종류</item>
+        <item>한식</item>
+        <item>양식</item>
+        <item>중식</item>
+        <item>일식</item>
+        <item>디저트</item>
+        <item>음료/차</item>
+        <item>양념/소스/잼</item>
+    </string-array>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
