@@ -137,4 +137,21 @@
                 android:layout_marginBottom="70dp"/>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+    <!-- Floating Action Button (항상 맨 위에 위치) -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="100dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:translationZ="8dp"
+        android:elevation="8dp"
+        android:src="@drawable/ic_recipe_write"
+        app:tint="@color/white"
+        app:backgroundTint="@color/elixir_orange"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

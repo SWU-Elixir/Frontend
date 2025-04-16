@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.example.elixir.R
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.tbuonomo.viewpagerdotsindicator.SpringDotsIndicator
 
 data class RecipeItem(
@@ -57,6 +58,8 @@ class RecipeListFragment : Fragment() {
 
     private lateinit var resetButton: Button
 
+    private lateinit var fab: FloatingActionButton
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -71,6 +74,13 @@ class RecipeListFragment : Fragment() {
         methodSpinner = view.findViewById(R.id.spinner_difficulty)
         typeSpinner = view.findViewById(R.id.spinner_type)
         resetButton = view.findViewById(R.id.resetButton)
+
+        fab = view.findViewById(R.id.fab)
+
+        // FAB 클릭 이벤트
+        fab.setOnClickListener {
+            Log.d("CalendarFragment", "FAB 클릭됨")
+        }
 
         fun updateResetButtonVisibility() {
             val isMethodSelected = methodSpinner.selectedItemPosition != 0
