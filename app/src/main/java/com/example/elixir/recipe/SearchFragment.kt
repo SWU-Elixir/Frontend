@@ -1,4 +1,4 @@
-package com.example.elixir
+package com.example.elixir.recipe
 
 import android.os.Bundle
 import android.text.Editable
@@ -13,6 +13,8 @@ import android.widget.ImageButton
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
+import com.example.elixir.R
+import com.example.elixir.calendar.DietLogIngredientAdapter
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent

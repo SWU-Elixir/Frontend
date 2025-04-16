@@ -1,4 +1,4 @@
-package com.example.elixir
+package com.example.elixir.recipe
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import com.example.elixir.R
 
 class RecipeListSpinnerAdapter(
     context: Context,

@@ -1,4 +1,4 @@
-package com.example.elixir
+package com.example.elixir.calendar
 
 import android.content.Context
 import android.graphics.*
@@ -14,6 +14,7 @@ import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import com.example.elixir.R
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.prolificinteractive.materialcalendarview.*
@@ -70,10 +71,11 @@ class CalendarFragment : Fragment() {
 
         // 오늘 날짜 데코레이터 (배경 원)
         try {
-            val todayDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.bg_calendar_circletoday)
-            val textColor = ContextCompat.getColor(requireContext(), R.color.elixir_orange)
+            val todayDrawable = ContextCompat.getDrawable(requireContext(),
+                R.drawable.bg_calendar_circletoday
+            )
             todayDrawable?.let {
-                calendarView.addDecorator(CalendarTodayDecorator(requireContext(), it, textColor))
+                calendarView.addDecorator(CalendarTodayDecorator(requireContext(), it))
             }
         } catch (e: Exception) {
             Log.e("CalendarFragment", "오늘 날짜 배경 설정 오류: \${e.message}")

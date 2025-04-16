@@ -1,4 +1,4 @@
-package com.example.elixir
+package com.example.elixir.recipe
 
 import android.util.Log
 import android.view.LayoutInflater
@@ -9,6 +9,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.elixir.R
 
 class RecipeRecommendationListAdapter(
     private val recipeList: List<RecommendationRecipeItem>

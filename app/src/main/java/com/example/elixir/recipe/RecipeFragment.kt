@@ -1,4 +1,4 @@
-package com.example.elixir
+package com.example.elixir.recipe
 
 import android.os.Bundle
 import android.util.Log
@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
+import com.example.elixir.R
 import com.tbuonomo.viewpagerdotsindicator.SpringDotsIndicator
 
 data class RecipeItem(

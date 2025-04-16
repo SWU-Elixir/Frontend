@@ -1,10 +1,11 @@
-package com.example.elixir
+package com.example.elixir.calendar
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.elixir.R
 
 class DietLogIngredientAdapter(private val ingredients: List<String>) :
     RecyclerView.Adapter<DietLogIngredientAdapter.IngredientViewHolder>() {
