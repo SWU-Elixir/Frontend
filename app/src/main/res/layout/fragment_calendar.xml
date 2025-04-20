@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/white">
 
+    <!--CalendarView-->
     <com.prolificinteractive.materialcalendarview.MaterialCalendarView
         android:id="@+id/calendarView"
         android:layout_width="match_parent"
@@ -23,6 +24,7 @@
         app:mcv_tileWidth="match_parent"
         app:mcv_weekDayTextAppearance="@style/CalendarWeekDayStyle" />
 
+    <!--BottomSheet-->
     <androidx.cardview.widget.CardView
         android:id="@+id/bottomSheet"
         android:layout_width="match_parent"
@@ -33,7 +35,7 @@
         app:backgroundTint="#FDCFA7"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
         app:behavior_peekHeight="140dp"
-        app:behavior_expandedOffset="30dp"
+        app:behavior_expandedOffset="15dp"
         app:behavior_fitToContents="false"
         app:behavior_halfExpandedRatio="0.5"
         app:cardCornerRadius="16dp">
@@ -42,6 +44,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+            <!--BottomSheet Handle-->
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -52,8 +55,9 @@
                 android:src="@drawable/png_handle"
                 tools:ignore="ContentDescription" />
 
+            <!--MealPlanList-->
             <ListView
-                android:id="@+id/dietLogList"
+                android:id="@+id/mealPlanList"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:dividerHeight="10dp"
@@ -65,7 +69,7 @@
                 android:visibility="visible"
                 />
             <TextView
-                android:id="@+id/emptyDietText"
+                android:id="@+id/emptyMealText"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="기록된 식단이 없습니다."

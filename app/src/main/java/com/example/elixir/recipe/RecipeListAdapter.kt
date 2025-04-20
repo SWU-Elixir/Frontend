@@ -1,5 +1,6 @@
 package com.example.elixir.recipe
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,7 +30,9 @@ class RecipeListAdapter(
     override fun onBindViewHolder(holder: RecipeViewHolder, position: Int) {
         val item = recipeList[position]
 
-        holder.recipeImage.setImageResource(R.drawable.png_recipe_sample)
+        val pictureRes = item.recipeImageRes ?: R.drawable.ic_recipe_white
+        holder.recipeImage.setImageResource(pictureRes)
+
         holder.recipeTitle.text = item.recipeTitle
 
         holder.ingredientRecyclerView.apply {
@@ -50,13 +53,35 @@ class RecipeListAdapter(
         holder.heartButton.setImageResource(
             if (item.isLiked) R.drawable.ic_recipe_heart_selected else R.drawable.ic_recipe_heart_normal
         )
-        holder.heartCount.text = item.likeCount.toString()
+
+        val likeCountText = when {
+            item.likeCount >= 1_000_000 -> formatCount(item.likeCount / 1_000_000.0, "M")
+            item.likeCount >= 1_000     -> formatCount(item.likeCount / 1_000.0, "k")
+            else                        -> item.likeCount.toString()
+        }
+        holder.heartCount.text = likeCountText
+
         holder.recipeLevel.text = item.difficulty
         holder.recipeTimeHour.text = if (item.timeHours == 0) "" else "${item.timeHours}시간"
         holder.recipeTimeMin.text = "${item.timeMinutes}분"
 
         holder.bookmarkButton.setOnClickListener { onBookmarkClick(item) }
         holder.heartButton.setOnClickListener { onHeartClick(item) }
+
+        holder.itemView.setOnClickListener {
+            Log.d("RecipeAdapter", "아이템 클릭됨: ${item.recipeTitle}")
+            // 필요시 클릭 시 동작 추가 가능
+        }
+    }
+
+    // 숫자를 3자리로 포맷 (예: 1.2k, 15k, 999, 1M 등)
+    private fun formatCount(value: Double, suffix: String): String {
+        val formatted = if (value < 10) {
+            String.format("%.1f", value) // 1.2k
+        } else {
+            value.toInt().toString()     // 15k
+        }
+        return formatted.removeSuffix(".0") + suffix
     }
 
     class RecipeViewHolder(view: View) : RecyclerView.ViewHolder(view) {

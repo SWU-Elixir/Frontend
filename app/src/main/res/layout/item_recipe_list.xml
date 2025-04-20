@@ -41,7 +41,7 @@
 
                 <!-- 카테고리 텍스트 영역 -->
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="105dp"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:layout_gravity="center">
@@ -50,9 +50,9 @@
                         android:id="@+id/category_slow_aging"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="항산화 강화"
+                        android:text="저속노화"
                         android:textSize="10sp"
-                        android:layout_marginEnd="8dp"
+                        android:layout_marginEnd="5dp"
                         android:textColor="@color/elixir_orange"
                         android:fontFamily="@font/pretendard_regular"
                         tools:ignore="MissingConstraints" />
@@ -61,7 +61,7 @@
                         android:id="@+id/category_type"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="양념/소스/잼"
+                        android:text="종류"
                         android:textSize="10sp"
                         android:textColor="@color/elixir_orange"
                         android:fontFamily="@font/pretendard_regular"
@@ -84,21 +84,24 @@
                         android:src="@drawable/ic_recipe_heart_normal"
                         android:adjustViewBounds="true"
                         android:background="@android:color/transparent"
-                        android:maxWidth="30dp"
+                        android:minWidth="30dp"
                         android:maxHeight="30dp"
-                        android:paddingEnd="5dp"
+                        android:paddingTop="2dp"
+                        android:paddingBottom="1dp"
                         android:scaleType="fitCenter"
+                        android:layout_gravity="center"
                         tools:ignore="ContentDescription,RtlSymmetry" />
 
                     <!-- 좋아요 수 -->
                     <TextView
                         android:id="@+id/heartCount"
-                        android:layout_width="wrap_content"
+                        android:layout_width="21dp"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/pretendard_regular"
                         android:textColor="@color/black"
-                        android:textSize="12sp"
-                        android:text="100"
+                        android:textSize="10sp"
+                        android:layout_marginStart="2dp"
+                        android:text=""
                         android:maxWidth="30dp"
                         android:layout_gravity="center"/>
 
@@ -109,10 +112,11 @@
                         android:layout_height="wrap_content"
                         android:src="@drawable/ic_recipe_bookmark_normal"
                         android:adjustViewBounds="true"
+                        android:layout_gravity="center"
                         android:background="@android:color/transparent"
-                        android:maxWidth="30dp"
+                        android:minWidth="30dp"
                         android:maxHeight="30dp"
-                        android:paddingStart="5dp"
+                        android:padding="1dp"
                         android:scaleType="fitCenter"
                         tools:ignore="ContentDescription,RtlSymmetry" />
                 </LinearLayout>

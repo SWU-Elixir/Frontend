@@ -42,7 +42,7 @@ data class RecommendationRecipeItem(
     var isBookmarked: Boolean = false,   // 북마크 여부
 )
 
-class RecipeListFragment : Fragment() {
+class RecipeFragment : Fragment() {
 
     private lateinit var searchButton: ImageButton
 
@@ -167,12 +167,12 @@ class RecipeListFragment : Fragment() {
                 timeMinutes = 10,
                 difficulty = "보통",
                 isLiked = true,
-                likeCount = 57
+                likeCount = 57674
             ),
             RecipeItem(
                 recipeTitle = "간단한 토마토 올리브 오일 마리네이드",
                 categorySlowAging = "항산화 강화",
-                categoryType = "반찬/마리네이드",
+                categoryType = "양념/소스/잼",
                 recipeIngredients = listOf("토마토", "올리브오일", "허브", "소금"),
                 recipeImageRes = R.drawable.png_recipe_sample,
                 isBookmarked = false,
@@ -180,7 +180,7 @@ class RecipeListFragment : Fragment() {
                 timeMinutes = 7,
                 difficulty = "쉬움",
                 isLiked = false,
-                likeCount = 14
+                likeCount = 999
             ),
             RecipeItem(
                 recipeTitle = "그린 스무디",
@@ -193,7 +193,7 @@ class RecipeListFragment : Fragment() {
                 timeMinutes = 3,
                 difficulty = "쉬움",
                 isLiked = true,
-                likeCount = 31
+                likeCount = 1200
             ),
             RecipeItem(
                 recipeTitle = "견과류 에너지볼",
@@ -206,14 +206,13 @@ class RecipeListFragment : Fragment() {
                 timeMinutes = 8,
                 difficulty = "보통",
                 isLiked = true,
-                likeCount = 49
+                likeCount = 5534
             ),
             RecipeItem(
                 recipeTitle = "그릭요거트 베리볼",
                 categorySlowAging = "항산화 강화",
                 categoryType = "디저트/간식",
                 recipeIngredients = listOf("그릭요거트", "블루베리", "라즈베리"),
-                recipeImageRes = R.drawable.png_recipe_sample,
                 isBookmarked = false,
                 timeHours = 0,
                 timeMinutes = 2,
@@ -292,11 +291,11 @@ class RecipeListFragment : Fragment() {
         }
 
 //        // ViewPager 아이템 클릭 이벤트 처리
-//        viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+//        recommendationViewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
 //            override fun onPageSelected(position: Int) {
 //                super.onPageSelected(position)
 //                val selectedRecipe = sampleRecipes[position]
-//                Log.d("RecipeFragment", "선택된 레시피 이름: ${selectedRecipe.recipeName}")
+//                Log.d("RecipeFragment", "선택된 레시피 이름: ${selectedRecipe.recipeTitle}")
 //                // 여기에 상세 화면 이동 또는 다른 동작 추가 가능
 //            }
 //        })

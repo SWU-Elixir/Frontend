@@ -10,7 +10,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import com.example.elixir.calendar.CalendarFragment
-import com.example.elixir.recipe.RecipeListFragment
+import com.example.elixir.recipe.RecipeFragment
 
 class HomeActivity : AppCompatActivity() {
 
@@ -77,12 +77,12 @@ class HomeActivity : AppCompatActivity() {
 
         recipeButton.setOnClickListener {
             updateSelectedButton(recipeButton, recipeTitle)
-            replaceFragment(RecipeListFragment())
+            replaceFragment(RecipeFragment())
         }
 
         challengeButton.setOnClickListener {
             updateSelectedButton(challengeButton, challengeTitle)
-            Toast.makeText(this, "챌린지 탭 선택됨", Toast.LENGTH_SHORT).show()
+            replaceFragment(ChallengeFragment())
         }
 
         chatbotButton.setOnClickListener {

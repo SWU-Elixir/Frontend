@@ -35,7 +35,7 @@ class CalendarFragment : Fragment() {
     // UI 컴포넌트 선언
     private lateinit var eventListView: ListView
     private lateinit var eventAdapter: DietLogAdapter
-    private lateinit var emptyDietText: TextView
+    private lateinit var emptyMealText: TextView
     private lateinit var calendarView: MaterialCalendarView
     private lateinit var fab: FloatingActionButton
 
@@ -54,8 +54,8 @@ class CalendarFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_calendar, container, false)
 
         // 리스트뷰 설정
-        eventListView = view.findViewById(R.id.dietLogList)
-        emptyDietText = view.findViewById(R.id.emptyDietText)
+        eventListView = view.findViewById(R.id.mealPlanList)
+        emptyMealText = view.findViewById(R.id.emptyMealText)
         eventAdapter = DietLogAdapter(requireContext(), mutableListOf()) { item ->
             onDietLogClick(item)
         }
@@ -226,10 +226,10 @@ class CalendarFragment : Fragment() {
         val events = eventMap[selectedDate]
         if (events.isNullOrEmpty()) {
             eventListView.visibility = View.GONE
-            emptyDietText.visibility = View.VISIBLE
+            emptyMealText.visibility = View.VISIBLE
         } else {
             eventListView.visibility = View.VISIBLE
-            emptyDietText.visibility = View.GONE
+            emptyMealText.visibility = View.GONE
             eventAdapter.updateData(events)
         }
     }

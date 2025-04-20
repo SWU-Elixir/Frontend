@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:background="@color/white"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="500dp"
+            android:orientation="vertical"
+            android:padding="16dp">
+            <Spinner
+                android:id="@+id/challengeSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:spinnerMode="dropdown"
+                android:background="@drawable/bg_challenge_spinner"/>
+            <ImageView
+                android:id="@+id/challengeImage"
+                android:layout_width="match_parent"
+                android:layout_height="400dp"
+                android:background="@drawable/bg_dietlog_picture"
+                android:src="@drawable/png_challenge_1"
+                android:scaleType="centerCrop"
+                android:clipToOutline="true"
+                android:backgroundTint="@color/elixir_gray"/>
+            <TextView
+                android:id="@+id/challengeTitleText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="챌린지 제목"
+                android:textSize="22sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/pretendard_bold"/>
+            <TextView
+                android:id="@+id/challengePeriodText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="챌린지 기간"
+                android:textSize="22sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/pretendard_bold"/>
+            <TextView
+                android:id="@+id/challengeGoalText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:text="챌린지 목적"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/pretendard_regular"/>
+            <TextView
+                android:id="@+id/challengeDescriptionText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:text="챌린지 설명"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/pretendard_regular"/>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/bottomSheet"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:descendantFocusability="beforeDescendants"
+        android:focusableInTouchMode="true"
+        app:backgroundTint="#FDCFA7"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+        app:behavior_peekHeight="140dp"
+        app:behavior_expandedOffset="15dp"
+        app:behavior_fitToContents="false"
+        app:behavior_halfExpandedRatio="0.5"
+        app:cardCornerRadius="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:paddingTop="25dp"
+                android:paddingLeft="130dp"
+                android:paddingRight="130dp"
+                android:src="@drawable/png_handle"
+                tools:ignore="ContentDescription" />
+
+            <ListView
+                android:id="@+id/challengeStageList"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:dividerHeight="10dp"
+                android:divider="@color/transparency"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                />
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

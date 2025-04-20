@@ -162,12 +162,12 @@ class SearchListFragment : Fragment() {
                 timeMinutes = 10,
                 difficulty = "보통",
                 isLiked = true,
-                likeCount = 57
+                likeCount = 57674
             ),
             RecipeItem(
                 recipeTitle = "간단한 토마토 올리브 오일 마리네이드",
                 categorySlowAging = "항산화 강화",
-                categoryType = "반찬/마리네이드",
+                categoryType = "양념/소스/잼",
                 recipeIngredients = listOf("토마토", "올리브오일", "허브", "소금"),
                 recipeImageRes = R.drawable.png_recipe_sample,
                 isBookmarked = false,
@@ -175,7 +175,7 @@ class SearchListFragment : Fragment() {
                 timeMinutes = 7,
                 difficulty = "쉬움",
                 isLiked = false,
-                likeCount = 14
+                likeCount = 999
             ),
             RecipeItem(
                 recipeTitle = "그린 스무디",
@@ -188,7 +188,7 @@ class SearchListFragment : Fragment() {
                 timeMinutes = 3,
                 difficulty = "쉬움",
                 isLiked = true,
-                likeCount = 31
+                likeCount = 1200
             ),
             RecipeItem(
                 recipeTitle = "견과류 에너지볼",
@@ -201,7 +201,7 @@ class SearchListFragment : Fragment() {
                 timeMinutes = 8,
                 difficulty = "보통",
                 isLiked = true,
-                likeCount = 49
+                likeCount = 5534
             ),
             RecipeItem(
                 recipeTitle = "그릭요거트 베리볼",
