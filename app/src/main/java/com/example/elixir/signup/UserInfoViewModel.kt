@@ -54,8 +54,8 @@ class UserInfoViewModel : ViewModel() {
     }
 
     // 설문조사 - 선호 식단
-    fun setPreferredDiets(diets: List<String>) {
-        signupData.preferredDiets = diets
+    fun setPreferredDiets(diet: String) {
+        signupData.preferredDiet = diet
     }
 
     // 설문조사 - 선호 레시피

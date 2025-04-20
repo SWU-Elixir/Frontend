@@ -8,7 +8,7 @@ data class SignupData(
     var sex: String?,
     var birthYear: Int?,
     var allergies: List<String>?,
-    var preferredDiets: List<String>?,
+    var preferredDiet: String?,
     var preferredRecipes: List<String>?,
     var signupReason: String?
 )
