@@ -18,8 +18,6 @@ class SignupFragment : Fragment() {
     private var preferredDiet: String? = null               // 선호 식단
     private var preferredRecipe: List<String>? = null       // 선호 레시피
 
-
-    data class ProfileData(val img: String, val nick: String, val gender: String, val birthYear: Int)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -65,7 +63,7 @@ class SignupFragment : Fragment() {
                     // userModel의 프로필에 저장, 완료 스테이지 추가
                     when(userModel.currentStep) {
                         0 -> profileData?.let {
-                            userModel.setProfile(it.img, it.nick, it.gender, it.birthYear)
+                            userModel.setProfile(it.profileImage, it.nickname, it.gender, it.birthYear)
                             userModel.updateCompletedStep(0, true)
                         }
                         1 -> selectedAllergies?.let {
@@ -96,8 +94,8 @@ class SignupFragment : Fragment() {
             0 -> SettingProfileFragment().apply {
                 listener = object : OnProfileCompletedListener {
                     // 유효한 값이 입력되었다면 활성화
-                    override fun onProfileCompleted(img: String, nick: String, sex: String, birthYear: Int) {
-                        profileData = ProfileData(img, nick, sex, birthYear)
+                    override fun onProfileCompleted(profileImage: String, nickname: String, gender: String, birthYear: Int) {
+                        userModel.setProfile(profileImage, nickname, gender, birthYear)
                         // 버튼 활성화
                         with(signupBinding) {
                             btnNext.isEnabled = true
@@ -107,7 +105,6 @@ class SignupFragment : Fragment() {
                     }
                     // 유효한 값이 입력되지 않았다면 활성화 x
                     override fun onProfileInvalid() {
-                        profileData = null
                         // 버튼 비활성화
                         with(signupBinding) {
                             btnNext.isEnabled = false
@@ -116,6 +113,7 @@ class SignupFragment : Fragment() {
                         }
                     }
                 }
+                // 인디케이터 숨기기
                 signupBinding.surveyStep.visibility = View.GONE
             }
             // 알레르기 입력 프래그먼트, 칩 선택 시 다음 버튼 활성화

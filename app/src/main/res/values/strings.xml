@@ -38,6 +38,11 @@
     <!-- 회원가입 : 계정 생성 -->
     <string name="set_profile">프로필 설정</string>
 
+    <!-- 회원가입: 이미지 선택 -->
+    <string name="set_profile_img">프로필 이미지 선택</string>
+    <string name="set_img_default">기본 이미지로 설정</string>
+    <string name="set_img_gallery">갤러리에서 가져오기</string>
+
     <!-- 회원가입: 성별 -->
     <string name="sex">성별</string>
     <string name="female">여성</string>
@@ -55,6 +60,7 @@
     <string name="survey_q2">선호하는 식단 스타일을\n알려주세요.</string>
     <string name="survey_q3">관심있는 레시피 종류를\n알려주세요.</string>
     <string name="survey_q4">저속노화를 하게 된 이유를\n알려주세요.</string>
+
     <!-- 회원가입: 질문 1(알러지) -->
     <string name="allergy_egg">알류</string>
     <string name="allergy_milk">우유</string>
@@ -92,7 +98,7 @@
     <string name="beverage">🧃 음료/차</string>
     <string name="sauce">🍯 양념/소스/잼</string>
     <string name="diet_n_a">❌ 특별히 없음</string>
-    
+
     <!-- 회원가입: 질문 4(식단) -->
     <!-- icon -->
     <string name="ic_antiox">💪</string>

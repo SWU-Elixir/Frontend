@@ -36,7 +36,7 @@ class ToolbarActivity : AppCompatActivity() {
                 // 뒤로가기 버튼을 누르면 로그인 페이지로 돌아가기
                 // 돌아가기 전 다이얼로그 띄우기
                 toolBinding.btnBack.setOnClickListener {
-                    AlertExitDialogFragment(this).show()
+                    AlertExitDialog(this).show()
                 }
 
                 // 계정 생성 프래그먼트 띄워주기

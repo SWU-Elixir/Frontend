@@ -14,7 +14,7 @@
             android:id="@+id/set_profile"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="50dp"
+            android:layout_marginTop="20dp"
             android:text="@string/set_profile"
             android:textSize="36sp"
             android:textStyle="bold"
@@ -68,13 +68,13 @@
             android:textColor="@color/black"
             android:textColorHint="@color/elixir_gray"
             android:textSize="16sp"
-            app:layout_constraintBottom_toTopOf="@id/text_sex"
+            app:layout_constraintBottom_toTopOf="@id/text_gender"
             app:layout_constraintTop_toBottomOf="@id/text_nick"
             tools:ignore="DuplicateSpeakableTextCheck,VisualLintTextFieldSize,TextContrastCheck" />
 
         <!-- 성별 -->
         <TextView
-            android:id="@+id/text_sex"
+            android:id="@+id/text_gender"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
@@ -84,16 +84,16 @@
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintTop_toBottomOf="@id/regist_nick"
-            app:layout_constraintBottom_toTopOf="@id/select_sex"/>
+            app:layout_constraintBottom_toTopOf="@id/select_gender"/>
 
         <!-- 성별 선택 버튼 -->
         <RadioGroup
-            android:id="@+id/select_sex"
+            android:id="@+id/select_gender"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginVertical="5dp"
-            app:layout_constraintTop_toBottomOf="@id/text_sex"
+            app:layout_constraintTop_toBottomOf="@id/text_gender"
             app:layout_constraintBottom_toTopOf="@id/text_birth">
             <RadioButton
                 android:id="@+id/btn_female"
@@ -162,7 +162,7 @@
             android:textSize="18sp"
             android:textStyle="bold"
             android:fontFamily="@font/pretendard_bold"
-            app:layout_constraintTop_toBottomOf="@id/select_sex"
+            app:layout_constraintTop_toBottomOf="@id/select_gender"
             app:layout_constraintBottom_toTopOf="@id/birth_year"/>
 
         <Spinner
