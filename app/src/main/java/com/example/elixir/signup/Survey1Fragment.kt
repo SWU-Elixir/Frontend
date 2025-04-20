@@ -5,66 +5,78 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import com.example.elixir.databinding.FragmentSurvey1Binding
-import com.google.android.material.chip.Chip
 
 class Survey1Fragment : Fragment() {
     private lateinit var survey1Binding: FragmentSurvey1Binding
+    private var allergies = mutableListOf<String>()
     var listener: OnChipCompletedListener? = null
-    private val userModel: UserInfoViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // 바인딩
         survey1Binding = FragmentSurvey1Binding.inflate(inflater, container, false)
         return survey1Binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        // Fragment나 Activity 내부
+
         with(survey1Binding) {
-            val chipList = listOf(allergyEgg, allergyMilk, allergyBuckwheat, allergyPeanut,
+            // 일반 칩
+            val chipList = listOf(
+                allergyEgg, allergyMilk, allergyBuckwheat, allergyPeanut,
                 allergySoybean, allergyWheat, allergyMackerel, allergyCrab, allergyShrimp,
                 allergyPig, allergyPeach, allergyTomato, allergyDioxide, allergyWalnut,
-                allergyChicken, allergyCow, allergySquid,
-                allergySeashell, allergyOyster, allergyPinenut)
-            val chipNone = nA // "해당 없음" Chip
+                allergyChicken, allergyCow, allergySquid, allergySeashell, allergyOyster,
+                allergyPinenut
+            )
+            // 해당 없음
+            val chipNone = nA
 
-            // 일반 Chips 클릭 시 "해당 없음" 해제
+            // 일반 칩 선택 시
             chipList.forEach { chip ->
                 chip.setOnCheckedChangeListener { _, isChecked ->
                     if (isChecked) {
+                        // 해당 없음 해제 및 배열에서 지우기
                         chipNone.isChecked = false
-
+                        allergies.clear()
+                        // 만약에 리스트에 같은 재료가 없다면 추가
+                        if (!allergies.contains(chip.text.toString())) {
+                            allergies.add(chip.text.toString())
+                        }
                     }
+                    // 만약에 리스트에 같은 재료가 있다면 삭제
+                    else {
+                        allergies.remove(chip.text.toString())
+                    }
+                    // 업데이트
+                    updateSelection()
                 }
             }
 
-            // "해당 없음" 클릭 시 나머지 해제
+            // "해당 없음" 선택 시
             chipNone.setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked) {
+                    // 일반 칩 전부 해제
                     chipList.forEach { it.isChecked = false }
+                    allergies.clear()
+                    allergies.add(chipNone.text.toString())
+                } else {
+                    allergies.remove(chipNone.text.toString())
                 }
+                updateSelection()
             }
         }
     }
-    private fun updateSelection(chipList: List<Chip>, chipNone: Chip) {
-        val selectedTexts = mutableListOf<String>()
 
-        chipList.forEach { chip ->
-            if (chip.isChecked)
-                selectedTexts.add(chip.text.toString())
+    private fun updateSelection() {
+        // 공백이 아니라면 칩이 선택된 상태 -> 다음 버튼 활성화
+        if (allergies.isNotEmpty()) {
+            listener?.onChipSelected(allergies)
+        } else {
+            listener?.onChipSelectedNot()
         }
-        if (chipNone.isChecked)
-            selectedTexts.add(chipNone.text.toString())
-
-        userModel.setAllergies(selectedTexts)
-
-        // 콜백으로 버튼 활성화 요청
-        listener?.onChipSelected(selectedTexts.isNotEmpty())
     }
 }
