@@ -5,9 +5,8 @@ import androidx.lifecycle.ViewModel
 
 // 사용자 정보 뷰 모델 (회원가입, 정보 수정)
 class UserInfoViewModel : ViewModel() {
-    var profileData: ProfileData = ProfileData("", "", "", 0)
-    private var id: String = ""
-    private var password: String = ""
+    private var accountData: AccountData = AccountData("", "")
+    private var profileData: ProfileData = ProfileData("", "", "", 0)
     private var allergies: List<String> = mutableListOf<String>()
     private var preferredDiet: String = ""
     private var preferredRecipes: List<String> = mutableListOf<String>()
@@ -18,7 +17,7 @@ class UserInfoViewModel : ViewModel() {
     val maxStep = 4  // 마지막 단계 번호
 
     // 단계별 정보 입력 완료 여부
-    val completedStep = MutableLiveData(
+    private val completedStep = MutableLiveData(
         mutableMapOf(
             0 to false,
             1 to false,
@@ -42,8 +41,12 @@ class UserInfoViewModel : ViewModel() {
 
     // 계정 생성
     fun setAccount(email: String, pw: String) {
-        id = email
-        password = pw
+        accountData = AccountData(email, pw)
+    }
+
+    fun getAccount(): AccountData? {
+        return if (accountData.id.isNotBlank() && accountData.password.isNotBlank()) accountData
+        else null
     }
 
     // 프로필 생성
@@ -59,23 +62,39 @@ class UserInfoViewModel : ViewModel() {
         else null
     }
 
-    // 설문조사 - 알러지
+    // 설문조사 - 알러지 정보 설정
     fun setAllergies(algs: List<String>) {
         allergies = algs
     }
 
-    // 설문조사 - 선호 식단
+    // 설문조사 - 알러지 정보 가져오기
+    fun getAllergies(): List<String>? {
+        return allergies.ifEmpty { null }
+    }
+
+    // 설문조사 - 선호 식단 설정
     fun setPreferredDiets(diet: String) {
         preferredDiet = diet
     }
 
-    // 설문조사 - 선호 레시피
+    // 설문조사 - 선호 식단 가져오기
+    fun getPreferredDiets(): String = preferredDiet
+
+    // 설문조사 - 선호 레시피 설정
     fun setPreferredRecipes(recipes: List<String>) {
         preferredRecipes = recipes
     }
 
-    // 설문조사 - 저속노화 이유
+    // 설문조사 - 선호 레시피 가져오기
+    fun getPreferredRecipes(): List<String>? {
+        return preferredRecipes.ifEmpty { null }
+    }
+
+    // 설문조사 - 저속노화 이유 설정
     fun setSignupReason(reason: String) {
         signupReason = reason
     }
+
+    // 설문조사 - 저속노화 이유 가져오기
+    fun getSignupReason(): String = signupReason
 }

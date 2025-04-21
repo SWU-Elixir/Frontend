@@ -55,23 +55,23 @@ class SignupFragment : Fragment() {
             // 다음 버튼 클릭 시
             btnNext.setOnClickListener {
                 // 최대 단계 누르면 로그인 액티비티로
-                if (userModel.currentStep == userModel.maxStep) {
-                    // 마지막 단계면 로그인 액티비티로 이동
+                if (userModel.currentStep == userModel.maxStep)
                     activity?.finish()
-                }
+
+                // 완료 스테이지 추가
                 else {
-                    // userModel의 프로필에 저장, 완료 스테이지 추가
                     when(userModel.currentStep) {
                         0 -> profileData?.let {
-                            userModel.setProfile(it.profileImage, it.nickname, it.gender, it.birthYear)
                             userModel.updateCompletedStep(0, true)
                         }
                         1 -> selectedAllergies?.let {
-                            userModel.setAllergies(it)
                             userModel.updateCompletedStep(1, true)
                         }
                         2 -> preferredDiet?.let {
-                            userModel.setPreferredDiets(it)
+                            userModel.updateCompletedStep(2, true)
+                        }
+                        3 -> preferredRecipe?.let {
+                            userModel.updateCompletedStep(3, true)
                         }
                     }
                     // 설문 다음 단계로
@@ -81,12 +81,14 @@ class SignupFragment : Fragment() {
             }
         }
     }
+
     // 설문 프래그먼트 설정
     private fun setStepFragment(fragment: Fragment) {
         childFragmentManager.beginTransaction()
             .replace(R.id.survey_step, fragment)
             .commit()
     }
+
     // 설문 프래그먼트 설정
     private fun setSurveyStepFragment(step: Int) {
         val fragment = when (step) {
@@ -141,7 +143,7 @@ class SignupFragment : Fragment() {
                     }
                 }
             }
-            // 식단 입력 프래그먼트, 식단 선택 시 다음 버튼 활성화
+            // 선호 식단 입력 프래그먼트, 식단 선택 시 다음 버튼 활성화
             2 -> Survey2Fragment().apply {
                 listener = object  : OnDietCompletedListener {
                     // 식단이 입력되었다면, 다음 버튼 활성화 및 데이터 저장
@@ -150,8 +152,7 @@ class SignupFragment : Fragment() {
                         // 버튼 활성화
                         with(signupBinding) {
                             btnNext.isEnabled = true
-                            btnNext.setBackgroundTintList(
-                                ContextCompat.getColorStateList(requireContext(), R.color.elixir_orange))
+                            btnNext.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), R.color.elixir_orange))
                         }
                     }
                     // 식단이 선택되지 않았다면, 다음 버튼 비활성화 및 데이터 NULL
@@ -160,12 +161,12 @@ class SignupFragment : Fragment() {
                         // 버튼 비활성화
                         with(signupBinding) {
                             btnNext.isEnabled = false
-                            btnNext.setBackgroundTintList(
-                                ContextCompat.getColorStateList(requireContext(), R.color.elixir_gray))
+                            btnNext.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), R.color.elixir_gray))
                         }
                     }
                 }
             }
+            // 선호 레시피 입력 프래그먼트, 레시피 선택 시 다음 버튼 활성화
             3 -> Survey3Fragment().apply {
                 listener = object : OnChipCompletedListener {
                     // 칩이 선택되었다면, 다음 버튼 활성화 및 데이터 저장
@@ -174,8 +175,7 @@ class SignupFragment : Fragment() {
                         // 버튼 활성화
                         with(signupBinding) {
                             btnNext.isEnabled = true
-                            btnNext.setBackgroundTintList(
-                                ContextCompat.getColorStateList(requireContext(), R.color.elixir_orange))
+                            btnNext.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), R.color.elixir_orange))
                         }
                     }
                     // 칩이 선택되지 않았다면, 다음 버튼 비활성화 및 데이터 NULL
@@ -184,8 +184,7 @@ class SignupFragment : Fragment() {
                         // 버튼 비활성화
                         with(signupBinding) {
                             btnNext.isEnabled = false
-                            btnNext.setBackgroundTintList(
-                                ContextCompat.getColorStateList(requireContext(), R.color.elixir_gray))
+                            btnNext.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), R.color.elixir_gray))
                         }
                     }
                 }

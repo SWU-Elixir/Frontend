@@ -10,15 +10,16 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import com.example.elixir.AlertExitDialog
 import com.example.elixir.R
 import com.example.elixir.databinding.FragmentCreateAccountBinding
 
 class CreateAccountFragment : Fragment() {
     private lateinit var accountBinding: FragmentCreateAccountBinding
-    private lateinit var email: String
-    private lateinit var pw: String
-    private lateinit var checkPw: String
     private val userModel: UserInfoViewModel by activityViewModels()
+    private var email: String = ""
+    private var pw: String = ""
+    private var checkPw: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,24 +43,29 @@ class CreateAccountFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 이메일, 비번 받아오기
-        email = accountBinding.registEmail.text.toString().trim()
-        pw = accountBinding.registPw.text.toString().trim()
-        checkPw = accountBinding.checkPw.text.toString().trim()
+        // 초기화 : 뷰 모델에 저장된 데이터가 있다면 불러오기
+        val data = userModel.getAccount()
+        if(data != null) {
+            // 클래스 속성에 데이터 값 집어넣기
+            email = data.id
+            pw = data.password
 
-        // 로그인 버튼 클릭 시 로그인 액티비티로
+            with(accountBinding) {
+                // 설정: 이미지 링크 파싱, 닉네임에 작성한 닉네임 불러오기, 선택한 성별에 따라 버튼 누르게
+                registEmail.setText(email)
+                registPw.setText(pw)
+            }
+        }
+
+        // 로그인 버튼 클릭 시 다이얼로그 띄우기
         accountBinding.btnLogin.setOnClickListener {
-            activity?.finish()
+            activity?.let { it1 -> AlertExitDialog(it1).show() }
         }
 
         // 이메일 입력 유효 여부 확인
         accountBinding.registEmail.addTextChangedListener (object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-            }
-
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
                 // 이메일 입력 받기
                 email = s.toString().trim()
@@ -76,22 +82,19 @@ class CreateAccountFragment : Fragment() {
                     accountBinding.registEmail.setCompoundDrawablesWithIntrinsicBounds(null, null,
                         ContextCompat.getDrawable(requireContext(), R.drawable.ic_not), null)
                 }
-                // 다음 버튼 활성화 여부
-                updateNextButton()
+                // 상태 갱신
+                updateSelection()
             }
         })
 
         // 비밀번호 입력 유효 여부 확인
         accountBinding.registPw.addTextChangedListener (object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-            }
-
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
                 // 비밀번호 입력 받기
                 pw = s.toString().trim()
+
                 // 만약 유효하다면 체크 표시 띄워주기
                 if(isPwValid(pw)) {
                     accountBinding.errorPw.visibility = View.GONE
@@ -105,19 +108,15 @@ class CreateAccountFragment : Fragment() {
                     accountBinding.registPw.setCompoundDrawablesWithIntrinsicBounds(null, null,
                         ContextCompat.getDrawable(requireContext(), R.drawable.ic_not), null)
                 }
-                // 다음 버튼 활성화 여부
-                updateNextButton()
+                // 상태 갱신
+                updateSelection()
             }
         })
 
         // 비밀번호 일치 확인
         accountBinding.checkPw.addTextChangedListener (object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-            }
-
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
                 // 비밀번호 입력 받기
                 checkPw = s.toString().trim()
@@ -134,8 +133,8 @@ class CreateAccountFragment : Fragment() {
                     accountBinding.checkPw.setCompoundDrawablesWithIntrinsicBounds(null, null,
                         ContextCompat.getDrawable(requireContext(), R.drawable.ic_not), null)
                 }
-                // 다음 버튼 활성화 여부
-                updateNextButton()
+                // 상태 갱신
+                updateSelection()
             }
         })
 
@@ -157,23 +156,20 @@ class CreateAccountFragment : Fragment() {
     }
 
     // 이메일 유효 여부
-    private fun isEmailValid(email: String): Boolean {
-        return Patterns.EMAIL_ADDRESS.matcher(email).matches()
-    }
+    private fun isEmailValid(email: String): Boolean = Patterns.EMAIL_ADDRESS.matcher(email).matches()
 
     // 비밀번호 유효 여부
     private fun isPwValid(pw: String): Boolean {
+        // 특수 문자 정의
         val regex = Regex("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[.!@#$%])[A-Za-z\\d.!@#$%]{8,20}$")
         return regex.matches(pw)
     }
 
     // 비밀번호 일치 여부
-    private fun incorrectPw(pw: String, checkPw: String): Boolean {
-        return pw == checkPw
-    }
+    private fun incorrectPw(pw: String, checkPw: String): Boolean = pw == checkPw
 
-    // 버튼 상태 갱신 함수
-    private fun updateNextButton() {
+    // 작업 상태 갱신 & 값 저장 함수
+    private fun updateSelection() {
         // 다 유효한 상태일 떄만 버튼 활성화
         val allValid = isEmailValid(email) && isPwValid(pw) && incorrectPw(pw, checkPw)
         accountBinding.btnNext.isEnabled = allValid
@@ -182,10 +178,8 @@ class CreateAccountFragment : Fragment() {
         accountBinding.btnNext.setBackgroundTintList(
             ContextCompat.getColorStateList(
                 requireContext(),
-                if (allValid)
-                    R.color.elixir_orange
-                else
-                    R.color.elixir_gray
+                if (allValid) R.color.elixir_orange
+                else R.color.elixir_gray
             )
         )
     }
