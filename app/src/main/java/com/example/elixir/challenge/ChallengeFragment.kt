@@ -1,4 +1,4 @@
-package com.example.elixir
+package com.example.elixir.challenge
 
 import android.content.Context
 import android.os.Bundle
@@ -7,6 +7,7 @@ import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
+import com.example.elixir.R
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 
 // 챌린지 정보를 담는 데이터 클래스
@@ -16,6 +17,7 @@ data class ChallengeItem(
     val challengePeriod: String,          // 챌린지 기간
     val challengeGoal: String,            // 챌린지 목적
     val challengeDescription: String,     // 챌린지 설명
+    val challengeBadge: String,
     val stages: MutableList<StageItem>    // 챌린지에 속한 단계 리스트
 )
 
@@ -78,6 +80,7 @@ class ChallengeFragment : Fragment() {
                 challengePeriod = "2024.05.01 ~ 2024.05.31",
                 challengeGoal = "하루 2L 이상 물 마시기",
                 challengeDescription = "수분 섭취를 통해 신진대사 촉진 및 건강 증진을 목표로 합니다.",
+                challengeBadge = "봄나물 마스터",
                 stages = mutableListOf(
                     StageItem(2, 1, "2단계 유형 1", "설명", true),
                     StageItem(2, 2, "2단계 유형 2", "설명", true),
@@ -91,6 +94,7 @@ class ChallengeFragment : Fragment() {
                 challengePeriod = "2024.05.01 ~ 2024.05.31",
                 challengeGoal = "하루 2L 이상 물 마시기",
                 challengeDescription = "수분 섭취를 통해 신진대사 촉진 및 건강 증진을 목표로 합니다.",
+                challengeBadge = "봄나물 마스터",
                 stages = mutableListOf(
                     StageItem(3, 1, "3단계 유형 1", "설명", false),
                     StageItem(3, 2, "3단계 유형 2", "설명", false),
@@ -104,7 +108,8 @@ class ChallengeFragment : Fragment() {
 
         // Spinner에 챌린지 제목 목록 표시
         val challengeTitles = allChallenges.map { it.challengeTitle }
-        val spinnerAdapter = ArrayAdapter(requireContext(), R.layout.item_challenge_spinner, challengeTitles)
+        val spinnerAdapter = ArrayAdapter(requireContext(),
+            R.layout.item_challenge_spinner, challengeTitles)
         spinnerAdapter.setDropDownViewResource(R.layout.item_challenge_spinner_dropdown)
         challengeSpinner.adapter = spinnerAdapter
 
@@ -149,7 +154,7 @@ class ChallengeFragment : Fragment() {
         // 모든 스테이지 완료 시 다이얼로그 표시 (calculateCurrentStage 활용)
         val maxStage = challenge.stages.maxOfOrNull { it.stage } ?: 1
         if (currentStage > maxStage) {
-            showCompletionDialog(challenge.challengeTitle)
+            showCompletionDialog(challenge.challengeBadge)
         }
     }
 
@@ -166,19 +171,26 @@ class ChallengeFragment : Fragment() {
     }
 
     private fun showCompletionDialog(title: String) {
-        val prefs = requireContext().getSharedPreferences("dialog_prefs", Context.MODE_PRIVATE)
-        // 테스트 remove 함수 적용
-        prefs.edit().remove("completion_dialog_shown").apply()
-        val isDialogShown = prefs.getBoolean("completion_dialog_shown", false)
-        if (!isDialogShown) {
-            AlertDialog.Builder(requireContext())
-                .setTitle("챌린지 완료")
-                .setMessage("${challengeTitleText.text}를 모두 완료하셨습니다!")
-                .setPositiveButton("확인", null)
-                .show()
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_challenge_completed, null)
 
-            // 다이얼로그가 한 번 보여졌음을 저장
-            prefs.edit().putBoolean("completion_dialog_shown", true).apply()
+        val dialogTitle = dialogView.findViewById<TextView>(R.id.dialogTitle)
+        val dialogMessage = dialogView.findViewById<TextView>(R.id.dialogMessage)
+        val dialogImage = dialogView.findViewById<ImageView>(R.id.dialogImage)
+        val dialogButton = dialogView.findViewById<Button>(R.id.dialogButton)
+
+        dialogTitle.text = "챌린지 완료!"
+        dialogMessage.text = "'$title' 칭호 및 뱃지를 획득했습니다."
+        dialogImage.setImageResource(R.drawable.img_badge) // 원하는 이미지로 교체 가능
+
+        val alertDialog = android.app.AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .create()
+
+        dialogButton.setOnClickListener {
+            alertDialog.dismiss()
         }
+
+        alertDialog.show()
     }
+
 }

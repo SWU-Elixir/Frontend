@@ -9,6 +9,7 @@ import android.widget.AdapterView
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.Spinner
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -57,6 +58,9 @@ class RecipeFragment : Fragment() {
     private lateinit var typeSpinner: Spinner
 
     private lateinit var resetButton: Button
+    private lateinit var emptyRecipeText: TextView
+
+    private lateinit var sampleRecipes: List<RecipeItem>
 
     private lateinit var fab: FloatingActionButton
 
@@ -74,6 +78,7 @@ class RecipeFragment : Fragment() {
         methodSpinner = view.findViewById(R.id.spinner_difficulty)
         typeSpinner = view.findViewById(R.id.spinner_type)
         resetButton = view.findViewById(R.id.resetButton)
+        emptyRecipeText = view.findViewById(R.id.emptyRecipeText)
 
         fab = view.findViewById(R.id.fab)
 
@@ -103,6 +108,7 @@ class RecipeFragment : Fragment() {
                     methodSpinner.isSelected = false
                 }
                 updateResetButtonVisibility()
+                filterRecipes()
             }
 
             override fun onNothingSelected(parent: AdapterView<*>) {
@@ -125,6 +131,7 @@ class RecipeFragment : Fragment() {
                     typeSpinner.isSelected = false
                 }
                 updateResetButtonVisibility()
+                filterRecipes()
             }
 
             override fun onNothingSelected(parent: AdapterView<*>) {
@@ -141,86 +148,8 @@ class RecipeFragment : Fragment() {
 
 
 
-        // 더미 데이터 추가
-        val sampleRecipes = listOf(
-            RecipeItem(
-                recipeTitle = "블루베리 스무디",
-                categorySlowAging = "항산화 강화",
-                categoryType = "음료/차",
-                recipeIngredients = listOf("블루베리", "요거트", "꿀"),
-                recipeImageRes = R.drawable.png_recipe_sample,
-                isBookmarked = false,
-                timeHours = 0,
-                timeMinutes = 5,
-                difficulty = "쉬움",
-                isLiked = false,
-                likeCount = 23
-            ),
-            RecipeItem(
-                recipeTitle = "아보카도 샐러드볼",
-                categorySlowAging = "항산화 강화",
-                categoryType = "샐러드/무침",
-                recipeIngredients = listOf("아보카도", "방울토마토", "올리브오일", "레몬즙"),
-                recipeImageRes = R.drawable.png_recipe_sample,
-                isBookmarked = true,
-                timeHours = 0,
-                timeMinutes = 10,
-                difficulty = "보통",
-                isLiked = true,
-                likeCount = 57674
-            ),
-            RecipeItem(
-                recipeTitle = "간단한 토마토 올리브 오일 마리네이드",
-                categorySlowAging = "항산화 강화",
-                categoryType = "양념/소스/잼",
-                recipeIngredients = listOf("토마토", "올리브오일", "허브", "소금"),
-                recipeImageRes = R.drawable.png_recipe_sample,
-                isBookmarked = false,
-                timeHours = 0,
-                timeMinutes = 7,
-                difficulty = "쉬움",
-                isLiked = false,
-                likeCount = 999
-            ),
-            RecipeItem(
-                recipeTitle = "그린 스무디",
-                categorySlowAging = "항산화 강화",
-                categoryType = "음료/차",
-                recipeIngredients = listOf("케일", "바나나", "사과", "아몬드밀크"),
-                recipeImageRes = R.drawable.png_recipe_sample,
-                isBookmarked = false,
-                timeHours = 0,
-                timeMinutes = 3,
-                difficulty = "쉬움",
-                isLiked = true,
-                likeCount = 1200
-            ),
-            RecipeItem(
-                recipeTitle = "견과류 에너지볼",
-                categorySlowAging = "항산화 강화",
-                categoryType = "디저트/간식",
-                recipeIngredients = listOf("아몬드", "대추야자", "카카오닙스"),
-                recipeImageRes = R.drawable.png_recipe_sample,
-                isBookmarked = true,
-                timeHours = 0,
-                timeMinutes = 8,
-                difficulty = "보통",
-                isLiked = true,
-                likeCount = 5534
-            ),
-            RecipeItem(
-                recipeTitle = "그릭요거트 베리볼",
-                categorySlowAging = "항산화 강화",
-                categoryType = "디저트/간식",
-                recipeIngredients = listOf("그릭요거트", "블루베리", "라즈베리"),
-                isBookmarked = false,
-                timeHours = 0,
-                timeMinutes = 2,
-                difficulty = "쉬움",
-                isLiked = false,
-                likeCount = 9
-            )
-        )
+        // 더미 데이터 초기화
+        sampleRecipes = getDummyRecipeData()
 
         val sampleRecommendationRecipes = listOf(
                 RecommendationRecipeItem(
@@ -290,19 +219,32 @@ class RecipeFragment : Fragment() {
             transaction.commit()
         }
 
-//        // ViewPager 아이템 클릭 이벤트 처리
-//        recommendationViewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-//            override fun onPageSelected(position: Int) {
-//                super.onPageSelected(position)
-//                val selectedRecipe = sampleRecipes[position]
-//                Log.d("RecipeFragment", "선택된 레시피 이름: ${selectedRecipe.recipeTitle}")
-//                // 여기에 상세 화면 이동 또는 다른 동작 추가 가능
-//            }
-//        })
-
         return view
 
 
+    }
+    /**
+     * 필터 조건에 따라 레시피 리스트 필터링
+     */
+    private fun filterRecipes() {
+        val selectedMethod = methodSpinner.selectedItem?.toString()
+        val selectedType = typeSpinner.selectedItem?.toString()
+
+        val filtered = sampleRecipes.filter { recipe ->
+            val methodMatch = selectedMethod == "저속노화" || recipe.categorySlowAging == selectedMethod
+            val typeMatch = selectedType == "종류" || recipe.categoryType == selectedType
+            methodMatch && typeMatch
+        }
+
+        recipeListAdapter.updateData(filtered)
+
+        if (filtered.isEmpty()) {
+            recipeListView.visibility = View.GONE
+            emptyRecipeText.visibility = View.VISIBLE
+        } else {
+            recipeListView.visibility = View.VISIBLE
+            emptyRecipeText.visibility = View.GONE
+        }
     }
 
     private fun resetSpinners() {
@@ -311,8 +253,85 @@ class RecipeFragment : Fragment() {
 
         // typeSpinner를 첫 번째 아이템으로 설정
         typeSpinner.setSelection(0)
-
-        // 필요하다면 다른 스피너들에 대해서도 동일한 작업을 수행
     }
-
+    private fun getDummyRecipeData(): List<RecipeItem> =
+        listOf(
+            RecipeItem(
+                recipeTitle = "블루베리 스무디",
+                categorySlowAging = "항산화 강화",
+                categoryType = "음료/차",
+                recipeIngredients = listOf("블루베리", "요거트", "꿀"),
+                recipeImageRes = R.drawable.png_recipe_sample,
+                isBookmarked = false,
+                timeHours = 0,
+                timeMinutes = 5,
+                difficulty = "쉬움",
+                isLiked = false,
+                likeCount = 23
+            ),
+            RecipeItem(
+                recipeTitle = "아보카도 샐러드볼",
+                categorySlowAging = "항산화 강화",
+                categoryType = "샐러드/무침",
+                recipeIngredients = listOf("아보카도", "방울토마토", "올리브오일", "레몬즙"),
+                recipeImageRes = R.drawable.png_recipe_sample,
+                isBookmarked = true,
+                timeHours = 0,
+                timeMinutes = 10,
+                difficulty = "보통",
+                isLiked = true,
+                likeCount = 57674
+            ),
+            RecipeItem(
+                recipeTitle = "간단한 토마토 올리브 오일 마리네이드",
+                categorySlowAging = "항산화 강화",
+                categoryType = "양념/소스/잼",
+                recipeIngredients = listOf("토마토", "올리브오일", "허브", "소금"),
+                recipeImageRes = R.drawable.png_recipe_sample,
+                isBookmarked = false,
+                timeHours = 0,
+                timeMinutes = 7,
+                difficulty = "쉬움",
+                isLiked = false,
+                likeCount = 999
+            ),
+            RecipeItem(
+                recipeTitle = "그린 스무디",
+                categorySlowAging = "염증 감소",
+                categoryType = "음료/차",
+                recipeIngredients = listOf("케일", "바나나", "사과", "아몬드밀크"),
+                recipeImageRes = R.drawable.png_recipe_sample,
+                isBookmarked = false,
+                timeHours = 0,
+                timeMinutes = 3,
+                difficulty = "쉬움",
+                isLiked = true,
+                likeCount = 1200
+            ),
+            RecipeItem(
+                recipeTitle = "견과류 에너지볼",
+                categorySlowAging = "항산화 강화",
+                categoryType = "디저트/간식",
+                recipeIngredients = listOf("아몬드", "대추야자", "카카오닙스"),
+                recipeImageRes = R.drawable.png_recipe_sample,
+                isBookmarked = true,
+                timeHours = 0,
+                timeMinutes = 8,
+                difficulty = "보통",
+                isLiked = true,
+                likeCount = 5534
+            ),
+            RecipeItem(
+                recipeTitle = "그릭요거트 베리볼",
+                categorySlowAging = "항산화 강화",
+                categoryType = "디저트/간식",
+                recipeIngredients = listOf("그릭요거트", "블루베리", "라즈베리"),
+                isBookmarked = false,
+                timeHours = 0,
+                timeMinutes = 2,
+                difficulty = "쉬움",
+                isLiked = false,
+                likeCount = 9
+            )
+        )
 }

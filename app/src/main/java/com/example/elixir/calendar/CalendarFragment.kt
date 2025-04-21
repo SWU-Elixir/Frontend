@@ -34,7 +34,7 @@ class CalendarFragment : Fragment() {
 
     // UI 컴포넌트 선언
     private lateinit var eventListView: ListView
-    private lateinit var eventAdapter: DietLogAdapter
+    private lateinit var eventAdapter: MealListAdapter
     private lateinit var emptyMealText: TextView
     private lateinit var calendarView: MaterialCalendarView
     private lateinit var fab: FloatingActionButton
@@ -56,7 +56,7 @@ class CalendarFragment : Fragment() {
         // 리스트뷰 설정
         eventListView = view.findViewById(R.id.mealPlanList)
         emptyMealText = view.findViewById(R.id.emptyMealText)
-        eventAdapter = DietLogAdapter(requireContext(), mutableListOf()) { item ->
+        eventAdapter = MealListAdapter(requireContext(), mutableListOf()) { item ->
             onDietLogClick(item)
         }
         eventListView.adapter = eventAdapter

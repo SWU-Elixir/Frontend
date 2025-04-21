@@ -54,6 +54,21 @@
                     android:paddingStart="8dp"
                     android:textSize="14sp" />
 
+                <ImageButton
+                    android:id="@+id/clearButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_delete"
+                    android:adjustViewBounds="true"
+                    android:background="@android:color/transparent"
+                    android:maxWidth="40dp"
+                    android:maxHeight="40dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:scaleType="fitCenter"
+                    android:visibility="gone"
+                    tools:ignore="ContentDescription, SpeakableTextPresentCheck" />
+
                 <!-- 검색 아이콘 -->
                 <ImageButton
                     android:id="@+id/searchButton"
@@ -65,8 +80,10 @@
                     android:maxWidth="40dp"
                     android:maxHeight="40dp"
                     android:paddingTop="8dp"
+                    android:layout_marginStart="3dp"
                     android:paddingBottom="8dp"
                     android:scaleType="fitCenter"
+                    app:tint="@color/elixir_gray"
                     tools:ignore="ContentDescription, SpeakableTextPresentCheck" />
             </LinearLayout>
         </LinearLayout>

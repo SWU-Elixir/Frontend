@@ -13,7 +13,7 @@ import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 
-class DietLogAdapter(
+class MealListAdapter(
     private val context: Context,
     private var data: MutableList<DietLogItem>,
     private val onItemClick: (DietLogItem) -> Unit
@@ -62,7 +62,7 @@ class DietLogAdapter(
 
         // 재료 목록 RecyclerView 설정
         holder.dietIngredientList.layoutManager = FlexboxLayoutManager(context)
-        holder.dietIngredientList.adapter = DietLogIngredientAdapter(item.dietIngredients)
+        holder.dietIngredientList.adapter = MealListIngredientAdapter(item.dietIngredients)
 
         val layoutManager: FlexboxLayoutManager = FlexboxLayoutManager(context)
         layoutManager.setFlexDirection(FlexDirection.COLUMN)

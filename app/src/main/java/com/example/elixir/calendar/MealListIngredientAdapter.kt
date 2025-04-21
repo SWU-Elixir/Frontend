@@ -7,8 +7,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.elixir.R
 
-class DietLogIngredientAdapter(private val ingredients: List<String>) :
-    RecyclerView.Adapter<DietLogIngredientAdapter.IngredientViewHolder>() {
+class MealListIngredientAdapter(private val ingredients: List<String>) :
+    RecyclerView.Adapter<MealListIngredientAdapter.IngredientViewHolder>() {
 
     inner class IngredientViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val ingredientTextView: TextView = itemView.findViewById(R.id.indeterminateName)

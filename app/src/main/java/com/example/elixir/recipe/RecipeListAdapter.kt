@@ -14,7 +14,7 @@ import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 
 class RecipeListAdapter(
-    private val recipeList: List<RecipeItem>,
+    private var recipeList: List<RecipeItem>,
     private val onBookmarkClick: (RecipeItem) -> Unit,
     private val onHeartClick: (RecipeItem) -> Unit
 ) : RecyclerView.Adapter<RecipeListAdapter.RecipeViewHolder>() {
@@ -32,7 +32,6 @@ class RecipeListAdapter(
 
         val pictureRes = item.recipeImageRes ?: R.drawable.ic_recipe_white
         holder.recipeImage.setImageResource(pictureRes)
-
         holder.recipeTitle.text = item.recipeTitle
 
         holder.ingredientRecyclerView.apply {
@@ -70,16 +69,19 @@ class RecipeListAdapter(
 
         holder.itemView.setOnClickListener {
             Log.d("RecipeAdapter", "아이템 클릭됨: ${item.recipeTitle}")
-            // 필요시 클릭 시 동작 추가 가능
         }
     }
 
-    // 숫자를 3자리로 포맷 (예: 1.2k, 15k, 999, 1M 등)
+    fun updateData(newList: List<RecipeItem>) {
+        recipeList = newList
+        notifyDataSetChanged()
+    }
+
     private fun formatCount(value: Double, suffix: String): String {
         val formatted = if (value < 10) {
-            String.format("%.1f", value) // 1.2k
+            String.format("%.1f", value) // e.g. 1.2k
         } else {
-            value.toInt().toString()     // 15k
+            value.toInt().toString()     // e.g. 15k
         }
         return formatted.removeSuffix(".0") + suffix
     }
