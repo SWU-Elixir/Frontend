@@ -16,7 +16,7 @@ class MealListIngredientAdapter(private val ingredients: List<String>) :
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): IngredientViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_dietlog_list_indeterminate, parent, false)
+            .inflate(R.layout.item_meal_list_indeterminate, parent, false)
         return IngredientViewHolder(view)
     }
 

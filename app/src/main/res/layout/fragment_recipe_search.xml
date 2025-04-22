@@ -104,7 +104,7 @@
             android:clipToPadding="false"
             android:orientation="horizontal"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            tools:listitem="@layout/item_dietlog_list_indeterminate"/>
+            tools:listitem="@layout/item_meal_list_indeterminate"/>
 
         <!-- 추천 검색어 -->
         <TextView

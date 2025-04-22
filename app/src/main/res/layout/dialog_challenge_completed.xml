@@ -7,7 +7,7 @@
     android:paddingLeft="16dp"
     android:orientation="vertical"
     android:gravity="center"
-    android:background="@drawable/bg_dietlog_picture">
+    android:background="@drawable/bg_meal_picture">
 
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/lottieAnimation"

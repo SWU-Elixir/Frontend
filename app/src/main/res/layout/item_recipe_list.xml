@@ -19,7 +19,7 @@
             android:id="@+id/recipePicture"
             android:layout_width="135dp"
             android:layout_height="135dp"
-            android:background="@drawable/bg_dietlog_picture"
+            android:background="@drawable/bg_meal_picture"
             android:src="@color/elixir_gray"
             android:scaleType="centerCrop"
             android:clipToOutline="true"

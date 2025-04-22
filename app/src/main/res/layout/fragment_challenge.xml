@@ -20,7 +20,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="500dp"
+            android:layout_marginBottom="200dp"
             android:orientation="vertical"
             android:padding="16dp">
             <Spinner
@@ -33,7 +33,7 @@
                 android:id="@+id/challengeImage"
                 android:layout_width="match_parent"
                 android:layout_height="400dp"
-                android:background="@drawable/bg_dietlog_picture"
+                android:background="@drawable/bg_meal_picture"
                 android:src="@drawable/png_challenge_1"
                 android:scaleType="centerCrop"
                 android:clipToOutline="true"
@@ -57,6 +57,16 @@
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_bold"/>
             <TextView
+                android:id="@+id/challengeSub1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:text="챌린지 목적 제목"
+                android:textSize="18sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/pretendard_bold"/>
+            <TextView
                 android:id="@+id/challengeGoalText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -67,6 +77,15 @@
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_regular"/>
             <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:text="🍀 챌린지는 이렇게 진행됩니다!"
+                android:textSize="18sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/pretendard_bold"/>
+            <TextView
                 android:id="@+id/challengeDescriptionText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -76,6 +95,16 @@
                 android:textSize="16sp"
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_regular"/>
+            <TextView
+                android:id="@+id/challengeSub2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:text="챌린지는 이렇게 진행됩니다!"
+                android:textSize="18sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/pretendard_bold"/>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
@@ -91,7 +120,7 @@
         app:behavior_peekHeight="140dp"
         app:behavior_expandedOffset="15dp"
         app:behavior_fitToContents="false"
-        app:behavior_halfExpandedRatio="0.5"
+        app:behavior_halfExpandedRatio="0.365"
         app:cardCornerRadius="16dp">
 
         <LinearLayout

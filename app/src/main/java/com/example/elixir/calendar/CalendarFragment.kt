@@ -20,32 +20,30 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.prolificinteractive.materialcalendarview.*
 import com.prolificinteractive.materialcalendarview.format.TitleFormatter
 import com.prolificinteractive.materialcalendarview.format.WeekDayFormatter
+import java.math.BigInteger
 
 // 식단 아이템 데이터 클래스
-data class DietLogItem(
-    val dietTimes: String,
-    val dietName: String,
-    val dietIngredients: List<String>,
-    val dietScore: Int,
-    val dietImageRes: Int? = null
-)
+// 각 식사 시간, 식단명, 재료, 점수, 이미지 리소스를 포함
+// 점수는 1~5로, 시각화 시 점 색상 구분에 사용
 
+
+// ----------------------------- 프래그먼트 -------------------------------------
 class CalendarFragment : Fragment() {
 
     // UI 컴포넌트 선언
-    private lateinit var eventListView: ListView
-    private lateinit var eventAdapter: MealListAdapter
+    private lateinit var mealListView: ListView
+    private lateinit var mealAdapter: MealListAdapter
     private lateinit var emptyMealText: TextView
     private lateinit var calendarView: MaterialCalendarView
     private lateinit var fab: FloatingActionButton
 
     // 날짜 관련 변수
-    private val eventMap = mutableMapOf<String, MutableList<DietLogItem>>()
+    private val eventMap = mutableMapOf<String, MutableList<MealPlanData>>()
     private var selectedCalendarDay: CalendarDay = CalendarDay.today()
     private var selectedTextDecorator: SelectedDateTextColorDecorator? = null
     private var todayTextDecorator: TodayTextColorDecorator? = null
     private val today = CalendarDay.today()
-    private var isFirstLaunch = true // 첫 실행 여부 확인용 플래그
+    private var isFirstLaunch = true
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -53,42 +51,38 @@ class CalendarFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_calendar, container, false)
 
-        // 리스트뷰 설정
-        eventListView = view.findViewById(R.id.mealPlanList)
+        // -------------------- 리스트뷰 설정 --------------------
+        mealListView = view.findViewById(R.id.mealPlanList)
         emptyMealText = view.findViewById(R.id.emptyMealText)
-        eventAdapter = MealListAdapter(requireContext(), mutableListOf()) { item ->
+        mealAdapter = MealListAdapter(requireContext(), mutableListOf()) { item ->
             onDietLogClick(item)
         }
-        eventListView.adapter = eventAdapter
+        mealListView.adapter = mealAdapter
+        addDummyEvents() // 더미 데이터 세팅
 
-        // 샘플 데이터 추가
-        addDummyEvents()
-
-        // 캘린더 뷰 설정
+        // -------------------- 캘린더 설정 ----------------------
         calendarView = view.findViewById(R.id.calendarView)
         calendarView.setWeekDayFormatter(CustomWeekDayFormatter(requireContext()))
         calendarView.setTitleFormatter(CustomTitleFormatter(requireContext()))
 
-        // 오늘 날짜 데코레이터 (배경 원)
+        // 오늘 날짜 배경 원 데코레이터
         try {
-            val todayDrawable = ContextCompat.getDrawable(requireContext(),
-                R.drawable.bg_calendar_circletoday
-            )
+            val todayDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.bg_calendar_circletoday)
             todayDrawable?.let {
                 calendarView.addDecorator(CalendarTodayDecorator(requireContext(), it))
             }
         } catch (e: Exception) {
-            Log.e("CalendarFragment", "오늘 날짜 배경 설정 오류: \${e.message}")
+            Log.e("CalendarFragment", "오늘 날짜 배경 설정 오류: ${e.message}")
         }
 
-        // 플로팅 액션 버튼 및 바텀시트 설정
+        // ----------------- FAB 및 바텀시트 ---------------------
         val bottomSheet = view.findViewById<CardView>(R.id.bottomSheet)
         val behavior = BottomSheetBehavior.from(bottomSheet)
         fab = view.findViewById(R.id.fab)
         fab.hide()
         var bottomSheetState = BottomSheetBehavior.STATE_COLLAPSED
 
-        // 오늘 날짜를 기본 선택으로 설정
+        // 오늘 날짜 기본 선택 및 점수 데코레이터 처리
         selectedCalendarDay = today
         updateEventList(selectedCalendarDay.toString())
         updateSelectedDateDecorator()
@@ -109,7 +103,7 @@ class CalendarFragment : Fragment() {
             Log.d("CalendarFragment", "FAB 클릭됨")
         }
 
-        // 바텀시트 콜백
+        // 바텀시트 상태 변화 시 FAB 제어
         behavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 bottomSheetState = newState
@@ -121,73 +115,64 @@ class CalendarFragment : Fragment() {
         return view
     }
 
-    // 선택된 날짜 데코레이터 갱신 함수
+    // ------------------------ 데코레이터 ---------------------------
+
+    // 선택된 날짜의 텍스트 색상 변경 데코레이터
     private fun updateSelectedDateDecorator() {
         selectedTextDecorator?.let { calendarView.removeDecorator(it) }
         todayTextDecorator?.let { calendarView.removeDecorator(it) }
 
-        val textColor = if (selectedCalendarDay == today) {
-            ContextCompat.getColor(requireContext(), R.color.white)
-        } else {
-            ContextCompat.getColor(requireContext(), R.color.white)
-        }
-
+        val textColor = ContextCompat.getColor(requireContext(), R.color.white)
         selectedTextDecorator = SelectedDateTextColorDecorator(selectedCalendarDay, textColor)
         calendarView.addDecorator(selectedTextDecorator!!)
 
-        // 선택된 날짜가 오늘이 아닌 경우 오렌지 텍스트 다시 표시
         if (selectedCalendarDay != today || isFirstLaunch) {
             val orangeColor = ContextCompat.getColor(requireContext(), R.color.elixir_orange)
             todayTextDecorator = TodayTextColorDecorator(today, orangeColor)
             calendarView.addDecorator(todayTextDecorator!!)
         }
-
         isFirstLaunch = false
     }
 
-    // 선택된 날짜의 텍스트 색 변경
-    class SelectedDateTextColorDecorator(
-        private val selectedDay: CalendarDay,
-        private val color: Int
-    ) : DayViewDecorator {
-        override fun shouldDecorate(day: CalendarDay): Boolean = day == selectedDay
-        override fun decorate(view: DayViewFacade) {
-            view.addSpan(ForegroundColorSpan(color))
-        }
-    }
-
-    // 오늘 날짜만 오렌지 텍스트로 표시
-    class TodayTextColorDecorator(
-        private val day: CalendarDay,
-        private val color: Int
-    ) : DayViewDecorator {
+    // 오늘 날짜 텍스트 색상 (오렌지)
+    class TodayTextColorDecorator(private val day: CalendarDay, private val color: Int) : DayViewDecorator {
         override fun shouldDecorate(date: CalendarDay): Boolean = date == day
         override fun decorate(view: DayViewFacade) {
             view.addSpan(ForegroundColorSpan(color))
         }
     }
 
-    // 요일 커스텀 포매터
+    // 선택 날짜 텍스트 색상 (흰색)
+    class SelectedDateTextColorDecorator(private val selectedDay: CalendarDay, private val color: Int) : DayViewDecorator {
+        override fun shouldDecorate(day: CalendarDay): Boolean = day == selectedDay
+        override fun decorate(view: DayViewFacade) {
+            view.addSpan(ForegroundColorSpan(color))
+        }
+    }
+
+    // ------------------------ 커스텀 포매터 ---------------------------
+
+    // 요일 표시 한글화
     class CustomWeekDayFormatter(context: Context) : WeekDayFormatter {
         private val weekdays = context.resources.getStringArray(R.array.custom_weekdays)
         override fun format(dayOfWeek: Int): CharSequence = weekdays[(dayOfWeek - 1) % 7]
     }
 
-    // 월 커스텀 포매터
+    // 월 표시 한글화
     class CustomTitleFormatter(context: Context) : TitleFormatter {
         private val months = context.resources.getStringArray(R.array.custom_months)
-        override fun format(day: CalendarDay): CharSequence {
-            return "${day.year}.${months[day.month]}"
-        }
+        override fun format(day: CalendarDay): CharSequence = "${day.year}.${months[day.month]}"
     }
 
-    // 점수별 데코레이터 (점 색상)
+    // ------------------------ 데코레이터 (점 표시) ---------------------------
+
+    // 점수 기반 색상 점 데코레이터 적용
     private fun processDietLogScores(calendarView: MaterialCalendarView) {
         val dotMap = mutableMapOf<CalendarDay, MutableList<Int>>()
         eventMap.forEach { (dateStr, items) ->
             val (year, month, day) = dateStr.split("-").map { it.toInt() }
             val calendarDay = CalendarDay.from(year, month - 1, day)
-            val colors = items.map { getColorByScore(it.dietScore) }
+            val colors = items.map { getColorByScore(it.score) }
             dotMap[calendarDay] = colors.toMutableList()
         }
         dotMap.forEach { (day, colors) ->
@@ -196,7 +181,7 @@ class CalendarFragment : Fragment() {
         }
     }
 
-    // 점수에 따라 색상 반환
+    // 점수에 따라 점 색상 반환
     private fun getColorByScore(score: Int) = when (score) {
         5 -> Color.parseColor("#E738F4")
         4 -> Color.parseColor("#38F4F4")
@@ -205,41 +190,8 @@ class CalendarFragment : Fragment() {
         1 -> Color.parseColor("#FD5050")
         else -> Color.GRAY
     }
- 
-    // 더미 이벤트 추가
-    private fun addDummyEvents() {
-        eventMap["2025-03-29"] = mutableListOf(
-            DietLogItem("아침", "흑임자 연근샐러드", listOf("연근", "흑임자", "식초", "깨"), 5, R.drawable.png_recipe_sample),
-            DietLogItem("점심", "김치찌개", listOf("김치", "돼지고기", "두부"), 4),
-            DietLogItem("저녁", "스테이크", listOf("소고기", "감자", "아스파라거스"), 3)
-        )
-        eventMap["2025-03-30"] = mutableListOf(
-            DietLogItem("아침", "토스트", listOf("빵이좋아좋아", "계란", "딸기잼"), 2),
-            DietLogItem("점심", "된장찌개", listOf("된장", "두부", "애호박"), 1),
-            DietLogItem("저녁", "샐러드", listOf("양상추", "토마토", "닭가슴살"), 5),
-            DietLogItem("간식", "샐러드", listOf("양상추", "토마토", "닭가슴살"), 5)
-        )
-    }
 
-    // 선택된 날짜의 식단 업데이트
-    private fun updateEventList(selectedDate: String) {
-        val events = eventMap[selectedDate]
-        if (events.isNullOrEmpty()) {
-            eventListView.visibility = View.GONE
-            emptyMealText.visibility = View.VISIBLE
-        } else {
-            eventListView.visibility = View.VISIBLE
-            emptyMealText.visibility = View.GONE
-            eventAdapter.updateData(events)
-        }
-    }
-
-    // 식단 클릭 이벤트
-    private fun onDietLogClick(item: DietLogItem) {
-        Log.d("CalendarFragment", "클릭된 식단: \${item.dietName} - \${item.dietTimes} - \${item.dietIngredients}")
-    }
-
-    // 여러 색상 점 데코레이터
+    // 점 1개 이상 있는 날짜에 여러 점 표시
     class MultipleDotDecorator(private val colors: List<Int>, private val date: CalendarDay, private val textColor: Int) : DayViewDecorator {
         override fun shouldDecorate(day: CalendarDay): Boolean = day == date
         override fun decorate(view: DayViewFacade) {
@@ -248,7 +200,7 @@ class CalendarFragment : Fragment() {
         }
     }
 
-    // 점을 그리는 커스텀 Span
+    // 점을 그리는 커스텀 span 클래스
     class CustomDotSpan(private val colors: List<Int>) : LineBackgroundSpan {
         private val radius = 5f
         private val verticalSpacing = 12f
@@ -275,4 +227,96 @@ class CalendarFragment : Fragment() {
             }
         }
     }
+
+    // ------------------------ 이벤트 처리 ---------------------------
+
+    // 날짜에 따른 식단 표시 업데이트
+    private fun updateEventList(selectedDate: String) {
+        val events = eventMap[selectedDate]
+        if (events.isNullOrEmpty()) {
+            mealListView.visibility = View.GONE
+            emptyMealText.visibility = View.VISIBLE
+        } else {
+            mealListView.visibility = View.VISIBLE
+            emptyMealText.visibility = View.GONE
+            mealAdapter.updateData(events)
+        }
+    }
+
+    // 식단 클릭 시 동작
+    private fun onDietLogClick(item: MealPlanData) {
+        Log.d("CalendarFragment", "클릭된 식단: ${item.name} - ${item.mealtimes} - ${item.mealPlanIngredients}")
+    }
+
+    // ------------------------ 더미 데이터 ---------------------------
+
+    // 샘플 식단 데이터 추가
+    private fun addDummyEvents() {
+        eventMap["2025-03-29"] = mutableListOf(
+            MealPlanData(
+                id = BigInteger("1001"),
+                memberId = BigInteger("1"),
+                name = "연어 아보카도 샐러드",
+                imageUrl = R.drawable.png_recipe_sample,
+                createdAt = "2025-03-29",
+                mealtimes = "아침",
+                score = 5,
+                mealPlanIngredients = listOf("연어", "아보카도", "올리브유", "잣")
+            ),
+            MealPlanData(
+                id = BigInteger("1002"),
+                memberId = BigInteger("1"),
+                name = "렌틸콩 채소 수프",
+                imageUrl = null,
+                createdAt = "2025-03-29",
+                mealtimes = "점심",
+                score = 4,
+                mealPlanIngredients = listOf("렌틸콩", "당근", "셀러리", "양파")
+            ),
+            MealPlanData(
+                id = BigInteger("1003"),
+                memberId = BigInteger("1"),
+                name = "두부 채소 볶음",
+                imageUrl = null,
+                createdAt = "2025-03-29",
+                mealtimes = "저녁",
+                score = 3,
+                mealPlanIngredients = listOf("두부", "브로콜리", "마늘", "참기름")
+            )
+        )
+
+        eventMap["2025-03-30"] = mutableListOf(
+            MealPlanData(
+                id = BigInteger("1004"),
+                memberId = BigInteger("1"),
+                name = "귀리 베리볼",
+                imageUrl = null,
+                createdAt = "2025-03-30",
+                mealtimes = "아침",
+                score = 5,
+                mealPlanIngredients = listOf("귀리", "블루베리", "요거트", "아몬드")
+            ),
+            MealPlanData(
+                id = BigInteger("1005"),
+                memberId = BigInteger("1"),
+                name = "퀴노아 보울",
+                imageUrl = R.drawable.png_recipe_sample,
+                createdAt = "2025-03-30",
+                mealtimes = "점심",
+                score = 4,
+                mealPlanIngredients = listOf("퀴노아", "아보카도", "병아리콩", "시금치")
+            ),
+            MealPlanData(
+                id = BigInteger("1006"),
+                memberId = BigInteger("1"),
+                name = "베리 스무디",
+                imageUrl = null,
+                createdAt = "2025-03-30",
+                mealtimes = "간식",
+                score = 5,
+                mealPlanIngredients = listOf("딸기", "블루베리", "바나나", "아몬드밀크")
+            )
+        )
+    }
+
 }

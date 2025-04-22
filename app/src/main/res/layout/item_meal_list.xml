@@ -17,7 +17,7 @@
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:layout_gravity="center"
-            android:background="@drawable/bg_dietlog_picture"
+            android:background="@drawable/bg_meal_picture"
             android:src="@color/elixir_gray"
             android:scaleType="centerCrop"
             android:clipToOutline="true"
@@ -55,7 +55,7 @@
                 android:clipToPadding="false"
                 android:orientation="horizontal"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:listitem="@layout/item_dietlog_list_indeterminate"/>
+                tools:listitem="@layout/item_meal_list_indeterminate"/>
 
 
         </LinearLayout>
@@ -64,7 +64,7 @@
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:layout_gravity="center"
-            android:src="@drawable/ic_dietlog_number1"
+            android:src="@drawable/ic_meal_number1"
             tools:ignore="ContentDescription" />
 
     </LinearLayout>

@@ -16,11 +16,11 @@ class ChallengeStageListAdapter(
 ) : BaseAdapter() {
 
     override fun getCount(): Int {
-        return stageList.count { it.stage <= currentStage }
+        return stageList.count { it.stepNumber <= currentStage }
     }
 
     override fun getItem(position: Int): StageItem {
-        val filtered = stageList.filter { it.stage <= currentStage }
+        val filtered = stageList.filter { it.stepNumber <= currentStage }
         return filtered[position]
     }
 
@@ -41,15 +41,24 @@ class ChallengeStageListAdapter(
 
         val item = getItem(position)
 
-        holder.challengeStage.text = item.typeName
-        holder.challengeMission.text = item.description
-        holder.challengeIcon.setImageResource(R.drawable.ic_dietlog_lunch)
+        holder.challengeStage.text = "${item.stepNumber}단계"
+        holder.challengeMission.text = item.stepName
+
+        val iconRes = when (item.stepType) {
+            "Meal_Record" -> R.drawable.ic_challenge_meal_record
+            "Meal_Time" -> R.drawable.ic_challenge_meal_time
+            "Recipe_Upload" -> R.drawable.ic_challenge_recipe_upload
+            "Other" -> R.drawable.ic_challenge_other
+            else -> R.drawable.ic_challenge_other // 기본 아이콘
+        }
+        holder.challengeIcon.setImageResource(iconRes)
+
 
         // 이전 단계는 50% 투명도 처리
-        view.alpha = if (item.stage < currentStage) 0.5f else 1.0f
+        view.alpha = if (item.stepNumber < currentStage) 0.5f else 1.0f
 
         // 클리어된 아이템이면 투명하게 처리
-        view.alpha = if (item.isCleared) 0.5f else 1.0f
+        view.alpha = if (item.isComplete) 0.5f else 1.0f
 
         return view
     }

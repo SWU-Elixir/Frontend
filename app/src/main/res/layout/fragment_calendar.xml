@@ -98,7 +98,7 @@
         android:translationZ="8dp"
         android:elevation="8dp"
         android:visibility="gone"
-        android:src="@drawable/ic_dietlog_write"
+        android:src="@drawable/ic_write"
         app:tint="@color/white"
         app:backgroundTint="@color/elixir_orange" />
 

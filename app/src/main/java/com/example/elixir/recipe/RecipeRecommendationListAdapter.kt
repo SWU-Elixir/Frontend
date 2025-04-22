@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.elixir.R
 
 class RecipeRecommendationListAdapter(
-    private val recipeList: List<RecommendationRecipeItem>
+    private val recipeList: List<RecipeData>
 ) : RecyclerView.Adapter<RecipeRecommendationListAdapter.RecipeViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecipeViewHolder {
@@ -25,7 +25,7 @@ class RecipeRecommendationListAdapter(
         val recipe = recipeList[position]
 
         // 레시피 제목 설정
-        holder.recipeTitle.text = recipe.recipeTitle
+        holder.recipeTitle.text = recipe.title
 
         // 이미지 설정 (더미 이미지 사용 가능)
         holder.recipeImage.setImageResource(R.drawable.png_recipe_sample)
@@ -35,7 +35,7 @@ class RecipeRecommendationListAdapter(
             if (layoutManager == null) {
                 layoutManager = LinearLayoutManager(holder.itemView.context, LinearLayoutManager.HORIZONTAL, false)
             }
-            adapter = RecipeIngredientAdapter(recipe.recipeIngredients)
+            adapter = RecipeIngredientAdapter(recipe.ingredients)
         }
 
         // 북마크 상태에 따라 버튼 이미지 설정
@@ -56,7 +56,7 @@ class RecipeRecommendationListAdapter(
         }
 
         holder.itemView.setOnClickListener {
-            Log.d("RecipeAdapter", "아이템 클릭됨: ${recipe.recipeTitle}")
+            Log.d("RecipeAdapter", "아이템 클릭됨: ${recipe.title}")
             // 필요시 클릭 시 동작 추가 가능
         }
     }
