@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
+import com.example.elixir.HomeActivity
 import com.example.elixir.R
 import com.example.elixir.signup.RetrofitClient
 import com.example.elixir.ToolbarActivity
@@ -42,13 +43,12 @@ class LoginActivity : AppCompatActivity() {
 
             //login(email, password)
 
-            // 로그인 성공 시
+            // 로그인 성공 시 현재 액티비티를 종료하고 홈 액티비티를 실행
             if (checkLogin(email, password)) {
                 Toast.makeText(this, "로그인 성공!", Toast.LENGTH_SHORT).show()
-
-                /* CalenderActivity로 이동
-                startActivity(Intent(this, CalendarActivity::class.java))
-                finish()*/
+                val intent = Intent(this, HomeActivity::class.java)
+                startActivity(intent)
+                finish()
             }
 
             else {
