@@ -27,7 +27,7 @@
     </style>
 
     <!-- 칩 커스텀 -->
-    <style name="ChipStyle" parent="Widget.MaterialComponents.Chip.Choice">
+    <style name="ChipStyle_Short" parent="Widget.MaterialComponents.Chip.Choice">
         <item name="chipBackgroundColor">@color/selector_btn_bg</item>
         <item name="chipStrokeColor">@color/selector_btn_stroke</item>
         <item name="chipStrokeWidth">1dp</item>
@@ -36,6 +36,20 @@
         <item name="android:textAppearance">@style/CustomChipText</item>
         <item name="android:paddingHorizontal" tools:targetApi="o">10dp</item>
         <item name="android:paddingVertical" tools:targetApi="o">5dp</item>
+        <item name="rippleColor">@color/elixir_orange</item>
+    </style>
+
+    <style name="ChipStyle_Long" parent="Widget.MaterialComponents.Chip.Choice">
+        <item name="chipBackgroundColor">@color/selector_btn_bg</item>
+        <item name="chipStrokeColor">@color/selector_btn_stroke</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="chipCornerRadius">10dp</item>
+        <item name="android:textColor">@color/selector_btn_text</item>
+        <item name="android:textAppearance">@style/CustomChipText</item>
+        <item name="chipStartPadding">10dp</item>
+        <item name="chipEndPadding">10dp</item>
+        <item name="android:paddingVertical" tools:targetApi="o">20dp</item>
+        <item name="chipMinHeight">48dp</item>
         <item name="rippleColor">@color/elixir_orange</item>
     </style>
 

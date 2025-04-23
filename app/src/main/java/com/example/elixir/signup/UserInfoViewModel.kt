@@ -8,16 +8,16 @@ class UserInfoViewModel : ViewModel() {
     private var accountData: AccountData = AccountData("", "")
     private var profileData: ProfileData = ProfileData("", "", "", 0)
     private var allergies: List<String> = mutableListOf<String>()
-    private var preferredDiet: String = ""
+    private var preferredDiets: List<String> = mutableListOf<String>()
     private var preferredRecipes: List<String> = mutableListOf<String>()
-    private var signupReason: String = ""
+    private var signupReasons: List<String> = mutableListOf<String>()
 
     // 회원가입 단계 설정 (계정 생성 제외)
     var currentStep = 0
     val maxStep = 4  // 마지막 단계 번호
 
     // 단계별 정보 입력 완료 여부
-    private val completedStep = MutableLiveData(
+    val completedStep = MutableLiveData(
         mutableMapOf(
             0 to false,
             1 to false,
@@ -32,11 +32,6 @@ class UserInfoViewModel : ViewModel() {
         val map = completedStep.value ?: mutableMapOf()
         map[step] = status
         completedStep.value = map
-    }
-
-    // 현재 단계가 완료됐는지
-    fun isStepCompleted(): Boolean {
-        return completedStep.value?.get(currentStep) == true
     }
 
     // 계정 생성
@@ -73,12 +68,14 @@ class UserInfoViewModel : ViewModel() {
     }
 
     // 설문조사 - 선호 식단 설정
-    fun setPreferredDiets(diet: String) {
-        preferredDiet = diet
+    fun setPreferredDiets(diets: List<String>) {
+        preferredDiets = diets
     }
 
     // 설문조사 - 선호 식단 가져오기
-    fun getPreferredDiets(): String = preferredDiet
+    fun getPreferredDiets(): List<String>? {
+        return preferredDiets.ifEmpty { null }
+    }
 
     // 설문조사 - 선호 레시피 설정
     fun setPreferredRecipes(recipes: List<String>) {
@@ -91,10 +88,12 @@ class UserInfoViewModel : ViewModel() {
     }
 
     // 설문조사 - 저속노화 이유 설정
-    fun setSignupReason(reason: String) {
-        signupReason = reason
+    fun setSignupReason(reason: List<String>) {
+        signupReasons = reason
     }
 
     // 설문조사 - 저속노화 이유 가져오기
-    fun getSignupReason(): String = signupReason
+    fun getSignupReason(): List<String>? {
+        return signupReasons.ifEmpty { null }
+    }
 }

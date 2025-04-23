@@ -84,10 +84,10 @@
     <string name="allergy_pinenut">잣</string>
 
     <!-- 회원가입: 질문 2(식단) -->
-    <string name="diet_meat">🍖  고기 위주의 식단</string>
-    <string name="diet_vegetable">🥬 채소 위주의 식단</string>
-    <string name="diet_meat_vegetable">🥪  고기와 채소가 어우러진 혼합식 식단</string>
-    <string name="diet_noting">🍽️  특별히 선호하는 식단 없음</string>
+    <string name="diet_meat">고기 위주의 식단</string>
+    <string name="diet_vegetable">채소 위주의 식단</string>
+    <string name="diet_meat_vegetable">고기와 채소가 어우러진 혼합식 식단</string>
+    <string name="diet_noting">특별히 선호하는 식단 없음</string>
 
     <!-- 회원가입: 질문 3(관심 레시피) -->
     <string name="diet_korean">🇰🇷 한식</string>
@@ -110,7 +110,7 @@
     <string name="title_antiox">항산화 강화</string>
     <string name="title_blood">혈당 조절</string>
     <string name="title_inflam">염증 감소</string>
-    <string name="title_no_recommend">특별히 없음</string>
+    <string name="title_no_recommend">특별한 이유 없음</string>
 
     <!-- content -->
     <string name="content_antiox">몸속 나쁜 활성산소를 없애서 세포가 늙거나 손상되는 걸 막아줌</string>
