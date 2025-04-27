@@ -91,7 +91,7 @@ class ChallengeFragment : Fragment() {
                         "• 1달 동안 누적 60끼 식단 기록\n" +
                         "   - 3월 1달간 식단(아침, 점심, 저녁, 간식) 누적 60개 이상 시 성공\n",
                 badgeTitle = "비타민 수호자",
-                badgeUrl = R.drawable.img_badge,
+                badgeUrl = R.drawable.png_badge,
                 startDate = "2025-02-01",
                 endDate = "2028-02-28",
                 month = 2,
@@ -140,7 +140,7 @@ class ChallengeFragment : Fragment() {
                         "• 1달 동안 누적 60끼 식단 기록\n" +
                         "   - 3월 1달간 식단(아침, 점심, 저녁, 간식) 누적 60개 이상 시 성공\n",
                 badgeTitle = "환절기 방어왕",
-                badgeUrl = R.drawable.img_badge,
+                badgeUrl = R.drawable.png_badge,
                 startDate = "2025-03-01",
                 endDate = "2025-03-31",
                 month = 3,
@@ -236,7 +236,7 @@ class ChallengeFragment : Fragment() {
 
         dialogTitle.text = "챌린지 완료!"
         dialogMessage.text = "'$title' 칭호 및 뱃지를 획득했습니다."
-        dialogImage.setImageResource(R.drawable.img_badge) // 원하는 이미지로 교체 가능
+        dialogImage.setImageResource(R.drawable.png_badge) // 원하는 이미지로 교체 가능
 
         val alertDialog = android.app.AlertDialog.Builder(requireContext())
             .setView(dialogView)

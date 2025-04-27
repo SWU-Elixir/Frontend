@@ -1,14 +1,18 @@
 package com.example.elixir.calendar
 
 import android.content.Context
+import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.elixir.R
+import com.example.elixir.recipe.RecipeDetailFragment
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
@@ -16,7 +20,7 @@ import com.google.android.flexbox.JustifyContent
 class MealListAdapter(
     private val context: Context,
     private var data: MutableList<MealPlanData>,
-    private val onItemClick: (MealPlanData) -> Unit
+    private val fragmentManager: FragmentManager
 ) : BaseAdapter() {
 
     override fun getCount(): Int = data.size
@@ -72,7 +76,25 @@ class MealListAdapter(
         layoutManager.setJustifyContent(JustifyContent.FLEX_END)
 
         // 클릭 이벤트 설정
-        view.setOnClickListener { onItemClick(item) }
+        view.setOnClickListener {
+            Log.d("RecipeAdapter", "아이템 클릭됨: ${item.name}")
+
+            // 레시피 상세 프래그먼트 생성 및 데이터 전달
+            val detailFragment = MealDetailFragment().apply {
+                arguments = Bundle().apply {
+                    putString("meal", item.name)
+                    putString("createdAt", item.createdAt)
+                    putString("mealtimes", item.mealtimes)
+                    putStringArrayList("mealPlanIngredients", ArrayList(item.mealPlanIngredients))
+                    putInt("imageUrl", item.imageUrl ?: R.drawable.ic_recipe_white)
+                }
+            }
+
+            fragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, detailFragment)
+                .addToBackStack(null)
+                .commit()
+        }
 
         return view
     }

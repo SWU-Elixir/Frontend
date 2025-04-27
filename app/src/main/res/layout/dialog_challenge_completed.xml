@@ -7,7 +7,7 @@
     android:paddingLeft="16dp"
     android:orientation="vertical"
     android:gravity="center"
-    android:background="@drawable/bg_meal_picture">
+    android:background="@drawable/bg_picture_gray">
 
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/lottieAnimation"
@@ -41,7 +41,7 @@
         android:id="@+id/dialogImage"
         android:layout_width="180dp"
         android:layout_height="180dp"
-        android:src="@drawable/img_badge"
+        android:src="@drawable/png_badge"
         android:layout_marginBottom="8dp"
         android:contentDescription="챌린지 완료 이미지" />
 

@@ -164,7 +164,8 @@ class SearchListFragment : Fragment() {
             onHeartClick = { recipe ->
                 recipe.isLiked = !recipe.isLiked
                 recipeListAdapter.notifyDataSetChanged()
-            }
+            },
+            fragmentManager = parentFragmentManager
         )
         recipeListView.adapter = recipeListAdapter
 

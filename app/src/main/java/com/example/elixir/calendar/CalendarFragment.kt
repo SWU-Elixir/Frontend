@@ -54,9 +54,7 @@ class CalendarFragment : Fragment() {
         // -------------------- 리스트뷰 설정 --------------------
         mealListView = view.findViewById(R.id.mealPlanList)
         emptyMealText = view.findViewById(R.id.emptyMealText)
-        mealAdapter = MealListAdapter(requireContext(), mutableListOf()) { item ->
-            onDietLogClick(item)
-        }
+        mealAdapter = MealListAdapter(requireContext(), mutableListOf(), fragmentManager = parentFragmentManager)
         mealListView.adapter = mealAdapter
         addDummyEvents() // 더미 데이터 세팅
 
@@ -67,7 +65,7 @@ class CalendarFragment : Fragment() {
 
         // 오늘 날짜 배경 원 데코레이터
         try {
-            val todayDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.bg_calendar_circletoday)
+            val todayDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.bg_oval_outline_orange)
             todayDrawable?.let {
                 calendarView.addDecorator(CalendarTodayDecorator(requireContext(), it))
             }

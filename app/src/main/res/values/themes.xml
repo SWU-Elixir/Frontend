@@ -61,6 +61,6 @@
 
     <!-- 캘린더의 날짜(Day)의 스타일 설정 -->
     <style name="CalenderViewCustom" parent="Theme.AppCompat">
-        <item name="android:textColor">@drawable/calendar_selector_textcolor</item>
+        <item name="android:textColor">@drawable/selector_calendar_textcolor</item>
     </style>
 </resources>

@@ -28,12 +28,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
                 android:spinnerMode="dropdown"
-                android:background="@drawable/bg_challenge_spinner"/>
+                android:background="@drawable/bg_spinner_challenge"/>
             <ImageView
                 android:id="@+id/challengeImage"
                 android:layout_width="match_parent"
                 android:layout_height="400dp"
-                android:background="@drawable/bg_meal_picture"
+                android:background="@drawable/bg_picture_gray"
                 android:src="@drawable/png_challenge_1"
                 android:scaleType="centerCrop"
                 android:clipToOutline="true"

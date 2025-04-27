@@ -1,5 +1,6 @@
 package com.example.elixir.recipe
 
+import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -7,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.elixir.R
 import com.google.android.flexbox.FlexDirection
@@ -15,14 +17,15 @@ import com.google.android.flexbox.JustifyContent
 
 /**
  * 레시피 리스트 화면에서 사용되는 RecyclerView 어댑터
- * @param recipeList: 레시피 목록 데이터
- * @param onBookmarkClick: 북마크 버튼 클릭 시 동작
- * @param onHeartClick: 좋아요(하트) 버튼 클릭 시 동작
+ * recipeList: 레시피 목록 데이터
+ * onBookmarkClick: 북마크 버튼 클릭 시 동작
+ * onHeartClick: 좋아요(하트) 버튼 클릭 시 동작
  */
 class RecipeListAdapter(
     private var recipeList: List<RecipeData>,
     private val onBookmarkClick: (RecipeData) -> Unit,
-    private val onHeartClick: (RecipeData) -> Unit
+    private val onHeartClick: (RecipeData) -> Unit,
+    private val fragmentManager: FragmentManager
 ) : RecyclerView.Adapter<RecipeListAdapter.RecipeViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecipeViewHolder {
@@ -82,6 +85,27 @@ class RecipeListAdapter(
         // 전체 아이템 클릭 로그 출력
         holder.itemView.setOnClickListener {
             Log.d("RecipeAdapter", "아이템 클릭됨: ${item.title}")
+
+            // 레시피 상세 프래그먼트 생성 및 데이터 전달
+            val detailFragment = RecipeDetailFragment().apply {
+                arguments = Bundle().apply {
+                    putString("title", item.title)
+                    putString("categorySlowAging", item.categorySlowAging)
+                    putString("categoryType", item.categoryType)
+                    putString("tip", item.tips)
+                    putStringArrayList("ingredients", ArrayList(item.ingredients))
+                    putStringArrayList("seasoning", ArrayList(item.seasoning))
+                    putInt("imageUrl", item.imageUrl ?: R.drawable.ic_recipe_white)
+                    putString("difficulty", item.difficulty)
+                    putInt("hour", item.timeHours)
+                    putInt("minute", item.timeMinutes)
+                }
+            }
+
+            fragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, detailFragment)
+                .addToBackStack(null)
+                .commit()
         }
     }
 
