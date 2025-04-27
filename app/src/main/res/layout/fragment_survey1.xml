@@ -195,6 +195,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/ChipStyle_Short"
+            app:chipIcon="@drawable/ic_x"
+            app:chipIconTint="@color/selector_chip_ic"
+            app:chipIconVisible="true"
             android:text="@string/n_a"
             android:textSize="16sp" />
 

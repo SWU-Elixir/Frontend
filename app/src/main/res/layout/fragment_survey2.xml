@@ -35,8 +35,6 @@
             style="@style/ChipStyle_Long"
             app:chipIcon="@drawable/ic_meat"
             app:chipIconVisible="true"
-            app:iconStartPadding="10dp"
-            app:iconEndPadding="10dp"
             android:text="@string/diet_meat"
             android:textSize="16sp"/>
 
@@ -47,8 +45,6 @@
             style="@style/ChipStyle_Long"
             app:chipIcon="@drawable/ic_vegetable"
             app:chipIconVisible="true"
-            app:iconStartPadding="10dp"
-            app:iconEndPadding="10dp"
             android:text="@string/diet_vegetable"
             android:textSize="16sp"/>
 
@@ -59,8 +55,6 @@
             style="@style/ChipStyle_Long"
             app:chipIcon="@drawable/ic_sandwich"
             app:chipIconVisible="true"
-            app:iconStartPadding="10dp"
-            app:iconEndPadding="10dp"
             android:text="@string/diet_meat_vegetable"
             android:textSize="16sp"/>
 
@@ -69,10 +63,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             style="@style/ChipStyle_Long"
-            app:chipIcon="@drawable/ic_meal"
+            app:chipIcon="@drawable/ic_plate"
             app:chipIconVisible="true"
-            app:iconStartPadding="10dp"
-            app:iconEndPadding="10dp"
             android:text="@string/diet_noting"
             android:textSize="16sp"/>
     </com.google.android.material.chip.ChipGroup>

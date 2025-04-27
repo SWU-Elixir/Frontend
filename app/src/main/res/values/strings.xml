@@ -90,36 +90,77 @@
     <string name="diet_noting">특별히 선호하는 식단 없음</string>
 
     <!-- 회원가입: 질문 3(관심 레시피) -->
-    <string name="diet_korean">🇰🇷 한식</string>
-    <string name="diet_japanese">🇯🇵 일식</string>
-    <string name="diet_chinese">🇨🇳 중식</string>
-    <string name="diet_western">🇺🇸 양식</string>
-    <string name="dessert">🍰 디저트</string>
-    <string name="beverage">🧃 음료/차</string>
-    <string name="sauce">🍯 양념/소스/잼</string>
-    <string name="diet_n_a">❌ 특별히 없음</string>
+    <string name="diet_korean">한식</string>
+    <string name="diet_japanese">일식</string>
+    <string name="diet_chinese">중식</string>
+    <string name="diet_western">양식</string>
+    <string name="dessert">디저트</string>
+    <string name="beverage">음료/차</string>
+    <string name="sauce">양념/소스/잼</string>
+    <string name="diet_n_a">특별히 없음</string>
 
-    <!-- 회원가입: 질문 4(식단) -->
-    <!-- icon -->
+    <!-- 회원가입: 질문 4(이유) -->
+    <!-- 아이콘 -->
     <string name="ic_antiox">💪</string>
     <string name="ic_blood">🍚</string>
     <string name="ic_inflam">🩺</string>
     <string name="ic_no_recommend">✨</string>
 
-    <!-- title -->
+    <!-- 이유 -->
     <string name="title_antiox">항산화 강화</string>
     <string name="title_blood">혈당 조절</string>
     <string name="title_inflam">염증 감소</string>
     <string name="title_no_recommend">특별한 이유 없음</string>
 
-    <!-- content -->
+    <!-- 세부 내용 -->
     <string name="content_antiox">몸속 나쁜 활성산소를 없애서 세포가 늙거나 손상되는 걸 막아줌</string>
     <string name="content_blood">혈당이 너무 오르거나 내려가지 않게 도와줘 당뇨를 예방</string>
     <string name="content_inflam">몸속 염증을 줄여서 건강을 지키고 면역력을 높이는 데 도움</string>
 
-    <!-- Not selected -->
+    <!-- 선택되지 않음 -->
     <string name="selected_not">선택안함</string>
     <string name="n_a">해당없음</string>
+
+    <!-- 식단 기록 -->
+    <!-- 시간 -->
+    <string name="time">시간</string>
+    <string name="am">AM</string>
+    <string name="pm">PM</string>
+    <string name="set_time_now">현재 시간으로 설정</string>
+
+    <!-- 식단명 -->
+    <string name="diet_name">식단명</string>
+
+    <!-- 식사 유형 -->
+    <string name="diet_category">식사 유형</string>
+    <string name="breakfast">아침</string>
+    <string name="lunch">점심</string>
+    <string name="dinner">저녁</string>
+    <string name="snack">간식</string>
+
+    <!-- 대표 식재료 태그 -->
+    <string name="represent_ingredient">대표 식재료 태그</string>
+    <string name="rule_ingredient">* 식재료는 최대 5개까지 태그할 수 있습니다.</string>
+    <string name="brown_rice">현미</string>
+    <string name="bean">콩</string>
+    <string name="grain">통곡물</string>
+    <string name="green_leafy">푸른잎채소</string>
+    <string name="berry">베리류</string>
+    <string name="nuts">견과류</string>
+    <string name="olive_oil">올리브 오일</string>
+    <string name="fish">생선</string>
+    <string name="poultry">가금류</string>
+    <string name="find_ingredient">식재료 검색</string>
+
+    <!-- 식단 점수 -->
+    <string name="diet_score">저속노화에 얼마나 적합한 식단인가요?</string>
+    <string name="score_1">1</string>
+    <string name="score_2">2</string>
+    <string name="score_3">3</string>
+    <string name="score_4">4</string>
+    <string name="score_5">5</string>
+
+    <string name="btn_write">작성</string>
 
     <string name="navi_calendar">캘린더</string>
     <string name="navi_recipe">레시피</string>">
