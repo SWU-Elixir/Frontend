@@ -6,77 +6,67 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".signup.Survey2Fragment">
 
-    <!-- question 2 -->
     <TextView
         android:id="@+id/q2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/list_prefer_diet"
+        app:layout_constraintBottom_toTopOf="@id/select_diet"
         android:layout_marginVertical="20dp"
         android:fontFamily="@font/pretendard_bold"
         android:text="@string/survey_q2"
         android:textColor="@color/black"
         android:textSize="22sp"/>
 
-    <LinearLayout
-        android:id="@+id/list_prefer_diet"
+    <!-- 선택지 -->
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/select_diet"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="100dp"
+        app:chipSpacingVertical="10dp"
         app:layout_constraintTop_toBottomOf="@id/q2"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:orientation="vertical">
+        app:layout_constraintBottom_toBottomOf="parent">
 
-        <android.widget.Button
+        <com.google.android.material.chip.Chip
             android:id="@+id/diet_meat"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginVertical="5dp"
-            android:background="@drawable/selector_btn"
-            android:paddingHorizontal="20dp"
-            android:text="@string/content_meat"
-            android:textAlignment="viewStart"
-            android:textColor="@color/black"
-            android:textSize="16sp"
-            android:fontFamily="@font/pretendard_regular" />
+            style="@style/ChipStyle_Long"
+            app:chipIcon="@drawable/ic_meat"
+            app:chipIconVisible="true"
+            android:text="@string/diet_meat"
+            android:textSize="16sp"/>
 
-        <android.widget.Button
+        <com.google.android.material.chip.Chip
             android:id="@+id/diet_vegetable"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginVertical="5dp"
-            android:paddingHorizontal="20dp"
-            android:background="@drawable/selector_btn"
-            android:text="@string/content_vegetable"
-            android:textAlignment="viewStart"
-            android:textColor="@color/black"
-            android:textSize="16sp"
-            android:fontFamily="@font/pretendard_regular"/>
-        <android.widget.Button
+            style="@style/ChipStyle_Long"
+            app:chipIcon="@drawable/ic_vegetable"
+            app:chipIconVisible="true"
+            android:text="@string/diet_vegetable"
+            android:textSize="16sp"/>
+
+        <com.google.android.material.chip.Chip
             android:id="@+id/diet_meat_vegetable"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/selector_btn"
-            android:layout_marginVertical="5dp"
-            android:paddingHorizontal="20dp"
-            android:text="@string/content_meat_vegetable"
-            android:textAlignment="viewStart"
-            android:textColor="@color/black"
-            android:textSize="16sp"
-            android:fontFamily="@font/pretendard_regular"/>
+            style="@style/ChipStyle_Long"
+            app:chipIcon="@drawable/ic_sandwich"
+            app:chipIconVisible="true"
+            android:text="@string/diet_meat_vegetable"
+            android:textSize="16sp"/>
 
-        <android.widget.Button
+        <com.google.android.material.chip.Chip
             android:id="@+id/diet_nothing"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/selector_btn"
-            android:layout_marginVertical="5dp"
-            android:paddingHorizontal="20dp"
-            android:text="@string/content_noting"
-            android:textAlignment="viewStart"
-            android:textColor="@color/black"
-            android:textSize="16sp"
-            android:fontFamily="@font/pretendard_regular"/>
-    </LinearLayout>
+            style="@style/ChipStyle_Long"
+            app:chipIcon="@drawable/ic_plate"
+            app:chipIconVisible="true"
+            android:text="@string/diet_noting"
+            android:textSize="16sp"/>
+    </com.google.android.material.chip.ChipGroup>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

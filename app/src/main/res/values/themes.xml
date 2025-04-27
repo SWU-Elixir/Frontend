@@ -8,9 +8,15 @@
         <item name="android:windowSoftInputMode">adjustResize</item>
     </style>
 
-    <style name="RoundedCorner">
+    <!-- 프로필 사진 윤곽 -->
+    <style name="ImgProfile_Circle">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">75dp</item>
+    </style>
+
+    <style name="ImgDefault_Rect">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">20dp</item>
     </style>
 
     <!-- 스플래시 화면 -->
@@ -20,22 +26,38 @@
         <item name="postSplashScreenTheme">@style/Theme.Elixir</item>
     </style>
 
-
     <!-- 칩 텍스트 커스텀 -->
     <style name="CustomChipText" parent="TextAppearance.MaterialComponents.Caption">
         <item name="fontFamily">@font/pretendard_regular</item>
     </style>
 
     <!-- 칩 커스텀 -->
-    <style name="ChipStyle" parent="Widget.MaterialComponents.Chip.Choice">
+    <style name="ChipStyle_Short" parent="Widget.MaterialComponents.Chip.Choice">
         <item name="chipBackgroundColor">@color/selector_btn_bg</item>
         <item name="chipStrokeColor">@color/selector_btn_stroke</item>
         <item name="chipStrokeWidth">1dp</item>
         <item name="chipCornerRadius">8dp</item>
         <item name="android:textColor">@color/selector_btn_text</item>
         <item name="android:textAppearance">@style/CustomChipText</item>
-        <item name="android:paddingHorizontal" tools:targetApi="o">10dp</item>
-        <item name="android:paddingVertical" tools:targetApi="o">5dp</item>
+        <item name="chipStartPadding">5dp</item>
+        <item name="chipEndPadding">5dp</item>
+        <item name="android:paddingVertical" tools:targetApi="o">16dp</item>
+        <item name="rippleColor">@color/elixir_orange</item>
+    </style>
+
+    <style name="ChipStyle_Long" parent="Widget.MaterialComponents.Chip.Choice">
+        <item name="chipBackgroundColor">@color/selector_btn_bg</item>
+        <item name="chipStrokeColor">@color/selector_btn_stroke</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="chipCornerRadius">10dp</item>
+        <item name="android:textColor">@color/selector_btn_text</item>
+        <item name="android:textAppearance">@style/CustomChipText</item>
+        <item name="chipStartPadding">16dp</item>
+        <item name="chipEndPadding">16dp</item>
+        <item name="android:paddingVertical" tools:targetApi="o">20dp</item>
+        <item name="chipMinHeight">48dp</item>
+        <item name="chipIconSize">32dp</item>
+        <item name="iconEndPadding">10dp</item>
         <item name="rippleColor">@color/elixir_orange</item>
     </style>
 

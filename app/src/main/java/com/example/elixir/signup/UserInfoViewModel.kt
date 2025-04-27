@@ -5,7 +5,12 @@ import androidx.lifecycle.ViewModel
 
 // 사용자 정보 뷰 모델 (회원가입, 정보 수정)
 class UserInfoViewModel : ViewModel() {
-    private val signupData = SignupData(null, null, null, null, null, null, null, null, null, null)
+    private var accountData: AccountData = AccountData("", "")
+    private var profileData: ProfileData = ProfileData("", "", "", 0)
+    private var allergies: List<String> = mutableListOf<String>()
+    private var preferredDiets: List<String> = mutableListOf<String>()
+    private var preferredRecipes: List<String> = mutableListOf<String>()
+    private var signupReasons: List<String> = mutableListOf<String>()
 
     // 회원가입 단계 설정 (계정 생성 제외)
     var currentStep = 0
@@ -29,47 +34,66 @@ class UserInfoViewModel : ViewModel() {
         completedStep.value = map
     }
 
-    // 현재 단계가 완료됐는지
-    fun isStepCompleted(): Boolean {
-        return completedStep.value?.get(currentStep) == true
-    }
-
     // 계정 생성
     fun setAccount(email: String, pw: String) {
-        signupData.id = email
-        signupData.pw = pw
+        accountData = AccountData(email, pw)
+    }
+
+    fun getAccount(): AccountData? {
+        return if (accountData.id.isNotBlank() && accountData.password.isNotBlank()) accountData
+        else null
     }
 
     // 프로필 생성
-    fun setProfile(img: String, nick: String, sex: String, birthYear: Int) {
-        signupData.profileImage = img
-        signupData.nickname = nick
-        signupData.sex = sex
-        signupData.birthYear = birthYear
+    fun setProfile(profileImage: String, nickname: String, gender: String, birthYear: Int) {
+        profileData = ProfileData(profileImage, nickname, gender, birthYear)
     }
 
-    // 설문조사 - 알러지
-    fun setAllergies(allergies: List<String>) {
-        signupData.allergies = allergies
+    // 프로필 조회
+    fun getProfile(): ProfileData? {
+        return if (profileData.profileImage.isNotBlank() && profileData.nickname.isNotBlank()
+            && profileData.gender.isNotBlank() && profileData.birthYear != 0)
+            profileData
+        else null
     }
 
-    // 설문조사 - 선호 식단
+    // 설문조사 - 알러지 정보 설정
+    fun setAllergies(algs: List<String>) {
+        allergies = algs
+    }
+
+    // 설문조사 - 알러지 정보 가져오기
+    fun getAllergies(): List<String>? {
+        return allergies.ifEmpty { null }
+    }
+
+    // 설문조사 - 선호 식단 설정
     fun setPreferredDiets(diets: List<String>) {
-        signupData.preferredDiets = diets
+        preferredDiets = diets
     }
 
-    // 설문조사 - 선호 레시피
+    // 설문조사 - 선호 식단 가져오기
+    fun getPreferredDiets(): List<String>? {
+        return preferredDiets.ifEmpty { null }
+    }
+
+    // 설문조사 - 선호 레시피 설정
     fun setPreferredRecipes(recipes: List<String>) {
-        signupData.preferredRecipes = recipes
+        preferredRecipes = recipes
     }
 
-    // 설문조사 - 저속노화 이유
-    fun setSignupReason(reason: String) {
-        signupData.signupReason = reason
+    // 설문조사 - 선호 레시피 가져오기
+    fun getPreferredRecipes(): List<String>? {
+        return preferredRecipes.ifEmpty { null }
     }
 
-    // 정보 가져 오기
-    fun getFinalSignupData(): SignupData {
-        return signupData
+    // 설문조사 - 저속노화 이유 설정
+    fun setSignupReason(reason: List<String>) {
+        signupReasons = reason
+    }
+
+    // 설문조사 - 저속노화 이유 가져오기
+    fun getSignupReason(): List<String>? {
+        return signupReasons.ifEmpty { null }
     }
 }

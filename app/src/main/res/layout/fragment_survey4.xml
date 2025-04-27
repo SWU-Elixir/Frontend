@@ -32,48 +32,54 @@
             android:id="@+id/reason1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/selector_btn"
-            android:layout_marginVertical="5dp"
+            android:background="@drawable/selector_btn_rect"
+            android:clickable="true"
+            android:focusable="true"
             android:padding="16dp">
             <!-- 이모지: 근육 -->
-            <TextView
+            <ImageView
                 android:id="@+id/ic_reason1"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
-                app:layout_constraintStart_toStartOf="parent"
-                android:text="@string/ic_antiox"
-                android:textAlignment="center"
-                android:textColor="@color/selector_btn_text"
-                android:textSize="32sp"
-                android:fontFamily="@font/pretendard_regular"/>
+                android:maxWidth="48dp"
+                android:maxHeight="48dp"
+                android:adjustViewBounds="true"
+                android:src="@drawable/ic_muscle"
+                android:scaleType="fitXY"
+                android:contentDescription="@string/title_antiox"
+                app:layout_constraintStart_toStartOf="parent"/>
             <!-- 텍스트 -->
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/text_reason1"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginHorizontal="16dp"
-                app:layout_constraintStart_toEndOf="@id/ic_reason1">
-                <TextView
-                    android:id="@+id/title_antiox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintTop_toTopOf="parent"
-                    android:text="@string/title_antiox"
-                    android:textAlignment="viewStart"
-                    android:textColor="@color/selector_btn_text"
-                    android:textSize="16sp"
-                    android:fontFamily="@font/pretendard_regular"/>
-                <TextView
-                    android:id="@+id/content_antiox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@id/title_antiox"
-                    android:text="@string/content_antiox"
-                    android:textAlignment="viewStart"
-                    android:textColor="@color/selector_btn_text"
-                    android:textSize="12sp"
-                    android:fontFamily="@font/pretendard_thin"/>
-            </androidx.constraintlayout.widget.ConstraintLayout>
+            <TextView
+                android:id="@+id/title_antiox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                app:layout_constraintStart_toEndOf="@id/ic_reason1"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/content_antiox"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:text="@string/title_antiox"
+                android:textAlignment="viewStart"
+                android:textColor="@color/selector_btn_text"
+                android:textSize="16sp"
+                android:fontFamily="@font/pretendard_regular"/>
+            <TextView
+                android:id="@+id/content_antiox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                app:layout_constraintTop_toBottomOf="@id/title_antiox"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/ic_reason1"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:text="@string/content_antiox"
+                android:textAlignment="viewStart"
+                android:textColor="@color/selector_btn_text"
+                android:textSize="12sp"
+                android:fontFamily="@font/pretendard_thin"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:breakStrategy="simple" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <!-- 선택 2. 혈당 -->
@@ -81,48 +87,56 @@
             android:id="@+id/reason2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/selector_btn"
+            android:background="@drawable/selector_btn_rect"
+            android:clickable="true"
+            android:focusable="true"
             android:layout_marginVertical="5dp"
             android:padding="16dp">
             <!-- 이모지: 밥 -->
-            <TextView
+            <ImageView
                 android:id="@+id/ic_reason2"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
                 app:layout_constraintStart_toStartOf="parent"
-                android:text="@string/ic_blood"
-                android:textAlignment="center"
+                android:maxWidth="48dp"
+                android:maxHeight="48dp"
+                android:adjustViewBounds="true"
+                android:src="@drawable/ic_rice"
+                android:scaleType="fitXY"
+                android:contentDescription="@string/title_blood"/>
+
+            <TextView
+                android:id="@+id/title_blood"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                app:layout_constraintBottom_toTopOf="@id/content_blood"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toEndOf="@id/ic_reason2"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:text="@string/title_blood"
+                android:textAlignment="viewStart"
                 android:textColor="@color/selector_btn_text"
-                android:textSize="32sp"
+                android:textSize="16sp"
                 android:fontFamily="@font/pretendard_regular"/>
-            <!-- 텍스트 -->
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/text_reason2"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginHorizontal="16dp"
-                app:layout_constraintStart_toEndOf="@id/ic_reason2">
-                <TextView
-                    android:id="@+id/title_blood"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintBottom_toTopOf="@id/content_blood"
-                    android:text="@string/title_blood"
-                    android:textAlignment="viewStart"
-                    android:textColor="@color/selector_btn_text"
-                    android:textSize="16sp"
-                    android:fontFamily="@font/pretendard_regular"/>
-                <TextView
-                    android:id="@+id/content_blood"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@id/title_blood"
-                    android:text="@string/content_blood"
-                    android:textAlignment="viewStart"
-                    android:textColor="@color/selector_btn_text"
-                    android:textSize="12sp"
-                    android:fontFamily="@font/pretendard_thin"/>
-            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <TextView
+                android:id="@+id/content_blood"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                app:layout_constraintTop_toBottomOf="@id/title_blood"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/ic_reason2"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:text="@string/content_blood"
+                android:textAlignment="viewStart"
+                android:textColor="@color/selector_btn_text"
+                android:textSize="12sp"
+                android:fontFamily="@font/pretendard_thin"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:breakStrategy="simple"  />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <!-- 선택 3. 염증 -->
@@ -130,49 +144,55 @@
             android:id="@+id/reason3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/selector_btn"
+            android:background="@drawable/selector_btn_rect"
+            android:clickable="true"
+            android:focusable="true"
             android:layout_marginVertical="5dp"
             android:padding="16dp">
-            <!-- 이모지: 근육 -->
-            <TextView
+            <!-- 이모지: 청진기 -->
+            <ImageView
                 android:id="@+id/ic_reason3"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/text_reason3"
-                android:text="@string/ic_inflam"
-                android:textAlignment="center"
-                android:textColor="@color/selector_btn_text"
-                android:textSize="32sp"
-                android:fontFamily="@font/pretendard_regular"/>
+                android:maxWidth="48dp"
+                android:maxHeight="48dp"
+                android:adjustViewBounds="true"
+                android:src="@drawable/ic_stethoscope"
+                android:scaleType="fitXY"
+                android:contentDescription="@string/title_inflam"
+                app:layout_constraintStart_toStartOf="parent"/>
             <!-- 텍스트 -->
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/text_reason3"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginHorizontal="16dp"
-                app:layout_constraintStart_toEndOf="@id/ic_reason3">
-                <TextView
-                    android:id="@+id/title_reason3"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintTop_toTopOf="parent"
-                    android:text="@string/title_inflam"
-                    android:textAlignment="viewStart"
-                    android:textColor="@color/selector_btn_text"
-                    android:textSize="16sp"
-                    android:fontFamily="@font/pretendard_regular"/>
-                <TextView
-                    android:id="@+id/content_reason3"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@id/title_reason3"
-                    android:text="@string/content_inflam"
-                    android:textAlignment="viewStart"
-                    android:textColor="@color/selector_btn_text"
-                    android:textSize="12sp"
-                    android:fontFamily="@font/pretendard_thin"/>
-            </androidx.constraintlayout.widget.ConstraintLayout>
+            <TextView
+                android:id="@+id/title_inflam"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/content_inflam"
+                app:layout_constraintStart_toEndOf="@id/ic_reason3"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:text="@string/title_inflam"
+                android:textAlignment="viewStart"
+                android:textColor="@color/selector_btn_text"
+                android:textSize="16sp"
+                android:fontFamily="@font/pretendard_regular"/>
+            <TextView
+                android:id="@+id/content_inflam"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                app:layout_constraintTop_toBottomOf="@id/title_inflam"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/ic_reason3"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:text="@string/content_inflam"
+                android:textAlignment="viewStart"
+                android:textColor="@color/selector_btn_text"
+                android:textSize="12sp"
+                android:fontFamily="@font/pretendard_thin"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:breakStrategy="simple" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <!-- 선택 4.   -->
@@ -180,29 +200,33 @@
             android:id="@+id/reason4"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/selector_btn"
+            android:background="@drawable/selector_btn_rect"
+            android:clickable="true"
+            android:focusable="true"
             android:layout_marginVertical="5dp"
             android:padding="16dp">
-            <!-- 이모지: 밥 -->
-            <TextView
+            <!-- 이모지: 스파클 -->
+            <ImageView
                 android:id="@+id/ic_reason4"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                app:layout_constraintStart_toStartOf="parent"
-                android:text="@string/ic_no_recommend"
-                android:textAlignment="center"
-                android:textColor="@color/selector_btn_text"
-                android:textSize="32sp"
-                android:fontFamily="@font/pretendard_regular"/>
+                android:maxWidth="48dp"
+                android:maxHeight="48dp"
+                android:adjustViewBounds="true"
+                android:src="@drawable/ic_sparkles"
+                android:scaleType="fitXY"
+                android:contentDescription="@string/title_no_recommend"
+                app:layout_constraintStart_toStartOf="parent"/>
             <!-- 텍스트 -->
             <TextView
-                android:id="@+id/title_reason4"
-                android:layout_width="wrap_content"
+                android:id="@+id/title_no_recommend"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_marginHorizontal="16dp"
-                app:layout_constraintStart_toEndOf="@id/ic_reason4"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/ic_reason4"
+                app:layout_constraintEnd_toEndOf="parent"
                 android:text="@string/title_no_recommend"
                 android:textAlignment="viewStart"
                 android:textColor="@color/selector_btn_text"

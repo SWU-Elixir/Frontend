@@ -4,11 +4,10 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
 import android.view.LayoutInflater
-import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 
-class AlertExitDialogFragment(private val act: Activity) {
+class AlertExitDialog(private val act: Activity) {
     @SuppressLint("InflateParams")
     val dialogView = LayoutInflater.from(act).inflate(R.layout.dialog_exit_confirm, null, false)!!
     fun show(){
@@ -37,7 +36,7 @@ class AlertExitDialogFragment(private val act: Activity) {
             positiveButton.setTextColor(ContextCompat.getColor(act, R.color.elixir_orange))
             negativeButton.setTextColor(ContextCompat.getColor(act, R.color.elixir_gray))
         }
-
+        // 다이얼로그 보이기
         dialog.show()
     }
 }

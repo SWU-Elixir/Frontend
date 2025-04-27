@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".signup.Survey3Fragment">
 
-    <!-- question 3 -->
     <TextView
         android:id="@+id/q3"
         android:layout_width="match_parent"
@@ -19,7 +18,7 @@
         android:textColor="@color/black"
         android:textSize="22sp"/>
 
-    <!-- tag of food for skip to next line -->
+    <!-- 선택지 -->
     <com.google.android.material.chip.ChipGroup
         android:id="@+id/tags_diet"
         android:layout_width="match_parent"
@@ -33,16 +32,19 @@
             android:id="@+id/diet_korean"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            style="@style/ChipStyle"
+            style="@style/ChipStyle_Short"
+            app:chipIcon="@drawable/ic_korea"
+            app:chipIconVisible="true"
             android:text="@string/diet_korean"
-            android:textSize="16sp"
-            app:chipIconVisible="false" />
+            android:textSize="16sp" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/diet_chinese"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            style="@style/ChipStyle"
+            style="@style/ChipStyle_Short"
+            app:chipIcon="@drawable/ic_china"
+            app:chipIconVisible="true"
             android:text="@string/diet_chinese"
             android:textSize="16sp" />
 
@@ -50,7 +52,9 @@
             android:id="@+id/diet_japanese"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            style="@style/ChipStyle"
+            style="@style/ChipStyle_Short"
+            app:chipIcon="@drawable/ic_japan"
+            app:chipIconVisible="true"
             android:text="@string/diet_japanese"
             android:textSize="16sp" />
 
@@ -58,7 +62,9 @@
             android:id="@+id/diet_western"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            style="@style/ChipStyle"
+            style="@style/ChipStyle_Short"
+            app:chipIcon="@drawable/ic_us"
+            app:chipIconVisible="true"
             android:text="@string/diet_western"
             android:textSize="16sp" />
 
@@ -66,7 +72,9 @@
             android:id="@+id/dessert"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            style="@style/ChipStyle"
+            style="@style/ChipStyle_Short"
+            app:chipIcon="@drawable/ic_cake"
+            app:chipIconVisible="true"
             android:text="@string/dessert"
             android:textSize="16sp" />
 
@@ -74,7 +82,9 @@
             android:id="@+id/beverage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            style="@style/ChipStyle"
+            style="@style/ChipStyle_Short"
+            app:chipIcon="@drawable/ic_tea"
+            app:chipIconVisible="true"
             android:text="@string/beverage"
             android:textSize="16sp" />
 
@@ -82,7 +92,9 @@
             android:id="@+id/sauce"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            style="@style/ChipStyle"
+            style="@style/ChipStyle_Short"
+            app:chipIcon="@drawable/ic_sauce"
+            app:chipIconVisible="true"
             android:text="@string/sauce"
             android:textSize="16sp" />
 
@@ -90,7 +102,10 @@
             android:id="@+id/diet_n_a"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            style="@style/ChipStyle"
+            style="@style/ChipStyle_Short"
+            app:chipIcon="@drawable/ic_x"
+            app:chipIconTint="@color/selector_chip_ic"
+            app:chipIconVisible="true"
             android:text="@string/diet_n_a"
             android:textSize="16sp" />
     </com.google.android.material.chip.ChipGroup>

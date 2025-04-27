@@ -9,18 +9,22 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import com.example.elixir.R
+import com.example.elixir.SelectImgDialog
 import com.example.elixir.databinding.FragmentSettingProfileBinding
 
 class SettingProfileFragment : Fragment() {
     private lateinit var profileBinding: FragmentSettingProfileBinding
+    private val userModel: UserInfoViewModel by activityViewModels()
     var listener: OnProfileCompletedListener? = null
 
-    private lateinit var img: String
-    private lateinit var nick: String
-    private lateinit var sex: String
+    private var profileImage: String = ""
+    private var nickname: String = ""
+    private var gender: String = ""
     private var birthYear: Int = 1990
 
     override fun onCreateView(
@@ -34,35 +38,50 @@ class SettingProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        img = ""
-        nick = ""
-        sex = ""
+
+        // 초기화 : 뷰 모델에 저장된 데이터가 있다면 불러오기
+        val data = userModel.getProfile()
+        if(data != null) {
+            // 클래스 속성에 데이터 값 집어넣기
+            profileImage = data.profileImage
+            nickname = data.nickname
+            gender = data.gender
+            birthYear = data.birthYear
+
+            with(profileBinding) {
+                // 설정: 이미지 링크 파싱, 닉네임에 작성한 닉네임 불러오기, 선택한 성별에 따라 버튼 누르게
+                registProfile.setImageURI(Uri.parse(profileImage))
+                registNick.setText(nickname)
+
+                when (gender) {
+                    R.string.female.toString() -> selectGender.check(R.id.btn_female)
+                    R.string.male.toString() -> selectGender.check(R.id.btn_male)
+                    R.string.other.toString() -> selectGender.check(R.id.btn_other)
+                    R.string.selected_not.toString() -> selectGender.check(R.id.btn_selected_not)
+                }
+            }
+        }
 
         // 프로필 이미지 선택
-        selectImg()
+        setImg()
 
         // 별명 입력
         profileBinding.registNick.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-            }
-
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
-                nick = s.toString().trim()
+                nickname = s.toString().trim()
                 checkAllValid()
             }
-
         })
 
-        // 성별 선택
-        profileBinding.selectSex.setOnCheckedChangeListener { _, checkedId ->
+        // 라디오 버튼 : 성별 선택
+        profileBinding.selectGender.setOnCheckedChangeListener { _, checkedId ->
             when(checkedId) {
-                R.id.btn_female -> sex = R.string.female.toString()
-                R.id.btn_male -> sex = R.string.male.toString()
-                R.id.btn_other -> sex = R.string.other.toString()
-                R.id.btn_selected_not -> sex = R.string.selected_not.toString()
+                R.id.btn_female -> gender = R.string.female.toString()
+                R.id.btn_male -> gender = R.string.male.toString()
+                R.id.btn_other -> gender = R.string.other.toString()
+                R.id.btn_selected_not -> gender = R.string.selected_not.toString()
             }
             checkAllValid()
         }
@@ -80,8 +99,10 @@ class SettingProfileFragment : Fragment() {
         val adapter = ArrayAdapter(requireContext(), R.layout.item_spinner_year, birthYears)
         profileBinding.birthYear.adapter = adapter
 
-        // 초기값 (1990년)
-        profileBinding.birthYear.setSelection(birthYears.indexOf("1990"))
+        // 저장된 생년 가져오기 (없으면 기본값 1990)
+        val savedBirthYear =  if (birthYear != 0) birthYear.toString() else "1990"
+        profileBinding.birthYear.setSelection(birthYears.indexOf(savedBirthYear))
+        
         // 선택 리스너 : Int로 변환해서 저장
         profileBinding.birthYear.onItemSelectedListener = object :
             AdapterView.OnItemSelectedListener {
@@ -89,30 +110,40 @@ class SettingProfileFragment : Fragment() {
                 birthYear = parent.getItemAtPosition(position).toString().toInt()
                 checkAllValid()
             }
-
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
     }
 
-    // 프로필 사진 갤러리에서 가져오기
-    private fun selectImg() {
-        // 이미지 피커 정의
-        val imagePickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+    // 이미지 설정
+    private fun setImg() {
+        // 이미지 피커 선언 (PickVisualMedia)
+        val imgSelector = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
+            // uri를 string으로 형변환 후 저장
             uri?.let {
-                profileBinding.registProfile.setImageURI(it)
-                img = it.toString()
+                profileBinding.registProfile.setImageURI(uri)
+                profileImage = uri.toString()
                 checkAllValid()
             }
         }
-
-        // 이미지 갤러리에서 가져오기
+        // 프로필 이미지를 눌렀을 때,
         profileBinding.registProfile.setOnClickListener {
-            imagePickerLauncher.launch("image/*")
+            // 커스텀 다이얼로그 띄우기
+            SelectImgDialog(requireContext(),
+                {
+                    val uri = Uri.parse("android.resource://${requireContext().packageName}/${R.drawable.img_blank}")
+                    profileBinding.registProfile.setImageURI(uri)
+                    profileImage = uri.toString()
+                    checkAllValid()
+                },
+                { imgSelector.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }
+            ).show()
         }
     }
+
+    // 모든 변수에 유효한 값이 들어왔는지 확인
     fun checkAllValid() {
-        if (img.isNotBlank() && nick.isNotBlank() && sex.isNotBlank() && birthYear != 0) {
-            listener?.onProfileCompleted(img, nick, sex, birthYear)
+        if (profileImage.isNotBlank() && nickname.isNotBlank() && gender.isNotBlank() && birthYear != 0) {
+            listener?.onProfileCompleted(profileImage, nickname, gender, birthYear)
         } else {
             listener?.onProfileInvalid()
         }
