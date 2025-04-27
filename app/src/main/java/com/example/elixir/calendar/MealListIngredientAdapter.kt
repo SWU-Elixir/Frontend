@@ -1,4 +1,4 @@
-package com.example.elixir.recipe
+package com.example.elixir.calendar
 
 import android.view.LayoutInflater
 import android.view.View
@@ -7,8 +7,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.elixir.R
 
-class CategoryAdapter(private val ingredients: List<String>) :
-    RecyclerView.Adapter<CategoryAdapter.IngredientViewHolder>() {
+class MealListIngredientAdapter(private val ingredients: List<String>) :
+    RecyclerView.Adapter<MealListIngredientAdapter.IngredientViewHolder>() {
 
     inner class IngredientViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val ingredientTextView: TextView = itemView.findViewById(R.id.indeterminateName)
@@ -16,7 +16,7 @@ class CategoryAdapter(private val ingredients: List<String>) :
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): IngredientViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_recipe_recommendation_list_category, parent, false)
+            .inflate(R.layout.item_meal_list_indeterminate, parent, false)
         return IngredientViewHolder(view)
     }
 

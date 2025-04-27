@@ -28,7 +28,7 @@
 
     <!-- 칩 텍스트 커스텀 -->
     <style name="CustomChipText" parent="TextAppearance.MaterialComponents.Caption">
-        <item name="fontFamily">@font/pretendard_regular</item>
+        <item name="fontFamily">@font/pretendard_medium</item>
     </style>
 
     <!-- 칩 커스텀 -->
@@ -83,6 +83,6 @@
 
     <!-- 캘린더의 날짜(Day)의 스타일 설정 -->
     <style name="CalenderViewCustom" parent="Theme.AppCompat">
-        <item name="android:textColor">@drawable/calendar_selector_textcolor</item>
+        <item name="android:textColor">@drawable/selector_calendar_textcolor</item>
     </style>
 </resources>

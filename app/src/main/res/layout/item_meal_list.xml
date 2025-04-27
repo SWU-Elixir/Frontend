@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     app:cardCornerRadius="16dp"
+    app:cardElevation="0dp"
     android:background="@color/white">
     <LinearLayout
         android:layout_width="match_parent"
@@ -16,7 +17,7 @@
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:layout_gravity="center"
-            android:background="@drawable/bg_dietlog_picture"
+            android:background="@drawable/bg_picture_gray"
             android:src="@color/elixir_gray"
             android:scaleType="centerCrop"
             android:clipToOutline="true"
@@ -35,7 +36,7 @@
                 android:layout_height="wrap_content"
                 android:text="아침/점심/저녁/간식"
                 android:textColor="@color/elixir_orange"
-                android:fontFamily="@font/pretendard_thin"
+                android:fontFamily="@font/pretendard_medium"
                 android:textSize="12sp"/>
             <TextView
                 android:id="@+id/dietNameText"
@@ -54,7 +55,7 @@
                 android:clipToPadding="false"
                 android:orientation="horizontal"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:listitem="@layout/item_dietlog_list_indeterminate"/>
+                tools:listitem="@layout/item_meal_list_indeterminate"/>
 
 
         </LinearLayout>
@@ -63,7 +64,7 @@
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:layout_gravity="center"
-            android:src="@drawable/ic_dietlog_number1"
+            android:src="@drawable/ic_meal_number1"
             tools:ignore="ContentDescription" />
 
     </LinearLayout>

@@ -59,7 +59,7 @@
             android:layout_height="wrap_content"
             android:layout_marginVertical="5dp"
             android:background="@drawable/bg_rect_outline_orange"
-            android:fontFamily="@font/pretendard_regular"
+            android:fontFamily="@font/pretendard_medium"
             android:hint="@string/nickname"
             android:importantForAutofill="no"
             android:inputType="text"
@@ -107,7 +107,7 @@
                 android:text="@string/female"
                 android:textSize="16sp"
                 android:textColor="@color/selector_btn_text"
-                android:fontFamily="@font/pretendard_regular"/>
+                android:fontFamily="@font/pretendard_medium"/>
 
             <RadioButton
                 android:id="@+id/btn_male"
@@ -121,7 +121,7 @@
                 android:text="@string/male"
                 android:textSize="16sp"
                 android:textColor="@color/selector_btn_text"
-                android:fontFamily="@font/pretendard_regular"/>
+                android:fontFamily="@font/pretendard_medium"/>
 
             <RadioButton
                 android:id="@+id/btn_other"
@@ -135,7 +135,7 @@
                 android:text="@string/other"
                 android:textSize="16sp"
                 android:textColor="@color/selector_btn_text"
-                android:fontFamily="@font/pretendard_regular"/>
+                android:fontFamily="@font/pretendard_medium"/>
 
             <RadioButton
                 android:id="@+id/btn_selected_not"
@@ -148,7 +148,7 @@
                 android:text="@string/selected_not"
                 android:textSize="16sp"
                 android:textColor="@color/selector_btn_text"
-                android:fontFamily="@font/pretendard_regular"/>
+                android:fontFamily="@font/pretendard_medium"/>
         </RadioGroup>
 
         <!-- 출생년도 -->

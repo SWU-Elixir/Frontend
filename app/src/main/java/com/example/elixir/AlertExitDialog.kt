@@ -28,7 +28,7 @@ class AlertExitDialog(private val act: Activity) {
             val negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
 
             // 폰트 설정
-            val font = ResourcesCompat.getFont(act, R.font.pretendard_regular)
+            val font = ResourcesCompat.getFont(act, R.font.pretendard_medium)
             positiveButton.typeface = font
             negativeButton.typeface = font
 
