@@ -36,7 +36,7 @@
                 android:layout_height="wrap_content"
                 android:text="아침/점심/저녁/간식"
                 android:textColor="@color/elixir_orange"
-                android:fontFamily="@font/pretendard_regular"
+                android:fontFamily="@font/pretendard_medium"
                 android:textSize="12sp"/>
             <TextView
                 android:id="@+id/dietNameText"

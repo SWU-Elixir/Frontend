@@ -35,7 +35,7 @@
                 android:layout_height="wrap_content"
                 android:text="단계"
                 android:textColor="@color/black"
-                android:fontFamily="@font/pretendard_thin"
+                android:fontFamily="@font/pretendard_light"
                 android:textSize="11sp"/>
             <TextView
                 android:id="@+id/challenge_mission"

@@ -22,5 +22,5 @@
         android:text="@string/alert_exit_message"
         android:textSize="16sp"
         android:textColor="@color/black"
-        android:fontFamily="@font/pretendard_regular" />
+        android:fontFamily="@font/pretendard_medium" />
 </LinearLayout>

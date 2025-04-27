@@ -62,7 +62,7 @@
                 android:textAlignment="viewStart"
                 android:textColor="@color/selector_btn_text"
                 android:textSize="16sp"
-                android:fontFamily="@font/pretendard_regular"/>
+                android:fontFamily="@font/pretendard_medium"/>
             <TextView
                 android:id="@+id/content_antiox"
                 android:layout_width="0dp"
@@ -76,7 +76,7 @@
                 android:textAlignment="viewStart"
                 android:textColor="@color/selector_btn_text"
                 android:textSize="12sp"
-                android:fontFamily="@font/pretendard_thin"
+                android:fontFamily="@font/pretendard_light"
                 android:maxLines="2"
                 android:ellipsize="end"
                 android:breakStrategy="simple" />
@@ -118,7 +118,7 @@
                 android:textAlignment="viewStart"
                 android:textColor="@color/selector_btn_text"
                 android:textSize="16sp"
-                android:fontFamily="@font/pretendard_regular"/>
+                android:fontFamily="@font/pretendard_medium"/>
 
             <TextView
                 android:id="@+id/content_blood"
@@ -133,7 +133,7 @@
                 android:textAlignment="viewStart"
                 android:textColor="@color/selector_btn_text"
                 android:textSize="12sp"
-                android:fontFamily="@font/pretendard_thin"
+                android:fontFamily="@font/pretendard_light"
                 android:maxLines="2"
                 android:ellipsize="end"
                 android:breakStrategy="simple"  />
@@ -175,7 +175,7 @@
                 android:textAlignment="viewStart"
                 android:textColor="@color/selector_btn_text"
                 android:textSize="16sp"
-                android:fontFamily="@font/pretendard_regular"/>
+                android:fontFamily="@font/pretendard_medium"/>
             <TextView
                 android:id="@+id/content_inflam"
                 android:layout_width="0dp"
@@ -189,7 +189,7 @@
                 android:textAlignment="viewStart"
                 android:textColor="@color/selector_btn_text"
                 android:textSize="12sp"
-                android:fontFamily="@font/pretendard_thin"
+                android:fontFamily="@font/pretendard_light"
                 android:maxLines="2"
                 android:ellipsize="end"
                 android:breakStrategy="simple" />
@@ -231,7 +231,7 @@
                 android:textAlignment="viewStart"
                 android:textColor="@color/selector_btn_text"
                 android:textSize="16sp"
-                android:fontFamily="@font/pretendard_regular"/>
+                android:fontFamily="@font/pretendard_medium"/>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>
 
