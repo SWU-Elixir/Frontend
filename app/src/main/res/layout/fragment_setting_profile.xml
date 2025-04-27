@@ -17,7 +17,6 @@
             android:layout_marginTop="20dp"
             android:text="@string/set_profile"
             android:textSize="36sp"
-            android:textStyle="bold"
             android:textColor="@color/black"
             android:fontFamily="@font/pretendard_bold"
             app:layout_constraintTop_toTopOf="parent"
@@ -46,10 +45,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:text="@string/nickname"
-            android:fontFamily="@font/pretendard_bold"
             android:textColor="@color/black"
             android:textSize="18sp"
-            android:textStyle="bold"
+            android:fontFamily="@font/pretendard_bold"
             app:layout_constraintTop_toBottomOf="@id/regist_profile"
             app:layout_constraintBottom_toTopOf="@id/regist_nick"/>
 
@@ -59,7 +57,6 @@
             android:layout_height="wrap_content"
             android:layout_marginVertical="5dp"
             android:background="@drawable/bg_rect_outline_orange"
-            android:fontFamily="@font/pretendard_medium"
             android:hint="@string/nickname"
             android:importantForAutofill="no"
             android:inputType="text"
@@ -68,6 +65,7 @@
             android:textColor="@color/black"
             android:textColorHint="@color/elixir_gray"
             android:textSize="16sp"
+            android:fontFamily="@font/pretendard_medium"
             app:layout_constraintBottom_toTopOf="@id/text_gender"
             app:layout_constraintTop_toBottomOf="@id/text_nick"
             tools:ignore="DuplicateSpeakableTextCheck,VisualLintTextFieldSize,TextContrastCheck" />
@@ -82,7 +80,6 @@
             android:fontFamily="@font/pretendard_bold"
             android:textColor="@color/black"
             android:textSize="18sp"
-            android:textStyle="bold"
             app:layout_constraintTop_toBottomOf="@id/regist_nick"
             app:layout_constraintBottom_toTopOf="@id/select_gender"/>
 
@@ -160,7 +157,6 @@
             android:text="@string/birth_year"
             android:textColor="@color/black"
             android:textSize="18sp"
-            android:textStyle="bold"
             android:fontFamily="@font/pretendard_bold"
             app:layout_constraintTop_toBottomOf="@id/select_gender"
             app:layout_constraintBottom_toTopOf="@id/birth_year"/>
