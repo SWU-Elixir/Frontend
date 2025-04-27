@@ -27,7 +27,6 @@ import java.util.Locale
 class DietLogFragment : Fragment() {
     private lateinit var dietLogBinding: FragmentDietLogBinding
     private lateinit var time: LocalDateTime
-    var listener: OnDietLogCompletedListener? = null
 
     private var dietImg: String = ""
     private var dietTitle: String = ""
