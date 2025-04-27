@@ -42,6 +42,26 @@ class ToolbarActivity : AppCompatActivity() {
                 // 계정 생성 프래그먼트 띄워주기
                 setFragment(CreateAccountFragment())
             }
+
+            // 식단 기록 모드
+            2 -> {
+                // 툴바의 제목은 보이게, 더보기 버튼 안보이게
+                toolBinding.title.visibility = View.VISIBLE
+                toolBinding.btnMore.visibility = View.INVISIBLE
+
+                // 뒤로가기 버튼을 누르면 로그인 페이지로 돌아가기
+                // 돌아가기 전 다이얼로그 띄우기
+                toolBinding.btnBack.setOnClickListener {
+                    AlertExitDialog(this).show()
+                }
+
+                // 날짜 불러오기
+                val date = intent.getStringExtra("date")
+                toolBinding.title.text = date
+
+                // 식단 기록 프래그먼트 띄워주기
+                setFragment(DietLogFragment())
+            }
         }
     }
 
