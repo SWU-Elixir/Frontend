@@ -1,0 +1,384 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:background="@color/white"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="150dp"
+            android:padding="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="15dp">
+                <!-- 뒤로가기 아이콘 -->
+                <ImageButton
+                    android:id="@+id/backButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_back_arrow"
+                    android:layout_gravity="center"
+                    android:adjustViewBounds="true"
+                    android:background="@android:color/transparent"
+                    android:maxWidth="30dp"
+                    android:maxHeight="30dp"
+                    android:scaleType="fitCenter"
+                    tools:ignore="ContentDescription, SpeakableTextPresentCheck" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="16dp">
+                <ImageView
+                    android:id="@+id/profileImage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_profile"/>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp">
+                    <TextView
+                        android:id="@+id/memberTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="칭호"
+                        android:textColor="@color/elixir_orange"
+                        android:textSize="14sp"
+                        android:fontFamily="@font/pretendard_regular"/>
+                    <TextView
+                        android:id="@+id/memberNickname"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="닉네임"
+                        android:textColor="@color/black"
+                        android:textSize="16sp"
+                        android:fontFamily="@font/pretendard_bold"/>
+                </LinearLayout>
+                <android.widget.Button
+                    android:id="@+id/btn_follow"
+                    android:layout_width="75dp"
+                    android:layout_height="35dp"
+                    android:background="@drawable/bg_profile_follow"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:text="팔로잉"
+                    android:layout_gravity="center"
+                    android:textSize="14sp"
+                    android:textColor="@color/black"
+                    android:fontFamily="@font/pretendard_regular"
+                    app:layout_constraintTop_toBottomOf="@id/birth_year" />
+            </LinearLayout>
+            <ImageView
+                android:id="@+id/recipeImage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_picture_gray"
+                android:src="@drawable/img_blank"
+                android:scaleType="centerCrop"
+                android:clipToOutline="true"
+                android:layout_marginTop="16dp"
+                tools:ignore="ContentDescription,UnusedAttribute"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:orientation="horizontal">
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <!-- 카테고리 텍스트 영역 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_gravity="center">
+
+                        <TextView
+                            android:id="@+id/category_slow_aging"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="저속노화"
+                            android:textSize="12sp"
+                            android:layout_marginEnd="5dp"
+                            android:textColor="@color/elixir_orange"
+                            android:fontFamily="@font/pretendard_regular"
+                            tools:ignore="MissingConstraints" />
+
+                        <TextView
+                            android:id="@+id/category_type"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="종류"
+                            android:textSize="12sp"
+                            android:textColor="@color/elixir_orange"
+                            android:fontFamily="@font/pretendard_regular"
+                            tools:ignore="MissingConstraints" />
+                    </LinearLayout>
+                    <!-- 레시피 이름 -->
+                    <TextView
+                        android:id="@+id/recipeNameText"
+                        android:layout_width="210dp"
+                        android:layout_height="wrap_content"
+                        android:text="제목"
+                        android:textColor="@color/black"
+                        android:fontFamily="@font/pretendard_bold"
+                        android:layout_marginBottom="3dp"
+                        android:textStyle="bold"
+                        android:textSize="20sp" />
+
+                    <!-- 난이도 + 시간 아이콘/텍스트 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <!-- 난이도 아이콘 -->
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:layout_marginEnd="5dp"
+                            android:src="@drawable/ic_recipe_level" />
+
+                        <!-- 난이도 텍스트 -->
+                        <TextView
+                            android:id="@+id/recipeLevel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:fontFamily="@font/pretendard_regular"
+                            android:maxWidth="40dp"
+                            android:text="난이도"
+                            android:textColor="@color/black"
+                            android:textSize="12sp" />
+
+                        <!-- 시간 아이콘 -->
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:layout_marginStart="30dp"
+                            android:layout_marginEnd="5dp"
+                            android:src="@drawable/ic_recipe_time" />
+
+                        <!-- 시간 텍스트 -->
+                        <TextView
+                            android:id="@+id/recipeTimeHour"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_marginEnd="5dp"
+                            android:fontFamily="@font/pretendard_regular"
+                            android:text="시간"
+                            android:textColor="@color/black"
+                            android:textSize="12sp" />
+
+                        <!-- 분 텍스트 -->
+                        <TextView
+                            android:id="@+id/recipeTimeMin"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:fontFamily="@font/pretendard_regular"
+                            android:text="분"
+                            android:textColor="@color/black"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+                </LinearLayout>
+                <!-- 좋아요 + 북마크 아이콘 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="end">
+
+                    <!-- 좋아요 버튼 -->
+                    <ImageButton
+                        android:id="@+id/heartButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_recipe_heart_normal"
+                        android:adjustViewBounds="true"
+                        android:background="@android:color/transparent"
+                        android:minWidth="30dp"
+                        android:maxHeight="30dp"
+                        android:paddingTop="2dp"
+                        android:paddingBottom="1dp"
+                        android:scaleType="fitCenter"
+                        android:layout_gravity="center"
+                        tools:ignore="ContentDescription,RtlSymmetry" />
+
+                    <!-- 좋아요 수 -->
+                    <TextView
+                        android:id="@+id/heartCount"
+                        android:layout_width="21dp"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/pretendard_regular"
+                        android:textColor="@color/black"
+                        android:textSize="10sp"
+                        android:layout_marginStart="2dp"
+                        android:text=""
+                        android:maxWidth="30dp"
+                        android:layout_gravity="center"/>
+
+                    <!-- 북마크 버튼 -->
+                    <ImageButton
+                        android:id="@+id/bookmarkButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_recipe_bookmark_normal"
+                        android:adjustViewBounds="true"
+                        android:layout_gravity="center"
+                        android:background="@android:color/transparent"
+                        android:minWidth="30dp"
+                        android:maxHeight="30dp"
+                        android:padding="1dp"
+                        android:scaleType="fitCenter"
+                        tools:ignore="ContentDescription,RtlSymmetry" />
+                    <ImageButton
+                        android:id="@+id/menuButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_more"
+                        android:adjustViewBounds="true"
+                        android:layout_gravity="center"
+                        android:background="@android:color/transparent"
+                        android:maxWidth="30dp"
+                        android:maxHeight="30dp"
+                        android:scaleType="fitCenter"
+                        app:tint="@color/elixir_darkgray"
+                        tools:ignore="ContentDescription, SpeakableTextPresentCheck" />
+                </LinearLayout>
+            </LinearLayout>
+
+
+            <!-- 재료 리스트 (RecyclerView) -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/tagList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_recipe_list_tag" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="재료"
+                android:textColor="@color/black"
+                android:fontFamily="@font/pretendard_bold"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="10dp"
+                android:textStyle="bold"
+                android:textSize="16sp" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/ingredientsList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_recipe_list_indeterminate"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="양념"
+                android:textColor="@color/black"
+                android:fontFamily="@font/pretendard_bold"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="10dp"
+                android:textStyle="bold"
+                android:textSize="16sp" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/seasoningList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_recipe_list_indeterminate"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="조리 순서"
+                android:textColor="@color/black"
+                android:fontFamily="@font/pretendard_bold"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="10dp"
+                android:textStyle="bold"
+                android:textSize="16sp" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/stepList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_recipe_list_step"
+                android:overScrollMode="never"
+                android:layout_marginBottom="20dp"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="팁 / 주의 사항"
+                android:textColor="@color/black"
+                android:fontFamily="@font/pretendard_bold"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="10dp"
+                android:textStyle="bold"
+                android:textSize="16sp" />
+            <TextView
+                android:id="@+id/tipText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="내용"
+                android:textColor="@color/black"
+                android:fontFamily="@font/pretendard_regular"
+                android:layout_marginBottom="5dp"
+                android:textSize="14sp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="댓글"
+                android:textColor="@color/black"
+                android:fontFamily="@font/pretendard_bold"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="20dp"
+                android:textStyle="bold"
+                android:textSize="16sp" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/commentList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:orientation="vertical"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_recipe_list_comment"/>
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
