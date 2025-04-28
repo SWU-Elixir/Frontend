@@ -33,7 +33,7 @@
                 android:id="@+id/challengeImage"
                 android:layout_width="match_parent"
                 android:layout_height="400dp"
-                android:background="@drawable/bg_picture_gray"
+                android:background="@drawable/bg_rect_filled_white_15"
                 android:src="@drawable/png_challenge_1"
                 android:scaleType="centerCrop"
                 android:clipToOutline="true"

@@ -25,7 +25,7 @@
             android:id="@+id/recipePicture"
             android:layout_width="130dp"
             android:layout_height="130dp"
-            android:background="@drawable/bg_picture_gray"
+            android:background="@drawable/bg_rect_filled_white_15"
             android:src="@color/elixir_gray"
             android:layout_gravity="center"
             android:scaleType="centerCrop"

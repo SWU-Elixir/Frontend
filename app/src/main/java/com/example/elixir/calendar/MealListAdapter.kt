@@ -7,11 +7,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.fragment.app.FragmentManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.elixir.R
+import com.example.elixir.databinding.ItemMealListBinding
 import com.example.elixir.recipe.RecipeDetailFragment
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
@@ -28,21 +26,21 @@ class MealListAdapter(
     override fun getItemId(position: Int): Long = position.toLong()
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+        val binding: ItemMealListBinding
         val view: View
-        val holder: ViewHolder
 
         if (convertView == null) {
-            view = LayoutInflater.from(context).inflate(R.layout.item_meal_list, parent, false)
-            holder = ViewHolder(view)
-            view.tag = holder
+            binding = ItemMealListBinding.inflate(LayoutInflater.from(context), parent, false)
+            view = binding.root
+            view.tag = binding
         } else {
+            binding = convertView.tag as ItemMealListBinding
             view = convertView
-            holder = view.tag as ViewHolder
         }
 
         val item = getItem(position)
 
-        holder.mealTimesText.text = item.mealtimes
+        binding.dietTimesText.text = item.mealtimes
 
         // 이미지 설정: imageUrl이 있으면 사용하고 없으면 식사 시간에 맞는 아이콘 사용
         val pictureRes = item.imageUrl ?: when (item.mealtimes) {
@@ -53,8 +51,8 @@ class MealListAdapter(
             else -> R.color.elixir_gray // 기본 아이콘
         }
 
-        holder.mealPicture.setImageResource(pictureRes)
-        holder.mealNameText.text = item.name
+        binding.dietPicture.setImageResource(pictureRes)
+        binding.dietNameText.text = item.name
 
         // 점수(Score)에 따라 아이콘 변경
         val iconRes = when (item.score) {
@@ -65,11 +63,11 @@ class MealListAdapter(
             5 -> R.drawable.ic_meal_number5
             else -> R.drawable.ic_meal_number1 // 기본 아이콘
         }
-        holder.mealScoreIcon.setImageResource(iconRes)
+        binding.dietScore.setImageResource(iconRes)
 
         // 재료 목록 RecyclerView 설정
-        holder.mealIngredientList.layoutManager = FlexboxLayoutManager(context)
-        holder.mealIngredientList.adapter = MealListIngredientAdapter(item.mealPlanIngredients)
+        binding.dietIngredientList.layoutManager = FlexboxLayoutManager(context)
+        binding.dietIngredientList.adapter = MealListIngredientAdapter(item.mealPlanIngredients)
 
         val layoutManager: FlexboxLayoutManager = FlexboxLayoutManager(context)
         layoutManager.setFlexDirection(FlexDirection.COLUMN)
@@ -103,13 +101,5 @@ class MealListAdapter(
         data.clear()
         data.addAll(newData)
         notifyDataSetChanged()
-    }
-
-    private class ViewHolder(view: View) {
-        val mealTimesText: TextView = view.findViewById(R.id.dietTimesText)
-        val mealNameText: TextView = view.findViewById(R.id.dietNameText)
-        val mealIngredientList: RecyclerView = view.findViewById(R.id.dietIngredientList)
-        val mealScoreIcon: ImageView = view.findViewById(R.id.dietScore)
-        val mealPicture: ImageView = view.findViewById(R.id.dietPicture)
     }
 }

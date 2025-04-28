@@ -8,59 +8,47 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.elixir.R
+import com.example.elixir.databinding.FragmentRecipeSearchListBinding
 import java.math.BigInteger
 
 class SearchListFragment : Fragment() {
 
-    private lateinit var searchButton: ImageButton
-    private lateinit var backButton: ImageButton
-    private lateinit var searchEditText: EditText
+    private var _binding: FragmentRecipeSearchListBinding? = null
+    private val binding get() = _binding!!
 
-    private lateinit var recipeListView: RecyclerView
     private lateinit var recipeListAdapter: RecipeListAdapter
-
-    private lateinit var methodSpinner: Spinner
-    private lateinit var typeSpinner: Spinner
-
-    private lateinit var resetButton: Button
-    private lateinit var emptyRecipeText: TextView
-
     private lateinit var sampleRecipes: List<RecipeData>
     private var hasNavigatedToSearch = false // 중복 방지 플래그
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_recipe_search_list, container, false)
+    ): View {
+        _binding = FragmentRecipeSearchListBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-        backButton = view.findViewById(R.id.backButton)
-        searchButton = view.findViewById(R.id.searchButton)
-        searchEditText = view.findViewById(R.id.searchEditText)
-        methodSpinner = view.findViewById(R.id.spinner_difficulty)
-        typeSpinner = view.findViewById(R.id.spinner_type)
-        resetButton = view.findViewById(R.id.resetButton)
-        recipeListView = view.findViewById(R.id.recipeList)
-        emptyRecipeText = view.findViewById(R.id.emptyRecipeText)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         // 전달받은 검색어 및 필터값
         val keyword = arguments?.getString("search_keyword")?.trim()
-        searchEditText.setText(keyword)
+        binding.searchEditText.setText(keyword)
 
         // EditText 입력 감지 → SearchFragment로 이동 (한 번만)
-        searchEditText.addTextChangedListener(object : TextWatcher {
+        binding.searchEditText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {}
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 if (!hasNavigatedToSearch) {
                     hasNavigatedToSearch = true
-                    val currentKeyword = searchEditText.text.toString().trim()
+                    val currentKeyword = binding.searchEditText.text.toString().trim()
                     val searchFragment = SearchFragment().apply {
                         arguments = Bundle().apply {
                             putString("search_keyword", currentKeyword)
@@ -75,10 +63,10 @@ class SearchListFragment : Fragment() {
         })
 
         // 검색 버튼 클릭 시 SearchFragment로 이동
-        searchButton.setOnClickListener {
+        binding.searchButton.setOnClickListener {
             if (!hasNavigatedToSearch) {
                 hasNavigatedToSearch = true
-                val currentKeyword = searchEditText.text.toString().trim()
+                val currentKeyword = binding.searchEditText.text.toString().trim()
                 val searchFragment = SearchFragment().apply {
                     arguments = Bundle().apply {
                         putString("search_keyword", currentKeyword)
@@ -92,28 +80,28 @@ class SearchListFragment : Fragment() {
         }
 
         fun updateResetButtonVisibility() {
-            val isMethodSelected = methodSpinner.selectedItemPosition != 0
-            val isTypeSelected = typeSpinner.selectedItemPosition != 0
-            resetButton.visibility = if (isMethodSelected || isTypeSelected) View.VISIBLE else View.GONE
+            val isMethodSelected = binding.spinnerDifficulty.selectedItemPosition != 0
+            val isTypeSelected = binding.spinnerType.selectedItemPosition != 0
+            binding.resetButton.visibility = if (isMethodSelected || isTypeSelected) View.VISIBLE else View.GONE
         }
 
         // 스피너 초기화
         val methodItems = resources.getStringArray(R.array.method_list).toList()
         val methodAdapter = RecipeListSpinnerAdapter(requireContext(), methodItems)
-        methodSpinner.adapter = methodAdapter
-        methodSpinner.setSelection(0) // 초기 선택값 설정
-        methodSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        binding.spinnerDifficulty.adapter = methodAdapter
+        binding.spinnerDifficulty.setSelection(0) // 초기 선택값 설정
+        binding.spinnerDifficulty.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 val selectedItem = parent.getItemAtPosition(position).toString()
                 Log.d("Spinner", "선택된 항목: $selectedItem")
                 // 첫 번째 아이템이 아닌 경우에만 선택된 상태로 설정
                 if (position != 0) {
-                    methodSpinner.isSelected = true
+                    binding.spinnerDifficulty.isSelected = true
                 } else {
-                    methodSpinner.isSelected = false
+                    binding.spinnerDifficulty.isSelected = false
                 }
                 updateResetButtonVisibility()
-                filterRecipes(searchEditText.text.toString())
+                filterRecipes(binding.searchEditText.text.toString())
             }
 
             override fun onNothingSelected(parent: AdapterView<*>) {
@@ -123,20 +111,20 @@ class SearchListFragment : Fragment() {
 
         val typeItems = resources.getStringArray(R.array.type_list).toList()
         val typeAdapter = RecipeListSpinnerAdapter(requireContext(), typeItems)
-        typeSpinner.adapter = typeAdapter
-        typeSpinner.setSelection(0) // 초기 선택값 설정
-        typeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        binding.spinnerType.adapter = typeAdapter
+        binding.spinnerType.setSelection(0) // 초기 선택값 설정
+        binding.spinnerType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 val selectedItem = parent.getItemAtPosition(position).toString()
                 Log.d("Spinner", "선택된 항목: $selectedItem")
                 // 첫 번째 아이템이 아닌 경우에만 선택된 상태로 설정
                 if (position != 0) {
-                    typeSpinner.isSelected = true
+                    binding.spinnerType.isSelected = true
                 } else {
-                    typeSpinner.isSelected = false
+                    binding.spinnerType.isSelected = false
                 }
                 updateResetButtonVisibility()
-                filterRecipes(searchEditText.text.toString())
+                filterRecipes(binding.searchEditText.text.toString())
             }
 
             override fun onNothingSelected(parent: AdapterView<*>) {
@@ -144,17 +132,17 @@ class SearchListFragment : Fragment() {
             }
         }
 
-        resetButton.setOnClickListener {
+        binding.resetButton.setOnClickListener {
             resetSpinners()
             updateResetButtonVisibility()
-            filterRecipes(searchEditText.text.toString())
+            filterRecipes(binding.searchEditText.text.toString())
         }
 
         // 더미 레시피 데이터 추가
         sampleRecipes = getDummyRecipeData()
 
         // 리사이클러뷰 설정
-        recipeListView.layoutManager = LinearLayoutManager(requireContext())
+        binding.recipeList.layoutManager = LinearLayoutManager(requireContext())
         recipeListAdapter = RecipeListAdapter(
             sampleRecipes.toMutableList(),
             onBookmarkClick = { recipe ->
@@ -167,7 +155,7 @@ class SearchListFragment : Fragment() {
             },
             fragmentManager = parentFragmentManager
         )
-        recipeListView.adapter = recipeListAdapter
+        binding.recipeList.adapter = recipeListAdapter
 
         // 검색어가 있으면 필터 적용
         if (!keyword.isNullOrEmpty()) {
@@ -175,15 +163,14 @@ class SearchListFragment : Fragment() {
         }
 
         // 뒤로 가기 버튼
-        backButton.setOnClickListener {
+        binding.backButton.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
 
-
         // 키보드의 검색 버튼 누르면 검색 실행
-        searchEditText.setOnEditorActionListener { _, actionId, _ ->
+        binding.searchEditText.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                val keyword = searchEditText.text.toString().trim()
+                val keyword = binding.searchEditText.text.toString().trim()
                 if (keyword.isNotEmpty()) {
                     filterRecipes(keyword)
                     resetSpinners()
@@ -196,8 +183,6 @@ class SearchListFragment : Fragment() {
                 false
             }
         }
-
-        return view
     }
 
     /**
@@ -205,8 +190,8 @@ class SearchListFragment : Fragment() {
      * 검색어, 카테고리 필터 두 조건을 모두 반영
      */
     private fun filterRecipes(keyword: String) {
-        val selectedMethod = methodSpinner.selectedItem?.toString()
-        val selectedType = typeSpinner.selectedItem?.toString()
+        val selectedMethod = binding.spinnerDifficulty.selectedItem?.toString()
+        val selectedType = binding.spinnerType.selectedItem?.toString()
 
         val filtered = sampleRecipes.filter { recipe ->
             val keywordMatch = recipe.title.contains(keyword, ignoreCase = true)
@@ -221,11 +206,11 @@ class SearchListFragment : Fragment() {
 
         // 결과 없을 시 안내 텍스트 표시
         if (filtered.isEmpty()) {
-            recipeListView.visibility = View.GONE
-            emptyRecipeText.visibility = View.VISIBLE
+            binding.recipeList.visibility = View.GONE
+            binding.emptyRecipeText.visibility = View.VISIBLE
         } else {
-            recipeListView.visibility = View.VISIBLE
-            emptyRecipeText.visibility = View.GONE
+            binding.recipeList.visibility = View.VISIBLE
+            binding.emptyRecipeText.visibility = View.GONE
         }
     }
 
@@ -233,8 +218,13 @@ class SearchListFragment : Fragment() {
      * 스피너 필터 초기화
      */
     private fun resetSpinners() {
-        methodSpinner.setSelection(0)
-        typeSpinner.setSelection(0)
+        binding.spinnerDifficulty.setSelection(0)
+        binding.spinnerType.setSelection(0)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     private fun getDummyRecipeData(): List<RecipeData> =
@@ -360,6 +350,5 @@ class SearchListFragment : Fragment() {
                 likeCount = 19
             )
         )
-
-
 }
+

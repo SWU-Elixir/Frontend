@@ -11,9 +11,13 @@ import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import com.example.elixir.calendar.CalendarFragment
 import com.example.elixir.challenge.ChallengeFragment
+import com.example.elixir.chatbot.ChatBotFragment
+import com.example.elixir.databinding.ActivityHomeBinding
 import com.example.elixir.recipe.RecipeFragment
 
 class HomeActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityHomeBinding
 
     // 하단 네비게이션 바의 아이콘 버튼들
     private lateinit var calendarButton: ImageButton
@@ -38,21 +42,22 @@ class HomeActivity : AppCompatActivity() {
 
         // 시스템 UI(edge-to-edge) 설정
         enableEdgeToEdge()
-        setContentView(R.layout.activity_home)
+        binding = ActivityHomeBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         // 하단 네비게이션 버튼 및 텍스트 초기화
-        calendarButton = findViewById(R.id.calendar_button)
-        recipeButton = findViewById(R.id.recipe_button)
-        challengeButton = findViewById(R.id.challenge_button)
-        mypageButton = findViewById(R.id.mypage_button)
-        chatbotButton = findViewById(R.id.chatbot_button)
+        calendarButton = binding.calendarButton
+        recipeButton = binding.recipeButton
+        challengeButton = binding.challengeButton
+        mypageButton = binding.mypageButton
+        chatbotButton = binding.chatbotButton
 
-        calendarTitle = findViewById(R.id.calendar_title)
-        recipeTitle = findViewById(R.id.recipe_title)
-        challengeTitle = findViewById(R.id.challenge_title)
-        mypageTitle = findViewById(R.id.mypage_title)
-        chatbotTitle = findViewById(R.id.chatbot_title)
+        calendarTitle = binding.calendarTitle
+        recipeTitle = binding.recipeTitle
+        challengeTitle = binding.challengeTitle
+        mypageTitle = binding.mypageTitle
+        chatbotTitle = binding.chatbotTitle
 
         // 최초 실행 시 캘린더 탭을 기본 선택 상태로 설정
         calendarTitle.setTextColor(ContextCompat.getColor(this, R.color.elixir_orange))
@@ -88,7 +93,9 @@ class HomeActivity : AppCompatActivity() {
 
         chatbotButton.setOnClickListener {
             updateSelectedButton(chatbotButton, chatbotTitle)
-            Toast.makeText(this, "챗봇 탭 선택됨", Toast.LENGTH_SHORT).show()
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fullscreenContainer, ChatBotFragment())
+                .commit()
         }
 
         mypageButton.setOnClickListener {

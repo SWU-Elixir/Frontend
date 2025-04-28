@@ -10,12 +10,16 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.elixir.R
+import com.example.elixir.databinding.FragmentRecipeDetailBinding
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 import java.math.BigInteger
 
 class RecipeDetailFragment : Fragment() {
+
+    private var _binding: FragmentRecipeDetailBinding? = null
+    private val binding get() = _binding!!
 
     // 상단 뒤로가기 버튼
     private lateinit var backButton: ImageButton
@@ -44,36 +48,40 @@ class RecipeDetailFragment : Fragment() {
     private lateinit var tipText: TextView
     private lateinit var commentList: RecyclerView
 
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_recipe_detail, container, false)
+        _binding = FragmentRecipeDetailBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         // ------------------------ 1. 뷰 초기화 ------------------------
-        backButton = view.findViewById(R.id.backButton)
-        profileImage = view.findViewById(R.id.profileImage)
-        memberTitle = view.findViewById(R.id.memberTitle)
-        memberNickname = view.findViewById(R.id.memberNickname)
-        followButton = view.findViewById(R.id.btn_follow)
+        backButton = binding.backButton
+        profileImage = binding.profileImage
+        memberTitle = binding.memberTitle
+        memberNickname = binding.memberNickname
+        followButton = binding.followButton
 
-        recipeTitle = view.findViewById(R.id.recipeNameText)
-        categorySlowAging = view.findViewById(R.id.category_slow_aging)
-        categoryType = view.findViewById(R.id.category_type)
-        tagList = view.findViewById(R.id.tagList)
-        bookmarkButton = view.findViewById(R.id.bookmarkButton)
-        heartButton = view.findViewById(R.id.heartButton)
-        menuButton = view.findViewById(R.id.menuButton)
-        heartCount = view.findViewById(R.id.heartCount)
-        recipeLevel = view.findViewById(R.id.recipeLevel)
-        recipeTimeHour = view.findViewById(R.id.recipeTimeHour)
-        recipeTimeMin = view.findViewById(R.id.recipeTimeMin)
-        stepList = view.findViewById(R.id.stepList)
-        ingredientsList = view.findViewById(R.id.ingredientsList)
-        seasoningList = view.findViewById(R.id.seasoningList)
-        tipText = view.findViewById(R.id.tipText)
-        commentList = view.findViewById(R.id.commentList)
+        recipeTitle = binding.recipeNameText
+        categorySlowAging = binding.categorySlowAging
+        categoryType = binding.categoryType
+        tagList = binding.tagList
+        bookmarkButton = binding.bookmarkButton
+        heartButton = binding.heartButton
+        menuButton = binding.menuButton
+        heartCount = binding.heartCount
+        recipeLevel = binding.recipeLevel
+        recipeTimeHour = binding.recipeTimeHour
+        recipeTimeMin = binding.recipeTimeMin
+        stepList = binding.stepList
+        ingredientsList = binding.ingredientsList
+        seasoningList = binding.seasoningList
+        tipText = binding.tipText
+        commentList = binding.commentList
 
         // ------------------------ 2. 더미 데이터 적용 ------------------------
         val dummyRecipe = RecipeData(
@@ -119,6 +127,23 @@ class RecipeDetailFragment : Fragment() {
         // 좋아요 수 포맷 처리
         heartCount.text = formatCount(dummyRecipe.likeCount)
 
+        // 팔로우 버튼 클릭 이벤트 설정
+        binding.followButton.setOnClickListener {
+            val isFollowing = binding.followButton.text == "팔로잉"
+            binding.followButton.text = if (isFollowing) "팔로우" else "팔로잉"
+            binding.followButton.setBackgroundResource(
+                if (isFollowing) R.drawable.bg_rect_outline_gray_10
+                else R.drawable.bg_rect_filled_orange_5
+            )
+            binding.followButton.setTextColor(
+                resources.getColor(
+                    if (isFollowing) R.color.black
+                    else R.color.white,
+                    null
+                )
+            )
+        }
+
         // 메뉴 버튼 클릭 시 팝업 메뉴 표시
         menuButton.setOnClickListener {
             val popupMenu = PopupMenu(context, menuButton)
@@ -157,7 +182,6 @@ class RecipeDetailFragment : Fragment() {
             adapter = RecipeSeasoningAdapter(dummyRecipe.ingredients)
         }
 
-
         seasoningList.apply {
             layoutManager = FlexboxLayoutManager(context).apply {
                 flexDirection = FlexDirection.ROW
@@ -195,8 +219,11 @@ class RecipeDetailFragment : Fragment() {
         backButton.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
+    }
 
-        return view
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     /**

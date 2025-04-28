@@ -76,10 +76,10 @@
                         android:fontFamily="@font/pretendard_bold"/>
                 </LinearLayout>
                 <android.widget.Button
-                    android:id="@+id/btn_follow"
+                    android:id="@+id/followButton"
                     android:layout_width="75dp"
                     android:layout_height="35dp"
-                    android:background="@drawable/bg_profile_follow"
+                    android:background="@drawable/bg_rect_outline_gray_10"
                     style="@style/Widget.AppCompat.Button.Borderless"
                     android:text="팔로잉"
                     android:layout_gravity="center"
@@ -92,7 +92,7 @@
                 android:id="@+id/recipeImage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_picture_gray"
+                android:background="@drawable/bg_rect_filled_white_15"
                 android:src="@drawable/img_blank"
                 android:scaleType="centerCrop"
                 android:clipToOutline="true"

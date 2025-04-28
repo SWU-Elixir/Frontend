@@ -9,14 +9,11 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ListView
-import android.widget.TextView
-import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.elixir.R
+import com.example.elixir.databinding.FragmentCalendarBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.prolificinteractive.materialcalendarview.*
 import com.prolificinteractive.materialcalendarview.format.TitleFormatter
 import com.prolificinteractive.materialcalendarview.format.WeekDayFormatter
@@ -30,12 +27,10 @@ import java.math.BigInteger
 // ----------------------------- 프래그먼트 -------------------------------------
 class CalendarFragment : Fragment() {
 
-    // UI 컴포넌트 선언
-    private lateinit var mealListView: ListView
+    private var _binding: FragmentCalendarBinding? = null
+    private val binding get() = _binding!!
+
     private lateinit var mealAdapter: MealListAdapter
-    private lateinit var emptyMealText: TextView
-    private lateinit var calendarView: MaterialCalendarView
-    private lateinit var fab: FloatingActionButton
 
     // 날짜 관련 변수
     private val eventMap = mutableMapOf<String, MutableList<MealPlanData>>()
@@ -48,56 +43,56 @@ class CalendarFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_calendar, container, false)
+    ): View {
+        _binding = FragmentCalendarBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         // -------------------- 리스트뷰 설정 --------------------
-        mealListView = view.findViewById(R.id.mealPlanList)
-        emptyMealText = view.findViewById(R.id.emptyMealText)
         mealAdapter = MealListAdapter(requireContext(), mutableListOf(), fragmentManager = parentFragmentManager)
-        mealListView.adapter = mealAdapter
+        binding.mealPlanList.adapter = mealAdapter
         addDummyEvents() // 더미 데이터 세팅
 
         // -------------------- 캘린더 설정 ----------------------
-        calendarView = view.findViewById(R.id.calendarView)
-        calendarView.setWeekDayFormatter(CustomWeekDayFormatter(requireContext()))
-        calendarView.setTitleFormatter(CustomTitleFormatter(requireContext()))
+        binding.calendarView.setWeekDayFormatter(CustomWeekDayFormatter(requireContext()))
+        binding.calendarView.setTitleFormatter(CustomTitleFormatter(requireContext()))
 
         // 오늘 날짜 배경 원 데코레이터
         try {
             val todayDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.bg_oval_outline_orange)
             todayDrawable?.let {
-                calendarView.addDecorator(CalendarTodayDecorator(requireContext(), it))
+                binding.calendarView.addDecorator(CalendarTodayDecorator(requireContext(), it))
             }
         } catch (e: Exception) {
             Log.e("CalendarFragment", "오늘 날짜 배경 설정 오류: ${e.message}")
         }
 
         // ----------------- FAB 및 바텀시트 ---------------------
-        val bottomSheet = view.findViewById<CardView>(R.id.bottomSheet)
-        val behavior = BottomSheetBehavior.from(bottomSheet)
-        fab = view.findViewById(R.id.fab)
-        fab.hide()
+        val behavior = BottomSheetBehavior.from(binding.bottomSheet)
+        binding.fab.hide()
         var bottomSheetState = BottomSheetBehavior.STATE_COLLAPSED
 
         // 오늘 날짜 기본 선택 및 점수 데코레이터 처리
         selectedCalendarDay = today
         updateEventList(selectedCalendarDay.toString())
         updateSelectedDateDecorator()
-        processDietLogScores(calendarView)
+        processDietLogScores(binding.calendarView)
 
         // 날짜 선택 이벤트 처리
-        calendarView.setOnDateChangedListener { _, date, _ ->
+        binding.calendarView.setOnDateChangedListener { _, date, _ ->
             selectedCalendarDay = date
             val selectedDateStr = "%04d-%02d-%02d".format(date.year, date.month + 1, date.day)
             updateEventList(selectedDateStr)
             updateSelectedDateDecorator()
 
-            fab.visibility = if (selectedCalendarDay == today && bottomSheetState != BottomSheetBehavior.STATE_COLLAPSED) View.VISIBLE else View.GONE
+            binding.fab.visibility = if (selectedCalendarDay == today && bottomSheetState != BottomSheetBehavior.STATE_COLLAPSED) View.VISIBLE else View.GONE
         }
 
         // FAB 클릭 이벤트
-        fab.setOnClickListener {
+        binding.fab.setOnClickListener {
             Log.d("CalendarFragment", "FAB 클릭됨")
         }
 
@@ -105,29 +100,27 @@ class CalendarFragment : Fragment() {
         behavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 bottomSheetState = newState
-                fab.visibility = if (selectedCalendarDay == today && newState != BottomSheetBehavior.STATE_COLLAPSED) View.VISIBLE else View.GONE
+                binding.fab.visibility = if (selectedCalendarDay == today && newState != BottomSheetBehavior.STATE_COLLAPSED) View.VISIBLE else View.GONE
             }
             override fun onSlide(bottomSheet: View, slideOffset: Float) {}
         })
-
-        return view
     }
 
     // ------------------------ 데코레이터 ---------------------------
 
     // 선택된 날짜의 텍스트 색상 변경 데코레이터
     private fun updateSelectedDateDecorator() {
-        selectedTextDecorator?.let { calendarView.removeDecorator(it) }
-        todayTextDecorator?.let { calendarView.removeDecorator(it) }
+        selectedTextDecorator?.let { binding.calendarView.removeDecorator(it) }
+        todayTextDecorator?.let { binding.calendarView.removeDecorator(it) }
 
         val textColor = ContextCompat.getColor(requireContext(), R.color.white)
         selectedTextDecorator = SelectedDateTextColorDecorator(selectedCalendarDay, textColor)
-        calendarView.addDecorator(selectedTextDecorator!!)
+        binding.calendarView.addDecorator(selectedTextDecorator!!)
 
         if (selectedCalendarDay != today || isFirstLaunch) {
             val orangeColor = ContextCompat.getColor(requireContext(), R.color.elixir_orange)
             todayTextDecorator = TodayTextColorDecorator(today, orangeColor)
-            calendarView.addDecorator(todayTextDecorator!!)
+            binding.calendarView.addDecorator(todayTextDecorator!!)
         }
         isFirstLaunch = false
     }
@@ -232,11 +225,11 @@ class CalendarFragment : Fragment() {
     private fun updateEventList(selectedDate: String) {
         val events = eventMap[selectedDate]
         if (events.isNullOrEmpty()) {
-            mealListView.visibility = View.GONE
-            emptyMealText.visibility = View.VISIBLE
+            binding.mealPlanList.visibility = View.GONE
+            binding.emptyMealText.visibility = View.VISIBLE
         } else {
-            mealListView.visibility = View.VISIBLE
-            emptyMealText.visibility = View.GONE
+            binding.mealPlanList.visibility = View.VISIBLE
+            binding.emptyMealText.visibility = View.GONE
             mealAdapter.updateData(events)
         }
     }
@@ -317,4 +310,8 @@ class CalendarFragment : Fragment() {
         )
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }

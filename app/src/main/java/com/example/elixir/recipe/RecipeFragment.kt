@@ -164,7 +164,7 @@ class RecipeFragment : Fragment() {
         searchButton.setOnClickListener {
             Log.e("RecipeFragment", "검색 버튼 클릭")
             val transaction = parentFragmentManager.beginTransaction()
-            transaction.replace(R.id.searchContainer, SearchFragment())
+            transaction.replace(R.id.fullscreenContainer, SearchFragment())
             transaction.addToBackStack(null)
             transaction.commit()
         }
