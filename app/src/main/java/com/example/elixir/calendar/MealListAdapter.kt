@@ -10,7 +10,6 @@ import android.widget.BaseAdapter
 import androidx.fragment.app.FragmentManager
 import com.example.elixir.R
 import com.example.elixir.databinding.ItemMealListBinding
-import com.example.elixir.recipe.RecipeDetailFragment
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent

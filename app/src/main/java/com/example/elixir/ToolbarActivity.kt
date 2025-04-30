@@ -1,22 +1,24 @@
 package com.example.elixir
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
+import com.example.elixir.chatbot.ChatBotActivity
 import com.example.elixir.databinding.ActivityToolbarBinding
 import com.example.elixir.signup.CreateAccountFragment
 
-class ToolbarActivity : AppCompatActivity() {
+open class ToolbarActivity : AppCompatActivity() {
     // 선언부
-    private lateinit var toolBinding: ActivityToolbarBinding
+    protected lateinit var toolBinding: ActivityToolbarBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // 화면 전체 사용, 상태 바를 투명하게 하기
         enableEdgeToEdge()
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowCompat.setDecorFitsSystemWindows(window, true)
 
         super.onCreate(savedInstanceState)
         // 바인딩 정의
@@ -62,10 +64,18 @@ class ToolbarActivity : AppCompatActivity() {
                 // 식단 기록 프래그먼트 띄워주기
                 setFragment(DietLogFragment())
             }
+
+            // 챗봇 모드
+            3 -> {
+                // ChatBotActivity로 이동
+                val intent = Intent(this, ChatBotActivity::class.java)
+                startActivity(intent)
+                finish()
+            }
         }
     }
 
-    private fun setFragment(frag: Fragment) {
+    protected fun setFragment(frag: Fragment) {
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_registration, frag)
             .commit()

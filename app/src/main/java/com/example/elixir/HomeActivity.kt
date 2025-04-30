@@ -1,9 +1,11 @@
 package com.example.elixir
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -11,7 +13,7 @@ import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import com.example.elixir.calendar.CalendarFragment
 import com.example.elixir.challenge.ChallengeFragment
-import com.example.elixir.chatbot.ChatBotFragment
+import com.example.elixir.chatbot.ChatBotActivity
 import com.example.elixir.databinding.ActivityHomeBinding
 import com.example.elixir.recipe.RecipeFragment
 
@@ -36,6 +38,23 @@ class HomeActivity : AppCompatActivity() {
     // 현재 선택된 텍스트와 버튼 추적용 변수
     private var selectedTitle: TextView? = null
     private var selectedButton: ImageButton? = null
+
+    // 이전 프래그먼트와 버튼 상태 저장
+    private var previousFragment: Fragment? = null
+    private var previousButton: ImageButton? = null
+    private var previousTitle: TextView? = null
+
+    private val chatBotLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        // 챗봇 액티비티에서 돌아왔을 때 이전 상태로 복구
+        if (previousFragment != null && previousButton != null && previousTitle != null) {
+            updateSelectedButton(previousButton!!, previousTitle!!)
+            replaceFragment(previousFragment!!)
+        } else {
+            // 이전 상태가 없는 경우 캘린더로 복구
+            updateSelectedButton(calendarButton, calendarTitle)
+            replaceFragment(CalendarFragment())
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,31 +96,43 @@ class HomeActivity : AppCompatActivity() {
      */
     private fun setupButtonListeners() {
         calendarButton.setOnClickListener {
+            savePreviousState()
             updateSelectedButton(calendarButton, calendarTitle)
             replaceFragment(CalendarFragment())
         }
 
         recipeButton.setOnClickListener {
+            savePreviousState()
             updateSelectedButton(recipeButton, recipeTitle)
             replaceFragment(RecipeFragment())
         }
 
         challengeButton.setOnClickListener {
+            savePreviousState()
             updateSelectedButton(challengeButton, challengeTitle)
             replaceFragment(ChallengeFragment())
         }
 
         chatbotButton.setOnClickListener {
+            savePreviousState()
             updateSelectedButton(chatbotButton, chatbotTitle)
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.fullscreenContainer, ChatBotFragment())
-                .commit()
+            chatBotLauncher.launch(Intent(this, ChatBotActivity::class.java))
         }
 
         mypageButton.setOnClickListener {
+            savePreviousState()
             updateSelectedButton(mypageButton, mypageTitle)
             Toast.makeText(this, "마이페이지 탭 선택됨", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    /**
+     * 현재 상태를 이전 상태로 저장
+     */
+    private fun savePreviousState() {
+        previousFragment = supportFragmentManager.findFragmentById(R.id.fragmentContainer)
+        previousButton = selectedButton
+        previousTitle = selectedTitle
     }
 
     /**

@@ -9,19 +9,20 @@
     android:gravity="center"
     android:background="@drawable/bg_rect_filled_white_15">
 
-    <com.airbnb.lottie.LottieAnimationView
-        android:id="@+id/lottieAnimation"
-        android:layout_width="70dp"
-        android:layout_height="70dp"
-        app:lottie_rawRes="@raw/challenge_success"
-        app:lottie_autoPlay="true"
-        app:lottie_loop="false" />
+<!--    <com.airbnb.lottie.LottieAnimationView-->
+<!--        android:id="@+id/lottieAnimation"-->
+<!--        android:layout_width="70dp"-->
+<!--        android:layout_height="70dp"-->
+<!--        app:lottie_rawRes="@raw/challenge_success"-->
+<!--        app:lottie_autoPlay="true"-->
+<!--        app:lottie_loop="false" />-->
 
     <TextView
         android:id="@+id/dialogTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="챌린지 완료!"
+        android:layout_marginTop="10dp"
         android:textSize="18sp"
         android:textStyle="bold"
         android:textColor="@color/black"
