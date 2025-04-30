@@ -1,6 +1,7 @@
 package com.example.elixir.calendar
 
 import android.content.Context
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -43,7 +44,7 @@ class MealListAdapter(
         val item = getItem(position)
 
         holder.mealTimesText.text = item.mealtimes
-
+/*
         // 이미지 설정: imageUrl이 있으면 사용하고 없으면 식사 시간에 맞는 아이콘 사용
         val pictureRes = item.imageUrl ?: when (item.mealtimes) {
             "아침" -> R.drawable.ic_meal_morning
@@ -53,7 +54,12 @@ class MealListAdapter(
             else -> R.color.elixir_gray // 기본 아이콘
         }
 
-        holder.mealPicture.setImageResource(pictureRes)
+        holder.mealPicture.setImageResource(pictureRes)*/
+        // 이미지 설정
+        val imageUriString = item.imageUrl
+        val imageUri = Uri.parse(imageUriString)
+        holder.mealPicture.setImageURI(imageUri)
+
         holder.mealNameText.text = item.name
 
         // 점수(Score)에 따라 아이콘 변경
@@ -86,7 +92,7 @@ class MealListAdapter(
                     putString("createdAt", item.createdAt)
                     putString("mealtimes", item.mealtimes)
                     putStringArrayList("mealPlanIngredients", ArrayList(item.mealPlanIngredients))
-                    putInt("imageUrl", item.imageUrl ?: R.drawable.ic_recipe_white)
+                    putString("imageUrl", item.imageUrl)
                 }
             }
 

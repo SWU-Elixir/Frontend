@@ -1,7 +1,11 @@
 package com.example.elixir.calendar
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.graphics.*
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.text.style.ForegroundColorSpan
 import android.text.style.LineBackgroundSpan
@@ -11,10 +15,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ListView
 import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.elixir.R
+import com.example.elixir.ToolbarActivity
+import com.example.elixir.databinding.FragmentCalendarBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.prolificinteractive.materialcalendarview.*
@@ -29,13 +39,11 @@ import java.math.BigInteger
 
 // ----------------------------- 프래그먼트 -------------------------------------
 class CalendarFragment : Fragment() {
+    // 바인딩
+    private lateinit var calendarBinding: FragmentCalendarBinding
 
     // UI 컴포넌트 선언
-    private lateinit var mealListView: ListView
     private lateinit var mealAdapter: MealListAdapter
-    private lateinit var emptyMealText: TextView
-    private lateinit var calendarView: MaterialCalendarView
-    private lateinit var fab: FloatingActionButton
 
     // 날짜 관련 변수
     private val eventMap = mutableMapOf<String, MutableList<MealPlanData>>()
@@ -45,89 +53,130 @@ class CalendarFragment : Fragment() {
     private val today = CalendarDay.today()
     private var isFirstLaunch = true
 
+    // DietLogFragment 띄우기
+    private lateinit var dietLogLauncher: ActivityResultLauncher<Intent>
+
+    // 바텀시트 상태 저장용
+    private var bottomSheetState = BottomSheetBehavior.STATE_COLLAPSED
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_calendar, container, false)
+    ): View {
+        calendarBinding = FragmentCalendarBinding.inflate(inflater, container, false)
+        return calendarBinding.root
+    }
 
-        // -------------------- 리스트뷰 설정 --------------------
-        mealListView = view.findViewById(R.id.mealPlanList)
-        emptyMealText = view.findViewById(R.id.emptyMealText)
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // 리스트뷰 및 어댑터 설정
         mealAdapter = MealListAdapter(requireContext(), mutableListOf(), fragmentManager = parentFragmentManager)
-        mealListView.adapter = mealAdapter
-        addDummyEvents() // 더미 데이터 세팅
+        calendarBinding.mealPlanList.adapter = mealAdapter
+        addDummyEvents()
 
-        // -------------------- 캘린더 설정 ----------------------
-        calendarView = view.findViewById(R.id.calendarView)
-        calendarView.setWeekDayFormatter(CustomWeekDayFormatter(requireContext()))
-        calendarView.setTitleFormatter(CustomTitleFormatter(requireContext()))
-
-        // 오늘 날짜 배경 원 데코레이터
-        try {
-            val todayDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.bg_oval_outline_orange)
-            todayDrawable?.let {
-                calendarView.addDecorator(CalendarTodayDecorator(requireContext(), it))
+        // 캘린더 설정
+        calendarBinding.calendarView.apply {
+            setWeekDayFormatter(CustomWeekDayFormatter(requireContext()))
+            setTitleFormatter(CustomTitleFormatter(requireContext()))
+            try {
+                val todayDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.bg_oval_outline_orange)
+                todayDrawable?.let {
+                    addDecorator(CalendarTodayDecorator(requireContext(), it))
+                }
+            } catch (e: Exception) {
+                Log.e("CalendarFragment", "오늘 날짜 배경 설정 오류: ${e.message}")
             }
-        } catch (e: Exception) {
-            Log.e("CalendarFragment", "오늘 날짜 배경 설정 오류: ${e.message}")
         }
-
-        // ----------------- FAB 및 바텀시트 ---------------------
-        val bottomSheet = view.findViewById<CardView>(R.id.bottomSheet)
-        val behavior = BottomSheetBehavior.from(bottomSheet)
-        fab = view.findViewById(R.id.fab)
-        fab.hide()
-        var bottomSheetState = BottomSheetBehavior.STATE_COLLAPSED
 
         // 오늘 날짜 기본 선택 및 점수 데코레이터 처리
         selectedCalendarDay = today
         updateEventList(selectedCalendarDay.toString())
         updateSelectedDateDecorator()
-        processDietLogScores(calendarView)
+        processDietLogScores(calendarBinding.calendarView)
 
-        // 날짜 선택 이벤트 처리
-        calendarView.setOnDateChangedListener { _, date, _ ->
+        // 날짜 선택 리스너
+        calendarBinding.calendarView.setOnDateChangedListener { _, date, _ ->
             selectedCalendarDay = date
             val selectedDateStr = "%04d-%02d-%02d".format(date.year, date.month + 1, date.day)
             updateEventList(selectedDateStr)
             updateSelectedDateDecorator()
 
-            fab.visibility = if (selectedCalendarDay == today && bottomSheetState != BottomSheetBehavior.STATE_COLLAPSED) View.VISIBLE else View.GONE
+            calendarBinding.fab.visibility = if (selectedCalendarDay == today && bottomSheetState != BottomSheetBehavior.STATE_COLLAPSED) View.VISIBLE else View.GONE
         }
 
-        // FAB 클릭 이벤트
-        fab.setOnClickListener {
+        // FAB 설정
+        calendarBinding.fab.hide()
+        calendarBinding.fab.setOnClickListener {
             Log.d("CalendarFragment", "FAB 클릭됨")
+            val intent = Intent(context, ToolbarActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+                putExtra("mode", 2)
+                putExtra("year", selectedCalendarDay.year)
+                putExtra("month", selectedCalendarDay.month + 1)
+                putExtra("day", selectedCalendarDay.day)
+            }
+
+            dietLogLauncher.launch(intent)
         }
 
-        // 바텀시트 상태 변화 시 FAB 제어
+        // ActivityResultLauncher 등록
+        dietLogLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val intent = result.data
+                val mealPlanData = intent?.extras?.getSerializable("mealData") as? MealPlanData
+                // 로그로 mealPlanData 확인
+                Log.d("DietLogFragment", "Received mealPlanData: $mealPlanData")
+
+                if (intent != null) {
+
+                    Toast.makeText(context, mealPlanData?.name, Toast.LENGTH_SHORT).show()
+                    mealPlanData?.let {
+                        val selectedDateStr = "%04d-%02d-%02d".format(
+                            selectedCalendarDay.year,
+                            selectedCalendarDay.month + 1,
+                            selectedCalendarDay.day
+                        )
+                        if (eventMap[selectedDateStr] == null) {
+                            eventMap[selectedDateStr] = mutableListOf()
+                        }
+                        eventMap[selectedDateStr]?.add(it)
+                        updateEventList(selectedDateStr) // 리스트 갱신
+                    }
+                }
+            } else {
+                Toast.makeText(context, "식단 작성 실패", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        // 바텀시트 설정
+        val behavior = BottomSheetBehavior.from(calendarBinding.bottomSheet)
         behavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 bottomSheetState = newState
-                fab.visibility = if (selectedCalendarDay == today && newState != BottomSheetBehavior.STATE_COLLAPSED) View.VISIBLE else View.GONE
+                calendarBinding.fab.visibility = if (selectedCalendarDay == today && newState != BottomSheetBehavior.STATE_COLLAPSED) View.VISIBLE else View.GONE
             }
             override fun onSlide(bottomSheet: View, slideOffset: Float) {}
         })
-
-        return view
     }
 
     // ------------------------ 데코레이터 ---------------------------
 
     // 선택된 날짜의 텍스트 색상 변경 데코레이터
     private fun updateSelectedDateDecorator() {
-        selectedTextDecorator?.let { calendarView.removeDecorator(it) }
-        todayTextDecorator?.let { calendarView.removeDecorator(it) }
+        selectedTextDecorator?.let { calendarBinding.calendarView.removeDecorator(it) }
+        todayTextDecorator?.let { calendarBinding.calendarView.removeDecorator(it) }
 
         val textColor = ContextCompat.getColor(requireContext(), R.color.white)
         selectedTextDecorator = SelectedDateTextColorDecorator(selectedCalendarDay, textColor)
-        calendarView.addDecorator(selectedTextDecorator!!)
-
+        calendarBinding.calendarView.addDecorator(selectedTextDecorator!!)
         if (selectedCalendarDay != today || isFirstLaunch) {
             val orangeColor = ContextCompat.getColor(requireContext(), R.color.elixir_orange)
             todayTextDecorator = TodayTextColorDecorator(today, orangeColor)
-            calendarView.addDecorator(todayTextDecorator!!)
+            calendarBinding.calendarView.addDecorator(todayTextDecorator!!)
         }
         isFirstLaunch = false
     }
@@ -232,11 +281,9 @@ class CalendarFragment : Fragment() {
     private fun updateEventList(selectedDate: String) {
         val events = eventMap[selectedDate]
         if (events.isNullOrEmpty()) {
-            mealListView.visibility = View.GONE
-            emptyMealText.visibility = View.VISIBLE
+            // 이벤트가 없으면 adapter 비우기
+            mealAdapter.updateData(mutableListOf())
         } else {
-            mealListView.visibility = View.VISIBLE
-            emptyMealText.visibility = View.GONE
             mealAdapter.updateData(events)
         }
     }
@@ -255,7 +302,7 @@ class CalendarFragment : Fragment() {
                 id = BigInteger("1001"),
                 memberId = BigInteger("1"),
                 name = "연어 아보카도 샐러드",
-                imageUrl = R.drawable.png_recipe_sample,
+                imageUrl = Uri.parse("android.resource://${context?.packageName}/${R.drawable.png_recipe_sample}").toString(),
                 createdAt = "2025-03-29",
                 mealtimes = "아침",
                 score = 5,
@@ -265,7 +312,7 @@ class CalendarFragment : Fragment() {
                 id = BigInteger("1002"),
                 memberId = BigInteger("1"),
                 name = "렌틸콩 채소 수프",
-                imageUrl = null,
+                imageUrl = Uri.parse("android.resource://${context?.packageName}/${R.drawable.png_recipe_sample}").toString(),
                 createdAt = "2025-03-29",
                 mealtimes = "점심",
                 score = 4,
@@ -275,7 +322,7 @@ class CalendarFragment : Fragment() {
                 id = BigInteger("1003"),
                 memberId = BigInteger("1"),
                 name = "두부 채소 볶음",
-                imageUrl = null,
+                imageUrl = Uri.parse("android.resource://${context?.packageName}/${R.drawable.png_recipe_sample}").toString(),
                 createdAt = "2025-03-29",
                 mealtimes = "저녁",
                 score = 3,
@@ -288,7 +335,7 @@ class CalendarFragment : Fragment() {
                 id = BigInteger("1004"),
                 memberId = BigInteger("1"),
                 name = "귀리 베리볼",
-                imageUrl = null,
+                imageUrl = Uri.parse("android.resource://${context?.packageName}/${R.drawable.png_recipe_sample}").toString(),
                 createdAt = "2025-03-30",
                 mealtimes = "아침",
                 score = 5,
@@ -298,7 +345,7 @@ class CalendarFragment : Fragment() {
                 id = BigInteger("1005"),
                 memberId = BigInteger("1"),
                 name = "퀴노아 보울",
-                imageUrl = R.drawable.png_recipe_sample,
+                imageUrl = Uri.parse("android.resource://${context?.packageName}/${R.drawable.png_recipe_sample}").toString(),
                 createdAt = "2025-03-30",
                 mealtimes = "점심",
                 score = 4,
@@ -308,7 +355,7 @@ class CalendarFragment : Fragment() {
                 id = BigInteger("1006"),
                 memberId = BigInteger("1"),
                 name = "베리 스무디",
-                imageUrl = null,
+                imageUrl = Uri.parse("android.resource://${context?.packageName}/${R.drawable.png_recipe_sample}").toString(),
                 createdAt = "2025-03-30",
                 mealtimes = "간식",
                 score = 5,

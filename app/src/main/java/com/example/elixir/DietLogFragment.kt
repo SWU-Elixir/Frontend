@@ -1,33 +1,58 @@
 package com.example.elixir
 
+import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.activityViewModels
+import com.example.elixir.calendar.MealPlanData
 import com.example.elixir.databinding.FragmentDietLogBinding
-import com.example.elixir.signup.OnProfileCompletedListener
+import com.google.android.material.timepicker.MaterialTimePicker
+import com.google.android.material.timepicker.TimeFormat
+import java.math.BigInteger
 import java.text.DateFormatSymbols
 import java.text.SimpleDateFormat
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
 
 class DietLogFragment : Fragment() {
     private lateinit var dietLogBinding: FragmentDietLogBinding
-    private lateinit var time: LocalDateTime
+    private val dietLogViewModel: DietLogViewModel by activityViewModels()
 
+    // 날짜 & 시간
+    private lateinit var formattedDate: String                          // 문자형 날짜(yyyy년 m월 d일)
+    private var selectedTimeMillis: Long = System.currentTimeMillis()   // 선택된 시간
+    private var selectedHour: Int = -1
+    private var selectedMin: Int = -1
+    private var selectedTime = Calendar.getInstance()
+
+    // 이미지
+    private lateinit var imgUri: Uri
+
+    // 정보
     private var dietImg: String = ""
     private var dietTitle: String = ""
     private var dietCategory: String = ""
@@ -42,12 +67,96 @@ class DietLogFragment : Fragment() {
         dietLogBinding = FragmentDietLogBinding.inflate(inflater, container, false)
         return dietLogBinding.root
     }
-
+    @RequiresApi(Build.VERSION_CODES.O)
+    @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        // -------------------------------------------- 초기화 -----------------------------------------------//
+        // 이미지뷰: 기본 이미지로 설정
+        imgUri = Uri.parse("android.resource://${requireContext().packageName}/${R.drawable.img_blank}")
+        dietLogBinding.dietImg.setImageURI(imgUri)
+        dietImg = imgUri.toString()
 
-        // 이미지 선택
-        setImg()
+        // 시간: 현재 시간으로 설정
+        displayImageTime(selectedTimeMillis)
+
+        // 날짜
+        // 데이터 받아오기
+        val year = activity?.intent?.getIntExtra("year", -1) ?: -1
+        val month = activity?.intent?.getIntExtra("month", -1) ?: -1
+        val day = activity?.intent?.getIntExtra("day", -1) ?: -1
+
+        // 날짜에 유효한 값이 들어왔을 때만 텍스트뷰에 띄워주기
+        if (year != -1 && month != -1 && day != -1) {
+            formattedDate = "%d년 %d월 %d일".format(year, month, day)
+            dietLogBinding.timestampDate.text = formattedDate
+        }
+
+        // 현재 시간으로 설정 체크
+        dietLogBinding.setNowCb.isChecked = true
+
+        // 시간 설정
+        selectedTime = Calendar.getInstance().apply {
+            timeInMillis = selectedTimeMillis
+        }
+
+        selectedHour = selectedTime.get(Calendar.HOUR)
+        selectedMin = selectedTime.get(Calendar.MINUTE)
+
+        // -------------------------------------------- 리스너 -----------------------------------------------//
+        // 현재 시간으로 설정: 체크하면 현재 시간으로 설정되도록
+        dietLogBinding.setNowCb.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                selectedTimeMillis = System.currentTimeMillis()
+                // 시간 재설정
+                selectedTime = Calendar.getInstance().apply {
+                    timeInMillis = selectedTimeMillis
+                }
+
+                selectedHour = selectedTime.get(Calendar.HOUR)
+                selectedMin = selectedTime.get(Calendar.MINUTE)
+
+                displayImageTime(selectedTimeMillis)
+            }
+            checkAllValid()
+        }
+
+        // 타임피커: 다이얼로그 띄워주기(material3 제공)
+        dietLogBinding.timePicker.setOnClickListener {
+            val picker = MaterialTimePicker.Builder()
+                .setTimeFormat(TimeFormat.CLOCK_12H)
+                .setHour(selectedHour)
+                .setMinute(selectedMin)
+                .setTheme(R.style.AppTheme_TimePicker)
+                .build()
+
+            picker.show(parentFragmentManager, "TIME_PICKER")
+
+            // 확인 버튼을 누르면 저장
+            picker.addOnPositiveButtonClickListener {
+                selectedHour = picker.hour
+                selectedMin = picker.minute
+
+                // Calendar를 이용해서 millis로 변환
+                selectedTime = Calendar.getInstance()
+                selectedTime.set(Calendar.HOUR_OF_DAY, selectedHour)
+                selectedTime.set(Calendar.MINUTE, selectedMin)
+                selectedTime.set(Calendar.SECOND, 0)
+                selectedTime.set(Calendar.MILLISECOND, 0)
+
+                selectedTimeMillis = selectedTime.timeInMillis
+                displayImageTime(selectedTimeMillis)
+
+                // 현재 시간과 다르면 체크박스 해제
+                val nowCalendar = Calendar.getInstance()
+                if (selectedTime.get(Calendar.HOUR_OF_DAY) != nowCalendar.get(Calendar.HOUR_OF_DAY) ||
+                    selectedTime.get(Calendar.MINUTE) != nowCalendar.get(Calendar.MINUTE)
+                ) {
+                    dietLogBinding.setNowCb.isChecked = false
+                }
+            }
+            checkAllValid()
+        }
 
         // 식단명 입력
         dietLogBinding.enterDietTitle.addTextChangedListener(object : TextWatcher {
@@ -58,6 +167,49 @@ class DietLogFragment : Fragment() {
                 checkAllValid()
             }
         })
+
+        // 식재료 태그 선택
+        with(dietLogBinding) {
+            // 일반 칩 리스트
+            val chipList = listOf(
+                ingredientBrownRice, ingredientBean, ingredientGrain,
+                ingredientGreenLeafy, ingredientBerry, ingredientNuts, ingredientOliveOil,
+                ingredientFish, ingredientPoultry)
+
+            // 챌린지 칩
+            val chipChallenge = ingredientChallenge
+
+            chipList.forEach { chip ->
+                chip.setOnCheckedChangeListener { _, isChecked ->
+                    val tagText = chip.text.toString()
+
+                    if (isChecked) {
+                        if (chip != chipChallenge) {
+                            // 일반 칩이면 5개 제한 체크
+                            val normalTagCount = ingredientTags.count { it != chipChallenge.text.toString() }
+                            if (normalTagCount >= 5) {
+                                chip.isChecked = false
+                                Toast.makeText(requireContext(), "일반 재료는 최대 5개까지만 선택할 수 있습니다.", Toast.LENGTH_SHORT).show()
+                                return@setOnCheckedChangeListener
+                            }
+
+                            checkAllValid()
+                        }
+
+                        // 추가 (챌린지든 일반이든)
+                        if (!ingredientTags.contains(tagText)) {
+                            ingredientTags.add(tagText)
+
+                            checkAllValid()
+                        }
+                    } else {
+                        // 체크 해제: 무조건 제거
+                        ingredientTags.remove(tagText)
+                    }
+                    checkAllValid()
+                }
+            }
+        }
 
         // 라디오 버튼 : 식단 유형 선택
         dietLogBinding.selectDiet.setOnCheckedChangeListener { _, checkedId ->
@@ -70,56 +222,9 @@ class DietLogFragment : Fragment() {
             checkAllValid()
         }
 
-        //
-        with(dietLogBinding) {
-            // 일반 칩 리스트
-            val chipList = listOf(
-                ingredientChallenge, ingredientBrownRice, ingredientBean, ingredientGrain,
-                ingredientGreenLeafy, ingredientBerry, ingredientNuts, ingredientOliveOil,
-                ingredientFish, ingredientPoultry)
-
-            // 해당 없음 칩
-            val chipNone = findIngredient
-
-            // 일반 칩 선택 시
-            chipList.forEach { chip ->
-                chip.setOnCheckedChangeListener { _, isChecked ->
-                    // 일반 칩을 선택했다면 해당 없음 칩을 리스트에서 제거
-                    if (isChecked) {
-                        chipNone.isChecked = false
-                        ingredientTags.remove(chipNone.text.toString())
-
-                        // 중복 저장 방지
-                        if (!ingredientTags.contains(chip.text.toString()))
-                            ingredientTags.add(chip.text.toString())
-                    }
-                    // 두번 클릭 시 리스트에서 제거
-                    else ingredientTags.remove(chip.text.toString())
-
-                    // 상태 갱신
-                    checkAllValid()
-                }
-            }
-
-            // 특별히 없음 선택 시
-            chipNone.setOnCheckedChangeListener { _, isChecked ->
-                // 일반 칩 모두 선택 해제, 리스트에서 제거하고 특별히 없음을 저장
-                if (isChecked) {
-                    chipList.forEach { it.isChecked = false }
-                    ingredientTags.clear()
-                    ingredientTags.add(chipNone.text.toString())
-                }
-                // 두 번 클릭 시 리스트에서 제거
-                else ingredientTags.remove(chipNone.text.toString())
-
-                // 상태 갱신
-                checkAllValid()
-            }
-        }
-
         // 라디오 버튼 : 점수
         dietLogBinding.selectScore.setOnCheckedChangeListener { _, checkedId ->
-            when(checkedId) {
+            when (checkedId) {
                 R.id.btn_1 -> score = 1
                 R.id.btn_2 -> score = 2
                 R.id.btn_3 -> score = 3
@@ -128,6 +233,68 @@ class DietLogFragment : Fragment() {
             }
             checkAllValid()
         }
+
+        // 작성 버튼
+        dietLogBinding.btnWriteDietLog.setOnClickListener {
+            // ToolbarActivity 속 onDietLogCompleted 호출
+            val activity = requireActivity()
+            if (activity is ToolbarActivity) {
+                activity.onDietLogCompleted()
+            }
+
+            val selectedDateTime = LocalDateTime.ofInstant(
+                Instant.ofEpochMilli(selectedTimeMillis),
+                ZoneId.systemDefault()
+            )
+
+            val formatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일 H시 m분")
+            val formattedString = selectedDateTime.format(formatter)
+
+            val dietLogData = DietLogData(
+                dietImg = dietImg,
+                time = selectedDateTime,   // 변환한 시간 넣기
+                dietTitle = dietTitle,
+                dietCategory = dietCategory,
+                ingredientTags = ingredientTags.toList(),
+                score = score
+            )
+            dietLogViewModel.saveDietLog(dietLogData)
+
+            val mealPlanData = MealPlanData(
+                id = BigInteger.valueOf(System.currentTimeMillis()),
+                memberId = BigInteger("1005"),
+                name = dietTitle,
+                imageUrl = dietImg,
+                createdAt = formattedString,
+                mealtimes = dietCategory,
+                score = score,
+                mealPlanIngredients = ingredientTags.toList()
+            )
+
+            val intent = Intent().apply {
+                putExtra("mealData", mealPlanData)
+            }
+
+            requireActivity().setResult(Activity.RESULT_OK, intent)
+            requireActivity().finish()
+        }
+
+        setImg()
+        checkAllValid()
+    }
+
+    // 시간 표시 함수
+    private fun displayImageTime(timeInMillis: Long) {
+        val date = Date(timeInMillis)
+        val format = SimpleDateFormat("a hh:mm", Locale.getDefault())
+
+        val symbols = DateFormatSymbols.getInstance(Locale.getDefault())
+        symbols.amPmStrings = arrayOf("AM", "PM")
+        format.dateFormatSymbols = symbols
+
+        val formattedTime = format.format(date)
+        dietLogBinding.time12h.text = formattedTime
+        dietLogBinding.timestampTime.text = formattedTime
     }
 
     // 이미지 설정
@@ -143,9 +310,8 @@ class DietLogFragment : Fragment() {
             }
         }
 
-        // 프로필 이미지를 눌렀을 때,
+        // 프로필 이미지를 눌렀을 때, 선택 다이얼로그 띄우기
         dietLogBinding.dietImg.setOnClickListener {
-            // 커스텀 다이얼로그 띄우기
             SelectImgDialog(requireContext(),
                 {
                     // 기본 이미지 선택 시 현재 시간 표시
@@ -161,25 +327,6 @@ class DietLogFragment : Fragment() {
                 }
             ).show()
         }
-
-        // 작성 버튼을 눌렀을 때
-        dietLogBinding.btnWriteDietLog.setOnClickListener {
-            DietLogData(dietImg, time, dietTitle, ingredientTags, score)
-        }
-    }
-
-    // 시간 표시 함수
-    private fun displayImageTime(timeInMillis: Long) {
-        val date = Date(timeInMillis)
-        val format = SimpleDateFormat("a hh:mm", Locale.getDefault())
-
-        // DateFormatSymbols 사용하여 AM/PM 소문자 설정
-        val symbols = DateFormatSymbols.getInstance(Locale.getDefault())
-        symbols.amPmStrings = arrayOf("AM", "PM")
-        format.dateFormatSymbols = symbols
-
-        val formattedTime = format.format(date)
-        dietLogBinding.time12h.text = formattedTime // 시간 텍스트 뷰에 표시
     }
 
     // 이미지 생성 시간 가져오기
@@ -209,7 +356,6 @@ class DietLogFragment : Fragment() {
         // 시간 정보를 찾을 수 없으면 현재 시간 반환
         return System.currentTimeMillis()
     }
-
 
     // 모든 변수에 유효한 값이 들어왔는지 확인
     fun checkAllValid() {

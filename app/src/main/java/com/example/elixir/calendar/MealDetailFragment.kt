@@ -1,11 +1,17 @@
 package com.example.elixir.calendar
 
+import android.app.Activity
+import android.content.Intent
 import android.content.res.ColorStateList
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
@@ -36,7 +42,8 @@ class MealDetailFragment : Fragment() {
     private lateinit var score4: TextView
     private lateinit var score5: TextView
 
-
+    // DietLogFragment 띄우기
+    private lateinit var dietLogLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -66,7 +73,7 @@ class MealDetailFragment : Fragment() {
             id = BigInteger("1001"),
             memberId = BigInteger("1"),
             name = "연어 아보카도 샐러드",
-            imageUrl = R.drawable.png_recipe_sample,
+            imageUrl = Uri.parse("android.resource://${context?.packageName}/${R.drawable.png_recipe_sample}").toString(),
             createdAt = "2025-03-29",
             mealtimes = "아침",
             score = 5,
@@ -155,7 +162,6 @@ class MealDetailFragment : Fragment() {
             }
         }
 
-
         // 메뉴 버튼 클릭 시 팝업 메뉴 표시
         menuButton.setOnClickListener {
             val popupMenu = PopupMenu(context, menuButton)
@@ -164,6 +170,21 @@ class MealDetailFragment : Fragment() {
             popupMenu.setOnMenuItemClickListener { menuItem ->
                 when (menuItem.itemId) {
                     R.id.menu_edit -> {
+                        dietLogLauncher = registerForActivityResult(
+                            ActivityResultContracts.StartActivityForResult()
+                        ) { result ->
+                            if (result.resultCode == Activity.RESULT_OK) {
+                                val intent = result.data
+                                val mealPlanData =
+                                    intent?.extras?.getSerializable("mealData") as? MealPlanData
+                                // 로그로 mealPlanData 확인
+                                Log.d("DietLogFragment", "Received mealPlanData: $mealPlanData")
+
+                                
+                            } else {
+                                Toast.makeText(context, "식단 작성 실패", Toast.LENGTH_SHORT).show()
+                            }
+                        }
                         Toast.makeText(context, "댓글 수정 클릭됨", Toast.LENGTH_SHORT).show()
                         true
                     }

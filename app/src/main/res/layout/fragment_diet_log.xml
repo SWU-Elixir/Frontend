@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    android:padding="16dp"
     tools:context=".signup.SettingProfileFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -13,41 +12,58 @@
         android:layout_height="wrap_content">
 
         <!-- 이미지 -->
-        <FrameLayout
-            android:id="@+id/frame_img"
+        <!-- 이미지 삽입 -->
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/diet_img"
+            style="@style/ImgDefault_Rect"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/img_profile"
+            android:scaleType="centerCrop"
+            android:src="@drawable/img_blank"
+            app:layout_constraintDimensionRatio="1:1"
+            app:shapeAppearanceOverlay="@style/ImgDefault_Rect"
+            tools:ignore="ImageContrastCheck"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/time_title"/>
+
+        <!--타임 스탬프-->
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintDimensionRatio="1:1"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/time_title">
-
-            <!-- 이미지 삽입 -->
-
-            <!--타임 스탬프-->
-            <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/diet_img"
-                style="@style/ImgDefault_Rect"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:adjustViewBounds="true"
-                android:contentDescription="@string/img_profile"
-                android:scaleType="centerCrop"
-                android:src="@drawable/img_blank"
-                tools:ignore="ImageContrastCheck" />
-
+            app:layout_constraintTop_toTopOf="@id/diet_img"
+            app:layout_constraintBottom_toBottomOf="@id/diet_img">
             <TextView
                 android:id="@+id/timestamp_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:textAlignment="center"/>
+                android:text="@string/time"
+                android:textColor="@color/white"
+                android:textSize="28sp"
+                android:textAlignment="center"
+                android:fontFamily="@font/pretendard_bold"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/timestamp_date"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
             <TextView
                 android:id="@+id/timestamp_date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:textAlignment="center"/>
-        </FrameLayout>
+                android:text="@string/calendar"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textAlignment="center"
+                android:fontFamily="@font/pretendard_medium"
+                app:layout_constraintTop_toBottomOf="@id/timestamp_time"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <TextView
             android:id="@+id/time_title"
@@ -58,8 +74,7 @@
             android:fontFamily="@font/pretendard_bold"
             android:textColor="@color/black"
             android:textSize="18sp"
-            android:textStyle="bold"
-            app:layout_constraintTop_toBottomOf="@id/frame_img"
+            app:layout_constraintTop_toBottomOf="@id/diet_img"
             app:layout_constraintBottom_toTopOf="@id/layout_time"/>
 
         <!-- 시간 -->
@@ -71,29 +86,15 @@
             app:layout_constraintBottom_toTopOf="@id/diet_title">
 
             <TextView
-                android:id="@+id/meridiem"
+                android:id="@+id/time_12h"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/am"
                 android:textSize="16sp"
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_medium"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"/>
-
-            <TextView
-                android:id="@+id/time_12h"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
-                android:text="09:00"
-                android:textSize="16sp"
-                android:textColor="@color/black"
-                android:fontFamily="@font/pretendard_medium"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@id/meridiem"/>
 
             <!-- 시간 선택 -->
             <android.widget.ImageButton
@@ -129,9 +130,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
                 android:text="@string/set_time_now"
-                android:textSize="16sp"
+                android:textSize="12sp"
                 android:textColor="@color/black"
-                android:fontFamily="@font/pretendard_medium"
+                android:fontFamily="@font/pretendard_light"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
@@ -479,9 +480,10 @@
             android:id="@+id/btn_write_diet_log"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginVertical="50dp"
+            android:layout_marginVertical="20dp"
             style="@style/Widget.AppCompat.Button.Borderless"
-            android:background="@drawable/bg_rect_filled_orange"
+            android:background="@drawable/bg_rect_filled_gray"
+            android:enabled="false"
             android:text="@string/btn_write"
             android:textColor="@color/white"
             android:textSize="16sp"
