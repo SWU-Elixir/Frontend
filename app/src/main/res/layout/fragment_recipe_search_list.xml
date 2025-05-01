@@ -41,7 +41,7 @@
                     android:maxHeight="30dp"
                     android:paddingEnd="6dp"
                     android:scaleType="fitCenter"
-                    tools:ignore="ContentDescription, SpeakableTextPresentCheck" />
+                    tools:ignore="ContentDescription,RtlSymmetry,SpeakableTextPresentCheck" />
                 <!-- 검색 바 -->
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -58,12 +58,14 @@
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:hint="검색어를 입력하세요"
+                        android:autofillHints=""
+                        android:hint="@string/search_hint"
                         android:imeOptions="actionSearch"
                         android:inputType="text"
                         android:background="@android:color/transparent"
                         android:paddingStart="8dp"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"
+                        tools:ignore="RtlSymmetry" />
 
                     <!-- 검색 아이콘 -->
                     <ImageButton
@@ -119,9 +121,9 @@
                     android:drawableTint="@color/elixir_orange"
                     android:minWidth="50dp"
                     android:minHeight="30dp"
-                    android:text="재설정"
+                    android:text="@string/recipe_reload"
                     android:textColor="@color/elixir_gray"
-                    android:textSize="10sp"
+                    android:textSize="12sp"
                     android:visibility="gone" />
 
             </LinearLayout>
@@ -140,7 +142,7 @@
                 android:id="@+id/emptyRecipeText"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="검색 결과가 없습니다"
+                android:text="@string/recipe_nothing_text"
                 android:textAlignment="center"
                 android:gravity="center"
                 android:layout_marginTop="-80dp"

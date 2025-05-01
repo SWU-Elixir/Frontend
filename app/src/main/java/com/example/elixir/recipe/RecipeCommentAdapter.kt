@@ -17,17 +17,22 @@ class RecipeCommentAdapter(
     inner class CommentViewHolder(private val binding: ItemRecipeListCommentBinding) : 
         RecyclerView.ViewHolder(binding.root) {
         fun bind(item: CommentData) {
+            // 댓글 작성자 정보 설정
             binding.profileImage.setImageResource(item.profileImageResId)
             binding.memberTitle.text = item.memberTitle
             binding.memberNickname.text = item.memberNickname
+            
+            // 댓글 내용과 작성일 설정
             binding.commentText.text = item.commentText
             binding.dateText.text = item.date
 
             // 메뉴 버튼 클릭 시 팝업 메뉴 표시
             binding.menuButton.setOnClickListener {
+                // 팝업 메뉴 생성 및 메뉴 리소스 설정
                 val popupMenu = PopupMenu(context, binding.menuButton)
                 popupMenu.menuInflater.inflate(R.menu.item_menu_drop, popupMenu.menu)
 
+                // 메뉴 아이템 클릭 이벤트 처리
                 popupMenu.setOnMenuItemClickListener { menuItem ->
                     when (menuItem.itemId) {
                         R.id.menu_edit -> {

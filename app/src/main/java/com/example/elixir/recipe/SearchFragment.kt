@@ -14,7 +14,6 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.widget.ImageViewCompat
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.RecyclerView
 import com.example.elixir.R
 import com.example.elixir.calendar.MealListIngredientAdapter
 import com.example.elixir.databinding.FragmentRecipeSearchBinding
@@ -155,7 +154,8 @@ class SearchFragment : Fragment() {
                 .addToBackStack(null)
                 .commit()
         } else {
-            Toast.makeText(requireContext(), "검색어를 입력하세요", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(),
+                getString(R.string.search_put_something), Toast.LENGTH_SHORT).show()
         }
     }
 

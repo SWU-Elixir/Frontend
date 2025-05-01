@@ -3,10 +3,13 @@ package com.example.elixir
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.PopupMenu
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
+import com.example.elixir.calendar.MealDetailFragment
 import com.example.elixir.chatbot.ChatBotActivity
 import com.example.elixir.databinding.ActivityToolbarBinding
 import com.example.elixir.signup.CreateAccountFragment
@@ -71,6 +74,45 @@ open class ToolbarActivity : AppCompatActivity() {
                 val intent = Intent(this, ChatBotActivity::class.java)
                 startActivity(intent)
                 finish()
+            }
+
+            // 식단 상세 모드
+            4 -> {
+                // 툴바의 제목은 보이게, 더보기 버튼 보이게
+                toolBinding.title.visibility = View.VISIBLE
+                toolBinding.btnMore.visibility = View.VISIBLE
+
+                // 뒤로가기 버튼을 누르면 이전 화면으로 돌아가기
+                toolBinding.btnBack.setOnClickListener {
+                    onBackPressed()
+                }
+
+                toolBinding.btnMore.setOnClickListener {
+                    val popupMenu = PopupMenu(this, it)
+                    popupMenu.menuInflater.inflate(R.menu.item_menu_drop, popupMenu.menu)
+
+                    popupMenu.setOnMenuItemClickListener { menuItem ->
+                        when (menuItem.itemId) {
+                            R.id.menu_edit -> {
+                                Toast.makeText(this, "댓글 수정 클릭됨", Toast.LENGTH_SHORT).show()
+                                true
+                            }
+                            R.id.menu_delete -> {
+                                Toast.makeText(this, "댓글 삭제 클릭됨", Toast.LENGTH_SHORT).show()
+                                true
+                            }
+                            else -> false
+                        }
+                    }
+                    popupMenu.show()
+                }
+
+                // 식단 이름 불러오기
+                val mealName = intent.getStringExtra("mealName")
+                toolBinding.title.text = mealName
+
+                // 식단 상세 프래그먼트 띄워주기
+                setFragment(MealDetailFragment())
             }
         }
     }

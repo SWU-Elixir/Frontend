@@ -16,7 +16,7 @@
         android:id="@+id/indeterminateName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="태그"
+        android:text="@string/tag"
         android:textSize="11sp"
         android:textColor="@color/black"
         android:fontFamily="@font/pretendard_medium"

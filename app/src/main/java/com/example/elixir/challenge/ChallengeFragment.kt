@@ -7,6 +7,7 @@ import java.math.BigInteger
 import com.example.elixir.R
 import androidx.fragment.app.Fragment
 import com.example.elixir.databinding.FragmentChallengeBinding
+import com.example.elixir.databinding.DialogChallengeCompletedBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 
 class ChallengeFragment : Fragment() {
@@ -176,14 +177,13 @@ class ChallengeFragment : Fragment() {
 
         // 챌린지 상세 정보 표시
         binding.challengeTitleText.text = challenge.name
-        binding.challengePeriodText.text = "${challenge.startDate} ~ ${challenge.endDate}"
-        binding.challengeSub1.text = "🌱 ${challenge.name}, 함께 도전해요!"
+        binding.challengePeriodText.text = getString(R.string.challenge_period_format, challenge.startDate, challenge.endDate)
+        binding.challengeSub1.text = getString(R.string.challenge_sub1_format, challenge.name)
         binding.challengeGoalText.text = challenge.purpose
         binding.challengeDescriptionText.text = challenge.description
-        binding.challengeSub2.text = "🌳 ${challenge.name}를 성공하고\n"+
-                "'${challenge.badgeTitle}' 칭호 및 배지를 획득하세요!"
+        binding.challengeSub2.text = getString(R.string.challenge_sub2_format, challenge.name, challenge.badgeTitle)
 
-        // 모든 스테이지 완료 시 다이얼로그 표시 (calculateCurrentStage 활용)
+        // 모든 스테이지 완료 시 다이얼로그 표시
         val maxStage = challenge.stages.maxOfOrNull { it.stepNumber } ?: 1
         if (currentStage > maxStage) {
             showCompletionDialog(challenge.badgeTitle)
@@ -203,22 +203,17 @@ class ChallengeFragment : Fragment() {
     }
 
     private fun showCompletionDialog(title: String) {
-        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_challenge_completed, null)
-
-        val dialogTitle = dialogView.findViewById<TextView>(R.id.dialogTitle)
-        val dialogMessage = dialogView.findViewById<TextView>(R.id.dialogMessage)
-        val dialogImage = dialogView.findViewById<ImageView>(R.id.dialogImage)
-        val dialogButton = dialogView.findViewById<Button>(R.id.dialogButton)
-
-        dialogTitle.text = "챌린지 완료!"
-        dialogMessage.text = "'$title' 칭호 및 뱃지를 획득했습니다."
-        dialogImage.setImageResource(R.drawable.png_badge) // 원하는 이미지로 교체 가능
+        val dialogBinding = DialogChallengeCompletedBinding.inflate(layoutInflater)
+        
+        dialogBinding.dialogTitle.text = getString(R.string.challenge_completion_title)
+        dialogBinding.dialogMessage.text = getString(R.string.challenge_completion_message, title)
+        dialogBinding.dialogImage.setImageResource(R.drawable.png_badge)
 
         val alertDialog = android.app.AlertDialog.Builder(requireContext())
-            .setView(dialogView)
+            .setView(dialogBinding.root)
             .create()
 
-        dialogButton.setOnClickListener {
+        dialogBinding.dialogButton.setOnClickListener {
             alertDialog.dismiss()
         }
 

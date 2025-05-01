@@ -30,7 +30,7 @@
                 android:maxHeight="30dp"
                 android:paddingEnd="6dp"
                 android:scaleType="fitCenter"
-                tools:ignore="ContentDescription, SpeakableTextPresentCheck" />
+                tools:ignore="ContentDescription,RtlSymmetry,SpeakableTextPresentCheck" />
             <!-- 검색 바 -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -47,12 +47,14 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:hint="검색어를 입력하세요"
+                    android:autofillHints=""
+                    android:hint="@string/search_hint"
                     android:imeOptions="actionSearch"
                     android:inputType="text"
                     android:background="@android:color/transparent"
                     android:paddingStart="8dp"
-                    android:textSize="14sp" />
+                    android:textSize="14sp"
+                    tools:ignore="RtlSymmetry" />
 
                 <ImageButton
                     android:id="@+id/clearButton"
@@ -92,7 +94,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="인기 검색어"
+            android:text="@string/search_populer"
             android:textColor="@color/black"
             android:layout_marginTop="24dp"
             android:layout_marginBottom="8dp" />
@@ -110,7 +112,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="추천 검색어"
+            android:text="@string/search_recommendation"
             android:textColor="@color/black"
             android:layout_marginTop="24dp"
             android:layout_marginBottom="8dp" />

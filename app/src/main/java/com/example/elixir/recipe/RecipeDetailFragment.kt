@@ -1,15 +1,12 @@
 package com.example.elixir.recipe
 
-import android.app.Dialog
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.elixir.R
 import com.example.elixir.databinding.FragmentRecipeDetailBinding
 import com.google.android.flexbox.FlexDirection
@@ -19,17 +16,24 @@ import java.math.BigInteger
 import java.text.SimpleDateFormat
 import java.util.*
 
+/**
+ * 레시피 상세 정보를 표시하는 프래그먼트
+ * 레시피의 기본 정보, 재료, 조리 순서, 댓글 등을 보여주고 관리
+ */
 class RecipeDetailFragment : Fragment() {
 
+    // ViewBinding 관련 변수
     private var _binding: FragmentRecipeDetailBinding? = null
     private val binding get() = _binding!!
+
+    // 댓글 관련 변수
     private lateinit var commentAdapter: RecipeCommentAdapter
     private val comments = mutableListOf<CommentData>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentRecipeDetailBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -37,7 +41,7 @@ class RecipeDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // ------------------------ 1. 더미 데이터 적용 ------------------------
+        // ------------------------ 더미 데이터 적용 ------------------------
         val dummyRecipe = RecipeData(
             id = BigInteger.valueOf(1),
             memberId = BigInteger.valueOf(1001),
@@ -59,17 +63,22 @@ class RecipeDetailFragment : Fragment() {
             likeCount = 42
         )
 
-        // ------------------------ 2. 데이터 바인딩 ------------------------
+        // ------------------------ 데이터 바인딩 ------------------------
+        // 레시피 기본 정보 설정
         binding.recipeNameText.text = dummyRecipe.title
         binding.categorySlowAging.text = dummyRecipe.categorySlowAging
         binding.categoryType.text = dummyRecipe.categoryType
         binding.recipeLevel.text = dummyRecipe.difficulty
-        binding.recipeTimeHour.text = if (dummyRecipe.timeHours > 0) "${dummyRecipe.timeHours}시간" else ""
-        binding.recipeTimeMin.text = "${dummyRecipe.timeMinutes}분"
+        
+        // 조리 시간 설정 (시간이 있는 경우에만 표시)
+        binding.recipeTimeHour.text = if (dummyRecipe.timeHours > 0) getString(R.string.recipe_time_hour_format, dummyRecipe.timeHours) else ""
+        binding.recipeTimeMin.text = getString(R.string.recipe_time_min_format, dummyRecipe.timeMinutes)
+        
+        // 팁과 좋아요 수 설정
         binding.tipText.text = dummyRecipe.tips
         binding.heartCount.text = formatCount(dummyRecipe.likeCount)
 
-        // 초기 버튼 상태 설정
+        // 북마크/좋아요 버튼 초기 상태 설정
         binding.bookmarkButton.setBackgroundResource(
             if(dummyRecipe.isBookmarked) R.drawable.ic_recipe_bookmark_selected
             else R.drawable.ic_recipe_bookmark_normal
@@ -79,7 +88,7 @@ class RecipeDetailFragment : Fragment() {
             else R.drawable.ic_recipe_heart_normal
         )
 
-        // 북마크/좋아요 버튼 이미지 설정
+        // 북마크 버튼 클릭 이벤트 처리
         binding.bookmarkButton.setOnClickListener{
             dummyRecipe.isBookmarked = !dummyRecipe.isBookmarked
             binding.bookmarkButton.setBackgroundResource(
@@ -88,13 +97,16 @@ class RecipeDetailFragment : Fragment() {
             )
         }
 
+        // 좋아요 버튼 클릭 이벤트 처리
         binding.heartButton.setOnClickListener{
             dummyRecipe.isLiked = !dummyRecipe.isLiked
+            // 좋아요 상태에 따라 카운트 증가/감소
             if (dummyRecipe.isLiked) {
                 dummyRecipe.likeCount++
             } else {
                 dummyRecipe.likeCount--
             }
+            // 버튼 이미지와 카운트 업데이트
             binding.heartButton.setBackgroundResource(
                 if(dummyRecipe.isLiked) R.drawable.ic_recipe_heart_selected
                 else R.drawable.ic_recipe_heart_normal
@@ -102,10 +114,11 @@ class RecipeDetailFragment : Fragment() {
             binding.heartCount.text = formatCount(dummyRecipe.likeCount)
         }
 
-        // 팔로우 버튼 클릭 이벤트 설정
+        // 팔로우 버튼 클릭 이벤트 처리
         binding.followButton.setOnClickListener {
-            val isFollowing = binding.followButton.text == "팔로잉"
-            binding.followButton.text = if (isFollowing) "팔로우" else "팔로잉"
+            val isFollowing = binding.followButton.text == getString(R.string.following)
+            // 팔로우 상태 토글 및 UI 업데이트
+            binding.followButton.text = if (isFollowing) getString(R.string.follow) else getString(R.string.following)
             binding.followButton.setBackgroundResource(
                 if (isFollowing) R.drawable.bg_rect_filled_orange
                 else R.drawable.bg_rect_outline_gray
@@ -124,14 +137,15 @@ class RecipeDetailFragment : Fragment() {
             val popupMenu = PopupMenu(context, binding.menuButton)
             popupMenu.menuInflater.inflate(R.menu.item_menu_drop, popupMenu.menu)
 
+            // 메뉴 아이템 클릭 이벤트 처리
             popupMenu.setOnMenuItemClickListener { menuItem ->
                 when (menuItem.itemId) {
                     R.id.menu_edit -> {
-                        Toast.makeText(context, "댓글 수정 클릭됨", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "댓글 수정 클릭", Toast.LENGTH_SHORT).show()
                         true
                     }
                     R.id.menu_delete -> {
-                        Toast.makeText(context, "댓글 삭제 클릭됨", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "댓긋 삭제 클릭", Toast.LENGTH_SHORT).show()
                         true
                     }
                     else -> false
@@ -140,7 +154,8 @@ class RecipeDetailFragment : Fragment() {
             popupMenu.show()
         }
 
-        // ------------------------ 3. 리스트 ------------------------
+        // ------------------------ 3. 리스트 설정 ------------------------
+        // 태그 리스트 설정 (FlexboxLayoutManager 사용)
         binding.tagList.apply {
             layoutManager = FlexboxLayoutManager(context).apply {
                 flexDirection = FlexDirection.ROW
@@ -149,6 +164,7 @@ class RecipeDetailFragment : Fragment() {
             adapter = RecipeTagAdapter(dummyRecipe.ingredients)
         }
 
+        // 재료 리스트 설정
         binding.ingredientsList.apply {
             layoutManager = FlexboxLayoutManager(context).apply {
                 flexDirection = FlexDirection.ROW
@@ -157,6 +173,7 @@ class RecipeDetailFragment : Fragment() {
             adapter = RecipeSeasoningAdapter(dummyRecipe.ingredients)
         }
 
+        // 양념 리스트 설정
         binding.seasoningList.apply {
             layoutManager = FlexboxLayoutManager(context).apply {
                 flexDirection = FlexDirection.ROW
@@ -165,6 +182,7 @@ class RecipeDetailFragment : Fragment() {
             adapter = RecipeSeasoningAdapter(dummyRecipe.seasoning)
         }
 
+        // 조리 순서 리스트 설정
         binding.stepList.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         binding.stepList.adapter = RecipeStepAdapter(dummyRecipe.recipeOrder)
 
@@ -191,24 +209,27 @@ class RecipeDetailFragment : Fragment() {
         commentAdapter = RecipeCommentAdapter(requireContext(), comments)
         binding.commentList.adapter = commentAdapter
 
-        // 댓글 작성 버튼 클릭 이벤트
+        // 댓글 작성 버튼 클릭 이벤트 처리
         binding.commentButton.setOnClickListener {
             val commentText = binding.editComment.text.toString()
             if (commentText.isNotEmpty()) {
+                // 현재 시간을 포맷팅하여 댓글 작성 시간으로 사용
                 val currentTime = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date())
+                // 새 댓글 데이터 생성
                 val newComment = CommentData(
                     profileImageResId = R.drawable.ic_profile,
-                    memberTitle = "칭호",
-                    memberNickname = "user123",
+                    memberTitle = "userTitle",
+                    memberNickname = "userNickname",
                     commentText = commentText,
                     date = currentTime
                 )
+                // 댓글 목록에 추가하고 UI 업데이트
                 comments.add(newComment)
                 commentAdapter.notifyItemInserted(comments.size - 1)
                 binding.commentList.smoothScrollToPosition(comments.size - 1)
                 binding.editComment.text.clear()
             } else {
-                Toast.makeText(context, "댓글을 입력해주세요", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(R.string.please_enter_comment), Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -224,12 +245,14 @@ class RecipeDetailFragment : Fragment() {
     }
 
     /**
-     * 좋아요 수를 보기 좋은 포맷으로 변환 (예: 1.2k, 2M)
+     * 좋아요 수를 보기 좋은 포맷으로 변환
+     * @param count 변환할 숫자
+     * @return 포맷팅된 문자열 (예: 1.2k, 2M)
      */
     private fun formatCount(count: Int): String {
         return when {
-            count >= 1_000_000 -> String.format("%.1fM", count / 1_000_000.0)
-            count >= 1_000     -> String.format("%.1fk", count / 1_000.0)
+            count >= 1_000_000 -> String.format(Locale.KOREA,"%.1fM", count / 1_000_000.0)
+            count >= 1_000     -> String.format(Locale.KOREA,"%.1fk", count / 1_000.0)
             else               -> count.toString()
         }.removeSuffix(".0") // 소수점 0 제거
     }

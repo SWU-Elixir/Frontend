@@ -44,9 +44,6 @@ class CalendarFragment : Fragment() {
     private val today = CalendarDay.today() // 오늘 날짜
     private var isFirstLaunch = true // 첫 실행 여부
 
-    companion object {
-        private const val KEY_SELECTED_DATE = "selected_date"
-    }
 
     // ------------------------ 생명주기 메서드 ---------------------------
 
@@ -95,7 +92,7 @@ class CalendarFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // -------------------- 리스트뷰 설정 --------------------
-        mealAdapter = MealListAdapter(requireContext(), mutableListOf(), fragmentManager = parentFragmentManager)
+        mealAdapter = MealListAdapter(requireContext(), mutableListOf())
         binding.mealPlanList.adapter = mealAdapter
         addDummyEvents() // 더미 데이터 세팅
 
@@ -324,14 +321,6 @@ class CalendarFragment : Fragment() {
             mealAdapter.updateData(events)
             binding.mealPlanList.smoothScrollToPosition(0)
         }
-    }
-
-    /**
-     * 식단 클릭 이벤트 처리
-     * @param item 클릭된 식단 데이터
-     */
-    private fun onDietLogClick(item: MealPlanData) {
-        Log.d("CalendarFragment", "클릭된 식단: ${item.name} - ${item.mealtimes} - ${item.mealPlanIngredients}")
     }
 
     // ------------------------ 더미 데이터 ---------------------------

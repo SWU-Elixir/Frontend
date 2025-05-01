@@ -51,7 +51,8 @@
                     android:id="@+id/profileImage"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:src="@drawable/ic_profile"/>
+                    android:src="@drawable/ic_profile"
+                    tools:ignore="ContentDescription,UnusedAttribute"/>
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -62,7 +63,7 @@
                         android:id="@+id/memberTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="칭호"
+                        android:text="@string/member_title"
                         android:textColor="@color/elixir_orange"
                         android:textSize="14sp"
                         android:fontFamily="@font/pretendard_medium"/>
@@ -70,7 +71,7 @@
                         android:id="@+id/memberNickname"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="닉네임"
+                        android:text="@string/member_nickname"
                         android:textColor="@color/black"
                         android:textSize="16sp"
                         android:fontFamily="@font/pretendard_bold"/>
@@ -81,12 +82,11 @@
                     android:layout_height="35dp"
                     android:background="@drawable/bg_rect_filled_orange"
                     style="@style/Widget.AppCompat.Button.Borderless"
-                    android:text="팔로우"
+                    android:text="@string/follow"
                     android:layout_gravity="center"
                     android:textSize="14sp"
                     android:textColor="@color/white"
-                    android:fontFamily="@font/pretendard_medium"
-                    app:layout_constraintTop_toBottomOf="@id/birth_year" />
+                    android:fontFamily="@font/pretendard_medium" />
             </LinearLayout>
             <ImageView
                 android:id="@+id/recipeImage"
@@ -119,7 +119,7 @@
                             android:id="@+id/category_slow_aging"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="저속노화"
+                            android:text="@string/recipe_cat_1"
                             android:textSize="12sp"
                             android:layout_marginEnd="5dp"
                             android:textColor="@color/elixir_orange"
@@ -130,7 +130,7 @@
                             android:id="@+id/category_type"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="종류"
+                            android:text="@string/recipe_cat_2"
                             android:textSize="12sp"
                             android:textColor="@color/elixir_orange"
                             android:fontFamily="@font/pretendard_medium"
@@ -141,7 +141,7 @@
                         android:id="@+id/recipeNameText"
                         android:layout_width="210dp"
                         android:layout_height="wrap_content"
-                        android:text="제목"
+                        android:text="@string/recipe_name"
                         android:textColor="@color/black"
                         android:fontFamily="@font/pretendard_bold"
                         android:layout_marginBottom="3dp"
@@ -160,7 +160,8 @@
                             android:layout_height="20dp"
                             android:layout_gravity="center"
                             android:layout_marginEnd="5dp"
-                            android:src="@drawable/ic_recipe_level" />
+                            android:src="@drawable/ic_recipe_level"
+                            tools:ignore="ContentDescription,UnusedAttribute"/>
 
                         <!-- 난이도 텍스트 -->
                         <TextView
@@ -170,7 +171,7 @@
                             android:layout_gravity="center"
                             android:fontFamily="@font/pretendard_medium"
                             android:maxWidth="40dp"
-                            android:text="난이도"
+                            android:text="@string/recipe_difficult"
                             android:textColor="@color/black"
                             android:textSize="12sp" />
 
@@ -181,7 +182,8 @@
                             android:layout_gravity="center"
                             android:layout_marginStart="30dp"
                             android:layout_marginEnd="5dp"
-                            android:src="@drawable/ic_recipe_time" />
+                            android:src="@drawable/ic_recipe_time"
+                            tools:ignore="ContentDescription,UnusedAttribute"/>
 
                         <!-- 시간 텍스트 -->
                         <TextView
@@ -191,7 +193,7 @@
                             android:layout_gravity="center"
                             android:layout_marginEnd="5dp"
                             android:fontFamily="@font/pretendard_medium"
-                            android:text="시간"
+                            android:text="@string/recipe_hour"
                             android:textColor="@color/black"
                             android:textSize="12sp" />
 
@@ -202,7 +204,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
                             android:fontFamily="@font/pretendard_medium"
-                            android:text="분"
+                            android:text="@string/recipe_minute"
                             android:textColor="@color/black"
                             android:textSize="12sp" />
                     </LinearLayout>
@@ -228,7 +230,7 @@
                         android:paddingBottom="1dp"
                         android:scaleType="fitCenter"
                         android:layout_gravity="center"
-                        tools:ignore="ContentDescription,RtlSymmetry" />
+                        tools:ignore="ContentDescription,UnusedAttribute" />
 
                     <!-- 좋아요 수 -->
                     <TextView
@@ -257,7 +259,7 @@
                         android:layout_marginEnd="5dp"
                         android:padding="1dp"
                         android:scaleType="fitCenter"
-                        tools:ignore="ContentDescription,RtlSymmetry" />
+                        tools:ignore="ContentDescription,UnusedAttribute"/>
                     <ImageButton
                         android:id="@+id/menuButton"
                         android:layout_width="wrap_content"
@@ -288,7 +290,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="재료"
+                android:text="@string/recipe_indeterminate"
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_bold"
                 android:layout_marginBottom="5dp"
@@ -306,7 +308,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="양념"
+                android:text="@string/recipe_seasoning"
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_bold"
                 android:layout_marginBottom="5dp"
@@ -324,7 +326,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="조리 순서"
+                android:text="@string/recipe_step"
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_bold"
                 android:layout_marginBottom="5dp"
@@ -343,7 +345,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="팁 / 주의 사항"
+                android:text="@string/recipe_tip"
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_bold"
                 android:layout_marginBottom="5dp"
@@ -354,7 +356,7 @@
                 android:id="@+id/tipText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="내용"
+                android:text="@string/recipe_tip_context"
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_medium"
                 android:layout_marginBottom="5dp"
@@ -362,7 +364,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="댓글"
+                android:text="@string/recipe_comment"
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_bold"
                 android:layout_marginBottom="5dp"
@@ -390,7 +392,7 @@
                     android:id="@+id/commentNickname"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="닉네임"
+                    android:text="@string/comment_nickname"
                     android:textColor="@color/elixir_orange"
                     android:fontFamily="@font/pretendard_medium"
                     android:textSize="12sp"
@@ -400,8 +402,10 @@
                     android:id="@+id/editComment"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
-                    android:textSize="12dp"
-                    android:hint="댓글을 입력해주세요"
+                    android:autofillHints=""
+                    android:inputType="text"
+                    android:textSize="12sp"
+                    android:hint="@string/comment_hint"
                     android:gravity="top"
                     android:background="@color/transparency"
                     android:layout_marginTop="8dp"
@@ -412,7 +416,7 @@
                     android:layout_width="60dp"
                     android:layout_height="40dp"
                     android:textSize="12sp"
-                    android:text="확인"
+                    android:text="@string/check"
                     android:background="@color/transparency"
                     android:textColor="@color/elixir_orange"
                     app:layout_constraintTop_toBottomOf="@id/editComment"

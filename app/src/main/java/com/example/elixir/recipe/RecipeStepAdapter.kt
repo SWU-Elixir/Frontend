@@ -3,6 +3,7 @@ package com.example.elixir.recipe
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.elixir.R
 import com.example.elixir.databinding.ItemRecipeListStepBinding
 
 class RecipeStepAdapter(private val recipeOrder: List<String>) :
@@ -21,7 +22,7 @@ class RecipeStepAdapter(private val recipeOrder: List<String>) :
 
     override fun onBindViewHolder(holder: StepViewHolder, position: Int) {
         holder.binding.recipeExplain.text = recipeOrder[position]
-        holder.binding.stepNumber.text = "STEP ${position + 1}"
+        holder.binding.stepNumber.text = holder.itemView.context.getString(R.string.recipe_step_format, position + 1)
     }
 
     override fun getItemCount(): Int = recipeOrder.size

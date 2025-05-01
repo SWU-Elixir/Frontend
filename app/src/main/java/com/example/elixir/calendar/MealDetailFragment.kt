@@ -31,7 +31,7 @@ class MealDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // ------------------------ 2. 더미 데이터 적용 ------------------------
+        // ------------------------ 더미 데이터 적용 ------------------------
         val dummyData = MealPlanData(
             id = BigInteger("1001"),
             memberId = BigInteger("1"),
@@ -43,8 +43,8 @@ class MealDetailFragment : Fragment() {
             mealPlanIngredients = listOf("연어", "아보카도", "올리브유", "잣")
         )
 
-        // ------------------------ 3. 데이터 바인딩 ------------------------
-        binding.mealTitle.text = dummyData.name
+        // ------------------------ 데이터 바인딩 ------------------------
+        //binding.mealTitle.text = dummyData.name
 
         // 색상 및 배경 drawable 준비
         val whiteColor = ContextCompat.getColor(requireContext(), R.color.white)
@@ -114,39 +114,13 @@ class MealDetailFragment : Fragment() {
             selectedButton.setTextColor(whiteColor)
         }
 
-        // 메뉴 버튼 클릭 시 팝업 메뉴 표시
-        binding.menuButton.setOnClickListener {
-            val popupMenu = PopupMenu(context, binding.menuButton)
-            popupMenu.menuInflater.inflate(R.menu.item_menu_drop, popupMenu.menu)
-
-            popupMenu.setOnMenuItemClickListener { menuItem ->
-                when (menuItem.itemId) {
-                    R.id.menu_edit -> {
-                        Toast.makeText(context, "댓글 수정 클릭됨", Toast.LENGTH_SHORT).show()
-                        true
-                    }
-                    R.id.menu_delete -> {
-                        Toast.makeText(context, "댓글 삭제 클릭됨", Toast.LENGTH_SHORT).show()
-                        true
-                    }
-                    else -> false
-                }
-            }
-            popupMenu.show()
-        }
-
-        // ------------------------ 4. 리스트 ------------------------
+        // ------------------------ 리스트 ------------------------
         binding.tagList.apply {
             layoutManager = FlexboxLayoutManager(context).apply {
                 flexDirection = FlexDirection.ROW
                 justifyContent = JustifyContent.FLEX_START
             }
             adapter = RecipeTagAdapter(dummyData.mealPlanIngredients)
-        }
-
-        // ------------------------ 5. 뒤로 가기 버튼 ------------------------
-        binding.backButton.setOnClickListener {
-            parentFragmentManager.popBackStack()
         }
     }
 

@@ -35,7 +35,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:text="오늘의 추천 레시피는?"
+                    android:text="@string/recipe_recommend_title"
                     android:textSize="20sp"
                     android:textColor="@color/black"
                     android:fontFamily="@font/pretendard_bold"
@@ -122,9 +122,9 @@
                     android:drawableTint="@color/elixir_orange"
                     android:minWidth="50dp"
                     android:minHeight="30dp"
-                    android:text="재설정"
+                    android:text="@string/recipe_reload"
                     android:textColor="@color/elixir_gray"
-                    android:textSize="10sp"
+                    android:textSize="12sp"
                     android:visibility="gone" />
 
             </LinearLayout>
@@ -144,7 +144,7 @@
                 android:id="@+id/emptyRecipeText"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="검색 결과가 없습니다"
+                android:text="@string/recipe_nothing_text"
                 android:textAlignment="center"
                 android:gravity="center"
                 android:layout_marginTop="-80dp"
@@ -164,11 +164,12 @@
         android:layout_marginBottom="100dp"
         android:clickable="true"
         android:focusable="true"
-        android:translationZ="8dp"
-        android:elevation="8dp"
+        android:contentDescription="@string/recipe_write"
         android:src="@drawable/ic_recipe_write"
         app:tint="@color/white"
         app:backgroundTint="@color/elixir_orange"
+        app:fabSize="normal"
+        app:elevation="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
