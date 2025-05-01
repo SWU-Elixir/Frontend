@@ -225,7 +225,7 @@ class RecipeFragment : Fragment() {
                 updateAt = "2025-04-22",
                 isBookmarked = false,
                 isLiked = false,
-                likeCount = 42
+                likeCount = 42234
             ),
             RecipeData(
                 id = BigInteger.valueOf(2),
@@ -245,14 +245,14 @@ class RecipeFragment : Fragment() {
                 updateAt = "2025-04-22",
                 isBookmarked = true,
                 isLiked = true,
-                likeCount = 129
+                likeCount = 1293
             ),
             RecipeData(
                 id = BigInteger.valueOf(3),
                 memberId = BigInteger.valueOf(1001),
                 title = "토마토 올리브 항염 마리네이드",
                 imageUrl = R.drawable.png_recipe_sample,
-                categorySlowAging = "염증 감소",
+                categorySlowAging = "향산화 강화",
                 categoryType = "양념/소스/잼",
                 difficulty = "쉬움",
                 timeHours = 0,
@@ -265,7 +265,7 @@ class RecipeFragment : Fragment() {
                 updateAt = "2025-04-22",
                 isBookmarked = false,
                 isLiked = false,
-                likeCount = 58
+                likeCount = 42234
             ),
             RecipeData(
                 id = BigInteger.valueOf(4),

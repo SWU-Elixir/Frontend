@@ -48,6 +48,7 @@ class RecipeListAdapter(
         holder.binding.categorySlowAging.text = item.categorySlowAging
         holder.binding.categoryType.text = item.categoryType
         holder.binding.recipeLevel.text = item.difficulty
+        holder.binding.heartCount.text = formatCount(item.likeCount)
 
         // 조리 시간 표시
         holder.binding.recipeTimeHour.text = if (item.timeHours == 0) "" else "${item.timeHours}시간"
@@ -62,25 +63,45 @@ class RecipeListAdapter(
             adapter = RecipeIngredientAdapter(item.ingredients)
         }
 
-        // 북마크/하트 아이콘 상태 설정
-        holder.binding.bookmarkButton.setImageResource(
-            if (item.isBookmarked) R.drawable.ic_recipe_bookmark_selected else R.drawable.ic_recipe_bookmark_normal
+        // 초기 버튼 상태 설정
+        holder.binding.bookmarkButton.setBackgroundResource(
+            if(item.isBookmarked) R.drawable.ic_recipe_bookmark_selected
+            else R.drawable.ic_recipe_bookmark_normal
         )
-        holder.binding.heartButton.setImageResource(
-            if (item.isLiked) R.drawable.ic_recipe_heart_selected else R.drawable.ic_recipe_heart_normal
+        holder.binding.heartButton.setBackgroundResource(
+            if(item.isLiked) R.drawable.ic_recipe_heart_selected
+            else R.drawable.ic_recipe_heart_normal
         )
 
-        // 좋아요 수 포맷 변환 (예: 1.2k / 2M 등)
-        val likeCountText = when {
-            item.likeCount >= 1_000_000 -> formatCount(item.likeCount / 1_000_000.0, "M")
-            item.likeCount >= 1_000     -> formatCount(item.likeCount / 1_000.0, "k")
-            else                        -> item.likeCount.toString()
+        // 북마크 버튼 클릭 이벤트
+        holder.binding.bookmarkButton.setOnClickListener {
+            item.isBookmarked = !item.isBookmarked
+            holder.binding.bookmarkButton.setBackgroundResource(
+                if(item.isBookmarked) R.drawable.ic_recipe_bookmark_selected
+                else R.drawable.ic_recipe_bookmark_normal
+            )
         }
-        holder.binding.heartCount.text = likeCountText
+
+        // 좋아요 버튼 클릭 이벤트
+        holder.binding.heartButton.setOnClickListener {
+            item.isLiked = !item.isLiked
+            holder.binding.heartButton.setBackgroundResource(
+                if(item.isLiked) R.drawable.ic_recipe_heart_selected
+                else R.drawable.ic_recipe_heart_normal
+            )
+            if (!item.isLiked) {
+                item.likeCount--
+            } else {
+                item.likeCount++
+            }
+            item.isLiked = !item.isLiked
+            holder.binding.heartCount.text = formatCount(item.likeCount)
+
+            onHeartClick(item)
+        }
 
         // 버튼 클릭 리스너 연결
         holder.binding.bookmarkButton.setOnClickListener { onBookmarkClick(item) }
-        holder.binding.heartButton.setOnClickListener { onHeartClick(item) }
 
         // 전체 아이템 클릭 로그 출력
         holder.binding.root.setOnClickListener {
@@ -122,13 +143,12 @@ class RecipeListAdapter(
      * @param value: 숫자 값
      * @param suffix: 단위 (k, M 등)
      */
-    private fun formatCount(value: Double, suffix: String): String {
-        val formatted = if (value < 10) {
-            String.format("%.1f", value) // e.g. 1.2k
-        } else {
-            value.toInt().toString()     // e.g. 15k
-        }
-        return formatted.removeSuffix(".0") + suffix
+    private fun formatCount(count: Int): String {
+        return when {
+            count >= 1_000_000 -> String.format("%.1fM", count / 1_000_000.0)
+            count >= 1_000     -> String.format("%.1fk", count / 1_000.0)
+            else               -> count.toString()
+        }.removeSuffix(".0") // 소수점 0 제거
     }
 
     /**

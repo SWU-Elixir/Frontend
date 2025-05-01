@@ -23,6 +23,6 @@ data class RecipeData(
 
     var isBookmarked: Boolean = false,   // 북마크 여부
     var isLiked: Boolean = false,        // 좋아요 클릭 여부
-    val likeCount: Int,                   // 좋아요 수
+    var likeCount: Int,                   // 좋아요 수
 
 )

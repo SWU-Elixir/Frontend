@@ -35,7 +35,7 @@
                 android:background="@drawable/bg_gradient_top_overlay"/>
             <View
                 android:layout_width="match_parent"
-                android:layout_height="80dp"
+                android:layout_height="160dp"
                 android:layout_gravity="bottom"
                 android:background="@drawable/bg_gradient_bottom_overlay"/>
         </FrameLayout>
