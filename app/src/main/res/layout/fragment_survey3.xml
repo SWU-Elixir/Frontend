@@ -69,33 +69,33 @@
             android:textSize="16sp" />
 
         <com.google.android.material.chip.Chip
-            android:id="@+id/dessert"
+            android:id="@+id/diet_dessert"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/ChipStyle_Short"
             app:chipIcon="@drawable/ic_cake"
             app:chipIconVisible="true"
-            android:text="@string/dessert"
+            android:text="@string/diet_dessert"
             android:textSize="16sp" />
 
         <com.google.android.material.chip.Chip
-            android:id="@+id/beverage"
+            android:id="@+id/diet_beverage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/ChipStyle_Short"
             app:chipIcon="@drawable/ic_tea"
             app:chipIconVisible="true"
-            android:text="@string/beverage"
+            android:text="@string/diet_beverage"
             android:textSize="16sp" />
 
         <com.google.android.material.chip.Chip
-            android:id="@+id/sauce"
+            android:id="@+id/diet_sauce"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/ChipStyle_Short"
             app:chipIcon="@drawable/ic_sauce"
             app:chipIconVisible="true"
-            android:text="@string/sauce"
+            android:text="@string/diet_sauce"
             android:textSize="16sp" />
 
         <com.google.android.material.chip.Chip

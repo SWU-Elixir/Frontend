@@ -1,4 +1,4 @@
-package com.example.elixir
+package com.example.elixir.dietlog
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -10,7 +10,6 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -21,6 +20,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
+import com.example.elixir.R
+import com.example.elixir.dialog.SelectImgDialog
+import com.example.elixir.ToolbarActivity
 import com.example.elixir.calendar.MealPlanData
 import com.example.elixir.databinding.FragmentDietLogBinding
 import com.google.android.material.timepicker.MaterialTimePicker
@@ -35,8 +37,6 @@ import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import kotlin.time.Duration.Companion.hours
-import kotlin.time.Duration.Companion.minutes
 
 class DietLogFragment : Fragment() {
     private lateinit var dietLogBinding: FragmentDietLogBinding

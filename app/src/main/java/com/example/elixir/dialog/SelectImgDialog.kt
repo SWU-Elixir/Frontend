@@ -1,4 +1,4 @@
-package com.example.elixir
+package com.example.elixir.dialog
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog

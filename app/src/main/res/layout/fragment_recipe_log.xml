@@ -1,0 +1,743 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingHorizontal="16dp"
+    android:fitsSystemWindows="true"
+    tools:context=".signup.SettingProfileFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <!-- 레시피명 -->
+        <TextView
+            android:id="@+id/recipe_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/recipe_name"
+            android:fontFamily="@font/pretendard_bold"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/enter_recipe_title"/>
+
+        <EditText
+            android:id="@+id/enter_recipe_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="5dp"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="15dp"
+            android:background="@drawable/bg_rect_outline_orange"
+            android:hint="@string/recipe_name"
+            android:textColor="@color/black"
+            android:textColorHint="@color/elixir_gray"
+            android:textSize="16sp"
+            android:fontFamily="@font/pretendard_medium"
+            android:importantForAutofill="no"
+            app:layout_constraintTop_toBottomOf="@id/recipe_title"
+            app:layout_constraintBottom_toTopOf="@id/recipe_thumbnail_text"
+            tools:ignore="DuplicateSpeakableTextCheck,VisualLintTextFieldSize,TextContrastCheck" />
+
+        <!-- 대표 사진 -->
+        <TextView
+            android:id="@+id/recipe_thumbnail_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/thumbnail"
+            android:fontFamily="@font/pretendard_bold"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toBottomOf="@id/enter_recipe_title"
+            app:layout_constraintBottom_toTopOf="@id/recipe_thumbnail"/>
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/recipe_thumbnail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            style="@style/ImgDefault_Rect"
+            android:maxWidth="200dp"
+            android:maxHeight="200dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/img_blank"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/thumbnail"
+            app:layout_constraintDimensionRatio="1:1"
+            app:shapeAppearanceOverlay="@style/ImgDefault_Rect"
+            app:layout_constraintTop_toBottomOf="@id/recipe_thumbnail_text"
+            app:layout_constraintBottom_toTopOf="@id/recipe_description"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:ignore="ImageContrastCheck" />
+
+        <!-- 레시피 설명 -->
+        <TextView
+            android:id="@+id/recipe_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/recipe_description"
+            android:fontFamily="@font/pretendard_bold"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            app:layout_constraintTop_toBottomOf="@id/recipe_thumbnail"
+            app:layout_constraintBottom_toTopOf="@id/enter_recipe_description"/>
+
+        <EditText
+            android:id="@+id/enter_recipe_description"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:layout_marginTop="5dp"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="15dp"
+            android:background="@drawable/bg_rect_outline_orange"
+            android:gravity="top|start"
+            android:hint="@string/recipe_description_hint"
+            android:textColor="@color/black"
+            android:textColorHint="@color/elixir_gray"
+            android:textSize="16sp"
+            android:fontFamily="@font/pretendard_medium"
+            android:maxLength="200"
+            android:importantForAutofill="no"
+            android:inputType="textMultiLine"
+            android:overScrollMode="always"
+            app:layout_constraintTop_toBottomOf="@id/recipe_description"
+            app:layout_constraintBottom_toTopOf="@id/recipe_category" />
+
+        <!-- 카테고리 -->
+        <TextView
+            android:id="@+id/recipe_category"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/category"
+            android:fontFamily="@font/pretendard_bold"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            app:layout_constraintTop_toBottomOf="@id/enter_recipe_description" />
+
+        <Spinner
+            android:id="@+id/select_low_aging"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/bg_spinner_recipe_category"
+            android:minHeight="24dp"
+            android:popupBackground="@color/white"
+            android:textAlignment="viewStart"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/recipe_category"/>
+
+        <Spinner
+            android:id="@+id/select_diet"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:background="@drawable/bg_spinner_recipe_category"
+            android:minHeight="24dp"
+            android:popupBackground="@color/white"
+            android:textAlignment="viewStart"
+            app:layout_constraintStart_toEndOf="@id/select_low_aging"
+            app:layout_constraintTop_toTopOf="@id/select_low_aging"
+            app:layout_constraintBottom_toBottomOf="@id/select_low_aging"/>
+
+        <!-- 대표 식재료 태그 -->
+        <TextView
+            android:id="@id/represent_ingredient"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:gravity="center_vertical"
+            android:text="@string/represent_ingredient"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:fontFamily="@font/pretendard_bold"
+            app:layout_constraintTop_toBottomOf="@id/select_diet"
+            app:layout_constraintBottom_toTopOf="@id/tags_ingredient"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <TextView
+            android:id="@id/rule_ingredient"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:gravity="center_vertical"
+            android:text="@string/rule_ingredient"
+            android:textColor="@color/elixir_darkgray"
+            android:textSize="12sp"
+            android:fontFamily="@font/pretendard_light"
+            app:layout_constraintTop_toBottomOf="@id/select_diet"
+            app:layout_constraintBottom_toTopOf="@id/tags_ingredient"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <!-- 태그 선택지 -->
+        <com.google.android.material.chip.ChipGroup
+            android:id="@id/tags_ingredient"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="20dp"
+            app:chipSpacingHorizontal="8dp"
+            app:layout_constraintTop_toBottomOf="@id/represent_ingredient"
+            app:layout_constraintBottom_toTopOf="@id/allergy">
+
+            <com.google.android.material.chip.Chip
+                android:id="@id/ingredient_challenge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                app:chipIcon="@drawable/ic_challenge"
+                app:chipIconVisible="true"
+                android:text="@string/navi_challenge"
+                android:textSize="16sp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@id/ingredient_brown_rice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/brown_rice"
+                android:textSize="16sp"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@id/ingredient_bean"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/bean"
+                android:textSize="16sp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@id/ingredient_grain"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/grain"
+                android:textSize="16sp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@id/ingredient_green_leafy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/green_leafy"
+                android:textSize="16sp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@id/ingredient_berry"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/berry"
+                android:textSize="16sp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@id/ingredient_nuts"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/nuts"
+                android:textSize="16sp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@id/ingredient_olive_oil"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/olive_oil"
+                android:textSize="16sp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@id/ingredient_fish"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/fish"
+                android:textSize="16sp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@id/ingredient_poultry"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/poultry"
+                android:textSize="16sp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@id/find_ingredient"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                app:chipStrokeColor="@color/elixir_orange"
+                app:chipIcon="@drawable/ic_search"
+                app:chipIconVisible="true"
+                android:text="@string/find_ingredient"
+                android:textSize="16sp"
+                android:textColor="@color/elixir_orange"/>
+        </com.google.android.material.chip.ChipGroup>
+
+        <!-- 알러지 -->
+        <TextView
+            android:id="@+id/allergy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:gravity="center_vertical"
+            android:text="@string/allergy"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:fontFamily="@font/pretendard_bold"
+            app:layout_constraintTop_toBottomOf="@id/tags_ingredient"
+            app:layout_constraintBottom_toTopOf="@id/tags_allergy"
+            app:layout_constraintStart_toStartOf="parent"/>
+        <!-- 선택지 -->
+        <com.google.android.material.chip.ChipGroup
+            android:id="@id/tags_allergy"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            app:chipSpacingHorizontal="8dp"
+            app:layout_constraintTop_toBottomOf="@id/allergy"
+            app:layout_constraintBottom_toTopOf="@id/level" >
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/allergy_egg"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/allergy_egg"
+                android:textSize="16sp"
+                app:chipIconVisible="false" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/allergy_milk"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/allergy_milk"
+                android:textSize="16sp"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/allergy_buckwheat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/allergy_buckwheat"
+                android:textSize="16sp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/allergy_peanut"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/allergy_peanut"
+                android:textSize="16sp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/allergy_soybean"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/allergy_soybean"
+                android:textSize="16sp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/allergy_wheat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/allergy_wheat"
+                android:textSize="16sp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/allergy_mackerel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/allergy_mackerel"
+                android:textSize="16sp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/allergy_crab"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/allergy_crab"
+                android:textSize="16sp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/allergy_shrimp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/allergy_shrimp"
+                android:textSize="16sp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/allergy_pig"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/allergy_pig"
+                android:textSize="16sp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/allergy_peach"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/allergy_peach"
+                android:textSize="16sp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/allergy_dioxide"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/allergy_dioxide"
+                android:textSize="16sp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/allergy_walnut"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/allergy_walnut"
+                android:textSize="16sp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/allergy_chicken"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/allergy_chicken"
+                android:textSize="16sp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/allergy_tomato"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/allergy_tomato"
+                android:textSize="16sp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/allergy_cow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/allergy_cow"
+                android:textSize="16sp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/allergy_squid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/allergy_squid"
+                android:textSize="16sp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/allergy_seashell"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:fontFamily="@font/pretendard_medium"
+                android:text="@string/allergy_seashell"
+                android:textSize="16sp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/allergy_oyster"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/allergy_oyster"
+                android:textSize="16sp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/allergy_pinenut"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/allergy_pinenut"
+                android:textSize="16sp"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/n_a"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                app:chipIcon="@drawable/ic_x"
+                app:chipIconTint="@color/selector_chip_ic"
+                app:chipIconVisible="true"
+                android:text="@string/n_a"
+                android:textSize="16sp" />
+        </com.google.android.material.chip.ChipGroup>
+
+        <!-- 난이도 -->
+        <TextView
+            android:id="@+id/level"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:gravity="center_vertical"
+            android:text="@string/level"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:fontFamily="@font/pretendard_bold"
+            app:layout_constraintTop_toBottomOf="@id/tags_allergy"
+            app:layout_constraintBottom_toTopOf="@id/tags_level"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <!-- 태그 선택지 -->
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/tags_level"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="20dp"
+            app:chipSpacingHorizontal="8dp"
+            app:layout_constraintTop_toBottomOf="@id/level"
+            app:layout_constraintBottom_toTopOf="@id/duration">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/level_easy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/level_easy"
+                android:textSize="16sp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/level_common"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/level_common"
+                android:textSize="16sp"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/level_difficult"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/level_difficult"
+                android:textSize="16sp" />
+        </com.google.android.material.chip.ChipGroup>
+
+        <!-- 소요시간 -->
+        <TextView
+            android:id="@+id/duration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/duration_time"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:fontFamily="@font/pretendard_bold"
+            app:layout_constraintTop_toBottomOf="@id/tags_level"
+            app:layout_constraintBottom_toTopOf="@id/select_hour"/>
+
+        <Spinner
+            android:id="@+id/select_hour"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/bg_spinner_recipe_category"
+            android:minHeight="24dp"
+            android:popupBackground="@color/white"
+
+            android:textAlignment="viewStart"
+            app:layout_constraintTop_toBottomOf="@id/duration"
+            app:layout_constraintBottom_toTopOf="@id/material"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <Spinner
+            android:id="@+id/select_min"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:background="@drawable/bg_spinner_recipe_category"
+            android:minHeight="24dp"
+            android:popupBackground="@color/white"
+            android:textAlignment="viewStart"
+            app:layout_constraintTop_toTopOf="@id/select_hour"
+            app:layout_constraintBottom_toBottomOf="@id/select_hour"
+            app:layout_constraintStart_toEndOf="@id/select_hour"/>
+
+        <!-- 재료 -->
+        <TextView
+            android:id="@+id/material"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="5dp"
+            android:text="@string/material"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:fontFamily="@font/pretendard_bold"
+            app:layout_constraintTop_toBottomOf="@id/select_hour"
+            app:layout_constraintBottom_toTopOf="@id/frame_enter_material"/>
+
+        <!-- 재료 입력 리스트 -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/frame_enter_material"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/material"
+            app:layout_constraintBottom_toTopOf="@id/btn_material_add"/>
+
+        <android.widget.Button
+            android:id="@+id/btn_material_add"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginTop="10dp"
+            android:paddingHorizontal="10dp"
+            android:background="@drawable/bg_rect_filled_orange"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:drawableStart="@drawable/ic_add"
+            android:text="@string/btn_add"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:fontFamily="@font/pretendard_medium"
+            app:layout_constraintTop_toBottomOf="@id/frame_enter_material"
+            app:layout_constraintBottom_toTopOf="@id/sauce"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <!-- 양념 -->
+        <TextView
+            android:id="@+id/sauce"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="5dp"
+            android:text="@string/sauce"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:fontFamily="@font/pretendard_bold"
+            app:layout_constraintTop_toBottomOf="@id/btn_material_add"
+            app:layout_constraintBottom_toTopOf="@id/frame_enter_sauce"/>
+
+        <!-- 양념 입력 리스트 -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/frame_enter_sauce"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/sauce"
+            app:layout_constraintBottom_toTopOf="@id/btn_sauce_add"/>
+
+        <android.widget.Button
+            android:id="@+id/btn_sauce_add"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginTop="10dp"
+            android:paddingHorizontal="10dp"
+            android:background="@drawable/bg_rect_filled_orange"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:drawableStart="@drawable/ic_add"
+            android:text="@string/btn_add"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:fontFamily="@font/pretendard_medium"
+            app:layout_constraintTop_toBottomOf="@id/frame_enter_sauce"
+            app:layout_constraintBottom_toTopOf="@id/cooking_order"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <!-- 요리 순서 -->
+        <TextView
+            android:id="@+id/cooking_order"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="5dp"
+            android:text="@string/cooking_order"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:fontFamily="@font/pretendard_bold"
+            app:layout_constraintTop_toBottomOf="@id/btn_sauce_add"
+            app:layout_constraintBottom_toTopOf="@id/frame_enter_cooking"/>
+
+        <!-- 요리 입력 리스트 -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/frame_enter_cooking"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/cooking_order"
+            app:layout_constraintBottom_toTopOf="@id/btn_cooking_order_add"/>
+
+        <android.widget.Button
+            android:id="@+id/btn_cooking_order_add"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginTop="10dp"
+            android:paddingHorizontal="10dp"
+            android:background="@drawable/bg_rect_filled_orange"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:drawableStart="@drawable/ic_add"
+            android:text="@string/btn_add"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:fontFamily="@font/pretendard_medium"
+            app:layout_constraintTop_toBottomOf="@id/frame_enter_cooking"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <!-- 팁/주의사항 -->
+        <TextView
+            android:id="@+id/tip_caution"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="5dp"
+            android:text="@string/tip_caution"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:fontFamily="@font/pretendard_bold"
+            app:layout_constraintTop_toBottomOf="@id/btn_cooking_order_add"
+            app:layout_constraintBottom_toTopOf="@id/enter_tip_caution"/>
+
+        <EditText
+            android:id="@+id/enter_tip_caution"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:layout_marginTop="5dp"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="15dp"
+            android:background="@drawable/bg_rect_outline_orange"
+            android:gravity="top|start"
+            android:hint="@string/tip_caution_hint"
+            android:textColor="@color/black"
+            android:textColorHint="@color/elixir_gray"
+            android:textSize="16sp"
+            android:fontFamily="@font/pretendard_medium"
+            android:importantForAutofill="no"
+            android:inputType="textMultiLine"
+            android:maxLength="200"
+            android:overScrollMode="always"
+            app:layout_constraintTop_toBottomOf="@id/tip_caution"
+            app:layout_constraintBottom_toTopOf="@id/btn_write_recipe"/>
+
+        <android.widget.Button
+            android:id="@+id/btn_write_recipe"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="20dp"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:background="@drawable/bg_rect_filled_gray"
+            android:enabled="false"
+            android:text="@string/btn_write"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:fontFamily="@font/pretendard_medium"
+            app:layout_constraintTop_toBottomOf="@id/enter_tip_caution"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

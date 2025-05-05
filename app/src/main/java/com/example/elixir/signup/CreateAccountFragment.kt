@@ -10,7 +10,7 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import com.example.elixir.AlertExitDialog
+import com.example.elixir.dialog.AlertExitDialog
 import com.example.elixir.R
 import com.example.elixir.databinding.FragmentCreateAccountBinding
 

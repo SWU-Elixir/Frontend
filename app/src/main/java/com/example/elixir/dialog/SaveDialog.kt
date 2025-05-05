@@ -1,19 +1,16 @@
-package com.example.elixir
+package com.example.elixir.dialog
 
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
-import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import com.example.elixir.R
 
-class DeleteDialog(private val act: Activity) {
+class SaveDialog(private val act: Activity) {
     @SuppressLint("InflateParams")
-    val dialogView = LayoutInflater.from(act).inflate(R.layout.dialog_exit_confirm, null, false)!!
+    val dialogView = LayoutInflater.from(act).inflate(R.layout.dialog_save_confirm, null, false)!!
     fun show(){
         val dialog = AlertDialog.Builder(act)
             .setView(dialogView)

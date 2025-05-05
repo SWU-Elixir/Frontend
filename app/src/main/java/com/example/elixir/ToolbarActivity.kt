@@ -4,14 +4,15 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
-import com.example.elixir.calendar.CalendarFragment
-import com.example.elixir.calendar.MealPlanData
 import com.example.elixir.databinding.ActivityToolbarBinding
+import com.example.elixir.dialog.AlertExitDialog
+import com.example.elixir.dietlog.DietLogFragment
+import com.example.elixir.recipe.RecipeFragment
+import com.example.elixir.recipe.RecipeLogFragment
 import com.example.elixir.signup.CreateAccountFragment
 
 open class ToolbarActivity : AppCompatActivity() {
@@ -70,6 +71,21 @@ open class ToolbarActivity : AppCompatActivity() {
 
                 // 식단 기록 프래그먼트 띄우기
                 setFragment(DietLogFragment())
+            }
+
+            // 레시피 기록 모드
+            3 -> {
+                // 툴바의 제목, 더보기 버튼 안보이게, 작동 x
+                toolBinding.title.visibility = View.INVISIBLE
+                toolBinding.btnMore.visibility = View.INVISIBLE
+
+                // 뒤로가기 버튼을 누르면 레시피 리스트 페이지로 이동
+                toolBinding.btnBack.setOnClickListener {
+                    AlertExitDialog(this).show()
+                }
+
+                // 레시피 프레그먼트 띄워주기
+                setFragment(RecipeLogFragment())
             }
         }
     }

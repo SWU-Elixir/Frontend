@@ -1,4 +1,4 @@
-package com.example.elixir
+package com.example.elixir.dietlog
 
 import java.time.LocalDateTime
 
