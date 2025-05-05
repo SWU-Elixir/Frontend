@@ -84,7 +84,7 @@ open class ToolbarActivity : AppCompatActivity() {
 
                 // 뒤로가기 버튼을 누르면 이전 화면으로 돌아가기
                 toolBinding.btnBack.setOnClickListener {
-                    onBackPressed()
+                    finish()
                 }
 
                 toolBinding.btnMore.setOnClickListener {
@@ -98,7 +98,7 @@ open class ToolbarActivity : AppCompatActivity() {
                                 true
                             }
                             R.id.menu_delete -> {
-                                Toast.makeText(this, "댓글 삭제 클릭됨", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(this , "댓글 삭제 클릭됨", Toast.LENGTH_SHORT).show()
                                 true
                             }
                             else -> false
@@ -113,6 +113,82 @@ open class ToolbarActivity : AppCompatActivity() {
 
                 // 식단 상세 프래그먼트 띄워주기
                 setFragment(MealDetailFragment())
+            }
+
+            // 내 레시피 모드
+            5 -> {
+                // 툴바의 제목은 보이게, 더보기 버튼 안보이게
+                toolBinding.title.visibility = View.VISIBLE
+                toolBinding.btnMore.visibility = View.INVISIBLE
+
+                // 뒤로가기 버튼을 누르면 이전 화면으로 돌아가기
+                toolBinding.btnBack.setOnClickListener {
+                    finish()
+                }
+
+                // 제목 설정
+                val title = intent.getStringExtra("title")
+                toolBinding.title.text = title
+
+                // 내 레시피 프래그먼트 띄워주기
+                setFragment(MyPageImageGridFragment.newInstance(MyPageImageGridFragment.TYPE_RECIPE))
+            }
+
+            // 내 스크랩 모드
+            6 -> {
+                // 툴바의 제목은 보이게, 더보기 버튼 안보이게
+                toolBinding.title.visibility = View.VISIBLE
+                toolBinding.btnMore.visibility = View.INVISIBLE
+
+                // 뒤로가기 버튼을 누르면 이전 화면으로 돌아가기
+                toolBinding.btnBack.setOnClickListener {
+                    finish()
+                }
+
+                // 제목 설정
+                val title = intent.getStringExtra("title")
+                toolBinding.title.text = title
+
+                // 내 스크랩 프래그먼트 띄워주기
+                setFragment(MyPageImageGridFragment.newInstance(MyPageImageGridFragment.TYPE_SCRAP))
+            }
+
+            // 내 뱃지 모드
+            7 -> {
+                // 툴바의 제목은 보이게, 더보기 버튼 안보이게
+                toolBinding.title.visibility = View.VISIBLE
+                toolBinding.btnMore.visibility = View.INVISIBLE
+
+                // 뒤로가기 버튼을 누르면 이전 화면으로 돌아가기
+                toolBinding.btnBack.setOnClickListener {
+                    finish()
+                }
+
+                // 제목 설정
+                val title = intent.getStringExtra("title")
+                toolBinding.title.text = title
+
+                // 내 스크랩 프래그먼트 띄워주기
+                setFragment(MyPageImageGridFragment.newInstance(MyPageImageGridFragment.TYPE_BADGE))
+            }
+
+            // 내 뱃지 모드
+            8 -> {
+                // 툴바의 제목은 보이게, 더보기 버튼 안보이게
+                toolBinding.title.visibility = View.VISIBLE
+                toolBinding.btnMore.visibility = View.INVISIBLE
+
+                // 뒤로가기 버튼을 누르면 이전 화면으로 돌아가기
+                toolBinding.btnBack.setOnClickListener {
+                    finish()
+                }
+
+                // 제목 설정
+                val title = intent.getStringExtra("title")
+                toolBinding.title.text = title
+
+                // 내 스크랩 프래그먼트 띄워주기
+                setFragment(MypageFollowListFragment())
             }
         }
     }

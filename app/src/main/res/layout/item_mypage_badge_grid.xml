@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="4dp">
+
+    <ImageView
+        android:id="@+id/badgeImage"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:adjustViewBounds="true"
+        android:scaleType="centerCrop"
+        android:background="@drawable/bg_rect_filled_gray"
+        android:clipToOutline="true"
+        android:minHeight="100dp"
+        android:minWidth="100dp"
+        android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:id="@+id/badgeTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="제목"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginTop="4dp"
+        android:textColor="#222222"/>
+
+    <TextView
+        android:id="@+id/badgeSubtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="서브제목"
+        android:textSize="12sp"
+        android:gravity="center"
+        android:layout_marginTop="2dp"
+        android:textColor="#888888"/>
+</LinearLayout>

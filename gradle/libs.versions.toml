@@ -19,6 +19,7 @@ lottie = "6.1.0"
 material = "1.12.0"
 materialCalendarview = "1.6.0"
 retrofit = "2.9.0"
+viewfinderCore = "1.4.0-alpha13"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -47,6 +48,7 @@ lottie = { module = "com.airbnb.android:lottie", version.ref = "lottie" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 material-calendarview = { module = "com.github.prolificinteractive:material-calendarview", version.ref = "materialCalendarview" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+androidx-viewfinder-core = { group = "androidx.camera.viewfinder", name = "viewfinder-core", version.ref = "viewfinderCore" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -122,7 +122,11 @@ class HomeActivity : AppCompatActivity() {
         mypageButton.setOnClickListener {
             savePreviousState()
             updateSelectedButton(mypageButton, mypageTitle)
-            Toast.makeText(this, "마이페이지 탭 선택됨", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, ToolbarActivity::class.java).apply {
+                putExtra("mode", 8)  // 식단 상세 모드
+                putExtra("title", "내 뱃지")  // 식단 이름
+            }
+            this.startActivity(intent)
         }
     }
 
