@@ -79,9 +79,9 @@ class MyPageImageGridFragment : Fragment() {
     private fun loadBadges(): List<BadgeItem> {
         // TODO: 뱃지 데이터 로드
         return listOf(
-            BadgeItem(R.drawable.img_blank, "봄나물 마스터", 2025, 3),
-            BadgeItem(R.drawable.img_blank, "봄나물 마스터", 2025, 3),
-            BadgeItem(R.drawable.img_blank, "봄나물 마스터", 2025, 3)
+            BadgeItem(R.drawable.png_badge, "봄나물 마스터", 2025, 3),
+            BadgeItem(R.drawable.bg_badge_empty, "봄나물 마스터", 2025, 3),
+            BadgeItem(R.drawable.bg_badge_empty, "봄나물 마스터", 2025, 3)
         )
     }
 

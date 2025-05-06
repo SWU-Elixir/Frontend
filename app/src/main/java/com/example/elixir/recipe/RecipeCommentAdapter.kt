@@ -1,6 +1,7 @@
 package com.example.elixir.recipe
 
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.PopupMenu
@@ -9,9 +10,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.elixir.R
 import com.example.elixir.databinding.ItemRecipeListCommentBinding
 
+interface CommentActionListener {
+    fun onEditComment(commentId: String, commentText: String)
+    fun onDeleteComment(commentId: String)
+}
+
 class RecipeCommentAdapter(
     private val context: Context,
-    private val comments: List<CommentData>
+    private val comments: List<CommentData>,
+    private val commentActionListener: CommentActionListener
 ) : RecyclerView.Adapter<RecipeCommentAdapter.CommentViewHolder>() {
 
     inner class CommentViewHolder(private val binding: ItemRecipeListCommentBinding) : 
@@ -36,11 +43,11 @@ class RecipeCommentAdapter(
                 popupMenu.setOnMenuItemClickListener { menuItem ->
                     when (menuItem.itemId) {
                         R.id.menu_edit -> {
-                            Toast.makeText(context, "댓글 수정 클릭됨", Toast.LENGTH_SHORT).show()
+                            commentActionListener.onEditComment(item.commentId, item.commentText)
                             true
                         }
                         R.id.menu_delete -> {
-                            Toast.makeText(context, "댓글 삭제 클릭됨", Toast.LENGTH_SHORT).show()
+                            commentActionListener.onDeleteComment(item.commentId)
                             true
                         }
                         else -> false

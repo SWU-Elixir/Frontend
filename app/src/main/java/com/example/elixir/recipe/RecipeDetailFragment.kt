@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.elixir.R
@@ -20,7 +21,7 @@ import java.util.*
  * 레시피 상세 정보를 표시하는 프래그먼트
  * 레시피의 기본 정보, 재료, 조리 순서, 댓글 등을 보여주고 관리
  */
-class RecipeDetailFragment : Fragment() {
+class RecipeDetailFragment : Fragment(), CommentActionListener {
 
     // ViewBinding 관련 변수
     private var _binding: FragmentRecipeDetailBinding? = null
@@ -29,6 +30,7 @@ class RecipeDetailFragment : Fragment() {
     // 댓글 관련 변수
     private lateinit var commentAdapter: RecipeCommentAdapter
     private val comments = mutableListOf<CommentData>()
+    private var editingCommentId: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -69,11 +71,11 @@ class RecipeDetailFragment : Fragment() {
         binding.categorySlowAging.text = dummyRecipe.categorySlowAging
         binding.categoryType.text = dummyRecipe.categoryType
         binding.recipeLevel.text = dummyRecipe.difficulty
-        
+
         // 조리 시간 설정 (시간이 있는 경우에만 표시)
         binding.recipeTimeHour.text = if (dummyRecipe.timeHours > 0) getString(R.string.recipe_time_hour_format, dummyRecipe.timeHours) else ""
         binding.recipeTimeMin.text = getString(R.string.recipe_time_min_format, dummyRecipe.timeMinutes)
-        
+
         // 팁과 좋아요 수 설정
         binding.tipText.text = dummyRecipe.tips
         binding.heartCount.text = formatCount(dummyRecipe.likeCount)
@@ -141,11 +143,20 @@ class RecipeDetailFragment : Fragment() {
             popupMenu.setOnMenuItemClickListener { menuItem ->
                 when (menuItem.itemId) {
                     R.id.menu_edit -> {
-                        Toast.makeText(context, "댓글 수정 클릭", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "레시피 수정 클릭", Toast.LENGTH_SHORT).show()
                         true
                     }
                     R.id.menu_delete -> {
-                        Toast.makeText(context, "댓긋 삭제 클릭", Toast.LENGTH_SHORT).show()
+                        // 레시피 삭제 확인 다이얼로그 표시
+                        AlertDialog.Builder(requireContext())
+                            .setTitle("레시피 삭제")
+                            .setMessage("레시피를 삭제하시겠습니까?")
+                            .setPositiveButton("삭제") { _, _ ->
+                                Toast.makeText(context, "레시피가 삭제되었습니다", Toast.LENGTH_SHORT).show()
+                                parentFragmentManager.popBackStack()
+                            }
+                            .setNegativeButton("취소", null)
+                            .show()
                         true
                     }
                     else -> false
@@ -189,6 +200,7 @@ class RecipeDetailFragment : Fragment() {
         // ------------------------ 더미 댓글 데이터 ------------------------
         comments.addAll(listOf(
             CommentData(
+                commentId = "1",
                 profileImageResId = R.drawable.ic_profile,
                 memberTitle = "건강지기",
                 memberNickname = "wellness_lover",
@@ -196,6 +208,7 @@ class RecipeDetailFragment : Fragment() {
                 date = "2025-05-01 12:13"
             ),
             CommentData(
+                commentId = "2",
                 profileImageResId = R.drawable.ic_profile,
                 memberTitle = "슬로우에이징러",
                 memberNickname = "슬로우",
@@ -206,27 +219,39 @@ class RecipeDetailFragment : Fragment() {
 
         // ------------------------ 댓글 어댑터 연결 ------------------------
         binding.commentList.layoutManager = LinearLayoutManager(requireContext())
-        commentAdapter = RecipeCommentAdapter(requireContext(), comments)
+        commentAdapter = RecipeCommentAdapter(requireContext(), comments, this)
         binding.commentList.adapter = commentAdapter
 
-        // 댓글 작성 버튼 클릭 이벤트 처리
+        // 댓글 작성/수정 버튼 클릭 이벤트 처리
         binding.commentButton.setOnClickListener {
             val commentText = binding.editComment.text.toString()
             if (commentText.isNotEmpty()) {
-                // 현재 시간을 포맷팅하여 댓글 작성 시간으로 사용
-                val currentTime = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date())
-                // 새 댓글 데이터 생성
-                val newComment = CommentData(
-                    profileImageResId = R.drawable.ic_profile,
-                    memberTitle = "userTitle",
-                    memberNickname = "userNickname",
-                    commentText = commentText,
-                    date = currentTime
-                )
-                // 댓글 목록에 추가하고 UI 업데이트
-                comments.add(newComment)
-                commentAdapter.notifyItemInserted(comments.size - 1)
-                binding.commentList.smoothScrollToPosition(comments.size - 1)
+                if (editingCommentId != null) {
+                    // 댓글 수정
+                    val commentIndex = comments.indexOfFirst { it.commentId == editingCommentId }
+                    if (commentIndex != -1) {
+                        val updatedComment = comments[commentIndex].copy(commentText = commentText)
+                        comments[commentIndex] = updatedComment
+                        commentAdapter.notifyItemChanged(commentIndex)
+                    }
+                    // 수정 모드 초기화
+                    editingCommentId = null
+                    binding.commentButton.text = getString(R.string.check)
+                } else {
+                    // 새 댓글 작성
+                    val currentTime = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date())
+                    val newComment = CommentData(
+                        commentId = UUID.randomUUID().toString(),
+                        profileImageResId = R.drawable.ic_profile,
+                        memberTitle = "userTitle",
+                        memberNickname = "userNickname",
+                        commentText = commentText,
+                        date = currentTime
+                    )
+                    comments.add(newComment)
+                    commentAdapter.notifyItemInserted(comments.size - 1)
+                    binding.commentList.smoothScrollToPosition(comments.size - 1)
+                }
                 binding.editComment.text.clear()
             } else {
                 Toast.makeText(context, getString(R.string.please_enter_comment), Toast.LENGTH_SHORT).show()
@@ -255,5 +280,31 @@ class RecipeDetailFragment : Fragment() {
             count >= 1_000     -> String.format(Locale.KOREA,"%.1fk", count / 1_000.0)
             else               -> count.toString()
         }.removeSuffix(".0") // 소수점 0 제거
+    }
+
+    override fun onEditComment(commentId: String, commentText: String) {
+        // 수정할 댓글 ID 저장
+        editingCommentId = commentId
+        // EditText에 기존 댓글 내용 설정
+        binding.editComment.setText(commentText)
+        // 버튼 텍스트 변경
+        binding.commentButton.text = "수정"
+    }
+
+    override fun onDeleteComment(commentId: String) {
+        // 댓글 삭제 확인 다이얼로그 표시
+        AlertDialog.Builder(requireContext())
+            .setTitle("댓글 삭제")
+            .setMessage("댓글을 삭제하시겠습니까?")
+            .setPositiveButton("삭제") { _, _ ->
+                // 댓글 삭제
+                val commentIndex = comments.indexOfFirst { it.commentId == commentId }
+                if (commentIndex != -1) {
+                    comments.removeAt(commentIndex)
+                    commentAdapter.notifyItemRemoved(commentIndex)
+                }
+            }
+            .setNegativeButton("취소", null)
+            .show()
     }
 }

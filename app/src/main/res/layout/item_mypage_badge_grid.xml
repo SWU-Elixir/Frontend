@@ -13,7 +13,6 @@
         android:layout_weight="1"
         android:adjustViewBounds="true"
         android:scaleType="centerCrop"
-        android:background="@drawable/bg_rect_filled_gray"
         android:clipToOutline="true"
         android:minHeight="100dp"
         android:minWidth="100dp"

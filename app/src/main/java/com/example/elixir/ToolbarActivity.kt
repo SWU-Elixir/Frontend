@@ -6,7 +6,9 @@ import android.view.View
 import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import com.example.elixir.calendar.MealDetailFragment
@@ -94,11 +96,20 @@ open class ToolbarActivity : AppCompatActivity() {
                     popupMenu.setOnMenuItemClickListener { menuItem ->
                         when (menuItem.itemId) {
                             R.id.menu_edit -> {
-                                Toast.makeText(this, "댓글 수정 클릭됨", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(this, "식단 수정 클릭됨", Toast.LENGTH_SHORT).show()
                                 true
                             }
                             R.id.menu_delete -> {
-                                Toast.makeText(this , "댓글 삭제 클릭됨", Toast.LENGTH_SHORT).show()
+                                // 식단 삭제 확인 다이얼로그 표시
+                                AlertDialog.Builder(this)
+                                    .setTitle("식단 삭제")
+                                    .setMessage("식단을 삭제하시겠습니까?")
+                                    .setPositiveButton("삭제") { _, _ ->
+                                        Toast.makeText(this, "식단이 삭제되었습니다", Toast.LENGTH_SHORT).show()
+                                        finish()
+                                    }
+                                    .setNegativeButton("취소", null)
+                                    .show()
                                 true
                             }
                             else -> false

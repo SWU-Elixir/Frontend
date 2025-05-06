@@ -122,11 +122,7 @@ class HomeActivity : AppCompatActivity() {
         mypageButton.setOnClickListener {
             savePreviousState()
             updateSelectedButton(mypageButton, mypageTitle)
-            val intent = Intent(this, ToolbarActivity::class.java).apply {
-                putExtra("mode", 8)  // 식단 상세 모드
-                putExtra("title", "내 뱃지")  // 식단 이름
-            }
-            this.startActivity(intent)
+            replaceFragment(MypageTestFragment())
         }
     }
 
