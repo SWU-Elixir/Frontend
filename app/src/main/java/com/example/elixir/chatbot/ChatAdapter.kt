@@ -2,17 +2,23 @@ package com.example.elixir.chatbot
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.example.elixir.R
 import com.example.elixir.databinding.ItemChatExampleListBinding
 import com.example.elixir.databinding.ItemChatTextMessageBinding
 import com.example.elixir.databinding.ItemChatTextMessageUserBinding
+import com.example.elixir.databinding.ItemChatMealListBinding
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayout
 import com.google.android.flexbox.JustifyContent
+import androidx.recyclerview.widget.GridLayoutManager
 
+/**
+ * ChatAdapter: 챗봇 메시지와 예시 버튼 리스트를 표시하는 RecyclerView 어댑터
+ * @param chatList: 표시할 채팅 아이템 리스트
+ * @param onExampleClick: 예시 버튼 클릭 시 호출될 콜백
+ */
 class ChatAdapter(
     private val chatList: List<ChatItem>,
     private val onExampleClick: (String) -> Unit
@@ -22,7 +28,9 @@ class ChatAdapter(
         // View 타입 상수
         private const val VIEW_TYPE_TEXT_MESSAGE = 0      // 챗봇 답변 메시지
         private const val VIEW_TYPE_TEXT_MESSAGE_USER = 1 // 사용자 입력 메시지
-        private const val VIEW_TYPE_EXAMPLE_LIST = 2       // 예시 버튼 리스트
+        private const val VIEW_TYPE_EXAMPLE_LIST = 2      // 예시 버튼 리스트
+        private const val VIEW_TYPE_MEAL_LIST = 3         // 식단 버튼 리스트
+        private const val VIEW_TYPE_RECIPE_LIST = 4       // 레시피 버튼 리스트
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -30,6 +38,8 @@ class ChatAdapter(
         return when (val item = chatList[position]) {
             is ChatItem.TextMessage -> if (item.isFromUser) VIEW_TYPE_TEXT_MESSAGE_USER else VIEW_TYPE_TEXT_MESSAGE
             is ChatItem.ExampleList -> VIEW_TYPE_EXAMPLE_LIST
+            is ChatItem.ChatMealList -> VIEW_TYPE_MEAL_LIST
+            is ChatItem.ChatRecipeList -> VIEW_TYPE_RECIPE_LIST
         }
     }
 
@@ -48,6 +58,18 @@ class ChatAdapter(
                 val binding = ItemChatExampleListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
                 ExampleListViewHolder(binding, onExampleClick)
             }
+            VIEW_TYPE_MEAL_LIST -> {
+                val binding = ItemChatMealListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                MealListViewHolder(binding) { example ->
+                    onExampleClick(example.title)
+                }
+            }
+            VIEW_TYPE_RECIPE_LIST -> {
+                val binding = ItemChatMealListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                RecipeListViewHolder(binding) { example ->
+                    onExampleClick(example.title)
+                }
+            }
             else -> throw IllegalArgumentException("Unknown view type: $viewType")
         }
     }
@@ -63,6 +85,8 @@ class ChatAdapter(
                 }
             }
             is ChatItem.ExampleList -> (holder as ExampleListViewHolder).bind(item)
+            is ChatItem.ChatMealList -> (holder as MealListViewHolder).bind(item)
+            is ChatItem.ChatRecipeList -> (holder as RecipeListViewHolder).bind(item)
         }
     }
 
@@ -146,4 +170,29 @@ class ChatAdapter(
         }
     }
 
+    // 식단 예시 버튼 리스트 ViewHolder
+    class MealListViewHolder(
+        private val binding: ItemChatMealListBinding,
+        private val onMealClick: (ChatMeal) -> Unit
+    ) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(item: ChatItem.ChatMealList) {
+            val adapter = ChatMealListAdapter(item.examples, onMealClick)
+            binding.mealRecyclerView.layoutManager =
+                GridLayoutManager(binding.root.context, 2, GridLayoutManager.HORIZONTAL, false)
+            binding.mealRecyclerView.adapter = adapter
+        }
+    }
+
+    // 레시피 리스트 ViewHolder
+    class RecipeListViewHolder(
+        private val binding: ItemChatMealListBinding,
+        private val onRecipeClick: (ChatRecipe) -> Unit
+    ) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(item: ChatItem.ChatRecipeList) {
+            val adapter = ChatRecipeListAdapter(item.examples, onRecipeClick)
+            binding.mealRecyclerView.layoutManager =
+                GridLayoutManager(binding.root.context, 2, GridLayoutManager.HORIZONTAL, false)
+            binding.mealRecyclerView.adapter = adapter
+        }
+    }
 }

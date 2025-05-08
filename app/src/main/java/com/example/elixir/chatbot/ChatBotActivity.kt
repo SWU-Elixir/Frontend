@@ -62,9 +62,59 @@ class ChatBotActivity : ToolbarActivity() {
         when (example) {
             "나의 식단 피드백 받기" -> {
                 addBotMessage("식단 피드백을 원하시는군요! 식단을 입력해 주세요.")
+                // 이미지 예시 리스트 추가
+                val imageExamples = listOf(
+                    ChatMeal(
+                        iconResId = R.drawable.png_recipe_sample, // 실제 리소스에 맞게 수정
+                        date = "2025.05.05",
+                        title = "흑임자 연근샐러드",
+                        subtitle = "연근 / 흑임자 / 식초 / 깨",
+                        badgeNumber = 3
+                    ),
+                    ChatMeal(
+                        iconResId = R.drawable.ic_meal_lunch, // 실제 리소스에 맞게 수정
+                        date = "2025.05.05",
+                        title = "닭가슴살 샐러드",
+                        subtitle = "닭가슴살 / 채소 / 드레싱",
+                        badgeNumber = 2
+                    ),
+                    ChatMeal(
+                        iconResId = R.drawable.ic_meal_snack, // 실제 리소스에 맞게 수정
+                        date = "2025.05.05",
+                        title = "오트밀볼",
+                        subtitle = "오트밀 / 우유 / 견과류",
+                        badgeNumber = 1
+                    )
+
+                )
+                chatList.add(ChatItem.ChatMealList(imageExamples))
+                chatAdapter.notifyItemInserted(chatList.size - 1)
+                binding.chatRecyclerView.scrollToPosition(chatList.size - 1)
             }
             "나의 레시피 피드백 받기" -> {
                 addBotMessage("레시피 피드백을 원하시는군요! 레시피를 입력해 주세요.")
+                // 이미지 예시 리스트 추가
+                val imageExamples = listOf(
+                    ChatRecipe(
+                        iconResId = R.drawable.png_recipe_sample, // 실제 리소스에 맞게 수정
+                        title = "흑임자 연근샐러드",
+                        subtitle = "연근 / 흑임자 / 식초 / 깨",
+                    ),
+                    ChatRecipe(
+                        iconResId = R.drawable.ic_meal_lunch, // 실제 리소스에 맞게 수정
+                        title = "닭가슴살 샐러드",
+                        subtitle = "닭가슴살 / 채소 / 드레싱",
+                    ),
+                    ChatRecipe(
+                        iconResId = R.drawable.ic_meal_snack, // 실제 리소스에 맞게 수정
+                        title = "오트밀볼",
+                        subtitle = "오트밀 / 우유 / 견과류",
+                    )
+
+                )
+                chatList.add(ChatItem.ChatRecipeList(imageExamples))
+                chatAdapter.notifyItemInserted(chatList.size - 1)
+                binding.chatRecyclerView.scrollToPosition(chatList.size - 1)
             }
             "식단 추천 받기" -> {
                 addBotMessage("추천 받을 기간을 선택해 주세요.\n\n최대 일주일 선택이 가능하며, 하루 세끼를 기준으로 추천됩니다.")
