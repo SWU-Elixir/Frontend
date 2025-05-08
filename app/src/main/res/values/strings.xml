@@ -219,6 +219,35 @@
     <string name="alert_delete_title">삭제</string>
     <string name="alert_delete_content">삭제하시겠습니까?</string>
 
+    <string-array name="cookingHours">
+        <item>시</item>
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12시간 이상</item>
+    </string-array>
+
+    <string-array name="cookingMinutes">
+        <item>분</item>
+        <item>00</item>
+        <item>05</item>
+        <item>10</item>
+        <item>15</item>
+        <item>20</item>
+        <item>30</item>
+        <item>40</item>
+        <item>50</item>
+    </string-array>
+
     <string-array name="custom_weekdays">
         <item>S</item>
         <item>M</item>

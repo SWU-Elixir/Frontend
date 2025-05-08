@@ -1,5 +1,6 @@
 package com.example.elixir.recipe
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -11,10 +12,12 @@ import android.widget.ImageButton
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.example.elixir.R
+import com.example.elixir.ToolbarActivity
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.tbuonomo.viewpagerdotsindicator.SpringDotsIndicator
 import java.math.BigInteger
@@ -41,6 +44,9 @@ class RecipeFragment : Fragment() {
 
     private lateinit var fab: FloatingActionButton
 
+    // 뷰모델
+    private lateinit var recipeViewModel: RecipeViewModel
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -61,7 +67,13 @@ class RecipeFragment : Fragment() {
 
         // FAB 클릭 이벤트
         fab.setOnClickListener {
-            Log.d("CalendarFragment", "FAB 클릭됨")
+            // Log.d("CalendarFragment", "FAB 클릭됨")
+            val intent = Intent(context, ToolbarActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+                putExtra("mode", 3) // 3: 레시피 작성
+            }
+
+            startActivity(intent)
         }
 
         fun updateResetButtonVisibility() {
@@ -159,8 +171,6 @@ class RecipeFragment : Fragment() {
 
         recipeListView.adapter = recipeListAdapter
 
-
-
         searchButton.setOnClickListener {
             Log.e("RecipeFragment", "검색 버튼 클릭")
             val transaction = parentFragmentManager.beginTransaction()
@@ -173,6 +183,7 @@ class RecipeFragment : Fragment() {
 
 
     }
+
     /**
      * 필터 조건에 따라 레시피 리스트 필터링
      */
@@ -211,7 +222,7 @@ class RecipeFragment : Fragment() {
                 id = BigInteger.valueOf(1),
                 memberId = BigInteger.valueOf(1001),
                 title = "블루베리 항산화 스무디",
-                imageUrl = R.drawable.png_recipe_sample,
+                imageUrl = "android.resource://com.example.elixir.recipe/${R.drawable.img_blank}",
                 categorySlowAging = "항산화 강화",
                 categoryType = "음료/차",
                 difficulty = "쉬움",
@@ -231,7 +242,7 @@ class RecipeFragment : Fragment() {
                 id = BigInteger.valueOf(2),
                 memberId = BigInteger.valueOf(1001),
                 title = "아보카도 혈당 조절 샐러드",
-                imageUrl = R.drawable.png_recipe_sample,
+                imageUrl = "android.resource://com.example.elixir.recipe/${R.drawable.img_blank}",
                 categorySlowAging = "혈당 조절",
                 categoryType = "샐러드",
                 difficulty = "보통",
@@ -251,7 +262,7 @@ class RecipeFragment : Fragment() {
                 id = BigInteger.valueOf(3),
                 memberId = BigInteger.valueOf(1001),
                 title = "토마토 올리브 항염 마리네이드",
-                imageUrl = R.drawable.png_recipe_sample,
+                imageUrl = "android.resource://com.example.elixir.recipe/${R.drawable.img_blank}",
                 categorySlowAging = "염증 감소",
                 categoryType = "양념/소스/잼",
                 difficulty = "쉬움",
@@ -271,7 +282,7 @@ class RecipeFragment : Fragment() {
                 id = BigInteger.valueOf(4),
                 memberId = BigInteger.valueOf(1001),
                 title = "케일 항염 그린 스무디",
-                imageUrl = R.drawable.png_recipe_sample,
+                imageUrl = "android.resource://com.example.elixir.recipe/${R.drawable.img_blank}",
                 categorySlowAging = "염증 감소",
                 categoryType = "음료/차",
                 difficulty = "쉬움",
@@ -291,7 +302,7 @@ class RecipeFragment : Fragment() {
                 id = BigInteger.valueOf(5),
                 memberId = BigInteger.valueOf(1001),
                 title = "견과류 에너지볼",
-                imageUrl = R.drawable.png_recipe_sample,
+                imageUrl = "android.resource://com.example.elixir.recipe/${R.drawable.img_blank}",
                 categorySlowAging = "항산화 강화",
                 categoryType = "디저트",
                 difficulty = "보통",
@@ -311,7 +322,7 @@ class RecipeFragment : Fragment() {
                 id = BigInteger.valueOf(6),
                 memberId = BigInteger.valueOf(1001),
                 title = "그릭요거트 베리볼",
-                imageUrl = R.drawable.png_recipe_sample,
+                imageUrl = "android.resource://com.example.elixir.recipe/${R.drawable.img_blank}",
                 categorySlowAging = "항산화 강화",
                 categoryType = "디저트",
                 difficulty = "쉬움",

@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import com.example.elixir.databinding.ActivityToolbarBinding
 import com.example.elixir.dialog.AlertExitDialog
 import com.example.elixir.dietlog.DietLogFragment
+import com.example.elixir.recipe.RecipeData
 import com.example.elixir.recipe.RecipeFragment
 import com.example.elixir.recipe.RecipeLogFragment
 import com.example.elixir.signup.CreateAccountFragment
@@ -29,6 +30,8 @@ open class ToolbarActivity : AppCompatActivity() {
         // 바인딩 정의
         toolBinding = ActivityToolbarBinding.inflate(layoutInflater)
         setContentView(toolBinding.root)
+
+        val recipeData = intent.getParcelableExtra<RecipeData>("recipeData")
 
         // 전 액티비티에서 정보 불러오기
         // 어떤 모드인지 확인하고, 맞는 화면 띄워주기
@@ -83,9 +86,14 @@ open class ToolbarActivity : AppCompatActivity() {
                 toolBinding.btnBack.setOnClickListener {
                     AlertExitDialog(this).show()
                 }
+                val fragment = RecipeLogFragment().apply {
+                    arguments = Bundle().apply {
+                        putParcelable("recipeData", recipeData)
+                    }
+                }
 
                 // 레시피 프레그먼트 띄워주기
-                setFragment(RecipeLogFragment())
+                setFragment(fragment)
             }
         }
     }

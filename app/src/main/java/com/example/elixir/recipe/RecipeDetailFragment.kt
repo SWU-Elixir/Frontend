@@ -1,5 +1,6 @@
 package com.example.elixir.recipe
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.elixir.R
+import com.example.elixir.ToolbarActivity
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
@@ -80,7 +82,7 @@ class RecipeDetailFragment : Fragment() {
             id = BigInteger.valueOf(1),
             memberId = BigInteger.valueOf(1001),
             title = "케일 항염 그린 스무디",
-            imageUrl = R.drawable.png_recipe_sample,
+            imageUrl = "android.resource://com.example.elixir.recipe/${R.drawable.img_blank}",
             categorySlowAging = "염증 감소",
             categoryType = "음료/차",
             difficulty = "쉬움",
@@ -128,6 +130,35 @@ class RecipeDetailFragment : Fragment() {
                 when (menuItem.itemId) {
                     R.id.menu_edit -> {
                         Toast.makeText(context, "댓글 수정 클릭됨", Toast.LENGTH_SHORT).show()
+                        val recipeData = RecipeData(
+                            id = BigInteger.valueOf(1), // 예시 데이터
+                            memberId = BigInteger.valueOf(1001),
+                            title = "블루베리 항산화 스무디",
+                            imageUrl = "image_url",
+                            categorySlowAging = "항산화 강화",
+                            categoryType = "음료/차",
+                            difficulty = "쉬움",
+                            timeHours = 0,
+                            timeMinutes = 5,
+                            ingredients = listOf("블루베리", "그릭요거트", "꿀"),
+                            seasoning = listOf("얼음", "시나몬 파우더"),
+                            recipeOrder = listOf("모든 재료를 믹서에 넣는다", "곱게 갈아 컵에 담는다"),
+                            tips = "시나몬을 추가하면 향과 항산화 성분이 강화됩니다.",
+                            createdAt = "2025-04-22",
+                            updateAt = "2025-04-22",
+                            isBookmarked = false,
+                            isLiked = false,
+                            likeCount = 42
+                        )
+/*
+                        val bundle = Bundle().apply {
+                            putParcelable("recipeData", recipeData)
+                        }
+                        val intent = Intent(requireContext(), ToolbarActivity::class.java)
+                        intent.putExtra("recipeData", recipeData) // 필요한 데이터 전달
+                        intent.putExtra("mode", 3)
+                        startActivity(intent)*/
+
                         true
                     }
                     R.id.menu_delete -> {
