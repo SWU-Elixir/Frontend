@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -69,7 +70,6 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
     implementation(libs.androidx.fragment.ktx)
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
@@ -84,4 +84,9 @@ dependencies {
     implementation (libs.flexbox)
     implementation(libs.dotsindicator)
     implementation(libs.lottie)
+
+    // Room DB 라이브러리 추가
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
 }
