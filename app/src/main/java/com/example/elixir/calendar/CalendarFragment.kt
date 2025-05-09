@@ -55,6 +55,9 @@ class CalendarFragment : Fragment() {
     private val today = CalendarDay.today() // 오늘 날짜
     private var isFirstLaunch = true // 첫 실행 여부
 
+    // DietLogFragment 띄우기
+    private lateinit var dietLogLauncher: ActivityResultLauncher<Intent>
+
 
     // ------------------------ 생명주기 메서드 ---------------------------
 
@@ -118,6 +121,10 @@ class CalendarFragment : Fragment() {
                 binding.calendarView.addDecorator(CalendarTodayDecorator(requireContext(), it))
             }
         }
+        catch (e: Exception) {
+            Log.e("CalendarFragment", "오늘 날짜 배경 설정 오류: ${e.message}")
+        }
+
 
 
         // ----------------- FAB 및 바텀시트 ---------------------
@@ -201,7 +208,7 @@ class CalendarFragment : Fragment() {
         }
 
         // 바텀시트 설정
-        val behavior = BottomSheetBehavior.from(calendarBinding.bottomSheet)
+        //val behavior = BottomSheetBehavior.from(calendarBinding.bottomSheet)
         behavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 bottomSheetState = newState

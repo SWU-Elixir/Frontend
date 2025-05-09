@@ -42,7 +42,7 @@ class RecipeListAdapter(
 
         // 이미지 설정 (없을 경우 기본 이미지 사용)
         val pictureRes = item.imageUrl ?: R.drawable.ic_recipe_white
-        holder.recipeImage.setImageURI(Uri.parse("android.resource://${holder.itemView.context.packageName}/$pictureRes"))
+        holder.binding.recipePicture.setImageURI(Uri.parse("android.resource://${holder.itemView.context.packageName}/$pictureRes"))
 
 
         // 텍스트 정보 설정
