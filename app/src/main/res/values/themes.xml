@@ -141,6 +141,7 @@
 
     <style name="AppTheme.TextInputLayout.CursorColor" parent="ThemeOverlay.MaterialComponents.TextInputEditText.OutlinedBox">
         <item name="colorControlActivated">@color/elixir_orange</item>
+    </style>
 
     <style name="ChatButton" parent="Widget.AppCompat.Button">
         <item name="android:textColor">@color/selector_chat_btn_text</item>

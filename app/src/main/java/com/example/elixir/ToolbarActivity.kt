@@ -38,7 +38,7 @@ open class ToolbarActivity : AppCompatActivity() {
         toolBinding = ActivityToolbarBinding.inflate(layoutInflater)
         setContentView(toolBinding.root)
 
-        val recipeData = intent.getParcelableExtra<RecipeData>("recipeData")
+        //val recipeData = intent.getParcelableExtra<RecipeData>("recipeData")
 
         // 전 액티비티에서 정보 불러오기
         // 어떤 모드인지 확인하고, 맞는 화면 띄워주기
@@ -95,17 +95,14 @@ open class ToolbarActivity : AppCompatActivity() {
                 }
                 val fragment = RecipeLogFragment().apply {
                     arguments = Bundle().apply {
-                        putParcelable("recipeData", recipeData)
+                        //putParcelable("recipeData", recipeData)
                     }
                 }
 
                 // 레시피 프레그먼트 띄워주기
                 setFragment(fragment)
             }
-        }
-    }
 
-    // 툴바 아래 올 프래그먼트 설정
             // 챗봇 모드
             3 -> {
                 // ChatBotActivity로 이동
@@ -239,6 +236,9 @@ open class ToolbarActivity : AppCompatActivity() {
             }
         }
     }
+
+    // 툴바 아래 올 프래그먼트 설정
+
 
     protected fun setFragment(frag: Fragment) {
         supportFragmentManager.beginTransaction()

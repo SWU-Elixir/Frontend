@@ -2,6 +2,7 @@ package com.example.elixir.calendar
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,7 +38,7 @@ class MealListAdapter(
 
         val item = getItem(position)
 
-        binding.dietPicture.setImageResource(pictureRes)
+        binding.dietPicture.setImageURI(Uri.parse("android.resource://com.example.elixir.recipe/${R.drawable.img_blank}"))
         binding.dietNameText.text = item.name
 
         // 식단 점수에 따른 아이콘 설정 (1~5점)

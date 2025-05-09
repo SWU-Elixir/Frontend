@@ -86,43 +86,43 @@ class RecipeLogFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val recipeData = arguments?.getParcelable<RecipeData>("recipeData")
-
-        recipeData?.let {
-            recipeBinding.enterRecipeTitle.setText(it.title)
-            recipeBinding.enterRecipeDescription.setText(it.tips ?: "")
-            val hourIndex = (recipeBinding.selectHour.adapter as? ArrayAdapter<String>)?.getPosition(it.timeHours.toString()) ?: -1
-            if (hourIndex != -1) {
-                recipeBinding.selectHour.setSelection(hourIndex)
-            } else {
-                // 기본값 설정 또는 로그 출력
-                android.util.Log.e("RecipeLogFragment", "시간 값이 어댑터에 없습니다: ${it.timeHours}")
-            }
-
-            val minIndex = (recipeBinding.selectMin.adapter as? ArrayAdapter<String>)?.getPosition(it.timeMinutes.toString()) ?: -1
-            if (minIndex != -1) {
-                recipeBinding.selectMin.setSelection(minIndex)
-            } else {
-                // 기본값 설정 또는 로그 출력
-                android.util.Log.e("RecipeLogFragment", "시간 값이 어댑터에 없습니다: ${it.timeMinutes}")
-            }
-
-
-            val difficultyList = listOf(recipeBinding.levelEasy, recipeBinding.levelNormal, recipeBinding.levelHard)
-            difficultyList.forEach { chip ->
-                chip.isChecked = chip.text.toString() == it.difficulty
-            }
-
-            val ingredientChips = listOf(
-                recipeBinding.ingredientBrownRice, recipeBinding.ingredientBean, recipeBinding.ingredientGrain,
-                recipeBinding.ingredientGreenLeafy, recipeBinding.ingredientBerry, recipeBinding.ingredientNuts,
-                recipeBinding.ingredientOliveOil, recipeBinding.ingredientFish, recipeBinding.ingredientPoultry
-            )
-
-            ingredientChips.forEach { chip ->
-                chip.isChecked = it.ingredients.contains(chip.text.toString())
-            }
-        }
+//        val recipeData = arguments?.getParcelable<RecipeData>("recipeData")
+//
+//        recipeData?.let {
+//            recipeBinding.enterRecipeTitle.setText(it.title)
+//            recipeBinding.enterRecipeDescription.setText(it.tips ?: "")
+//            val hourIndex = (recipeBinding.selectHour.adapter as? ArrayAdapter<String>)?.getPosition(it.timeHours.toString()) ?: -1
+//            if (hourIndex != -1) {
+//                recipeBinding.selectHour.setSelection(hourIndex)
+//            } else {
+//                // 기본값 설정 또는 로그 출력
+//                android.util.Log.e("RecipeLogFragment", "시간 값이 어댑터에 없습니다: ${it.timeHours}")
+//            }
+//
+//            val minIndex = (recipeBinding.selectMin.adapter as? ArrayAdapter<String>)?.getPosition(it.timeMinutes.toString()) ?: -1
+//            if (minIndex != -1) {
+//                recipeBinding.selectMin.setSelection(minIndex)
+//            } else {
+//                // 기본값 설정 또는 로그 출력
+//                android.util.Log.e("RecipeLogFragment", "시간 값이 어댑터에 없습니다: ${it.timeMinutes}")
+//            }
+//
+//
+//            val difficultyList = listOf(recipeBinding.levelEasy, recipeBinding.levelNormal, recipeBinding.levelHard)
+//            difficultyList.forEach { chip ->
+//                chip.isChecked = chip.text.toString() == it.difficulty
+//            }
+//
+//            val ingredientChips = listOf(
+//                recipeBinding.ingredientBrownRice, recipeBinding.ingredientBean, recipeBinding.ingredientGrain,
+//                recipeBinding.ingredientGreenLeafy, recipeBinding.ingredientBerry, recipeBinding.ingredientNuts,
+//                recipeBinding.ingredientOliveOil, recipeBinding.ingredientFish, recipeBinding.ingredientPoultry
+//            )
+//
+//            ingredientChips.forEach { chip ->
+//                chip.isChecked = it.ingredients.contains(chip.text.toString())
+//            }
+//        }
 
         // ViewModel 초기화
         recipeViewModel = ViewModelProvider(this)[RecipeViewModel::class.java]

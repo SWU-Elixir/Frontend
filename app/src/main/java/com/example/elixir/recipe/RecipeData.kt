@@ -25,10 +25,5 @@ data class RecipeData(
 
     var isBookmarked: Boolean = false,   // 북마크 여부
     var isLiked: Boolean = false,        // 좋아요 클릭 여부
-    var likeCount: Int,                   // 좋아요 수
-
-    companion object CREATOR : Parcelable.Creator<RecipeData> {
-        override fun createFromParcel(parcel: Parcel): RecipeData = RecipeData(parcel)
-        override fun newArray(size: Int): Array<RecipeData?> = arrayOfNulls(size)
-    }
-}
+    var likeCount: Int
+)

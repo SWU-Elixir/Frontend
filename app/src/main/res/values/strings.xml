@@ -354,7 +354,6 @@
     <string name="member_nickname">닉네임</string>
     <string name="recipe_cat_1">저속노화</string>
     <string name="recipe_cat_2">종류</string>
-    <string name="recipe_name">제목</string>
     <string name="recipe_difficult">난이도</string>
     <string name="recipe_hour">시간</string>
     <string name="recipe_minute">분</string>
