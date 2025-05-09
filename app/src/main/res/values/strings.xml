@@ -94,9 +94,9 @@
     <string name="diet_japanese">일식</string>
     <string name="diet_chinese">중식</string>
     <string name="diet_western">양식</string>
-    <string name="dessert">디저트</string>
-    <string name="beverage">음료/차</string>
-    <string name="sauce">양념/소스/잼</string>
+    <string name="diet_dessert">디저트</string>
+    <string name="diet_beverage">음료/차</string>
+    <string name="diet_sauce">양념/소스/잼</string>
     <string name="diet_n_a">특별히 없음</string>
 
     <!-- 회원가입: 질문 4(이유) -->
@@ -161,13 +161,95 @@
     <string name="score_5">5</string>
 
     <string name="btn_write">작성</string>
+  
+    <!-- 레시피 작성 -->
+    <!-- 내용 -->
+    <string name="recipe_name">레시피명</string>
+    <string name="thumbnail">대표 사진</string>
+    <string name="recipe_description">설명</string>
+    <string name="recipe_description_hint">200자 내로 작성해주세요.</string>
+    <string name="category">카테고리</string>
+    <string name="low_aging">저속노화</string>
+    <string name="type">종류</string>
+    <string name="allergy">알레르기</string>
+
+    <!-- 난이도 -->
+    <string name="level">난이도</string>
+    <string name="level_easy">쉬움</string>
+    <string name="level_common">보통</string>
+    <string name="level_difficult">어려움</string>
+
+    <!-- 소요시간 -->
+    <string name="duration_time">소요시간</string>
+    <string name="hour">시</string>
+    <string name="min">분</string>
+
+    <!-- 재료 -->
+    <string name="material">재료</string>
+    <string name="material_item_hint">예) 양배추</string>
+    <string name="material_item_unit_hint">예) 200g</string>
+
+    <!-- 추가 버튼 -->
+    <string name="btn_add">추가</string>
+
+    <!-- 양념 -->
+    <string name="sauce">양념</string>
+    <string name="sauce_item_hint">예) 간장</string>
+    <string name="sauce_item_unit_hint">예) 1 작은술</string>
+
+    <!-- 요리 순서 -->
+    <string name="cooking_order">요리 순서</string>
+    <string name="cooking_order_hint">예) 양배추를 한입 크기로 자릅니다.</string>
+
+    <!-- 팁/주의사항 -->
+    <string name="tip_caution">팁/주의사항</string>
+    <string name="tip_caution_hint">팁 및 주의사항을 200자 내로 적어주세요.</string>
+
+    <!-- 레시피 -->
 
     <!-- 네비게이션 -->
+
     <string name="navi_calendar">캘린더</string>
     <string name="navi_recipe">레시피</string>
     <string name="navi_challenge">챌린지</string>
     <string name="navi_chatbot">챗봇</string>
     <string name="navi_mypage">마이페이지</string>
+
+    <!-- 다이얼로그 -->
+    <string name="alert_save_title">저장</string>
+    <string name="alert_save_content">저장하시겠습니까?</string>
+
+    <string name="alert_delete_title">삭제</string>
+    <string name="alert_delete_content">삭제하시겠습니까?</string>
+
+    <string-array name="cookingHours">
+        <item>시</item>
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12시간 이상</item>
+    </string-array>
+
+    <string-array name="cookingMinutes">
+        <item>분</item>
+        <item>00</item>
+        <item>05</item>
+        <item>10</item>
+        <item>15</item>
+        <item>20</item>
+        <item>30</item>
+        <item>40</item>
+        <item>50</item>
+    </string-array>
 
     <!-- 캘린더: 커스텀 주 -->
     <string-array name="custom_weekdays">
@@ -272,7 +354,6 @@
     <string name="member_nickname">닉네임</string>
     <string name="recipe_cat_1">저속노화</string>
     <string name="recipe_cat_2">종류</string>
-    <string name="recipe_name">제목</string>
     <string name="recipe_difficult">난이도</string>
     <string name="recipe_hour">시간</string>
     <string name="recipe_minute">분</string>

@@ -7,7 +7,7 @@ data class MealPlanData(
     val id: BigInteger,
     val memberId: BigInteger,
     val name: String,
-    val imageUrl: Int? = null,
+    val imageUrl: String,
     val createdAt: String,
     val mealtimes: String, // 아침, 점심, 저녁, 간식
     val score: Int, // 1, 2, 3, 4, 5

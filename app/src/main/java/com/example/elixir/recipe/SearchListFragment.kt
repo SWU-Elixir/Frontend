@@ -1,5 +1,6 @@
 package com.example.elixir.recipe
 
+import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -290,7 +291,7 @@ class SearchListFragment : Fragment() {
                 id = BigInteger.valueOf(1),
                 memberId = BigInteger.valueOf(1001),
                 title = "블루베리 항산화 스무디",
-                imageUrl = R.drawable.png_recipe_sample,
+                imageUrl = "android.resource://com.example.elixir.recipe/${R.drawable.ic_recipe_white}",
                 categorySlowAging = "항산화 강화",
                 categoryType = "음료/차",
                 difficulty = "쉬움",
@@ -310,7 +311,7 @@ class SearchListFragment : Fragment() {
                 id = BigInteger.valueOf(2),
                 memberId = BigInteger.valueOf(1001),
                 title = "아보카도 혈당 조절 샐러드",
-                imageUrl = R.drawable.png_recipe_sample,
+                imageUrl = "android.resource://com.example.elixir.recipe/${R.drawable.ic_recipe_white}",
                 categorySlowAging = "혈당 조절",
                 categoryType = "샐러드",
                 difficulty = "보통",
@@ -330,7 +331,7 @@ class SearchListFragment : Fragment() {
                 id = BigInteger.valueOf(3),
                 memberId = BigInteger.valueOf(1001),
                 title = "토마토 올리브 항염 마리네이드",
-                imageUrl = R.drawable.png_recipe_sample,
+                imageUrl = "android.resource://com.example.elixir.recipe/${R.drawable.ic_recipe_white}",
                 categorySlowAging = "염증 감소",
                 categoryType = "양념/소스/잼",
                 difficulty = "쉬움",
@@ -350,7 +351,7 @@ class SearchListFragment : Fragment() {
                 id = BigInteger.valueOf(4),
                 memberId = BigInteger.valueOf(1001),
                 title = "케일 항염 그린 스무디",
-                imageUrl = R.drawable.png_recipe_sample,
+                imageUrl = "android.resource://com.example.elixir.recipe/${R.drawable.ic_recipe_white}",
                 categorySlowAging = "염증 감소",
                 categoryType = "음료/차",
                 difficulty = "쉬움",
@@ -370,7 +371,7 @@ class SearchListFragment : Fragment() {
                 id = BigInteger.valueOf(5),
                 memberId = BigInteger.valueOf(1001),
                 title = "견과류 에너지볼",
-                imageUrl = R.drawable.png_recipe_sample,
+                imageUrl = "android.resource://com.example.elixir.recipe/${R.drawable.ic_recipe_white}",
                 categorySlowAging = "항산화 강화",
                 categoryType = "디저트",
                 difficulty = "보통",
@@ -390,7 +391,7 @@ class SearchListFragment : Fragment() {
                 id = BigInteger.valueOf(6),
                 memberId = BigInteger.valueOf(1001),
                 title = "그릭요거트 베리볼",
-                imageUrl = R.drawable.png_recipe_sample,
+                imageUrl = "android.resource://com.example.elixir.recipe/${R.drawable.ic_recipe_white}",
                 categorySlowAging = "항산화 강화",
                 categoryType = "디저트",
                 difficulty = "쉬움",

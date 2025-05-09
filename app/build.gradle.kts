@@ -1,11 +1,18 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.ksp)
 }
 
 android {
     namespace = "com.example.elixir"
     compileSdk = 34
+
+    composeCompiler {
+        reportsDestination = layout.buildDirectory.dir("compose_compiler")
+        stabilityConfigurationFiles.set(listOf(rootProject.layout.projectDirectory.file("stability_config.conf")))
+    }
 
     defaultConfig {
         applicationId = "com.example.elixir"
@@ -69,12 +76,12 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
     implementation(libs.androidx.fragment.ktx)
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation (libs.logging.interceptor)
     implementation (libs.androidx.core.splashscreen)
+    implementation(libs.kotlin.stdlib)
     
     // Material Components 라이브러리 추가
     implementation (libs.material)
@@ -84,4 +91,9 @@ dependencies {
     implementation (libs.flexbox)
     implementation(libs.dotsindicator)
     implementation(libs.lottie)
+
+    // Room DB 라이브러리 추가
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
 }

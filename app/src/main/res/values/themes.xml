@@ -86,6 +86,63 @@
         <item name="android:textColor">@drawable/selector_calendar_textcolor</item>
     </style>
 
+    <!-- 타임 피커 커스텀 -->
+    <style name="AppTheme.TimePicker" parent="ThemeOverlay.MaterialComponents.TimePicker">
+        <item name="materialClockStyle">@style/AppTheme.Widget.TimePicker.Clock</item>
+        <item name="chipStyle">@style/AppTheme.TimePicker.Chip</item>
+        <item name="android:timePickerMode">spinner</item>
+        <item name="materialTimePickerTitleStyle">@style/AppTheme.TimePicker.Title</item>
+        <item name="materialButtonOutlinedStyle">@style/AppTheme.Widget.TimePicker.Clock.AmPmButton</item>
+        <item name="textInputStyle">@style/AppTheme.TimePicker.EditText</item>
+        <item name="android:textColorPrimary">@color/elixir_orange</item>
+        <item name="android:theme">@style/AppTheme.TextInputLayout.CursorColor</item>
+        <item name="colorSurface">@color/white</item>
+    </style>
+
+    <!-- 타이틀 글꼴 -->
+    <style name="AppTheme.TimePicker.Title" parent="TextAppearance.MaterialComponents.Subtitle1">
+        <item name="android:textSize">22sp</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="fontFamily">@font/pretendard_bold</item>
+    </style>
+
+    <!-- 시간 설정 화면 -->
+    <style name="AppTheme.TimePicker.Chip" parent="Widget.MaterialComponents.TimePicker.Display">
+        <item name="android:textColor">@color/selector_time_text</item>
+        <item name="chipBackgroundColor">@color/selector_time_bg</item>
+        <item name="chipStrokeColor">@color/selector_time_stroke</item>
+        <item name="chipStrokeWidth">3dp</item>
+        <item name="rippleColor">@color/transparency</item>
+    </style>
+
+    <!-- 시계 스타일 (배경, 선택 핸들, 시/분 숫자) -->
+    <style name="AppTheme.Widget.TimePicker.Clock" parent="Widget.MaterialComponents.TimePicker.Clock">
+        <item name="clockFaceBackgroundColor">@color/elixir_orange_10</item>
+        <item name="clockHandColor">@color/elixir_orange</item>
+        <item name="clockNumberTextColor">@color/selector_clock_text</item>
+    </style>
+
+    <!-- AM/PM 버튼 스타일 (배경, 글꼴 적용, 텍스트 색상, 윤곽선, 리플 제거) -->
+    <style name="AppTheme.Widget.TimePicker.Clock.AmPmButton" parent="Widget.MaterialComponents.TimePicker.Button">
+        <item name="backgroundTint">@color/selector_meridiem_bg</item>
+        <item name="android:textColor">@color/elixir_orange</item>
+        <item name="strokeColor">@color/elixir_orange</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="rippleColor">@color/transparency</item>
+    </style>
+
+    <!-- 시간 입력 박스 -->
+    <style name="AppTheme.TimePicker.EditText" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxBackgroundColor">@color/selector_time_bg</item>
+        <item name="android:textColor">@color/selector_time_text</item>
+        <item name="boxStrokeColor">@color/selector_time_stroke</item>
+        <item name="android:textColorHighlight">@color/elixir_orange</item>
+    </style>
+
+    <style name="AppTheme.TextInputLayout.CursorColor" parent="ThemeOverlay.MaterialComponents.TextInputEditText.OutlinedBox">
+        <item name="colorControlActivated">@color/elixir_orange</item>
+    </style>
+
     <style name="ChatButton" parent="Widget.AppCompat.Button">
         <item name="android:textColor">@color/selector_chat_btn_text</item>
         <item name="android:gravity">center</item>

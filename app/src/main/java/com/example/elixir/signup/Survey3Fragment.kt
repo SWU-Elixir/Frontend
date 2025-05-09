@@ -27,7 +27,7 @@ class Survey3Fragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         with(survey3Binding) {
             // 일반 칩 리스트
-            val chipList = listOf(dietKorean, dietChinese, dietJapanese, dietWestern, dessert, beverage, sauce)
+            val chipList = listOf(dietKorean, dietChinese, dietJapanese, dietWestern, dietDessert, dietBeverage, dietSauce)
 
             // 특별히 없음 칩
             val chipNone = dietNA

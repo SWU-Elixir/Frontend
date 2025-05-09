@@ -1,5 +1,6 @@
 package com.example.elixir.recipe
 
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -41,7 +42,8 @@ class RecipeListAdapter(
 
         // 이미지 설정 (없을 경우 기본 이미지 사용)
         val pictureRes = item.imageUrl ?: R.drawable.ic_recipe_white
-        holder.binding.recipePicture.setImageResource(pictureRes)
+        holder.binding.recipePicture.setImageURI(Uri.parse("android.resource://${holder.itemView.context.packageName}/$pictureRes"))
+
 
         // 텍스트 정보 설정
         holder.binding.recipeNameText.text = item.title
@@ -116,7 +118,7 @@ class RecipeListAdapter(
                     putString("tip", item.tips)
                     putStringArrayList("ingredients", ArrayList(item.ingredients))
                     putStringArrayList("seasoning", ArrayList(item.seasoning))
-                    putInt("imageUrl", item.imageUrl ?: R.drawable.ic_recipe_white)
+                    //putInt("imageUrl", item.imageUrl ?: u),
                     putString("difficulty", item.difficulty)
                     putInt("hour", item.timeHours)
                     putInt("minute", item.timeMinutes)

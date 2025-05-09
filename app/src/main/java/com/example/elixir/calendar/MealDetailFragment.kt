@@ -1,10 +1,17 @@
 package com.example.elixir.calendar
 
+import android.app.Activity
+import android.content.Intent
+import android.content.res.ColorStateList
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.elixir.R
@@ -16,7 +23,6 @@ import com.google.android.flexbox.JustifyContent
 import java.math.BigInteger
 
 class MealDetailFragment : Fragment() {
-
     private var _binding: FragmentMealDetailBinding? = null
     private val binding get() = _binding!!
 
@@ -36,7 +42,7 @@ class MealDetailFragment : Fragment() {
             id = BigInteger("1001"),
             memberId = BigInteger("1"),
             name = "연어 아보카도 샐러드",
-            imageUrl = R.drawable.png_recipe_sample,
+            imageUrl = Uri.parse("android.resource://${context?.packageName}/${R.drawable.png_recipe_sample}").toString(),
             createdAt = "2025-03-29",
             mealtimes = "아침",
             score = 5,

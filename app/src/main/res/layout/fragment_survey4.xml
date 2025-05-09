@@ -14,10 +14,10 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/list_reason"
         android:layout_marginVertical="20dp"
-        android:fontFamily="@font/pretendard_bold"
         android:text="@string/survey_q4"
         android:textColor="@color/black"
-        android:textSize="22sp"/>
+        android:textSize="22sp"
+        android:fontFamily="@font/pretendard_bold" />
 
     <!-- 저속노화 이유 선택 리스트 -->
     <LinearLayout

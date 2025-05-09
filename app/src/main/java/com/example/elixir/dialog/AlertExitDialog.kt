@@ -1,4 +1,4 @@
-package com.example.elixir
+package com.example.elixir.dialog
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -6,6 +6,7 @@ import android.app.AlertDialog
 import android.view.LayoutInflater
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import com.example.elixir.R
 
 class AlertExitDialog(private val act: Activity) {
     @SuppressLint("InflateParams")
