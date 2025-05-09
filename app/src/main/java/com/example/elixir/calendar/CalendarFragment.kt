@@ -9,8 +9,12 @@
  */
 package com.example.elixir.calendar
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.graphics.*
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.text.style.ForegroundColorSpan
 import android.text.style.LineBackgroundSpan
@@ -18,6 +22,11 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
+import com.example.elixir.ToolbarActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.elixir.R
@@ -30,6 +39,8 @@ import java.math.BigInteger
 
 // ----------------------------- 프래그먼트 클래스 -------------------------------------
 class CalendarFragment : Fragment() {
+    // 바인딩
+    private lateinit var calendarBinding: FragmentCalendarBinding
 
     // 뷰 바인딩 변수
     private var _binding: FragmentCalendarBinding? = null
@@ -106,9 +117,8 @@ class CalendarFragment : Fragment() {
             todayDrawable?.let {
                 binding.calendarView.addDecorator(CalendarTodayDecorator(requireContext(), it))
             }
-        } catch (e: Exception) {
-            Log.e("CalendarFragment", "오늘 날짜 배경 설정 오류: ${e.message}")
         }
+
 
         // ----------------- FAB 및 바텀시트 ---------------------
         val behavior = BottomSheetBehavior.from(binding.bottomSheet)
@@ -148,9 +158,50 @@ class CalendarFragment : Fragment() {
         // FAB 클릭 이벤트
         binding.fab.setOnClickListener {
             Log.d("CalendarFragment", "FAB 클릭됨")
+            val intent = Intent(context, ToolbarActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+                putExtra("mode", 2)
+                putExtra("year", selectedCalendarDay.year)
+                putExtra("month", selectedCalendarDay.month + 1)
+                putExtra("day", selectedCalendarDay.day)
+            }
+
+            dietLogLauncher.launch(intent)
         }
 
-        // 바텀시트 상태 변화 시 FAB 제어
+        // ActivityResultLauncher 등록
+        dietLogLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val intent = result.data
+                val mealPlanData = intent?.extras?.getSerializable("mealData") as? MealPlanData
+                // 로그로 mealPlanData 확인
+                Log.d("DietLogFragment", "Received mealPlanData: $mealPlanData")
+
+                if (intent != null) {
+
+                    Toast.makeText(context, mealPlanData?.name, Toast.LENGTH_SHORT).show()
+                    mealPlanData?.let {
+                        val selectedDateStr = "%04d-%02d-%02d".format(
+                            selectedCalendarDay.year,
+                            selectedCalendarDay.month + 1,
+                            selectedCalendarDay.day
+                        )
+                        if (eventMap[selectedDateStr] == null) {
+                            eventMap[selectedDateStr] = mutableListOf()
+                        }
+                        eventMap[selectedDateStr]?.add(it)
+                        updateEventList(selectedDateStr) // 리스트 갱신
+                    }
+                }
+            } else {
+                Toast.makeText(context, "식단 작성 실패", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        // 바텀시트 설정
+        val behavior = BottomSheetBehavior.from(calendarBinding.bottomSheet)
         behavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 bottomSheetState = newState
@@ -335,7 +386,7 @@ class CalendarFragment : Fragment() {
                 id = BigInteger("1001"),
                 memberId = BigInteger("1"),
                 name = "연어 아보카도 샐러드",
-                imageUrl = R.drawable.png_recipe_sample,
+                imageUrl = Uri.parse("android.resource://${context?.packageName}/${R.drawable.png_recipe_sample}").toString(),
                 createdAt = "2025-03-29",
                 mealtimes = "아침",
                 score = 5,
@@ -345,7 +396,7 @@ class CalendarFragment : Fragment() {
                 id = BigInteger("1002"),
                 memberId = BigInteger("1"),
                 name = "렌틸콩 채소 수프",
-                imageUrl = null,
+                imageUrl = Uri.parse("android.resource://${context?.packageName}/${R.drawable.png_recipe_sample}").toString(),
                 createdAt = "2025-03-29",
                 mealtimes = "점심",
                 score = 4,
@@ -355,7 +406,7 @@ class CalendarFragment : Fragment() {
                 id = BigInteger("1003"),
                 memberId = BigInteger("1"),
                 name = "두부 채소 볶음",
-                imageUrl = null,
+                imageUrl = Uri.parse("android.resource://${context?.packageName}/${R.drawable.png_recipe_sample}").toString(),
                 createdAt = "2025-03-29",
                 mealtimes = "저녁",
                 score = 3,
@@ -368,7 +419,7 @@ class CalendarFragment : Fragment() {
                 id = BigInteger("1004"),
                 memberId = BigInteger("1"),
                 name = "귀리 베리볼",
-                imageUrl = null,
+                imageUrl = Uri.parse("android.resource://${context?.packageName}/${R.drawable.png_recipe_sample}").toString(),
                 createdAt = "2025-03-30",
                 mealtimes = "아침",
                 score = 5,
@@ -378,7 +429,7 @@ class CalendarFragment : Fragment() {
                 id = BigInteger("1005"),
                 memberId = BigInteger("1"),
                 name = "퀴노아 보울",
-                imageUrl = R.drawable.png_recipe_sample,
+                imageUrl = Uri.parse("android.resource://${context?.packageName}/${R.drawable.png_recipe_sample}").toString(),
                 createdAt = "2025-03-30",
                 mealtimes = "점심",
                 score = 4,
@@ -388,7 +439,7 @@ class CalendarFragment : Fragment() {
                 id = BigInteger("1006"),
                 memberId = BigInteger("1"),
                 name = "베리 스무디",
-                imageUrl = null,
+                imageUrl = Uri.parse("android.resource://${context?.packageName}/${R.drawable.png_recipe_sample}").toString(),
                 createdAt = "2025-03-30",
                 mealtimes = "간식",
                 score = 5,

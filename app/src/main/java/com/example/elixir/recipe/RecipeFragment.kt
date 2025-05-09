@@ -1,5 +1,6 @@
 package com.example.elixir.recipe
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -7,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.elixir.R
 import com.example.elixir.databinding.FragmentRecipeBinding
@@ -25,6 +27,9 @@ class RecipeFragment : Fragment() {
     private lateinit var sampleRecipes: List<RecipeData>
     private lateinit var recipeListAdapter: RecipeListAdapter
 
+    // 뷰모델
+    private lateinit var recipeViewModel: RecipeViewModel
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -42,7 +47,6 @@ class RecipeFragment : Fragment() {
 
         // 검색 버튼 클릭 이벤트 설정
         setupSearchButton()
-
         return binding.root
     }
 
@@ -205,7 +209,6 @@ class RecipeFragment : Fragment() {
             // 프래그먼트 전환을 위한 FragmentManager 전달
             fragmentManager = parentFragmentManager
         )
-
         // RecyclerView에 어댑터 설정
         binding.recipeList.adapter = recipeListAdapter
     }
@@ -282,7 +285,7 @@ class RecipeFragment : Fragment() {
                 id = BigInteger.valueOf(1),
                 memberId = BigInteger.valueOf(1001),
                 title = "블루베리 항산화 스무디",
-                imageUrl = R.drawable.png_recipe_sample,
+                imageUrl = "android.resource://com.example.elixir.recipe/${R.drawable.img_blank}",
                 categorySlowAging = "항산화 강화",
                 categoryType = "음료/차",
                 difficulty = "쉬움",
@@ -302,7 +305,7 @@ class RecipeFragment : Fragment() {
                 id = BigInteger.valueOf(2),
                 memberId = BigInteger.valueOf(1001),
                 title = "아보카도 혈당 조절 샐러드",
-                imageUrl = R.drawable.png_recipe_sample,
+                imageUrl = "android.resource://com.example.elixir.recipe/${R.drawable.img_blank}",
                 categorySlowAging = "혈당 조절",
                 categoryType = "샐러드",
                 difficulty = "보통",
@@ -322,8 +325,8 @@ class RecipeFragment : Fragment() {
                 id = BigInteger.valueOf(3),
                 memberId = BigInteger.valueOf(1001),
                 title = "토마토 올리브 항염 마리네이드",
-                imageUrl = R.drawable.png_recipe_sample,
-                categorySlowAging = "향산화 강화",
+                imageUrl = "android.resource://com.example.elixir.recipe/${R.drawable.img_blank}",
+                categorySlowAging = "염증 감소",
                 categoryType = "양념/소스/잼",
                 difficulty = "쉬움",
                 timeHours = 0,
@@ -342,7 +345,7 @@ class RecipeFragment : Fragment() {
                 id = BigInteger.valueOf(4),
                 memberId = BigInteger.valueOf(1001),
                 title = "케일 항염 그린 스무디",
-                imageUrl = R.drawable.png_recipe_sample,
+                imageUrl = "android.resource://com.example.elixir.recipe/${R.drawable.img_blank}",
                 categorySlowAging = "염증 감소",
                 categoryType = "음료/차",
                 difficulty = "쉬움",
@@ -362,7 +365,7 @@ class RecipeFragment : Fragment() {
                 id = BigInteger.valueOf(5),
                 memberId = BigInteger.valueOf(1001),
                 title = "견과류 에너지볼",
-                imageUrl = R.drawable.png_recipe_sample,
+                imageUrl = "android.resource://com.example.elixir.recipe/${R.drawable.img_blank}",
                 categorySlowAging = "항산화 강화",
                 categoryType = "디저트",
                 difficulty = "보통",
@@ -382,7 +385,7 @@ class RecipeFragment : Fragment() {
                 id = BigInteger.valueOf(6),
                 memberId = BigInteger.valueOf(1001),
                 title = "그릭요거트 베리볼",
-                imageUrl = R.drawable.png_recipe_sample,
+                imageUrl = "android.resource://com.example.elixir.recipe/${R.drawable.img_blank}",
                 categorySlowAging = "항산화 강화",
                 categoryType = "디저트",
                 difficulty = "쉬움",

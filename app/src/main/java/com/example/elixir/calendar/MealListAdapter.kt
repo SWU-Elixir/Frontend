@@ -37,19 +37,6 @@ class MealListAdapter(
 
         val item = getItem(position)
 
-        // 식사 시간 설정
-        binding.dietTimesText.text = item.mealtimes
-
-        // 식사 이미지 설정
-        // imageUrl이 있으면 해당 이미지를 사용하고, 없으면 식사 시간에 맞는 기본 아이콘 사용
-        val pictureRes = item.imageUrl ?: when (item.mealtimes) {
-            "아침" -> R.drawable.ic_meal_morning
-            "점심" -> R.drawable.ic_meal_lunch
-            "저녁" -> R.drawable.ic_meal_dinner
-            "간식" -> R.drawable.ic_meal_snack
-            else -> R.color.elixir_gray // 기본 아이콘
-        }
-
         binding.dietPicture.setImageResource(pictureRes)
         binding.dietNameText.text = item.name
 

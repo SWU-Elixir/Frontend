@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    android:layout_weight="1">
+
+    <!-- 재료 입력 -->
+    <EditText
+        android:id="@+id/enter_item_data"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="5dp"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="15dp"
+        android:background="@drawable/bg_rect_outline_orange"
+        android:hint="@string/material_item_hint"
+        android:textColor="@color/black"
+        android:textColorHint="@color/elixir_gray"
+        android:textSize="16sp"
+        android:fontFamily="@font/pretendard_medium"
+        android:importantForAutofill="no"
+        android:inputType="text"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/enter_item_unit"/>
+
+    <EditText
+        android:id="@+id/enter_item_unit"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="15dp"
+        android:background="@drawable/bg_rect_outline_orange"
+        android:hint="@string/material_item_unit_hint"
+        android:textColor="@color/black"
+        android:textColorHint="@color/elixir_gray"
+        android:textSize="16sp"
+        android:fontFamily="@font/pretendard_medium"
+        android:importantForAutofill="no"
+        android:inputType="text"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/enter_item_data"
+        app:layout_constraintEnd_toStartOf="@id/btn_del" />
+
+    <ImageButton
+        android:id="@+id/btn_del"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginStart="10dp"
+        android:background="@null"
+        android:contentDescription="@string/alert_delete_title"
+        android:src="@drawable/btn_del"
+        android:scaleType="fitCenter"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

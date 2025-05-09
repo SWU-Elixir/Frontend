@@ -14,7 +14,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.example.elixir.R
-import com.example.elixir.SelectImgDialog
+import com.example.elixir.dialog.SelectImgDialog
 import com.example.elixir.databinding.FragmentSettingProfileBinding
 
 class SettingProfileFragment : Fragment() {
