@@ -33,17 +33,17 @@
                 android:id="@+id/challengeImage"
                 android:layout_width="match_parent"
                 android:layout_height="400dp"
-                android:background="@drawable/bg_picture_gray"
+                android:background="@drawable/bg_rect_filled_white_15"
                 android:src="@drawable/png_challenge_1"
                 android:scaleType="centerCrop"
-                android:clipToOutline="true"
-                android:backgroundTint="@color/elixir_gray"/>
+                android:backgroundTint="@color/elixir_gray"
+                android:contentDescription="@null"/>
             <TextView
                 android:id="@+id/challengeTitleText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="챌린지 제목"
+                android:text="@string/challenge_name"
                 android:textSize="22sp"
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_bold"/>
@@ -52,7 +52,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:text="챌린지 기간"
+                android:text="@string/challenge_period"
                 android:textSize="22sp"
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_bold"/>
@@ -62,7 +62,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
-                android:text="챌린지 목적 제목"
+                android:text="@string/challenge_purpose_title"
                 android:textSize="18sp"
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_bold"/>
@@ -72,7 +72,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
-                android:text="챌린지 목적"
+                android:text="@string/challenge_purpose"
                 android:textSize="16sp"
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_medium"/>
@@ -81,7 +81,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
-                android:text="🍀 챌린지는 이렇게 진행됩니다!"
+                android:text="@string/challenge_sub1"
                 android:textSize="18sp"
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_bold"/>
@@ -91,7 +91,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
-                android:text="챌린지 설명"
+                android:text="@string/challenge_discripetion"
                 android:textSize="16sp"
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_medium"/>
@@ -101,7 +101,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
-                android:text="챌린지는 이렇게 진행됩니다!"
+                android:text="@string/challenge_sub2"
                 android:textSize="18sp"
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_bold"/>

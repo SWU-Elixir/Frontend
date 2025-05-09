@@ -7,21 +7,14 @@
     android:paddingLeft="16dp"
     android:orientation="vertical"
     android:gravity="center"
-    android:background="@drawable/bg_picture_gray">
-
-    <com.airbnb.lottie.LottieAnimationView
-        android:id="@+id/lottieAnimation"
-        android:layout_width="70dp"
-        android:layout_height="70dp"
-        app:lottie_rawRes="@raw/challenge_success"
-        app:lottie_autoPlay="true"
-        app:lottie_loop="false" />
+    android:background="@drawable/bg_rect_filled_white_15">
 
     <TextView
         android:id="@+id/dialogTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="챌린지 완료!"
+        android:text="@string/challenge_complete"
+        android:layout_marginTop="10dp"
         android:textSize="18sp"
         android:textStyle="bold"
         android:textColor="@color/black"
@@ -31,7 +24,7 @@
         android:id="@+id/dialogMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="칭호 및 뱃지를 획득했습니다."
+        android:text="@string/challenge_complete_messege"
         android:textSize="14sp"
         android:textColor="@color/black"
         android:gravity="center"
@@ -43,13 +36,13 @@
         android:layout_height="180dp"
         android:src="@drawable/png_badge"
         android:layout_marginBottom="8dp"
-        android:contentDescription="챌린지 완료 이미지" />
+        android:contentDescription="@string/challenge_complete_image" />
 
     <Button
         android:id="@+id/dialogButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="확인"
+        android:text="@string/check"
         android:background="@color/transparency"
         android:textColor="@color/elixir_orange" />
 

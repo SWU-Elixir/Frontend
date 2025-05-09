@@ -2,82 +2,50 @@ package com.example.elixir.recipe
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.elixir.R
 import com.example.elixir.ToolbarActivity
+import com.example.elixir.databinding.FragmentRecipeDetailBinding
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 import java.math.BigInteger
+import java.text.SimpleDateFormat
+import java.util.*
 
-class RecipeDetailFragment : Fragment() {
+/**
+ * 레시피 상세 정보를 표시하는 프래그먼트
+ * 레시피의 기본 정보, 재료, 조리 순서, 댓글 등을 보여주고 관리
+ */
+class RecipeDetailFragment : Fragment(), CommentActionListener {
 
-    // 상단 뒤로가기 버튼
-    private lateinit var backButton: ImageButton
+    // ViewBinding 관련 변수
+    private var _binding: FragmentRecipeDetailBinding? = null
+    private val binding get() = _binding!!
 
-    // 유저 정보
-    private lateinit var profileImage: ImageView
-    private lateinit var memberTitle: TextView
-    private lateinit var memberNickname: TextView
-    private lateinit var followButton: Button
-
-    // 레시피 정보
-    private lateinit var recipeTitle: TextView
-    private lateinit var categorySlowAging: TextView
-    private lateinit var categoryType: TextView
-    private lateinit var tagList: RecyclerView
-    private lateinit var bookmarkButton: ImageButton
-    private lateinit var heartButton: ImageButton
-    private lateinit var menuButton: ImageButton
-    private lateinit var heartCount: TextView
-    private lateinit var recipeLevel: TextView
-    private lateinit var recipeTimeHour: TextView
-    private lateinit var recipeTimeMin: TextView
-    private lateinit var ingredientsList: RecyclerView
-    private lateinit var seasoningList: RecyclerView
-    private lateinit var stepList:RecyclerView
-    private lateinit var tipText: TextView
-    private lateinit var commentList: RecyclerView
-
+    // 댓글 관련 변수
+    private lateinit var commentAdapter: RecipeCommentAdapter
+    private val comments = mutableListOf<CommentData>()
+    private var editingCommentId: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_recipe_detail, container, false)
+    ): View {
+        _binding = FragmentRecipeDetailBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-        // ------------------------ 1. 뷰 초기화 ------------------------
-        backButton = view.findViewById(R.id.backButton)
-        profileImage = view.findViewById(R.id.profileImage)
-        memberTitle = view.findViewById(R.id.memberTitle)
-        memberNickname = view.findViewById(R.id.memberNickname)
-        followButton = view.findViewById(R.id.btn_follow)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        recipeTitle = view.findViewById(R.id.recipeNameText)
-        categorySlowAging = view.findViewById(R.id.category_slow_aging)
-        categoryType = view.findViewById(R.id.category_type)
-        tagList = view.findViewById(R.id.tagList)
-        bookmarkButton = view.findViewById(R.id.bookmarkButton)
-        heartButton = view.findViewById(R.id.heartButton)
-        menuButton = view.findViewById(R.id.menuButton)
-        heartCount = view.findViewById(R.id.heartCount)
-        recipeLevel = view.findViewById(R.id.recipeLevel)
-        recipeTimeHour = view.findViewById(R.id.recipeTimeHour)
-        recipeTimeMin = view.findViewById(R.id.recipeTimeMin)
-        stepList = view.findViewById(R.id.stepList)
-        ingredientsList = view.findViewById(R.id.ingredientsList)
-        seasoningList = view.findViewById(R.id.seasoningList)
-        tipText = view.findViewById(R.id.tipText)
-        commentList = view.findViewById(R.id.commentList)
-
-        // ------------------------ 2. 더미 데이터 적용 ------------------------
+        // ------------------------ 더미 데이터 적용 ------------------------
         val dummyRecipe = RecipeData(
             id = BigInteger.valueOf(1),
             memberId = BigInteger.valueOf(1001),
@@ -96,36 +64,84 @@ class RecipeDetailFragment : Fragment() {
             updateAt = "2025-04-25",
             isBookmarked = true,
             isLiked = true,
-            likeCount = 125
+            likeCount = 42
         )
 
-        // ------------------------ 3. 데이터 바인딩 ------------------------
-        recipeTitle.text = dummyRecipe.title
-        categorySlowAging.text = dummyRecipe.categorySlowAging
-        categoryType.text = dummyRecipe.categoryType
-        recipeLevel.text = dummyRecipe.difficulty
-        recipeTimeHour.text = if (dummyRecipe.timeHours > 0) "${dummyRecipe.timeHours}시간" else ""
-        recipeTimeMin.text = "${dummyRecipe.timeMinutes}분"
-        tipText.text = dummyRecipe.tips
+        // ------------------------ 데이터 바인딩 ------------------------
+        // 레시피 기본 정보 설정
+        binding.recipeNameText.text = dummyRecipe.title
+        binding.categorySlowAging.text = dummyRecipe.categorySlowAging
+        binding.categoryType.text = dummyRecipe.categoryType
+        binding.recipeLevel.text = dummyRecipe.difficulty
 
-        // 북마크/좋아요 버튼 이미지 설정
-        bookmarkButton.setImageResource(
-            if (dummyRecipe.isBookmarked) R.drawable.ic_recipe_bookmark_selected
+        // 조리 시간 설정 (시간이 있는 경우에만 표시)
+        binding.recipeTimeHour.text = if (dummyRecipe.timeHours > 0) getString(R.string.recipe_time_hour_format, dummyRecipe.timeHours) else ""
+        binding.recipeTimeMin.text = getString(R.string.recipe_time_min_format, dummyRecipe.timeMinutes)
+
+        // 팁과 좋아요 수 설정
+        binding.tipText.text = dummyRecipe.tips
+        binding.heartCount.text = formatCount(dummyRecipe.likeCount)
+
+        // 북마크/좋아요 버튼 초기 상태 설정
+        binding.bookmarkButton.setBackgroundResource(
+            if(dummyRecipe.isBookmarked) R.drawable.ic_recipe_bookmark_selected
             else R.drawable.ic_recipe_bookmark_normal
         )
-        heartButton.setImageResource(
-            if (dummyRecipe.isLiked) R.drawable.ic_recipe_heart_selected
+        binding.heartButton.setBackgroundResource(
+            if(dummyRecipe.isLiked) R.drawable.ic_recipe_heart_selected
             else R.drawable.ic_recipe_heart_normal
         )
 
-        // 좋아요 수 포맷 처리
-        heartCount.text = formatCount(dummyRecipe.likeCount)
+        // 북마크 버튼 클릭 이벤트 처리
+        binding.bookmarkButton.setOnClickListener{
+            dummyRecipe.isBookmarked = !dummyRecipe.isBookmarked
+            binding.bookmarkButton.setBackgroundResource(
+                if(dummyRecipe.isBookmarked) R.drawable.ic_recipe_bookmark_selected
+                else R.drawable.ic_recipe_bookmark_normal
+            )
+        }
+
+        // 좋아요 버튼 클릭 이벤트 처리
+        binding.heartButton.setOnClickListener{
+            dummyRecipe.isLiked = !dummyRecipe.isLiked
+            // 좋아요 상태에 따라 카운트 증가/감소
+            if (dummyRecipe.isLiked) {
+                dummyRecipe.likeCount++
+            } else {
+                dummyRecipe.likeCount--
+            }
+            // 버튼 이미지와 카운트 업데이트
+            binding.heartButton.setBackgroundResource(
+                if(dummyRecipe.isLiked) R.drawable.ic_recipe_heart_selected
+                else R.drawable.ic_recipe_heart_normal
+            )
+            binding.heartCount.text = formatCount(dummyRecipe.likeCount)
+        }
+
+        // 팔로우 버튼 클릭 이벤트 처리
+        binding.followButton.setOnClickListener {
+            val isFollowing = binding.followButton.text == getString(R.string.following)
+            // 팔로우 상태 토글 및 UI 업데이트
+            binding.followButton.text = if (isFollowing) getString(R.string.follow) else getString(R.string.following)
+            binding.followButton.setBackgroundResource(
+                if (isFollowing) R.drawable.bg_rect_filled_orange
+                else R.drawable.bg_rect_outline_gray
+            )
+            binding.followButton.setTextColor(
+                resources.getColor(
+                    if (isFollowing) R.color.white
+                    else R.color.black,
+                    null
+                )
+            )
+        }
 
         // 메뉴 버튼 클릭 시 팝업 메뉴 표시
-        menuButton.setOnClickListener {
-            val popupMenu = PopupMenu(context, menuButton)
+        binding.menuButton.setOnClickListener {
+            val popupMenu = PopupMenu(context, binding.menuButton)
             popupMenu.menuInflater.inflate(R.menu.item_menu_drop, popupMenu.menu)
 
+            // 메뉴 아이템 클릭 이벤트 처리
             popupMenu.setOnMenuItemClickListener { menuItem ->
                 when (menuItem.itemId) {
                     R.id.menu_edit -> {
@@ -150,19 +166,19 @@ class RecipeDetailFragment : Fragment() {
                             isLiked = false,
                             likeCount = 42
                         )
-/*
-                        val bundle = Bundle().apply {
-                            putParcelable("recipeData", recipeData)
-                        }
-                        val intent = Intent(requireContext(), ToolbarActivity::class.java)
-                        intent.putExtra("recipeData", recipeData) // 필요한 데이터 전달
-                        intent.putExtra("mode", 3)
-                        startActivity(intent)*/
-
                         true
                     }
                     R.id.menu_delete -> {
-                        Toast.makeText(context, "댓글 삭제 클릭됨", Toast.LENGTH_SHORT).show()
+                        // 레시피 삭제 확인 다이얼로그 표시
+                        AlertDialog.Builder(requireContext())
+                            .setTitle("레시피 삭제")
+                            .setMessage("레시피를 삭제하시겠습니까?")
+                            .setPositiveButton("삭제") { _, _ ->
+                                Toast.makeText(context, "레시피가 삭제되었습니다", Toast.LENGTH_SHORT).show()
+                                parentFragmentManager.popBackStack()
+                            }
+                            .setNegativeButton("취소", null)
+                            .show()
                         true
                     }
                     else -> false
@@ -171,8 +187,9 @@ class RecipeDetailFragment : Fragment() {
             popupMenu.show()
         }
 
-        // ------------------------ 4. 리스트 ------------------------
-        tagList.apply {
+        // ------------------------ 3. 리스트 설정 ------------------------
+        // 태그 리스트 설정 (FlexboxLayoutManager 사용)
+        binding.tagList.apply {
             layoutManager = FlexboxLayoutManager(context).apply {
                 flexDirection = FlexDirection.ROW
                 justifyContent = JustifyContent.FLEX_START
@@ -180,7 +197,8 @@ class RecipeDetailFragment : Fragment() {
             adapter = RecipeTagAdapter(dummyRecipe.ingredients)
         }
 
-        ingredientsList.apply {
+        // 재료 리스트 설정
+        binding.ingredientsList.apply {
             layoutManager = FlexboxLayoutManager(context).apply {
                 flexDirection = FlexDirection.ROW
                 justifyContent = JustifyContent.FLEX_START
@@ -188,8 +206,8 @@ class RecipeDetailFragment : Fragment() {
             adapter = RecipeSeasoningAdapter(dummyRecipe.ingredients)
         }
 
-
-        seasoningList.apply {
+        // 양념 리스트 설정
+        binding.seasoningList.apply {
             layoutManager = FlexboxLayoutManager(context).apply {
                 flexDirection = FlexDirection.ROW
                 justifyContent = JustifyContent.FLEX_START
@@ -197,12 +215,14 @@ class RecipeDetailFragment : Fragment() {
             adapter = RecipeSeasoningAdapter(dummyRecipe.seasoning)
         }
 
-        stepList.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
-        stepList.adapter = RecipeStepAdapter(dummyRecipe.recipeOrder)
+        // 조리 순서 리스트 설정
+        binding.stepList.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+        binding.stepList.adapter = RecipeStepAdapter(dummyRecipe.recipeOrder)
 
         // ------------------------ 더미 댓글 데이터 ------------------------
-        val dummyComments = listOf(
+        comments.addAll(listOf(
             CommentData(
+                commentId = "1",
                 profileImageResId = R.drawable.ic_profile,
                 memberTitle = "건강지기",
                 memberNickname = "wellness_lover",
@@ -210,34 +230,103 @@ class RecipeDetailFragment : Fragment() {
                 date = "2025-05-01 12:13"
             ),
             CommentData(
+                commentId = "2",
                 profileImageResId = R.drawable.ic_profile,
                 memberTitle = "슬로우에이징러",
                 memberNickname = "슬로우",
                 commentText = "아보카도 좋아하는데 해봐야겠어요~",
                 date = "2025-05-01 12:13"
             )
-        )
+        ))
 
         // ------------------------ 댓글 어댑터 연결 ------------------------
-        commentList.layoutManager = LinearLayoutManager(requireContext())
-        commentList.adapter = RecipeCommentAdapter(requireContext(), dummyComments)
+        binding.commentList.layoutManager = LinearLayoutManager(requireContext())
+        commentAdapter = RecipeCommentAdapter(requireContext(), comments, this)
+        binding.commentList.adapter = commentAdapter
 
-        // ------------------------ 5. 뒤로 가기 버튼 ------------------------
-        backButton.setOnClickListener {
-            parentFragmentManager.popBackStack()
+        // 댓글 작성/수정 버튼 클릭 이벤트 처리
+        binding.commentButton.setOnClickListener {
+            val commentText = binding.editComment.text.toString()
+            if (commentText.isNotEmpty()) {
+                if (editingCommentId != null) {
+                    // 댓글 수정
+                    val commentIndex = comments.indexOfFirst { it.commentId == editingCommentId }
+                    if (commentIndex != -1) {
+                        val updatedComment = comments[commentIndex].copy(commentText = commentText)
+                        comments[commentIndex] = updatedComment
+                        commentAdapter.notifyItemChanged(commentIndex)
+                    }
+                    // 수정 모드 초기화
+                    editingCommentId = null
+                    binding.commentButton.text = getString(R.string.check)
+                } else {
+                    // 새 댓글 작성
+                    val currentTime = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date())
+                    val newComment = CommentData(
+                        commentId = UUID.randomUUID().toString(),
+                        profileImageResId = R.drawable.ic_profile,
+                        memberTitle = "userTitle",
+                        memberNickname = "userNickname",
+                        commentText = commentText,
+                        date = currentTime
+                    )
+                    comments.add(newComment)
+                    commentAdapter.notifyItemInserted(comments.size - 1)
+                    binding.commentList.smoothScrollToPosition(comments.size - 1)
+                }
+                binding.editComment.text.clear()
+            } else {
+                Toast.makeText(context, getString(R.string.please_enter_comment), Toast.LENGTH_SHORT).show()
+            }
         }
 
-        return view
+        // ------------------------ 4. 뒤로 가기 버튼 ------------------------
+        binding.backButton.setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     /**
-     * 좋아요 수를 보기 좋은 포맷으로 변환 (예: 1.2k, 2M)
+     * 좋아요 수를 보기 좋은 포맷으로 변환
+     * @param count 변환할 숫자
+     * @return 포맷팅된 문자열 (예: 1.2k, 2M)
      */
     private fun formatCount(count: Int): String {
         return when {
-            count >= 1_000_000 -> String.format("%.1fM", count / 1_000_000.0)
-            count >= 1_000     -> String.format("%.1fk", count / 1_000.0)
+            count >= 1_000_000 -> String.format(Locale.KOREA,"%.1fM", count / 1_000_000.0)
+            count >= 1_000     -> String.format(Locale.KOREA,"%.1fk", count / 1_000.0)
             else               -> count.toString()
         }.removeSuffix(".0") // 소수점 0 제거
+    }
+
+    override fun onEditComment(commentId: String, commentText: String) {
+        // 수정할 댓글 ID 저장
+        editingCommentId = commentId
+        // EditText에 기존 댓글 내용 설정
+        binding.editComment.setText(commentText)
+        // 버튼 텍스트 변경
+        binding.commentButton.text = "수정"
+    }
+
+    override fun onDeleteComment(commentId: String) {
+        // 댓글 삭제 확인 다이얼로그 표시
+        AlertDialog.Builder(requireContext())
+            .setTitle("댓글 삭제")
+            .setMessage("댓글을 삭제하시겠습니까?")
+            .setPositiveButton("삭제") { _, _ ->
+                // 댓글 삭제
+                val commentIndex = comments.indexOfFirst { it.commentId == commentId }
+                if (commentIndex != -1) {
+                    comments.removeAt(commentIndex)
+                    commentAdapter.notifyItemRemoved(commentIndex)
+                }
+            }
+            .setNegativeButton("취소", null)
+            .show()
     }
 }

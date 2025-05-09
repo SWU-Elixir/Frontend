@@ -1,68 +1,46 @@
 package com.example.elixir.calendar
 
 import android.content.Context
-import android.net.Uri
-import android.os.Bundle
-import android.util.Log
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
-import android.widget.ImageView
-import android.widget.TextView
-import androidx.fragment.app.FragmentManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.elixir.R
-import com.example.elixir.recipe.RecipeDetailFragment
+import com.example.elixir.ToolbarActivity
+import com.example.elixir.databinding.ItemMealListBinding
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 
 class MealListAdapter(
     private val context: Context,
-    private var data: MutableList<MealPlanData>,
-    private val fragmentManager: FragmentManager
+    private var data: MutableList<MealPlanData>
 ) : BaseAdapter() {
-
     override fun getCount(): Int = data.size
     override fun getItem(position: Int): MealPlanData = data[position]
     override fun getItemId(position: Int): Long = position.toLong()
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+        val binding: ItemMealListBinding
         val view: View
-        val holder: ViewHolder
 
+        // 뷰 재사용 로직
         if (convertView == null) {
-            view = LayoutInflater.from(context).inflate(R.layout.item_meal_list, parent, false)
-            holder = ViewHolder(view)
-            view.tag = holder
+            binding = ItemMealListBinding.inflate(LayoutInflater.from(context), parent, false)
+            view = binding.root
+            view.tag = binding
         } else {
+            binding = convertView.tag as ItemMealListBinding
             view = convertView
-            holder = view.tag as ViewHolder
         }
 
         val item = getItem(position)
 
-        holder.mealTimesText.text = item.mealtimes
-/*
-        // 이미지 설정: imageUrl이 있으면 사용하고 없으면 식사 시간에 맞는 아이콘 사용
-        val pictureRes = item.imageUrl ?: when (item.mealtimes) {
-            "아침" -> R.drawable.ic_meal_morning
-            "점심" -> R.drawable.ic_meal_lunch
-            "저녁" -> R.drawable.ic_meal_dinner
-            "간식" -> R.drawable.ic_meal_snack
-            else -> R.color.elixir_gray // 기본 아이콘
-        }
+        binding.dietPicture.setImageResource(pictureRes)
+        binding.dietNameText.text = item.name
 
-        holder.mealPicture.setImageResource(pictureRes)*/
-        // 이미지 설정
-        val imageUriString = item.imageUrl
-        val imageUri = Uri.parse(imageUriString)
-        holder.mealPicture.setImageURI(imageUri)
-
-        holder.mealNameText.text = item.name
-
-        // 점수(Score)에 따라 아이콘 변경
+        // 식단 점수에 따른 아이콘 설정 (1~5점)
         val iconRes = when (item.score) {
             1 -> R.drawable.ic_meal_number1
             2 -> R.drawable.ic_meal_number2
@@ -71,51 +49,35 @@ class MealListAdapter(
             5 -> R.drawable.ic_meal_number5
             else -> R.drawable.ic_meal_number1 // 기본 아이콘
         }
-        holder.mealScoreIcon.setImageResource(iconRes)
+        binding.dietScore.setImageResource(iconRes)
 
-        // 재료 목록 RecyclerView 설정
-        holder.mealIngredientList.layoutManager = FlexboxLayoutManager(context)
-        holder.mealIngredientList.adapter = MealListIngredientAdapter(item.mealPlanIngredients)
+        // 재료 목록을 FlexboxLayoutManager를 사용하여 표시
+        binding.dietIngredientList.layoutManager = FlexboxLayoutManager(context)
+        binding.dietIngredientList.adapter = MealListIngredientAdapter(item.mealPlanIngredients)
 
+        // Flexbox 레이아웃 매니저 설정
         val layoutManager: FlexboxLayoutManager = FlexboxLayoutManager(context)
         layoutManager.setFlexDirection(FlexDirection.COLUMN)
         layoutManager.setJustifyContent(JustifyContent.FLEX_END)
 
-        // 클릭 이벤트 설정
+        // 식단 아이템 클릭 시 상세 화면으로 이동
         view.setOnClickListener {
-            Log.d("RecipeAdapter", "아이템 클릭됨: ${item.name}")
-
-            // 레시피 상세 프래그먼트 생성 및 데이터 전달
-            val detailFragment = MealDetailFragment().apply {
-                arguments = Bundle().apply {
-                    putString("meal", item.name)
-                    putString("createdAt", item.createdAt)
-                    putString("mealtimes", item.mealtimes)
-                    putStringArrayList("mealPlanIngredients", ArrayList(item.mealPlanIngredients))
-                    putString("imageUrl", item.imageUrl)
-                }
+            val intent = Intent(context, ToolbarActivity::class.java).apply {
+                putExtra("mode", 4)  // 식단 상세 모드
+                putExtra("mealName", item.name)  // 식단 이름
             }
-
-            fragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainer, detailFragment)
-                .addToBackStack(null)
-                .commit()
+            context.startActivity(intent)
         }
 
         return view
     }
 
+    /**
+     * 어댑터의 데이터를 새로운 데이터로 업데이트
+     */
     fun updateData(newData: List<MealPlanData>) {
         data.clear()
         data.addAll(newData)
         notifyDataSetChanged()
-    }
-
-    private class ViewHolder(view: View) {
-        val mealTimesText: TextView = view.findViewById(R.id.dietTimesText)
-        val mealNameText: TextView = view.findViewById(R.id.dietNameText)
-        val mealIngredientList: RecyclerView = view.findViewById(R.id.dietIngredientList)
-        val mealScoreIcon: ImageView = view.findViewById(R.id.dietScore)
-        val mealPicture: ImageView = view.findViewById(R.id.dietPicture)
     }
 }

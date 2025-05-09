@@ -1,27 +1,31 @@
 package com.example.elixir.recipe
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.elixir.R
+import com.example.elixir.databinding.ItemRecipeRecommendationListIndeterminateBinding
 
 class RecipeIngredientAdapter(private val ingredients: List<String>) :
     RecyclerView.Adapter<RecipeIngredientAdapter.IngredientViewHolder>() {
 
-    inner class IngredientViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val ingredientTextView: TextView = itemView.findViewById(R.id.indeterminateName)
+    inner class IngredientViewHolder(private val binding: ItemRecipeRecommendationListIndeterminateBinding) : 
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(ingredient: String) {
+            binding.indeterminateName.text = ingredient
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): IngredientViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_recipe_recommendation_list_indeterminate, parent, false)
-        return IngredientViewHolder(view)
+        val binding = ItemRecipeRecommendationListIndeterminateBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
+        return IngredientViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: IngredientViewHolder, position: Int) {
-        holder.ingredientTextView.text = ingredients[position]
+        holder.bind(ingredients[position])
     }
 
     override fun getItemCount(): Int = ingredients.size
