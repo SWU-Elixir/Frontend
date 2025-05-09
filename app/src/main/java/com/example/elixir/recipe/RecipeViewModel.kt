@@ -3,20 +3,24 @@ package com.example.elixir.recipe
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 
-class RecipeViewModel : ViewModel() {
-    var recipeTitle = ""
-    var thumbnail = ""
-    var recipeDescription = ""
+class RecipeViewModel(private val repository: RecipeRepository) : ViewModel() {
+    private var recipeTitle = ""
+    private var thumbnail = ""
+    private var recipeDescription = ""
     var categorySlowAging = ""
     var categoryType = ""
-    var difficulty = ""
+    private var difficulty = ""
     var ingredients = MutableLiveData<List<FlavoringData>>()
     var seasoning = MutableLiveData<List<FlavoringData>>()
-    var steps = MutableLiveData<List<RecipeStepData>>()
-    var tips = ""
+    private var steps = MutableLiveData<List<RecipeStepData>>()
+    private var tips = ""
 
-    val recipeList = MutableLiveData<MutableList<RecipeData>>(mutableListOf())
+    private val recipeList = MutableLiveData<MutableList<RecipeData>>(mutableListOf())
+
+    val allRecipes: LiveData<List<RecipeEntity>> = repository.getAllRecipes()
 
     fun addRecipe(recipe: RecipeData) {
         val currentList = recipeList.value ?: mutableListOf()
@@ -47,5 +51,11 @@ class RecipeViewModel : ViewModel() {
         seasoning.value = seasoningList
         steps.value = stepsList
         tips = tipsText
+    }
+
+    fun saveRecipeToDB(recipeEntity: RecipeEntity) {
+        viewModelScope.launch {
+            repository.insertRecipe(recipeEntity)
+        }
     }
 }

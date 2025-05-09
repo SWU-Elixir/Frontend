@@ -179,6 +179,12 @@ class RecipeFragment : Fragment() {
             transaction.commit()
         }
 
+        recipeViewModel.allRecipes.observe(viewLifecycleOwner) { recipes ->
+            recipes.forEach { recipe ->
+                Log.d("RecipeLogFragment", "Recipe: ${recipe.title}, ${recipe.description}")
+            }
+        }
+
         return view
 
 

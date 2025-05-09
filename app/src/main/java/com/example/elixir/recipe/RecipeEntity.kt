@@ -16,7 +16,6 @@ import java.io.File
 data class RecipeEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,                        // 로컬에서 자동 생성되는 ID
-    val serverId: Int?,                     // 서버에서 받은 ID (null일 경우 아직 서버에 저장되지 않음)
     val title: String,
     val description: String,
     val categorySlowAging: String,

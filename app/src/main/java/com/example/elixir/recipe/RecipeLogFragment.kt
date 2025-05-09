@@ -467,27 +467,31 @@ class RecipeLogFragment : Fragment() {
         recipeBinding.btnWriteRecipe.setOnClickListener {
             if (isAllFieldsValid()) {
                 val saveDialog = SaveDialog(requireActivity()) {
-                    // ViewModel에 데이터 저장
-                    recipeViewModel.saveRecipeData(
-                        recipeTitle,
-                        thumbnail,
-                        recipeDescription,
-                        slowAging = categorySlowAging,
-                        type = categoryType,
+                    val recipeEntity = RecipeEntity(
+                        title = recipeTitle,
+                        description = recipeDescription,
+                        categorySlowAging = categorySlowAging,
+                        categoryType = categoryType,
                         difficulty = difficulty,
-                        ingredientsList = ingredients,
-                        seasoningList = seasoning,
-                        stepsList = steps,
-                        tipsText = tips
+                        timeHours = timeHours,
+                        timeMinutes = timeMinutes,
+                        ingredientTagNames = ingredientTags,
+                        ingredients = ingredients.associate { it.name to it.unit },
+                        seasoning = seasoning.associate { it.name to it.unit },
+                        stepDescriptions = steps.map { it.stepDescription },
+                        stepImageUrls = steps.map { it.stepImg },
+                        tips = tips,
+                        allergies = allergies,
+                        imageUrl = thumbnail,
+                        createdAt = System.currentTimeMillis().toString(),
+                        updatedAt = System.currentTimeMillis().toString()
                     )
-                    Toast.makeText(requireContext(), "레시피가 저장되었습니다.", Toast.LENGTH_SHORT).show()
 
-                    // 현재 프래그먼트와 Activity 종료
+                    recipeViewModel.saveRecipeToDB(recipeEntity)
+                    Toast.makeText(requireContext(), "레시피가 저장되었습니다.", Toast.LENGTH_SHORT).show()
                     requireActivity().finish()
                 }
                 saveDialog.show()
-            } else {
-                android.util.Log.d("RecipeLogFragment", "isAllFieldsValid: false")
             }
         }
     }
