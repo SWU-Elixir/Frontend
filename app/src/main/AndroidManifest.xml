@@ -35,6 +35,16 @@
             android:exported="true"
             android:theme="@style/Theme.Elixir">
         </activity>
+        <activity
+            android:name=".chatbot.ChatBotActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Elixir.Splash">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />

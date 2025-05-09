@@ -12,14 +12,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginBottom="10dp">
+        android:layout_marginBottom="10dp"
+        tools:ignore="UselessParent">
 
         <!-- 레시피 이미지 -->
         <ImageView
             android:id="@+id/recipePicture"
             android:layout_width="135dp"
             android:layout_height="135dp"
-            android:background="@drawable/bg_picture_gray"
+            android:background="@drawable/bg_rect_filled_white_15"
             android:src="@color/elixir_gray"
             android:scaleType="centerCrop"
             android:clipToOutline="true"
@@ -50,7 +51,7 @@
                         android:id="@+id/category_slow_aging"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="저속노화"
+                        android:text="@string/recipe_cat_1"
                         android:textSize="10sp"
                         android:layout_marginEnd="5dp"
                         android:textColor="@color/elixir_orange"
@@ -61,7 +62,7 @@
                         android:id="@+id/category_type"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="종류"
+                        android:text="@string/recipe_cat_2"
                         android:textSize="10sp"
                         android:textColor="@color/elixir_orange"
                         android:fontFamily="@font/pretendard_medium"
@@ -95,12 +96,12 @@
                     <!-- 좋아요 수 -->
                     <TextView
                         android:id="@+id/heartCount"
-                        android:layout_width="21dp"
+                        android:layout_width="25dp"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/pretendard_medium"
                         android:textColor="@color/black"
-                        android:textSize="10sp"
-                        android:layout_marginStart="2dp"
+                        android:textSize="9sp"
+                        android:layout_marginStart="1dp"
                         android:text=""
                         android:maxWidth="30dp"
                         android:layout_gravity="center"/>
@@ -127,11 +128,13 @@
                 android:id="@+id/recipeNameText"
                 android:layout_width="match_parent"
                 android:layout_height="20dp"
-                android:text="제목"
+                android:text="@string/recipe_name"
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_bold"
                 android:layout_marginBottom="3dp"
                 android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end"
                 android:textSize="16sp" />
 
             <!-- 재료 리스트 (RecyclerView) -->
@@ -163,7 +166,8 @@
                     android:layout_height="20dp"
                     android:layout_gravity="center"
                     android:layout_marginEnd="5dp"
-                    android:src="@drawable/ic_recipe_level" />
+                    android:src="@drawable/ic_recipe_level"
+                    android:contentDescription="@null"/>
 
                 <!-- 난이도 텍스트 -->
                 <TextView
@@ -173,7 +177,7 @@
                     android:layout_gravity="center"
                     android:fontFamily="@font/pretendard_medium"
                     android:maxWidth="40dp"
-                    android:text="난이도"
+                    android:text="@string/recipe_difficult"
                     android:textColor="@color/black"
                     android:textSize="12sp" />
 
@@ -184,7 +188,8 @@
                     android:layout_gravity="center"
                     android:layout_marginStart="30dp"
                     android:layout_marginEnd="5dp"
-                    android:src="@drawable/ic_recipe_time" />
+                    android:src="@drawable/ic_recipe_time"
+                    android:contentDescription="@null"/>
 
                 <!-- 시간 텍스트 -->
                 <TextView
@@ -194,7 +199,7 @@
                     android:layout_gravity="center"
                     android:layout_marginEnd="5dp"
                     android:fontFamily="@font/pretendard_medium"
-                    android:text="시간"
+                    android:text="@string/recipe_hour"
                     android:textColor="@color/black"
                     android:textSize="12sp" />
 
@@ -205,7 +210,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:fontFamily="@font/pretendard_medium"
-                    android:text="분"
+                    android:text="@string/recipe_minute"
                     android:textColor="@color/black"
                     android:textSize="12sp" />
             </LinearLayout>

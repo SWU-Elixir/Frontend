@@ -72,7 +72,7 @@
                 android:id="@+id/emptyMealText"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="기록된 식단이 없습니다."
+                android:text="@string/no_mealplan"
                 android:textAlignment="center"
                 android:gravity="center"
                 android:layout_marginTop="110dp"
@@ -100,6 +100,7 @@
         android:visibility="gone"
         android:src="@drawable/ic_write"
         app:tint="@color/white"
+        android:contentDescription="@null"
         app:backgroundTint="@color/elixir_orange" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

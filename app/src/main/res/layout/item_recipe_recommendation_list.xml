@@ -35,7 +35,7 @@
                 android:background="@drawable/bg_gradient_top_overlay"/>
             <View
                 android:layout_width="match_parent"
-                android:layout_height="80dp"
+                android:layout_height="160dp"
                 android:layout_gravity="bottom"
                 android:background="@drawable/bg_gradient_bottom_overlay"/>
         </FrameLayout>
@@ -53,7 +53,7 @@
             android:maxHeight="45dp"
             android:padding="8dp"
             android:scaleType="fitCenter"
-            android:contentDescription="북마크"/>
+            android:contentDescription="@string/bookmark"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -70,9 +70,9 @@
                         android:id="@+id/category_slow_aging"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="저속노화"
+                        android:text="@string/recipe_cat_1"
                         android:textSize="10sp"
-                        android:background="@drawable/bg_recipe_indeterminate"
+                        android:background="@drawable/bg_rect_filled_white_5"
                         android:paddingTop="1dp"
                         android:paddingBottom="1dp"
                         android:paddingStart="6dp"
@@ -85,9 +85,9 @@
                     android:id="@+id/category_type"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="종류"
+                    android:text="@string/recipe_cat_2"
                     android:textSize="10sp"
-                    android:background="@drawable/bg_recipe_indeterminate"
+                    android:background="@drawable/bg_rect_filled_white_5"
                     android:paddingTop="1dp"
                     android:paddingBottom="1dp"
                     android:paddingStart="6dp"
@@ -101,7 +101,7 @@
                 android:id="@+id/recipeNameText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="제목"
+                android:text="@string/recipe_name"
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_bold"
                 android:textStyle="bold"

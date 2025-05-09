@@ -85,4 +85,9 @@
     <style name="CalenderViewCustom" parent="Theme.AppCompat">
         <item name="android:textColor">@drawable/selector_calendar_textcolor</item>
     </style>
+
+    <style name="ChatButton" parent="Widget.AppCompat.Button">
+        <item name="android:textColor">@color/selector_chat_btn_text</item>
+        <item name="android:gravity">center</item>
+    </style>
 </resources>

@@ -4,57 +4,37 @@ import android.os.Bundle
 import android.view.*
 import android.widget.*
 import java.math.BigInteger
-import androidx.cardview.widget.CardView
-import androidx.fragment.app.Fragment
 import com.example.elixir.R
+import androidx.fragment.app.Fragment
+import com.example.elixir.databinding.FragmentChallengeBinding
+import com.example.elixir.databinding.DialogChallengeCompletedBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-
 
 class ChallengeFragment : Fragment() {
 
-    // UI 컴포넌트 선언
-    private lateinit var eventListView: ListView
+    private var _binding: FragmentChallengeBinding? = null
+    private val binding get() = _binding!!
+
     private lateinit var listAdapter: ChallengeStageListAdapter
-    private lateinit var challengeImage: ImageView
-    private lateinit var challengeSpinner: Spinner
-
-    // 챌린지 정보를 표시할 텍스트뷰
-    private lateinit var challengeTitleText: TextView
-    private lateinit var challengePeriodText: TextView
-    private lateinit var challengePurposeText: TextView
-    private lateinit var challengeDescriptionText: TextView
-    private lateinit var challengeSub1:TextView
-    private lateinit var challengeSub2:TextView
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_challenge, container, false)
+    ): View {
+        _binding = FragmentChallengeBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-        // UI 요소 연결
-        eventListView = view.findViewById(R.id.challengeStageList)
-        challengeImage = view.findViewById(R.id.challengeImage)
-        challengeSpinner = view.findViewById(R.id.challengeSpinner)
-
-        challengeTitleText = view.findViewById(R.id.challengeTitleText)
-        challengePeriodText = view.findViewById(R.id.challengePeriodText)
-        challengePurposeText = view.findViewById(R.id.challengeGoalText)
-        challengeDescriptionText = view.findViewById(R.id.challengeDescriptionText)
-        challengeSub1 = view.findViewById(R.id.challengeSub1)
-        challengeSub2 = view.findViewById(R.id.challengeSub2)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         // 바텀시트 설정
-        val bottomSheet = view.findViewById<CardView>(R.id.bottomSheet)
-        BottomSheetBehavior.from(bottomSheet).apply {
+        BottomSheetBehavior.from(binding.bottomSheet).apply {
             addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
                 override fun onStateChanged(bottomSheet: View, newState: Int) {}
                 override fun onSlide(bottomSheet: View, slideOffset: Float) {}
             })
         }
-
-
 
         // 샘플 챌린지 데이터 구성
         val allChallenges = listOf(
@@ -158,16 +138,15 @@ class ChallengeFragment : Fragment() {
             )
         )
 
-
         // Spinner에 챌린지 제목 목록 표시
         val challengeTitles = allChallenges.map { it.name }
         val spinnerAdapter = ArrayAdapter(requireContext(),
             R.layout.item_challenge_spinner, challengeTitles)
         spinnerAdapter.setDropDownViewResource(R.layout.item_challenge_spinner_dropdown)
-        challengeSpinner.adapter = spinnerAdapter
+        binding.challengeSpinner.adapter = spinnerAdapter
 
         // Spinner 선택 이벤트 처리
-        challengeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        binding.challengeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 val selectedChallenge = allChallenges[position]
                 updateChallenge(selectedChallenge) // 챌린지 선택 시 화면 업데이트
@@ -175,8 +154,6 @@ class ChallengeFragment : Fragment() {
 
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
-
-        return view
     }
 
     // 챌린지에 맞게 리스트와 UI 갱신
@@ -186,7 +163,7 @@ class ChallengeFragment : Fragment() {
 
         // 단계 리스트 뷰 어댑터 갱신
         listAdapter = ChallengeStageListAdapter(requireContext(), visibleStages.toMutableList(), currentStage)
-        eventListView.adapter = listAdapter
+        binding.challengeStageList.adapter = listAdapter
 
         // 스테이지에 따라 대표 이미지 변경
         val imageRes = when (currentStage) {
@@ -196,18 +173,17 @@ class ChallengeFragment : Fragment() {
             4 -> R.drawable.png_challenge_4
             else -> R.drawable.png_challenge_5
         }
-        challengeImage.setImageResource(imageRes)
+        binding.challengeImage.setImageResource(imageRes)
 
         // 챌린지 상세 정보 표시
-        challengeTitleText.text = challenge.name
-        challengePeriodText.text = "${challenge.startDate} ~ ${challenge.endDate}"
-        challengeSub1.text = "🌱 ${challenge.name}, 함께 도전해요!"
-        challengePurposeText.text = challenge.purpose
-        challengeDescriptionText.text = challenge.description
-        challengeSub2.text = "🌳 ${challenge.name}를 성공하고\n"+
-                "'${challenge.badgeTitle}' 칭호 및 배지를 획득하세요!"
+        binding.challengeTitleText.text = challenge.name
+        binding.challengePeriodText.text = getString(R.string.challenge_period_format, challenge.startDate, challenge.endDate)
+        binding.challengeSub1.text = getString(R.string.challenge_sub1_format, challenge.name)
+        binding.challengeGoalText.text = challenge.purpose
+        binding.challengeDescriptionText.text = challenge.description
+        binding.challengeSub2.text = getString(R.string.challenge_sub2_format, challenge.name, challenge.badgeTitle)
 
-        // 모든 스테이지 완료 시 다이얼로그 표시 (calculateCurrentStage 활용)
+        // 모든 스테이지 완료 시 다이얼로그 표시
         val maxStage = challenge.stages.maxOfOrNull { it.stepNumber } ?: 1
         if (currentStage > maxStage) {
             showCompletionDialog(challenge.badgeTitle)
@@ -227,26 +203,25 @@ class ChallengeFragment : Fragment() {
     }
 
     private fun showCompletionDialog(title: String) {
-        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_challenge_completed, null)
-
-        val dialogTitle = dialogView.findViewById<TextView>(R.id.dialogTitle)
-        val dialogMessage = dialogView.findViewById<TextView>(R.id.dialogMessage)
-        val dialogImage = dialogView.findViewById<ImageView>(R.id.dialogImage)
-        val dialogButton = dialogView.findViewById<Button>(R.id.dialogButton)
-
-        dialogTitle.text = "챌린지 완료!"
-        dialogMessage.text = "'$title' 칭호 및 뱃지를 획득했습니다."
-        dialogImage.setImageResource(R.drawable.png_badge) // 원하는 이미지로 교체 가능
+        val dialogBinding = DialogChallengeCompletedBinding.inflate(layoutInflater)
+        
+        dialogBinding.dialogTitle.text = getString(R.string.challenge_completion_title)
+        dialogBinding.dialogMessage.text = getString(R.string.challenge_completion_message, title)
+        dialogBinding.dialogImage.setImageResource(R.drawable.png_badge)
 
         val alertDialog = android.app.AlertDialog.Builder(requireContext())
-            .setView(dialogView)
+            .setView(dialogBinding.root)
             .create()
 
-        dialogButton.setOnClickListener {
+        dialogBinding.dialogButton.setOnClickListener {
             alertDialog.dismiss()
         }
 
         alertDialog.show()
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }

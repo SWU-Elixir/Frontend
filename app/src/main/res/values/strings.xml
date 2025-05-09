@@ -162,12 +162,14 @@
 
     <string name="btn_write">작성</string>
 
+    <!-- 네비게이션 -->
     <string name="navi_calendar">캘린더</string>
-    <string name="navi_recipe">레시피</string>">
+    <string name="navi_recipe">레시피</string>
     <string name="navi_challenge">챌린지</string>
     <string name="navi_chatbot">챗봇</string>
     <string name="navi_mypage">마이페이지</string>
 
+    <!-- 캘린더: 커스텀 주 -->
     <string-array name="custom_weekdays">
         <item>S</item>
         <item>M</item>
@@ -178,6 +180,7 @@
         <item>S</item>
     </string-array>
 
+    <!-- 캘린더: 커스텀 월 -->
     <string-array name="custom_months">
         <item>01</item>
         <item>02</item>
@@ -192,6 +195,10 @@
         <item>11</item>
         <item>12</item>
     </string-array>
+
+    <!-- 캘린더 -->
+    <string name="no_mealplan">기록된 식단이 없습니다.</string>
+    <string name="tag">태그</string>
 
     <string-array name="ingredient_list">
         <item>식재료</item>
@@ -218,6 +225,70 @@
         <item>양념/소스/잼</item>
     </string-array>
 
+    <!-- 챌린지: 포멧 -->
+    <string name="challenge_period_format">%1$s ~ %2$s</string>
+    <string name="challenge_sub1_format">🌱 %1$s, 함께 도전해요!</string>
+    <string name="challenge_sub2_format">🌳 %1$s를 성공하고\n\'%2$s\' 칭호 및 배지를 획득하세요!</string>
+    <string name="challenge_completion_title">챌린지 완료!</string>
+    <string name="challenge_completion_message">\'%1$s\' 칭호 및 뱃지를 획득했습니다.</string>
+    <string name="challenge_step">%1d단계</string>
+
+    <!-- 챌린지: 메인 화면 -->
+    <string name="challenge_name">챌린지 제목</string>
+    <string name="challenge_period">챌린지 기간</string>
+    <string name="challenge_purpose_title">챌린지 목적 제목</string>
+    <string name="challenge_purpose">챌린지 목적</string>
+    <string name="challenge_sub1">🍀 챌린지는 이렇게 진행됩니다!</string>
+    <string name="challenge_sub2">챌린지는 이렇게 진행됩니다!</string>
+    <string name="challenge_discripetion">챌린지 설명</string>
+    <string name="challenge_list_step">단계</string>
+    <string name="challenge_list_mission">미션</string>
+
+    <!-- 챌린지: 다이얼로그 -->
+    <string name="challenge_complete">챌린지 완료!</string>
+    <string name="challenge_complete_messege">칭호 및 뱃지를 획득했습니다.</string>
+    <string name="challenge_complete_image">챌린지 완료 이미지</string>
+
+    <!-- Recipe Detail Fragment Strings -->
+    <string name="recipe_time_hour_format">%d시간</string>
+    <string name="recipe_time_min_format">%d분</string>
+    <string name="follow">팔로우</string>
+    <string name="following">팔로잉</string>
+    <string name="please_enter_comment">댓글을 입력해주세요</string>
+
+    <!-- Recipe Step Format -->
+    <string name="recipe_step_format">STEP %d</string>
+    <string name="search_put_something">검색어를 입력하세요</string>
+    <string name="recipe_nothing_text">검색 결과가 없습니다</string>
+
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="recipe_reload">재설정</string>
+    <string name="recipe_write">레시피 작성</string>
+    <string name="recipe_recommend_title">오늘의 추천 레시피는?</string>
+    <string name="search_hint">검색어를 입력하세요</string>
+    <string name="member_title">칭호</string>
+    <string name="member_nickname">닉네임</string>
+    <string name="recipe_cat_1">저속노화</string>
+    <string name="recipe_cat_2">종류</string>
+    <string name="recipe_name">제목</string>
+    <string name="recipe_difficult">난이도</string>
+    <string name="recipe_hour">시간</string>
+    <string name="recipe_minute">분</string>
+    <string name="recipe_indeterminate">재료</string>
+    <string name="recipe_seasoning">양념</string>
+    <string name="recipe_step">조리 순서</string>
+    <string name="recipe_tip">팁 / 주의 사항</string>
+    <string name="recipe_tip_context">내용</string>
+    <string name="recipe_comment">댓글</string>
+    <string name="comment_nickname">닉네임</string>
+    <string name="comment_hint">댓글을 입력해주세요</string>
+    <string name="search_populer">인기 검색어</string>
+    <string name="search_recommendation">추천 검색어</string>
+    <string name="comment_date">날짜</string>
+    <string name="step">STEP</string>
+    <string name="bookmark">북마크</string>
+    <string name="chatbot_hint">무엇이든 물어보세요!</string>
+
 </resources>
