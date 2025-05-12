@@ -4,18 +4,17 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageButton
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
-import com.example.elixir.calendar.CalendarFragment
+import com.example.elixir.calendar.ui.CalendarFragment
 import com.example.elixir.challenge.ChallengeFragment
 import com.example.elixir.chatbot.ChatBotActivity
 import com.example.elixir.databinding.ActivityHomeBinding
-import com.example.elixir.recipe.RecipeFragment
+import com.example.elixir.recipe.ui.RecipeFragment
 
 class HomeActivity : AppCompatActivity() {
 

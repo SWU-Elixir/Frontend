@@ -10,17 +10,14 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
-import com.example.elixir.calendar.MealDetailFragment
+import com.example.elixir.calendar.ui.MealDetailFragment
 import com.example.elixir.chatbot.ChatBotActivity
 import com.example.elixir.databinding.ActivityToolbarBinding
 import com.example.elixir.dialog.AlertExitDialog
-import com.example.elixir.dietlog.DietLogFragment
-import com.example.elixir.recipe.RecipeData
-import com.example.elixir.recipe.RecipeFragment
-import com.example.elixir.recipe.RecipeLogFragment
+import com.example.elixir.calendar.ui.DietLogFragment
+import com.example.elixir.recipe.ui.RecipeLogFragment
 import com.example.elixir.signup.CreateAccountFragment
 
 open class ToolbarActivity : AppCompatActivity() {
