@@ -3,7 +3,7 @@ package com.example.elixir.calendar.data
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.example.elixir.calendar.DietLogDto
-import java.time.LocalDateTime
+import org.threeten.bp.LocalDateTime
 
 @Entity(tableName = "diet_table")
 data class DietLogEntity(

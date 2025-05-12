@@ -96,4 +96,7 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
+
+    // LocalDateTime을 위한 라이브러리 추가
+    implementation (libs.threetenabp)
 }
