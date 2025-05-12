@@ -3,6 +3,7 @@ package com.example.elixir.chatbot
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.GridLayoutManager
 import com.example.elixir.R
 import com.example.elixir.databinding.ItemChatExampleListBinding
 import com.example.elixir.databinding.ItemChatTextMessageBinding
@@ -12,7 +13,6 @@ import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayout
 import com.google.android.flexbox.JustifyContent
-import androidx.recyclerview.widget.GridLayoutManager
 
 /**
  * ChatAdapter: 챗봇 메시지와 예시 버튼 리스트를 표시하는 RecyclerView 어댑터
@@ -60,14 +60,14 @@ class ChatAdapter(
             }
             VIEW_TYPE_MEAL_LIST -> {
                 val binding = ItemChatMealListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-                MealListViewHolder(binding) { example ->
-                    onExampleClick(example.title)
+                MealListViewHolder(binding) { meal ->
+                    onExampleClick("${meal.title}에 대한 피드백을 받고 싶습니다.")
                 }
             }
             VIEW_TYPE_RECIPE_LIST -> {
                 val binding = ItemChatMealListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-                RecipeListViewHolder(binding) { example ->
-                    onExampleClick(example.title)
+                RecipeListViewHolder(binding) { recipe ->
+                    onExampleClick("${recipe.title}에 대한 피드백을 받고 싶습니다.")
                 }
             }
             else -> throw IllegalArgumentException("Unknown view type: $viewType")
@@ -170,7 +170,7 @@ class ChatAdapter(
         }
     }
 
-    // 식단 예시 버튼 리스트 ViewHolder
+    // 식단 리스트 ViewHolder
     class MealListViewHolder(
         private val binding: ItemChatMealListBinding,
         private val onMealClick: (ChatMeal) -> Unit
