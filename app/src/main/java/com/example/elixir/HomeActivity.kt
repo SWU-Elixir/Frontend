@@ -121,7 +121,7 @@ class HomeActivity : AppCompatActivity() {
         mypageButton.setOnClickListener {
             savePreviousState()
             updateSelectedButton(mypageButton, mypageTitle)
-            replaceFragment(MypageTestFragment())
+            replaceFragment(MyPageFragment())
         }
     }
 

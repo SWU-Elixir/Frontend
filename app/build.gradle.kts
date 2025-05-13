@@ -97,6 +97,10 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
 
-    // LocalDateTime을 위한 라이브러리 추가
+    // API 23 이하에서 LocalDateTime 타입 변환을 위한 라이브러리 추가
     implementation (libs.threetenabp)
+
+    // Glide 라이브러리 추가
+    implementation(libs.glide)
+    ksp(libs.glide.compiler)
 }

@@ -205,10 +205,17 @@
     <string name="tip_caution">팁/주의사항</string>
     <string name="tip_caution_hint">팁 및 주의사항을 200자 내로 적어주세요.</string>
 
-    <!-- 레시피 -->
+    <!-- 마이페이지 -->
+    <string name="btn_logout"><u>로그아웃</u></string>
+    <string name="follow">팔로우</string>
+    <string name="follower">팔로워</string>
+    <string name="following">팔로잉</string>
+    <string name="modify_profile">프로필 수정</string>
+    <string name="badge">뱃지</string>
+    <string name="my_recipe">내 레시피</string>
+    <string name="my_scrap">내 스크랩</string>
 
     <!-- 네비게이션 -->
-
     <string name="navi_calendar">캘린더</string>
     <string name="navi_recipe">레시피</string>
     <string name="navi_challenge">챌린지</string>
@@ -334,8 +341,6 @@
     <!-- Recipe Detail Fragment Strings -->
     <string name="recipe_time_hour_format">%d시간</string>
     <string name="recipe_time_min_format">%d분</string>
-    <string name="follow">팔로우</string>
-    <string name="following">팔로잉</string>
     <string name="please_enter_comment">댓글을 입력해주세요</string>
 
     <!-- Recipe Step Format -->
