@@ -2,6 +2,7 @@ package com.example.elixir.chatbot
 
 import android.graphics.PorterDuff
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
@@ -49,16 +50,21 @@ class ChatBotActivity : ToolbarActivity() {
     private fun setupRecyclerView() {
         chatAdapter = ChatAdapter(
             chatList = chatList,
-            onExampleClick = { example ->
-                when {
-                    example.endsWith("에 대한 피드백을 받고 싶습니다.") -> {
-                        // 식단이나 레시피 피드백 요청인 경우
-                        sendMessage(example)
+            onExampleClick = { item ->
+                when (item) {
+                    is ChatMeal -> {
+                        // ChatMeal 선택 시 targetId 설정
+                        val requestDto = ChatRequestDto(type = ChatRequestDto.TYPE_DIET_FEEDBACK, targetId = item.id)
+                        addBotMessage("선택된 식단: ${item.title}에 대한 피드백을 요청합니다.", requestDto)
+                        // 추가 로직: API 호출 등
                     }
-                    else -> {
-                        // 일반 예시 버튼 클릭인 경우
-                        handleExampleClick(example)
+                    is ChatRecipe -> {
+                        // ChatRecipe 선택 시 targetId 설정
+                        val requestDto = ChatRequestDto(type = ChatRequestDto.TYPE_RECIPE_FEEDBACK, targetId = item.id)
+                        addBotMessage("선택된 레시피: ${item.title}에 대한 피드백을 요청합니다.", requestDto)
+                        // 추가 로직: API 호출 등
                     }
+                    else -> handleExampleClick(item.toString())  // 기존 문자열 기반 로직 유지
                 }
             }
         )
@@ -84,6 +90,7 @@ class ChatBotActivity : ToolbarActivity() {
                 // 하드코딩된 예시 식단 리스트
                 val mealExamples = listOf(
                     ChatMeal(
+                        id = 1,
                         imageUrl = R.drawable.png_recipe_sample,
                         date = "2024-03-20",
                         title = "아침 식단",
@@ -91,6 +98,7 @@ class ChatBotActivity : ToolbarActivity() {
                         badgeNumber = 1
                     ),
                     ChatMeal(
+                        id = 2,
                         imageUrl = R.drawable.png_recipe_sample,
                         date = "2024-03-20",
                         title = "점심 식단",
@@ -98,6 +106,7 @@ class ChatBotActivity : ToolbarActivity() {
                         badgeNumber = 2
                     ),
                     ChatMeal(
+                        id = 3,
                         imageUrl = R.drawable.png_recipe_sample,
                         date = "2024-03-20",
                         title = "저녁 식단",
@@ -115,16 +124,19 @@ class ChatBotActivity : ToolbarActivity() {
 
                 val recipeExamples = listOf(
                     ChatRecipe(
+                        id = 1,
                         iconResId = R.drawable.png_recipe_sample,
                         title = "흑임자 연근샐러드",
                         subtitle = "연근 / 흑임자 / 식초 / 깨",
                     ),
                     ChatRecipe(
+                        id = 2,
                         iconResId = R.drawable.ic_meal_lunch,
                         title = "닭가슴살 샐러드",
                         subtitle = "닭가슴살 / 채소 / 드레싱",
                     ),
                     ChatRecipe(
+                        id = 3,
                         iconResId = R.drawable.ic_meal_snack,
                         title = "오트밀볼",
                         subtitle = "오트밀 / 우유 / 견과류",
@@ -158,7 +170,17 @@ class ChatBotActivity : ToolbarActivity() {
                 binding.chatRecyclerView.scrollToPosition(chatList.size - 1)
             }
             in listOf("사용함","사용안함") -> {
-                addBotMessage("추가로 원하는 조건이 있다면 입력해 주세요. \n(예: 닭고기 포함, 낮은 칼로리, 없음 등)")
+                // "사용함" 또는 "사용안함"이 클릭되었을 때
+                val includeChallenge = example == "사용함"
+                Log.d("ChatBotActivity", "includeChallengeIngredients set to: $includeChallenge")
+                // 임시적으로 가장 최근에 추가된 ChatItem.ExampleList (기간 선택)의 DTO를 찾아서 업데이트
+                val lastExampleList = chatList.findLast { it is ChatItem.ExampleList } as? ChatItem.ExampleList
+                val requestDtoToUpdate = lastExampleList?.requestDto?.copy(
+                    includeChallengeIngredients = includeChallenge
+                )
+                Log.d("ChatBotActivity", "Updated requestDto: includeChallengeIngredients = ${requestDtoToUpdate?.includeChallengeIngredients}")
+                // 업데이트된 DTO를 다음 챗봇 메시지 ("추가 조건 입력 안내")에 연결
+                addBotMessage("추가로 원하는 조건이 있다면 입력해 주세요. \n(예: 닭고기 포함, 낮은 칼로리, 없음 등)", requestDtoToUpdate)
             }
             else -> {
                 addBotMessage("선택하신 항목: $example")
@@ -180,6 +202,13 @@ class ChatBotActivity : ToolbarActivity() {
         chatAdapter.notifyItemInserted(chatList.size - 1)
         binding.chatRecyclerView.scrollToPosition(chatList.size - 1)
 
+        // 바로 이전 챗봇 메시지를 확인하여 연결된 DTO가 있는지 찾습니다.
+        // 이 DTO는 "추가 조건 입력 안내" 메시지에 연결되어 있을 것으로 예상됩니다.
+        val lastBotMessage = chatList.findLast { it is ChatItem.TextMessage && !it.isFromUser } as? ChatItem.TextMessage
+        val recommendationRequestDto = lastBotMessage?.requestDto?.copy(
+            additionalConditions = message // 사용자의 마지막 메시지를 additionalConditions에 추가Log.d("ChatBotActivity", "Updated requestDto: includeChallengeIngredients = ${requestDtoToUpdate?.includeChallengeIngredients}")
+        )
+
         // 로딩 메시지 추가
         val loadingMessage = "답변을 생성중입니다..."
         chatList.add(ChatItem.TextMessage(loadingMessage, isFromUser = false))
@@ -190,12 +219,18 @@ class ChatBotActivity : ToolbarActivity() {
         // ChatGPT API 호출
         lifecycleScope.launch {
             try {
-                val response = chatGptService.sendMessage(message)
+                // 최종적으로 완성된 DTO (recommendationRequestDto)를 사용하여 API 호출
+                val responseDto = if (recommendationRequestDto != null && recommendationRequestDto.type == ChatRequestDto.TYPE_RECOMMEND) {
+                    // 실제 구현에서는 서버 API에 맞게 ChatRequestDto를 직렬화하여 보내야 함
+                    chatGptService.sendMessage(recommendationRequestDto.additionalConditions ?: "식단 추천 요청")
+                } else {
+                    chatGptService.sendMessage(message) // 일반 대화 메시지 전송
+                }
                 // 로딩 메시지 제거
                 chatList.removeAt(loadingPosition)
                 chatAdapter.notifyItemRemoved(loadingPosition)
                 // 실제 응답 추가
-                chatList.add(ChatItem.TextMessage(response, isFromUser = false))
+                chatList.add(ChatItem.TextMessage(responseDto.message, isFromUser = false))
                 chatAdapter.notifyItemInserted(chatList.size - 1)
                 binding.chatRecyclerView.scrollToPosition(chatList.size - 1)
             } catch (e: Exception) {

@@ -21,7 +21,7 @@ import com.google.android.flexbox.JustifyContent
  */
 class ChatAdapter(
     private val chatList: List<ChatItem>,
-    private val onExampleClick: (String) -> Unit
+    private val onExampleClick: (Any) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
@@ -61,13 +61,13 @@ class ChatAdapter(
             VIEW_TYPE_MEAL_LIST -> {
                 val binding = ItemChatMealListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
                 MealListViewHolder(binding) { meal ->
-                    onExampleClick("${meal.title}에 대한 피드백을 받고 싶습니다.")
+                    onExampleClick(meal)
                 }
             }
             VIEW_TYPE_RECIPE_LIST -> {
                 val binding = ItemChatMealListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
                 RecipeListViewHolder(binding) { recipe ->
-                    onExampleClick("${recipe.title}에 대한 피드백을 받고 싶습니다.")
+                    onExampleClick(recipe)
                 }
             }
             else -> throw IllegalArgumentException("Unknown view type: $viewType")
@@ -109,7 +109,7 @@ class ChatAdapter(
     // 예시 버튼 리스트 ViewHolder
     class ExampleListViewHolder(
         private val binding: ItemChatExampleListBinding,
-        private val onExampleClick: (String) -> Unit
+        private val onExampleClick: (Any) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
         private var selectedIndex: Int = -1
 

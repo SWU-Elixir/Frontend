@@ -27,6 +27,7 @@ sealed class ChatItem {
 }
 
 data class ChatMeal(
+    val id: Long,
     val imageUrl: Int,
     val date: String,
     val title: String,
@@ -37,6 +38,7 @@ data class ChatMeal(
 )
 
 data class ChatRecipe(
+    val id: Long,
     val iconResId: Int, // drawable 리소스 ID
     val title: String,
     val subtitle: String,
