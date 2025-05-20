@@ -1,4 +1,4 @@
-package com.example.elixir.indeterminate
+package com.example.elixir.Ingredient
 
 import android.content.Context
 import android.os.Bundle
@@ -17,16 +17,21 @@ import androidx.fragment.app.Fragment
 import android.content.res.ColorStateList
 import com.example.elixir.R
 import com.example.elixir.databinding.FragmentIndeterminateSearchBinding
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.elixir.signup.RetrofitClient
 
-class IndeterminateSearchFragment : Fragment() {
+class IngredientSearchFragment : Fragment() {
 
     private var _binding: FragmentIndeterminateSearchBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var Adapter: IndeterminateSearchListAdapter
+    private lateinit var viewModel: IngredientViewModel
+    private lateinit var Adapter: IngredientSearchListAdapter
+    private var allIngredients: List<IngredientItem> = emptyList()
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentIndeterminateSearchBinding.inflate(inflater, container, false)
@@ -35,6 +40,43 @@ class IndeterminateSearchFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Room DB, Retrofit, Repository, Service, ViewModel 연결
+        val db = IngredientDB.getInstance(requireContext())
+        val api = RetrofitClient.instanceIngredientApi
+        val repository = IngredientRepository(api, db.ingredientDao())
+        val service = IngredientService(repository)
+        viewModel = IngredientViewModel(service)
+
+        Adapter = IngredientSearchListAdapter(emptyList()) { selectedItem ->
+            // 선택된 식재료를 이전 화면으로 전달
+            val result = Bundle().apply {
+                putInt("ingredientId", selectedItem.id)
+                putString("ingredientName", selectedItem.name)
+                putString("ingredientType", selectedItem.type)
+            }
+            parentFragmentManager.setFragmentResult("ingredient_selection", result)
+            parentFragmentManager.popBackStack()
+        }
+        binding.searchList.adapter = Adapter
+        binding.searchList.layoutManager = LinearLayoutManager(requireContext())
+
+        // 데이터 관찰
+        viewModel.ingredients.observe(viewLifecycleOwner) { items ->
+            allIngredients = items
+            Adapter.updateData(items)
+        }
+
+        // 에러 처리
+        viewModel.error.observe(viewLifecycleOwner) { error ->
+            error?.let {
+                Log.e("YourTag", "데이터 로드 실패: $it")
+                Toast.makeText(requireContext(), "데이터 로드 실패: $it", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        // 데이터 로드
+        viewModel.loadIngredients()
 
         // 텍스트 변경에 따라 검색 버튼 색상 및 삭제 버튼 가시성 제어
         binding.searchEditText.addTextChangedListener(object : TextWatcher {
@@ -83,6 +125,10 @@ class IndeterminateSearchFragment : Fragment() {
         // 삭제 버튼 클릭 시 입력 초기화
         binding.clearButton.setOnClickListener {
             binding.searchEditText.setText("")
+            // 전체 리스트 다시 표시
+            Adapter.updateData(allIngredients)
+            binding.searchList.visibility = View.VISIBLE
+            binding.emptyRecipeText.visibility = View.GONE
         }
 
         // 뒤로 가기 버튼 클릭 시 이전 프래그먼트로 돌아가기
@@ -91,58 +137,26 @@ class IndeterminateSearchFragment : Fragment() {
         }
 
 
-
-        // ------------------------ 검색 어댑터 연결 ------------------------
-        // 챌린지 태그가 제일 위쪽에 보여지게 설정
-        val sortedList = getDummyIndeterminate()
-            .sortedWith(compareByDescending { it.type == "챌린지" })
-
-        Adapter = IndeterminateSearchListAdapter(sortedList)
-        binding.searchList.adapter = Adapter
-
     }
-
-    private fun getDummyIndeterminate(): List<IndeterminateItem> =
-        listOf(
-            IndeterminateItem(
-                id = 1,
-                name = "식재료1",
-                type = "초가공식품"
-            ),
-            IndeterminateItem(
-                id = 2,
-                name = "식재료2",
-                type = "챌린지"
-            ),
-            IndeterminateItem(
-                id = 3,
-                name = "식재료3",
-                type = "null"
-            )
-        )
 
     private fun performSearch() {
         val keyword = binding.searchEditText.text.toString().trim()
-
         if (keyword.isNotEmpty()) {
-            Toast.makeText(requireContext(), "검색어: $keyword", Toast.LENGTH_SHORT).show()
-            Log.d("SearchFragment", "입력된 검색어: $keyword")
-
-            // 결과 적용
-                //Adapter.updateData(filtered)
-
+            val filtered = allIngredients.filter {
+                (it.name?.contains(keyword, ignoreCase = true) == true) ||
+                        (it.type?.contains(keyword, ignoreCase = true) == true)
+            }
+            Adapter.updateData(filtered)
             // 결과 없을 시 안내 텍스트 표시
-//            if (filtered.isEmpty()) {
-//                binding.searchList.visibility = View.GONE
-//                binding.emptyRecipeText.visibility = View.VISIBLE
-//            } else {
-//                binding.searchList.visibility = View.VISIBLE
-//                binding.emptyRecipeText.visibility = View.GONE
-//            }
-
+            if (filtered.isEmpty()) {
+                binding.searchList.visibility = View.GONE
+                binding.emptyRecipeText.visibility = View.VISIBLE
+            } else {
+                binding.searchList.visibility = View.VISIBLE
+                binding.emptyRecipeText.visibility = View.GONE
+            }
         } else {
-            Toast.makeText(requireContext(),
-                getString(R.string.search_put_something), Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), getString(R.string.search_put_something), Toast.LENGTH_SHORT).show()
         }
     }
 

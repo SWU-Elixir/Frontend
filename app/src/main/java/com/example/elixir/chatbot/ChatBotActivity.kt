@@ -271,5 +271,6 @@ class ChatBotActivity : ToolbarActivity() {
     // 챗봇 초기화 (초기화 버튼 클릭 시)
     private fun resetChat() {
         showWelcomeMessage()
+        // 눌러졌던 버튼 초기화
     }
 }
