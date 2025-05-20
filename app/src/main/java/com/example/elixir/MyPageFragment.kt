@@ -8,6 +8,7 @@ import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.elixir.databinding.FragmentMypageBinding
+import com.example.elixir.dialog.LogoutDialog
 
 class MyPageFragment : Fragment() {
 
@@ -76,9 +77,15 @@ class MyPageFragment : Fragment() {
         // 프로필 수정 버튼 클릭 시 회원가입 페이지로 넘어가게
         binding.btnProfileEdit.setOnClickListener {
             val intent = Intent(context, ToolbarActivity::class.java).apply {
-                putExtra("mode", 1)
+                putExtra("mode", 10)
+                putExtra("nickname", "닉네임")
             }
             startActivity(intent)
+        }
+
+        // 로그아웃 버튼
+        binding.btnLogout.setOnClickListener {
+            LogoutDialog(requireActivity()).show()
         }
 
         // 팔로워 클릭 시 팔로워 목록 페이지로 넘어가게

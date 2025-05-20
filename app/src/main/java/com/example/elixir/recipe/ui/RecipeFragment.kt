@@ -1,5 +1,6 @@
 package com.example.elixir.recipe.ui
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -9,6 +10,7 @@ import android.widget.AdapterView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.elixir.R
+import com.example.elixir.ToolbarActivity
 import com.example.elixir.databinding.FragmentRecipeBinding
 import com.example.elixir.recipe.viewmodel.RecipeViewModel
 import com.example.elixir.recipe.data.RecipeData
@@ -60,7 +62,9 @@ class RecipeFragment : Fragment() {
      */
     private fun setupFabClickListener() {
         binding.fab.setOnClickListener {
-            Log.d("CalendarFragment", "FAB 클릭됨")
+            val intent = Intent(requireContext(), ToolbarActivity::class.java)
+            intent.putExtra("mode", 9) // 레시피 등록 모드
+            startActivity(intent)
         }
     }
 

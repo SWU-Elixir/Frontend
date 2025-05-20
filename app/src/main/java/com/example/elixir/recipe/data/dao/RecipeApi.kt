@@ -1,4 +1,4 @@
-package com.example.elixir.calendar.network
+package com.example.elixir.recipe.data.dao
 
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -6,10 +6,10 @@ import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
 
-interface DietLogApi {
+interface RecipeApi {
     @Multipart
-    @POST("/api/diet-log")
-    suspend fun uploadDietLog(
+    @POST("/api/recipe")
+    suspend fun postRecipe(
         @Part("dto") dto: RequestBody,
         @Part image: MultipartBody.Part
     )

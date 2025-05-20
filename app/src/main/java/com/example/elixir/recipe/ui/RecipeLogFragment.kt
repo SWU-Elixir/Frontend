@@ -471,6 +471,7 @@ class RecipeLogFragment : Fragment() {
         recipeBinding.btnWriteRecipe.setOnClickListener {
             if (isAllFieldsValid()) {
                 val saveDialog = SaveDialog(requireActivity()) {
+                    /*
                     val recipeEntity = RecipeEntity(
                         title = recipeTitle,
                         description = recipeDescription,
@@ -479,7 +480,7 @@ class RecipeLogFragment : Fragment() {
                         difficulty = difficulty,
                         timeHours = timeHours,
                         timeMinutes = timeMinutes,
-                        ingredientTagNames = ingredientTags,
+                        ingredientTagIds = ingredientTagIds,
                         ingredients = ingredients.associate { it.name to it.unit },
                         seasoning = seasoning.associate { it.name to it.unit },
                         stepDescriptions = steps.map { it.stepDescription },
@@ -491,7 +492,7 @@ class RecipeLogFragment : Fragment() {
                         updatedAt = System.currentTimeMillis().toString()
                     )
 
-                    recipeViewModel.saveRecipeToDB(recipeEntity)
+                    recipeViewModel.saveRecipeToDB(recipeEntity)*/
                     Toast.makeText(requireContext(), "레시피가 저장되었습니다.", Toast.LENGTH_SHORT).show()
                     requireActivity().finish()
                 }

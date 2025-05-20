@@ -22,10 +22,6 @@
     </style>
 
     <style name="ImgDefault_Rect">
-        <item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay.App.CornerSize</item>
-    </style>
-
-    <style name="ShapeAppearanceOverlay.App.CornerSize" parent="">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">20dp</item>
     </style>

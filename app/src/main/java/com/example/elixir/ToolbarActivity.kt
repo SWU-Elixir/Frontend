@@ -17,8 +17,10 @@ import com.example.elixir.chatbot.ChatBotActivity
 import com.example.elixir.databinding.ActivityToolbarBinding
 import com.example.elixir.dialog.AlertExitDialog
 import com.example.elixir.calendar.ui.DietLogFragment
+import com.example.elixir.recipe.ui.RecipeFragment
 import com.example.elixir.recipe.ui.RecipeLogFragment
 import com.example.elixir.signup.CreateAccountFragment
+import com.example.elixir.signup.SettingProfileFragment
 
 open class ToolbarActivity : AppCompatActivity() {
     // 선언부
@@ -90,14 +92,9 @@ open class ToolbarActivity : AppCompatActivity() {
                 toolBinding.btnBack.setOnClickListener {
                     AlertExitDialog(this).show()
                 }
-                val fragment = RecipeLogFragment().apply {
-                    arguments = Bundle().apply {
-                        //putParcelable("recipeData", recipeData)
-                    }
-                }
 
                 // 레시피 프레그먼트 띄워주기
-                setFragment(fragment)
+                setFragment(RecipeLogFragment())
             }
 
             // 챗봇 모드
@@ -231,20 +228,29 @@ open class ToolbarActivity : AppCompatActivity() {
                 // 내 스크랩 프래그먼트 띄워주기
                 setFragment(MypageFollowListFragment())
             }
+
+            // 프로필 수정 모드
+            10 -> {
+                // 툴바의 제목, 더보기 버튼 안보이게, 작동 x
+                toolBinding.title.visibility = View.INVISIBLE
+                toolBinding.btnMore.visibility = View.INVISIBLE
+
+                // 뒤로가기 버튼을 누르면 로그인 페이지로 돌아가기
+                // 돌아가기 전 다이얼로그 띄우기
+                toolBinding.btnBack.setOnClickListener {
+                    AlertExitDialog(this).show()
+                }
+
+                // 계정 생성 프래그먼트 띄워주기
+                setFragment(SettingProfileFragment())
+            }
         }
     }
 
     // 툴바 아래 올 프래그먼트 설정
-
-
     protected fun setFragment(frag: Fragment) {
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_registration, frag)
             .commit()
-    }
-
-    fun onDietLogCompleted() {
-        setResult(Activity.RESULT_OK)
-        finish()
     }
 }

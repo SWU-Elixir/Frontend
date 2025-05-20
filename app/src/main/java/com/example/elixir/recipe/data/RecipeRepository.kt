@@ -7,7 +7,7 @@ import com.example.elixir.recipe.data.entity.RecipeEntity
 class RecipeRepository(private val recipeDao: RecipeDao) {
 
     suspend fun insertRecipe(recipeEntity: RecipeEntity) {
-        recipeDao.insert(recipeEntity)
+        recipeDao.insertRecipe(recipeEntity)
     }
 
     fun getAllRecipes(): LiveData<List<RecipeEntity>> {

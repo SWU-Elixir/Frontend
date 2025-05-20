@@ -152,6 +152,12 @@
     <string name="poultry">가금류</string>
     <string name="find_ingredient">식재료 검색</string>
 
+    <!-- 식재료 챌린지 - 2월 -->
+    <string name="seasoned_cabbage">봄동</string>
+    <string name="strawberry">딸기</string>
+    <string name="spinach">시금치</string>
+    <string name="almond">아몬드</string>
+
     <!-- 식단 점수 -->
     <string name="diet_score">저속노화에 얼마나 적합한 식단인가요?</string>
     <string name="score_1">1</string>
@@ -207,6 +213,8 @@
 
     <!-- 마이페이지 -->
     <string name="btn_logout"><u>로그아웃</u></string>
+    <string name="logout">로그아웃</string>
+    <string name="logout_message">정말 로그아웃 하시겠습니까?</string>
     <string name="follow">팔로우</string>
     <string name="follower">팔로워</string>
     <string name="following">팔로잉</string>

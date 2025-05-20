@@ -11,8 +11,6 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-
-        <!-- 이미지 -->
         <!-- 이미지 삽입 -->
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/diet_img"
@@ -30,6 +28,7 @@
             app:layout_constraintBottom_toTopOf="@id/time_title"/>
 
         <!--타임 스탬프-->
+        <!--
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -64,7 +63,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"/>
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout> -->
 
         <TextView
             android:id="@+id/time_title"
@@ -291,85 +290,35 @@
             app:layout_constraintTop_toBottomOf="@id/represent_ingredient">
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/ingredient_challenge"
+                android:id="@+id/ingredient_seasoned_cabbage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/ChipStyle_Short"
-                app:chipIcon="@drawable/ic_challenge"
-                app:chipIconVisible="true"
-                android:text="@string/navi_challenge"
-                android:textSize="16sp" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/ingredient_brown_rice"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/ChipStyle_Short"
-                android:text="@string/brown_rice"
+                android:text="@string/seasoned_cabbage"
                 android:textSize="16sp"/>
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/ingredient_bean"
+                android:id="@+id/ingredient_strawberry"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/ChipStyle_Short"
-                android:text="@string/bean"
+                android:text="@string/strawberry"
                 android:textSize="16sp" />
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/ingredient_grain"
+                android:id="@+id/ingredient_spinach"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/ChipStyle_Short"
-                android:text="@string/grain"
+                android:text="@string/spinach"
                 android:textSize="16sp" />
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/ingredient_green_leafy"
+                android:id="@+id/ingredient_almond"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/ChipStyle_Short"
-                android:text="@string/green_leafy"
-                android:textSize="16sp" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/ingredient_berry"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/ChipStyle_Short"
-                android:text="@string/berry"
-                android:textSize="16sp" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/ingredient_nuts"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/ChipStyle_Short"
-                android:text="@string/nuts"
-                android:textSize="16sp" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/ingredient_olive_oil"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/ChipStyle_Short"
-                android:text="@string/olive_oil"
-                android:textSize="16sp" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/ingredient_fish"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/ChipStyle_Short"
-                android:text="@string/fish"
-                android:textSize="16sp" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/ingredient_poultry"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/ChipStyle_Short"
-                android:text="@string/poultry"
+                android:text="@string/almond"
                 android:textSize="16sp" />
 
             <com.google.android.material.chip.Chip

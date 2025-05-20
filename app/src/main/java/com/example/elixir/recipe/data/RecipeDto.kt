@@ -1,8 +1,6 @@
-package com.example.elixir.recipe.network.request
+package com.example.elixir.recipe.data
 
-import okhttp3.MultipartBody
-
-data class RecipeRequest(
+data class RecipeDto(
     val title: String,
     val description: String,
     val categorySlowAging: String,
@@ -10,12 +8,10 @@ data class RecipeRequest(
     val difficulty: String,
     val timeHours: Int,
     val timeMinutes: Int,
-    val ingredientTagNames: List<String>,
+    val ingredientTagIds: List<Int>,
     val ingredients: Map<String, String>,
     val seasoning: Map<String, String>,
     val stepDescriptions: List<String>,
     val tips: String,
-    val allergies: List<String>,
-    val imageUrl: MultipartBody.Part, // 레시피 이미지 URL
-    val stepImageUrls: List<MultipartBody.Part> // 조리 단계 이미지 URL (nullable
+    val allergies: List<String>
 )

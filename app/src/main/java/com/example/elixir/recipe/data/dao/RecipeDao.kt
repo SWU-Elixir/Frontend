@@ -10,7 +10,7 @@ import com.example.elixir.recipe.data.entity.RecipeEntity
 @Dao
 interface RecipeDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(recipeEntity: RecipeEntity)
+    suspend fun insertRecipe(recipeEntity: RecipeEntity)
 
     @Query("SELECT * FROM recipe_table")
     fun getAllRecipes(): LiveData<List<RecipeEntity>>

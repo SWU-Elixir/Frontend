@@ -1,4 +1,4 @@
-package com.example.elixir.calendar
+package com.example.elixir.calendar.data
 
 data class DietLogDto(
     val name: String,

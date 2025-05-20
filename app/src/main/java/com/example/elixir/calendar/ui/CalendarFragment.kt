@@ -161,7 +161,6 @@ class CalendarFragment : Fragment() {
 
         // FAB 클릭 이벤트
         binding.fab.setOnClickListener {
-            Log.d("CalendarFragment", "FAB 클릭됨")
             val intent = Intent(context, ToolbarActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
                 putExtra("mode", 2)
@@ -185,7 +184,7 @@ class CalendarFragment : Fragment() {
 
                 if (intent != null) {
 
-                    Toast.makeText(context, mealPlanData?.name, Toast.LENGTH_SHORT).show()
+                    //Toast.makeText(context, mealPlanData?.name, Toast.LENGTH_SHORT).show()
                     mealPlanData?.let {
                         val selectedDateStr = "%04d-%02d-%02d".format(
                             selectedCalendarDay.year,

@@ -9,17 +9,6 @@ import org.threeten.bp.format.DateTimeFormatter
 
 object DBConverters {
     @TypeConverter
-    fun fromIngredientTagIdList(value: List<Int>): String {
-        return Gson().toJson(value)
-    }
-
-    @TypeConverter
-    fun toIngredientTagIdList(value: String): List<Int> {
-        val listType: Type = object : TypeToken<List<Int>>() {}.type
-        return Gson().fromJson(value, listType)
-    }
-
-    @TypeConverter
     fun fromLocalDateTime(value: LocalDateTime): String {
         return value.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
     }
@@ -30,4 +19,33 @@ object DBConverters {
             LocalDateTime.parse(it, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
         }
     }
+
+    @TypeConverter
+    fun fromMap(map: Map<String, String>?): String {
+        return Gson().toJson(map)
+    }
+
+    @TypeConverter
+    fun toMap(json: String): Map<String, String>? {
+        val type = object : TypeToken<Map<String, String>>() {}.type
+        return Gson().fromJson(json, type)
+    }
+
+    @TypeConverter
+    fun fromList(list: List<String>?): String {
+        return Gson().toJson(list)
+    }
+
+    @TypeConverter
+    fun toList(json: String): List<String>? {
+        val type = object : TypeToken<List<String>>() {}.type
+        return Gson().fromJson(json, type)
+    }
+
+    @TypeConverter
+    fun fromListInt(list: List<Int>): String = list.joinToString(",")
+
+    @TypeConverter
+    fun toListInt(data: String): List<Int> =
+        if (data.isBlank()) emptyList() else data.split(",").map { it.toInt() }
 }
