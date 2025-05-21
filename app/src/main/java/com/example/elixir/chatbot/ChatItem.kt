@@ -1,7 +1,7 @@
 package com.example.elixir.chatbot
 
-import com.example.elixir.calendar.MealPlanData
-import com.example.elixir.recipe.RecipeData
+//import com.example.elixir.calendar.DietLogData
+//import com.example.elixir.recipe.RecipeData
 
 sealed class ChatItem {
     data class TextMessage(
@@ -34,7 +34,7 @@ data class ChatMeal(
     val subtitle: String,
     val badgeNumber: Int,
     // 실제 데이터를 위한 필드 추가
-    val mealData: MealPlanData? = null  // 실제 식단 데이터
+    //val mealData: MealPlanData? = null  // 실제 식단 데이터
 )
 
 data class ChatRecipe(
@@ -43,6 +43,6 @@ data class ChatRecipe(
     val title: String,
     val subtitle: String,
     // 실제 데이터를 위한 필드 추가
-    val recipeData: RecipeData? = null  // 실제 레시피 데이터
+    //val recipeData: RecipeData? = null  // 실제 레시피 데이터
 )
 
