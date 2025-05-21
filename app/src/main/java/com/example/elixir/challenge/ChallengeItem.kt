@@ -9,8 +9,7 @@ data class ChallengeItem(
     val badgeTitle: String,
     val badgeUrl: Int,
 
-    val startDate: String,
-    val endDate: String,
+    val periodDate: String,
     val month: Int,
     val year: Int,
 

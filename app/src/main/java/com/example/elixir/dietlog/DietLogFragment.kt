@@ -4,12 +4,14 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.ContextThemeWrapper
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -20,10 +22,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
+import com.example.elixir.Ingredient.IngredientSearchFragment
 import com.example.elixir.R
 import com.example.elixir.dialog.SelectImgDialog
 import com.example.elixir.ToolbarActivity
 import com.example.elixir.calendar.MealPlanData
+import com.example.elixir.challenge.ChallengeFragment
 import com.example.elixir.databinding.FragmentDietLogBinding
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
@@ -168,6 +172,55 @@ class DietLogFragment : Fragment() {
             }
         })
 
+        // SearchFragment에서 전달된 결과 수신
+        parentFragmentManager.setFragmentResultListener("ingredient_selection", viewLifecycleOwner) { _, bundle ->
+            val name = bundle.getString("ingredientName") ?: return@setFragmentResultListener
+
+            val chipChallenge = dietLogBinding.ingredientChallenge
+            val findIngredientChip = dietLogBinding.findIngredient
+
+            // 중복 방지
+            if (ingredientTags.contains(name)) {
+                Toast.makeText(requireContext(), "이미 추가된 재료입니다.", Toast.LENGTH_SHORT).show()
+                return@setFragmentResultListener
+            }
+
+            // 일반 태그 개수 제한 (챌린지 제외)
+            val normalTagCount = ingredientTags.count { it != chipChallenge.text.toString() }
+            if (normalTagCount >= 5) {
+                Toast.makeText(requireContext(), "일반 재료는 최대 5개까지만 선택할 수 있습니다.", Toast.LENGTH_SHORT).show()
+                return@setFragmentResultListener
+            }
+
+            // 칩 생성 및 추가
+            val chip = com.google.android.material.chip.Chip(
+                ContextThemeWrapper(requireContext(), R.style.ChipStyle_Short)
+            ).apply {
+                text = name
+                isClickable = true
+                isCheckable = false
+                isCloseIconVisible = false
+                chipBackgroundColor = ColorStateList.valueOf(
+                    ContextCompat.getColor(context, R.color.elixir_orange)
+                )
+                setTextColor(ContextCompat.getColor(context, R.color.white))
+
+                setOnClickListener {
+                    ingredientTags.remove(name)
+                    dietLogBinding.tagsIngredient.removeView(this)
+                    checkAllValid()
+                }
+            }
+
+            // findIngredient Chip 앞에 삽입
+            val index = dietLogBinding.tagsIngredient.indexOfChild(findIngredientChip)
+            dietLogBinding.tagsIngredient.addView(chip, index)
+
+            // 리스트에 추가
+            ingredientTags.add(name)
+            checkAllValid()
+        }
+
         // 식재료 태그 선택
         with(dietLogBinding) {
             // 일반 칩 리스트
@@ -178,6 +231,7 @@ class DietLogFragment : Fragment() {
 
             // 챌린지 칩
             val chipChallenge = ingredientChallenge
+            val chipFind = findIngredient
 
             chipList.forEach { chip ->
                 chip.setOnCheckedChangeListener { _, isChecked ->
@@ -185,29 +239,41 @@ class DietLogFragment : Fragment() {
 
                     if (isChecked) {
                         if (chip != chipChallenge) {
-                            // 일반 칩이면 5개 제한 체크
+                            // 일반 칩이면 5개 제한 체크 (챌린지 칩 제외)
                             val normalTagCount = ingredientTags.count { it != chipChallenge.text.toString() }
                             if (normalTagCount >= 5) {
                                 chip.isChecked = false
                                 Toast.makeText(requireContext(), "일반 재료는 최대 5개까지만 선택할 수 있습니다.", Toast.LENGTH_SHORT).show()
                                 return@setOnCheckedChangeListener
                             }
-
-                            checkAllValid()
                         }
 
                         // 추가 (챌린지든 일반이든)
                         if (!ingredientTags.contains(tagText)) {
                             ingredientTags.add(tagText)
-
                             checkAllValid()
                         }
                     } else {
                         // 체크 해제: 무조건 제거
                         ingredientTags.remove(tagText)
+                        checkAllValid()
                     }
-                    checkAllValid()
                 }
+            }
+
+            chipFind.setOnClickListener {
+                // 일반 칩 개수 체크 (챌린지 칩 제외)
+                val normalTagCount = ingredientTags.count { it != chipChallenge.text.toString() }
+                if (normalTagCount >= 5) {
+                    Toast.makeText(requireContext(), "일반 재료는 최대 5개까지만 선택할 수 있습니다.", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+
+                val searchFragment = IngredientSearchFragment()
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.fragmentContainer, searchFragment)
+                    .addToBackStack(null)
+                    .commit()
             }
         }
 

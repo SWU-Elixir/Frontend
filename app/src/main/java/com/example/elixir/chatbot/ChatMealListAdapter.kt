@@ -1,8 +1,10 @@
 package com.example.elixir.chatbot
 
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.elixir.R
 import com.example.elixir.databinding.ItemChatMealBinding
 
 class ChatMealListAdapter(
@@ -14,7 +16,7 @@ class ChatMealListAdapter(
 
     inner class ViewHolder(val binding: ItemChatMealBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: ChatMeal, position: Int) {
-            binding.icon.setImageResource(item.iconResId)
+            binding.icon.setImageResource(item.imageUrl)
             binding.date.text = item.date
             binding.title.text = item.title
             binding.subtitle.text = item.subtitle

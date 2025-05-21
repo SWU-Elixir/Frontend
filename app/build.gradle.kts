@@ -1,8 +1,19 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.ksp)
+}
+
+// local.properties 파일에서 API 키 로드
+val properties = Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        load(FileInputStream(localPropertiesFile))
+    }
 }
 
 android {
@@ -25,6 +36,9 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        // API 키 설정
+        buildConfigField("String", "CHATGPT_API_KEY", "\"${properties.getProperty("CHATGPT_API_KEY", "")}\"")
     }
 
     buildTypes {
@@ -46,6 +60,7 @@ android {
     buildFeatures {
         compose = true
         viewBinding = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -96,4 +111,7 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
+
+    // OkHttp
+    implementation (libs.okhttp)
 }
