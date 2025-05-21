@@ -52,17 +52,11 @@ class ChallengeFragment : Fragment() {
         // 데이터 관찰
         viewModel.challenges.observe(viewLifecycleOwner) { challenges ->
             if (challenges.isNotEmpty()) {
-                val challengeTitles = challenges.map { it.name }
-                val spinnerAdapter = ArrayAdapter(
-                    requireContext(),
-                    R.layout.item_challenge_spinner,
-                    challengeTitles
-                )
-                spinnerAdapter.setDropDownViewResource(R.layout.item_challenge_spinner_dropdown)
-                binding.challengeSpinner.adapter = spinnerAdapter
-
+                Log.d("ChallengeFragment", "챌린지 데이터 업데이트: ${challenges.size}개")
+                
                 // 챌린지 목록이 로드된 경우 (연도별 조회)
                 if (challenges.size > 1) {
+                    Log.d("ChallengeFragment", "연도별 챌린지 목록 표시")
                     val challengeTitles = challenges.map { it.name }
                     val spinnerAdapter = ArrayAdapter(
                         requireContext(),
@@ -72,15 +66,11 @@ class ChallengeFragment : Fragment() {
                     spinnerAdapter.setDropDownViewResource(R.layout.item_challenge_spinner_dropdown)
                     binding.challengeSpinner.adapter = spinnerAdapter
 
-                    // 첫 번째 챌린지로 초기화
-                    if (challenges[0].id > 0) {
-                        viewModel.loadChallengesById(challenges[0].id)
-                    }
-
                     // Spinner 선택 이벤트 처리
                     binding.challengeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                         override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                             val selectedChallenge = challenges[position]
+                            Log.d("ChallengeFragment", "스피너 선택: ${selectedChallenge.name} (id: ${selectedChallenge.id})")
                             if (selectedChallenge.id > 0) {
                                 viewModel.loadChallengesById(selectedChallenge.id)
                             }
@@ -91,6 +81,7 @@ class ChallengeFragment : Fragment() {
                 }
                 // 챌린지 상세 정보가 로드된 경우 (ID로 조회)
                 else {
+                    Log.d("ChallengeFragment", "챌린지 상세 정보 표시")
                     updateChallenge(challenges[0])
                 }
             }
@@ -104,17 +95,23 @@ class ChallengeFragment : Fragment() {
             }
         }
 
+        // 초기 데이터 로드
         val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+        Log.d("ChallengeFragment", "현재 연도($currentYear)의 챌린지 목록 로드 시작")
         viewModel.loadChallengesByYear(currentYear)
     }
 
     // 챌린지에 맞게 리스트와 UI 갱신
     private fun updateChallenge(challenge: ChallengeEntity) {
+        Log.d("ChallengeFragment", "UI 업데이트 시작: ${challenge.name}")
+        
         // 현재 스테이지 계산
         val currentStage = calculateCurrentStage(challenge)
+        Log.d("ChallengeFragment", "현재 스테이지: $currentStage")
 
         // 스테이지 목표 목록 생성
         val stageGoals = createStageGoalsList(challenge)
+        Log.d("ChallengeFragment", "스테이지 목표 생성 완료: ${stageGoals.size}개")
 
         // 단계 리스트 뷰 어댑터 갱신
         stageAdapter = ChallengeStageListAdapter(requireContext(), stageGoals, currentStage)
@@ -144,6 +141,7 @@ class ChallengeFragment : Fragment() {
 
         // 모든 스테이지 완료 시 다이얼로그 표시
         if (challenge.challengeCompleted) {
+            Log.d("ChallengeFragment", "챌린지 완료 다이얼로그 표시")
             showCompletionDialog(challenge.achievementName ?: "")
         }
     }
@@ -168,7 +166,6 @@ class ChallengeFragment : Fragment() {
     // ChallengeEntity에서 StageItem 목록 생성
     private fun createStageGoalsList(challenge: ChallengeEntity): MutableList<StageItem> {
         val stageGoals = mutableListOf<StageItem>()
-        //viewModel.loadChallengesById(challenge.id)
 
         // Stage 1
         stageGoals.add(StageItem(
@@ -271,7 +268,6 @@ class ChallengeFragment : Fragment() {
 
         dialogBinding.dialogTitle.text = getString(R.string.challenge_completion_title)
         dialogBinding.dialogMessage.text = getString(R.string.challenge_completion_message, title)
-        // 수정 필요
         dialogBinding.dialogImage.setImageResource(R.drawable.png_badge)
 
         val alertDialog = android.app.AlertDialog.Builder(requireContext())

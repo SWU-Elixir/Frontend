@@ -13,7 +13,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 object RetrofitClient {
     // 서버 주소
     private const val BASE_URL = "https://port-0-elixir-backend-g0424l70py8py.gksl2.cloudtype.app/"
-    private var authToken: String? = null // Bearer 토큰을 저장할 변수
+    private var authToken: String? = "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJ6ZW4iLCJhdXRoIjoiVVNFUiIsImV4cCI6MTc0NzgxNjQyOX0.Tl1hmkBxofBxFCYyjXgV7xNvoKg4fD32yHEUHNlxytkz20wYtXVWbOiH-nxv9W0B" // Bearer 토큰을 저장할 변수
 
     fun setAuthToken(token: String) {
         authToken = token

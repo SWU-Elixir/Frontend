@@ -1,9 +1,9 @@
 package com.example.elixir.challenge
 
 class ChallengeService(private val repository: ChallengeRepository) {
-    suspend fun getAllChallenges(): List<ChallengeEntity> {
-        return repository.fetchAndSaveChallenges()
-    }
+//    suspend fun getAllChallenges(): List<ChallengeEntity> {
+//        return repository.fetchAndSaveChallenges()
+//    }
 
     suspend fun getChallengesByYear(year: Int): List<ChallengeEntity> {
         return repository.fetchAndSaveChallengesByYear(year)
@@ -21,8 +21,8 @@ class ChallengeService(private val repository: ChallengeRepository) {
         return repository.fetchChallengeProgress(challengeId)
     }
 
-    suspend fun getChallengeCompletion(challengeId: Int): List<ChallengeEntity> {
-        return repository.fetchChallengeCompletion(challengeId)
-    }
+//    suspend fun getChallengeCompletion(challengeId: Int): List<ChallengeEntity> {
+//        return repository.fetchChallengeCompletion(challengeId)
+//    }
 }
 
