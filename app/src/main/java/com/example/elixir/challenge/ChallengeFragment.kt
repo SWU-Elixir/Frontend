@@ -61,17 +61,37 @@ class ChallengeFragment : Fragment() {
                 spinnerAdapter.setDropDownViewResource(R.layout.item_challenge_spinner_dropdown)
                 binding.challengeSpinner.adapter = spinnerAdapter
 
-                // 첫 번째 챌린지로 초기화
-                updateChallenge(challenges[0])
+                // 챌린지 목록이 로드된 경우 (연도별 조회)
+                if (challenges.size > 1) {
+                    val challengeTitles = challenges.map { it.name }
+                    val spinnerAdapter = ArrayAdapter(
+                        requireContext(),
+                        R.layout.item_challenge_spinner,
+                        challengeTitles
+                    )
+                    spinnerAdapter.setDropDownViewResource(R.layout.item_challenge_spinner_dropdown)
+                    binding.challengeSpinner.adapter = spinnerAdapter
 
-                // Spinner 선택 이벤트 처리
-                binding.challengeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                    override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                        val selectedChallenge = challenges[position]
-                        updateChallenge(selectedChallenge)
+                    // 첫 번째 챌린지로 초기화
+                    if (challenges[0].id > 0) {
+                        viewModel.loadChallengesById(challenges[0].id)
                     }
 
-                    override fun onNothingSelected(parent: AdapterView<*>) {}
+                    // Spinner 선택 이벤트 처리
+                    binding.challengeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                        override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                            val selectedChallenge = challenges[position]
+                            if (selectedChallenge.id > 0) {
+                                viewModel.loadChallengesById(selectedChallenge.id)
+                            }
+                        }
+
+                        override fun onNothingSelected(parent: AdapterView<*>) {}
+                    }
+                }
+                // 챌린지 상세 정보가 로드된 경우 (ID로 조회)
+                else {
+                    updateChallenge(challenges[0])
                 }
             }
         }
@@ -90,13 +110,9 @@ class ChallengeFragment : Fragment() {
 
     // 챌린지에 맞게 리스트와 UI 갱신
     private fun updateChallenge(challenge: ChallengeEntity) {
-        // 진행 상황과 완료 상태 가져오기
-        viewModel.loadChallengeProgress(challenge.id)
-        viewModel.loadChallengeCompletion(challenge.id)
-
         // 현재 스테이지 계산
         val currentStage = calculateCurrentStage(challenge)
-        
+
         // 스테이지 목표 목록 생성
         val stageGoals = createStageGoalsList(challenge)
 
@@ -121,18 +137,15 @@ class ChallengeFragment : Fragment() {
             challengeTitleText.text = challenge.name
             challengePeriodText.text = challenge.period ?: ""
             challengeSub1.text = getString(R.string.challenge_sub1_format, challenge.name)
-            challengeGoalText.text = challenge.purpose
-            challengeDescriptionText.text = challenge.description
-            challengeSub2.text = getString(R.string.challenge_sub2_format, challenge.name, challenge.achievementName)
+            challengeGoalText.text = challenge.purpose ?: ""
+            challengeDescriptionText.text = challenge.description ?: ""
+            challengeSub2.text = getString(R.string.challenge_sub2_format, challenge.name, challenge.achievementName ?: "")
         }
 
         // 모든 스테이지 완료 시 다이얼로그 표시
         if (challenge.challengeCompleted) {
-            showCompletionDialog(challenge.achievementName)
+            showCompletionDialog(challenge.achievementName ?: "")
         }
-
-        // 챌린지 데이터 업데이트 요청
-        viewModel.updateChallenge(challenge)
     }
 
     // 클리어된 단계 수에 따라 현재 스테이지 계산
@@ -155,14 +168,15 @@ class ChallengeFragment : Fragment() {
     // ChallengeEntity에서 StageItem 목록 생성
     private fun createStageGoalsList(challenge: ChallengeEntity): MutableList<StageItem> {
         val stageGoals = mutableListOf<StageItem>()
-        
+        //viewModel.loadChallengesById(challenge.id)
+
         // Stage 1
         stageGoals.add(StageItem(
             id = BigInteger.valueOf(1),
             challengeId = BigInteger.valueOf(challenge.id.toLong()),
             stepNumber = 1,
             stepName = challenge.step1Goal1Desc,
-            stepType = challenge.step1Goal1Type,
+            stepType = challenge.step1Goal1Type ?: "",
             progressDate = "",
             isComplete = challenge.step1Goal1Achieved
         ))
@@ -170,11 +184,12 @@ class ChallengeFragment : Fragment() {
             id = BigInteger.valueOf(2),
             challengeId = BigInteger.valueOf(challenge.id.toLong()),
             stepNumber = 1,
-            stepName = challenge.step1Goal2Desc,
-            stepType = challenge.step1Goal2Type,
+            stepName = challenge.step1Goal2Desc ?: "",
+            stepType = challenge.step1Goal2Type ?: "",
             progressDate = "",
             isComplete = challenge.step1Goal2Achieved
         ))
+        Log.d("ChallengeFragment", "Stage 1 goals: $stageGoals")
 
         // Stage 2
         if (challenge.step2Goal1Active) {
@@ -182,8 +197,8 @@ class ChallengeFragment : Fragment() {
                 id = BigInteger.valueOf(3),
                 challengeId = BigInteger.valueOf(challenge.id.toLong()),
                 stepNumber = 2,
-                stepName = challenge.step2Goal1Desc,
-                stepType = challenge.step2Goal1Type,
+                stepName = challenge.step2Goal1Desc ?: "",
+                stepType = challenge.step2Goal1Type ?: "",
                 progressDate = "",
                 isComplete = challenge.step2Goal1Achieved
             ))
@@ -193,8 +208,8 @@ class ChallengeFragment : Fragment() {
                 id = BigInteger.valueOf(4),
                 challengeId = BigInteger.valueOf(challenge.id.toLong()),
                 stepNumber = 2,
-                stepName = challenge.step2Goal2Desc,
-                stepType = challenge.step2Goal2Type,
+                stepName = challenge.step2Goal2Desc ?: "",
+                stepType = challenge.step2Goal2Type ?: "",
                 progressDate = "",
                 isComplete = challenge.step2Goal2Achieved
             ))
@@ -206,8 +221,8 @@ class ChallengeFragment : Fragment() {
                 id = BigInteger.valueOf(5),
                 challengeId = BigInteger.valueOf(challenge.id.toLong()),
                 stepNumber = 3,
-                stepName = challenge.step3Goal1Desc,
-                stepType = challenge.step3Goal1Type,
+                stepName = challenge.step3Goal1Desc ?: "",
+                stepType = challenge.step3Goal1Type ?: "",
                 progressDate = "",
                 isComplete = challenge.step3Goal1Achieved
             ))
@@ -217,8 +232,8 @@ class ChallengeFragment : Fragment() {
                 id = BigInteger.valueOf(6),
                 challengeId = BigInteger.valueOf(challenge.id.toLong()),
                 stepNumber = 3,
-                stepName = challenge.step3Goal2Desc,
-                stepType = challenge.step3Goal2Type,
+                stepName = challenge.step3Goal2Desc ?: "",
+                stepType = challenge.step3Goal2Type ?: "",
                 progressDate = "",
                 isComplete = challenge.step3Goal2Achieved
             ))
@@ -230,8 +245,8 @@ class ChallengeFragment : Fragment() {
                 id = BigInteger.valueOf(7),
                 challengeId = BigInteger.valueOf(challenge.id.toLong()),
                 stepNumber = 4,
-                stepName = challenge.step4Goal1Desc,
-                stepType = challenge.step4Goal1Type,
+                stepName = challenge.step4Goal1Desc ?: "",
+                stepType = challenge.step4Goal1Type ?: "",
                 progressDate = "",
                 isComplete = challenge.step4Goal1Achieved
             ))
@@ -241,8 +256,8 @@ class ChallengeFragment : Fragment() {
                 id = BigInteger.valueOf(8),
                 challengeId = BigInteger.valueOf(challenge.id.toLong()),
                 stepNumber = 4,
-                stepName = challenge.step4Goal2Desc,
-                stepType = challenge.step4Goal2Type,
+                stepName = challenge.step4Goal2Desc ?: "",
+                stepType = challenge.step4Goal2Type ?: "",
                 progressDate = "",
                 isComplete = challenge.step4Goal2Achieved
             ))
@@ -253,9 +268,10 @@ class ChallengeFragment : Fragment() {
 
     private fun showCompletionDialog(title: String) {
         val dialogBinding = DialogChallengeCompletedBinding.inflate(layoutInflater)
-        
+
         dialogBinding.dialogTitle.text = getString(R.string.challenge_completion_title)
         dialogBinding.dialogMessage.text = getString(R.string.challenge_completion_message, title)
+        // 수정 필요
         dialogBinding.dialogImage.setImageResource(R.drawable.png_badge)
 
         val alertDialog = android.app.AlertDialog.Builder(requireContext())

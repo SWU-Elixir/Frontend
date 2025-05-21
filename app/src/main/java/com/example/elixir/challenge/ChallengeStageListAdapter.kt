@@ -41,11 +41,11 @@ class ChallengeStageListAdapter(
 
         // 스테이지 번호와 미션 내용 설정
         binding.challengeStage.text = context.getString(R.string.challenge_step, item.stepNumber)
-        binding.challengeMission.text = item.stepName
+        binding.challengeMission.text = item.stepName ?: ""
 
         // 스테이지 타입에 따른 아이콘 설정
         val iconRes = when (item.stepType) {
-            "Meal_Record" -> R.drawable.ic_challenge_meal_record
+            "식단기록" -> R.drawable.ic_challenge_meal_record
             "Meal_Time" -> R.drawable.ic_challenge_meal_time
             "Recipe_Upload" -> R.drawable.ic_challenge_recipe_upload
             "Other" -> R.drawable.ic_challenge_other

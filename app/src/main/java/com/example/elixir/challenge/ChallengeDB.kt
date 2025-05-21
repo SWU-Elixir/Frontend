@@ -25,7 +25,9 @@ abstract class ChallengeDB : RoomDatabase() {
                     context.applicationContext,
                     ChallengeDB::class.java,
                     "challenge_database"
-                ).build()
+                )
+                .fallbackToDestructiveMigration()
+                .build()
                 INSTANCE = instance
                 instance
             }

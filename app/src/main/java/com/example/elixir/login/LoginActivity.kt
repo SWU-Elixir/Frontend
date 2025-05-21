@@ -41,18 +41,10 @@ class LoginActivity : AppCompatActivity() {
             val email = loginBinding.enterEmail.text.toString()
             val password = loginBinding.enterPw.text.toString()
 
-            //login(email, password)
-
-            // 로그인 성공 시 현재 액티비티를 종료하고 홈 액티비티를 실행
-            if (checkLogin(email, password)) {
-                Toast.makeText(this, "로그인 성공!", Toast.LENGTH_SHORT).show()
-                val intent = Intent(this, HomeActivity::class.java)
-                startActivity(intent)
-                finish()
-            }
-
-            else {
-                loginBinding.errorLogin.text = "이메일이나 비밀번호가 일치하지 않습니다."
+            if (email.isNotEmpty() && password.isNotEmpty()) {
+                login(email, password)
+            } else {
+                loginBinding.errorLogin.text = "이메일과 비밀번호를 입력해주세요."
                 loginBinding.errorLogin.visibility = View.VISIBLE
             }
         }
@@ -80,8 +72,21 @@ class LoginActivity : AppCompatActivity() {
             .apply()
     }
 
-    // 로그인 성공 시
-    private fun login(email: String, password: String){
+    //login(email, password)
+
+    // 로그인 성공 시 현재 액티비티를 종료하고 홈 액티비티를 실행
+//    if (checkLogin(email, password)) {
+//        Toast.makeText(this, "로그인 성공!", Toast.LENGTH_SHORT).show()
+//        val intent = Intent(this, HomeActivity::class.java)
+//        startActivity(intent)
+//        finish()
+//    }
+//
+//    else {
+//        loginBinding.errorLogin.text = "이메일이나 비밀번호가 일치하지 않습니다."
+
+        // 로그인 성공 시
+    private fun login(email: String, password: String) {
         val request = LoginRequest(email, password)
 
         RetrofitClient.instance.login(request).enqueue(object : retrofit2.Callback<LoginResponse> {
@@ -91,22 +96,32 @@ class LoginActivity : AppCompatActivity() {
             ) {
                 if (response.isSuccessful) {
                     val result = response.body()
-                    Toast.makeText(
-                        this@LoginActivity,
-                        "Login success : status: ${result?.status}, message: ${result?.message}",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    if (result?.status == 200) {
+                        // 토큰 저장
+                        result.token?.let { token ->
+                            RetrofitClient.setAuthToken(token)
+                        }
+                        
+                        // 자동 로그인 정보 저장
+                        saveAutoLogin(email, password)
+                        
+                        Toast.makeText(this@LoginActivity, "로그인 성공!", Toast.LENGTH_SHORT).show()
+                        val intent = Intent(this@LoginActivity, HomeActivity::class.java)
+                        startActivity(intent)
+                        finish()
+                    } else {
+                        loginBinding.errorLogin.text = result?.message ?: "로그인에 실패했습니다."
+                        loginBinding.errorLogin.visibility = View.VISIBLE
+                    }
                 } else {
-                    Toast.makeText(
-                        this@LoginActivity,
-                        "LoginError : Code: ${response.code()} - ${response.errorBody()?.string()}",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    loginBinding.errorLogin.text = "서버 오류가 발생했습니다."
+                    loginBinding.errorLogin.visibility = View.VISIBLE
                 }
             }
 
             override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
-                Toast.makeText(this@LoginActivity, "LoginFailure : Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                loginBinding.errorLogin.text = "네트워크 오류가 발생했습니다."
+                loginBinding.errorLogin.visibility = View.VISIBLE
             }
         })
     }
