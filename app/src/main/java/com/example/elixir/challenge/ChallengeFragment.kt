@@ -11,8 +11,6 @@ import androidx.fragment.app.Fragment
 import com.example.elixir.databinding.FragmentChallengeBinding
 import com.example.elixir.databinding.DialogChallengeCompletedBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.LinearLayoutManager
 import android.widget.Toast
 import java.util.Calendar
 import com.example.elixir.signup.RetrofitClient
@@ -92,6 +90,10 @@ class ChallengeFragment : Fragment() {
 
     // 챌린지에 맞게 리스트와 UI 갱신
     private fun updateChallenge(challenge: ChallengeEntity) {
+        // 진행 상황과 완료 상태 가져오기
+        viewModel.loadChallengeProgress(challenge.id)
+        viewModel.loadChallengeCompletion(challenge.id)
+
         // 현재 스테이지 계산
         val currentStage = calculateCurrentStage(challenge)
         
@@ -101,7 +103,6 @@ class ChallengeFragment : Fragment() {
         // 단계 리스트 뷰 어댑터 갱신
         stageAdapter = ChallengeStageListAdapter(requireContext(), stageGoals, currentStage)
         binding.challengeStageList.apply {
-            //layoutManager = LinearLayoutManager(context)
             adapter = stageAdapter
         }
 

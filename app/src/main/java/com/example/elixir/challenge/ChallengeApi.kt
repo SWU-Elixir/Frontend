@@ -13,4 +13,9 @@ interface ChallengeApi {
     @GET("/api/challenge/year/{year}")
     suspend fun getChallengesByYear(@Path("year") year: Int): ChallengeResponse
 
+    @GET("/api/challenge/progress/{challengeId}")
+    suspend fun getChallengeProgress(@Path("challengeId") challengeId: Int): ChallengeResponse
+
+    @GET("/api/challenge/completion/{challengeId}")
+    suspend fun getChallengeCompletion(@Path("challengeId") challengeId: Int): ChallengeResponse
 }

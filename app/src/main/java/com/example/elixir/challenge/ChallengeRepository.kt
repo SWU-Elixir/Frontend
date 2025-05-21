@@ -1,13 +1,6 @@
 package com.example.elixir.challenge
 
 import android.util.Log
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
-import okhttp3.MultipartBody
-import okhttp3.RequestBody
-import java.io.File
-import com.google.gson.Gson
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
 
 class ChallengeRepository(
     private val api: ChallengeApi,
@@ -43,6 +36,21 @@ class ChallengeRepository(
         }
     }
 
+    suspend fun fetchAndSaveChallengeById(id: Int): List<ChallengeEntity> {
+        return try {
+            val response = api.getChallengeById(id)
+            if (response.status == 200) {
+                challengeDao.insertChallenges(response.data)
+                response.data
+            } else {
+                throw Exception("챌린지 연도 API 실패: ${response.message}")
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return getChallengeByIdFromDb(id)
+        }
+    }
+
     suspend fun getChallengesFromDb(): List<ChallengeEntity> {
         return try {
             challengeDao.getAllChallenges()
@@ -61,11 +69,50 @@ class ChallengeRepository(
         }
     }
 
+    suspend fun getChallengeByIdFromDb(id: Int): List<ChallengeEntity> {
+        return try {
+            challengeDao.getChallengeById(id)
+        } catch (e: Exception) {
+            Log.e("ChallengeRepository", "DB 조회 실패", e)
+            emptyList()
+        }
+    }
+
     suspend fun updateChallenge(challenge: ChallengeEntity) {
         try {
             challengeDao.updateChallenge(challenge)
         } catch (e: Exception) {
             Log.e("ChallengeRepository", "챌린지 업데이트 실패", e)
+        }
+    }
+
+    suspend fun fetchChallengeProgress(challengeId: Int): List<ChallengeEntity> {
+        return try {
+            val response = api.getChallengeProgress(challengeId)
+            if (response.status == 200) {
+                challengeDao.insertChallenges(response.data)
+                response.data
+            } else {
+                throw Exception("챌린지 진행상황 API 실패: ${response.message}")
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return getChallengeByIdFromDb(challengeId)
+        }
+    }
+
+    suspend fun fetchChallengeCompletion(challengeId: Int): List<ChallengeEntity> {
+        return try {
+            val response = api.getChallengeCompletion(challengeId)
+            if (response.status == 200) {
+                challengeDao.insertChallenges(response.data)
+                response.data
+            } else {
+                throw Exception("챌린지 완료상태 API 실패: ${response.message}")
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return getChallengeByIdFromDb(challengeId)
         }
     }
 }

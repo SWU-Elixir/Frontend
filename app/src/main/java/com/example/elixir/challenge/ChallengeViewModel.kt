@@ -37,6 +37,17 @@ class ChallengeViewModel(
         }
     }
 
+    fun loadChallengesById(id: Int) {
+        viewModelScope.launch {
+            try {
+                val result = service.getChallengeById(id)
+                _challenges.value = result
+            } catch (e: Exception) {
+                _error.value = e.message
+            }
+        }
+    }
+
     fun updateChallenge(challenge: ChallengeEntity) {
         viewModelScope.launch {
             try {
@@ -51,6 +62,28 @@ class ChallengeViewModel(
 
     fun clearError() {
         _error.value = null
+    }
+
+    fun loadChallengeProgress(challengeId: Int) {
+        viewModelScope.launch {
+            try {
+                val result = service.getChallengeProgress(challengeId)
+                _challenges.value = result
+            } catch (e: Exception) {
+                _error.value = e.message
+            }
+        }
+    }
+
+    fun loadChallengeCompletion(challengeId: Int) {
+        viewModelScope.launch {
+            try {
+                val result = service.getChallengeCompletion(challengeId)
+                _challenges.value = result
+            } catch (e: Exception) {
+                _error.value = e.message
+            }
+        }
     }
 }
 
