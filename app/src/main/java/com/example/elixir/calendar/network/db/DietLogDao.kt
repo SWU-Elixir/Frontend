@@ -1,5 +1,6 @@
 package com.example.elixir.calendar.network.db
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -25,6 +26,9 @@ interface DietLogDao {
     // 전체 식단 기록 가져오기
     @Query("SELECT * FROM diet_table")
     suspend fun getAllDietLogs(): List<DietLogEntity>
+
+    @Query("SELECT * FROM diet_table WHERE date(time) = :date")
+    fun getDietLogsByDate(date: String): LiveData<List<DietLogEntity>>
 
     // 식단 기록 가져오기 (날짜 기준)
     //@Query("SELECT * FROM diet_table WHERE time == :time")

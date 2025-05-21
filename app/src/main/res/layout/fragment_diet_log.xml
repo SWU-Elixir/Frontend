@@ -14,7 +14,6 @@
         <!-- 이미지 삽입 -->
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/diet_img"
-            style="@style/ImgDefault_Rect"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:adjustViewBounds="true"

@@ -28,11 +28,14 @@ import com.example.elixir.dialog.SaveDialog
 import com.example.elixir.network.AppDatabase
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
+import com.google.gson.Gson
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.LocalTime
 import org.threeten.bp.ZoneId
 import org.threeten.bp.format.DateTimeFormatter
 import org.threeten.bp.Instant
+import java.io.File
+import java.io.FileOutputStream
 import java.util.Locale
 
 class DietLogFragment : Fragment() {
@@ -224,10 +227,12 @@ class DietLogFragment : Fragment() {
                     dietImg = dietImg
                 )
                 dietLogViewModel.saveDietLogDB(dietLogData)
+                val dietLogDataJson = Gson().toJson(dietLogData)
 
                 // 식단 기록 완료 후 메인 화면으로 이동
                 val intent = Intent().apply {
                     putExtra("mode", 0) // 메인 화면으로 이동
+                    putExtra("dietLogData", dietLogDataJson)
                 }
 
                 requireActivity().setResult(Activity.RESULT_OK, intent)
@@ -243,41 +248,37 @@ class DietLogFragment : Fragment() {
 
     // 이미지 설정
     private fun setImg() {
-        // 이미지 피커 선언 (PickVisualMedia)
         val imgSelector = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
             uri?.let {
-                // 이미지 설정
-                dietLogBinding.dietImg.setImageURI(uri)
-                dietImg = uri.toString()
+                // 1. 내부 캐시에 복사
+                val copiedUri = copyUriToInternal(requireContext(), uri)
+                if (copiedUri != null) {
+                    dietLogBinding.dietImg.setImageURI(copiedUri)
+                    dietImg = copiedUri.toString()
+                } else {
+                    Toast.makeText(requireContext(), "이미지 복사에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                }
 
                 // 이미지 생성 시간
                 val createdDateTime = getImageCreatedTime(requireContext(), uri)
-
-                // "AM 9:30" 포맷으로 변환
                 val formattedTime = DateTimeFormatter
                     .ofPattern("a h:mm", Locale.ENGLISH)
                     .format(createdDateTime)
-
-                // 텍스트에 표시
                 dietLogBinding.time12h.text = formattedTime
 
-                // 현재 시간 체크박스 해제
                 if (createdDateTime != LocalDateTime.now())
                     dietLogBinding.setNowCb.isChecked = false
             }
         }
 
-        // 프로필 이미지를 눌렀을 때, 선택 다이얼로그 띄우기
         dietLogBinding.dietImg.setOnClickListener {
             SelectImgDialog(requireContext(),
                 {
-                    // 기본 이미지 선택 시 현재 시간 표시
                     val uri = Uri.parse("android.resource://${requireContext().packageName}/${R.drawable.img_blank}")
                     dietLogBinding.dietImg.setImageURI(uri)
                     dietImg = uri.toString()
                 },
                 {
-                    // 갤러리에서 이미지 선택
                     imgSelector.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                 }
             ).show()
@@ -336,5 +337,20 @@ class DietLogFragment : Fragment() {
                 else R.color.elixir_gray
             )
         )
+    }
+
+    // Photo Picker URI를 내부 캐시에 복사
+    private fun copyUriToInternal(context: Context, uri: Uri): Uri? {
+        return try {
+            val inputStream = context.contentResolver.openInputStream(uri) ?: return null
+            val file = File(context.cacheDir, "temp_image_${System.currentTimeMillis()}.jpg")
+            val outputStream = FileOutputStream(file)
+            inputStream.copyTo(outputStream)
+            inputStream.close()
+            outputStream.close()
+            Uri.fromFile(file)
+        } catch (e: Exception) {
+            null
+        }
     }
 }

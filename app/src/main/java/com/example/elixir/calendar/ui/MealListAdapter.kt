@@ -7,21 +7,27 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
+import androidx.activity.result.ActivityResultLauncher
 import com.example.elixir.R
 import com.example.elixir.ToolbarActivity
-import com.example.elixir.calendar.data.MealPlanData
+import com.example.elixir.calendar.data.DietLogData
 import com.example.elixir.databinding.ItemMealListBinding
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
+import com.google.gson.Gson
 
 class MealListAdapter(
     private val context: Context,
-    private var data: MutableList<MealPlanData>
+    private var data: MutableList<DietLogData>,
+    private val listener: OnMealClickListener
 ) : BaseAdapter() {
     override fun getCount(): Int = data.size
-    override fun getItem(position: Int): MealPlanData = data[position]
+    override fun getItem(position: Int): DietLogData = data[position]
     override fun getItemId(position: Int): Long = position.toLong()
+
+    // MealDetailFragment 띄우기
+    private lateinit var mealDetailLauncher: ActivityResultLauncher<Intent>
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val binding: ItemMealListBinding
@@ -39,8 +45,8 @@ class MealListAdapter(
 
         val item = getItem(position)
 
-        binding.dietPicture.setImageURI(Uri.parse("android.resource://com.example.elixir.recipe/${R.drawable.img_blank}"))
-        binding.dietNameText.text = item.name
+        binding.dietPicture.setImageURI(Uri.parse(item.dietImg))
+        binding.dietNameText.text = item.dietTitle
 
         // 식단 점수에 따른 아이콘 설정 (1~5점)
         val iconRes = when (item.score) {
@@ -55,29 +61,25 @@ class MealListAdapter(
 
         // 재료 목록을 FlexboxLayoutManager를 사용하여 표시
         binding.dietIngredientList.layoutManager = FlexboxLayoutManager(context)
-        binding.dietIngredientList.adapter = MealListIngredientAdapter(item.mealPlanIngredients)
+        binding.dietIngredientList.adapter = MealListIngredientAdapter(item.ingredientTags)
 
         // Flexbox 레이아웃 매니저 설정
-        val layoutManager: FlexboxLayoutManager = FlexboxLayoutManager(context)
-        layoutManager.setFlexDirection(FlexDirection.COLUMN)
-        layoutManager.setJustifyContent(JustifyContent.FLEX_END)
+        val layoutManager = FlexboxLayoutManager(context)
+        layoutManager.flexDirection = FlexDirection.COLUMN
+        layoutManager.justifyContent = JustifyContent.FLEX_END
 
-        // 식단 아이템 클릭 시 상세 화면으로 이동
         view.setOnClickListener {
-            val intent = Intent(context, ToolbarActivity::class.java).apply {
-                putExtra("mode", 4)  // 식단 상세 모드
-                putExtra("mealName", item.name)  // 식단 이름
-            }
-            context.startActivity(intent)
+            listener.onMealClick(item)
         }
+
+        // 식사 시간 표시
+        binding.dietTimesText.text = item.dietCategory
 
         return view
     }
 
-    /**
-     * 어댑터의 데이터를 새로운 데이터로 업데이트
-     */
-    fun updateData(newData: List<MealPlanData>) {
+    //어댑터의 데이터를 새로운 데이터로 업데이트
+    fun updateData(newData: List<DietLogData>) {
         data.clear()
         data.addAll(newData)
         notifyDataSetChanged()

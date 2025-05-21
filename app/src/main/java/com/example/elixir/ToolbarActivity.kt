@@ -149,8 +149,16 @@ open class ToolbarActivity : AppCompatActivity() {
                 val mealName = intent.getStringExtra("mealName")
                 toolBinding.title.text = mealName
 
-                // 식단 상세 프래그먼트 띄워주기
-                setFragment(MealDetailFragment())
+                val mealDataJson = intent.getStringExtra("mealData")
+
+                // MealDetailFragment에 Bundle로 전달
+                val fragment = MealDetailFragment()
+                val bundle = Bundle().apply {
+                    putString("mealData", mealDataJson)
+                }
+                fragment.arguments = bundle
+
+                setFragment(fragment)
             }
 
             // 내 레시피 모드

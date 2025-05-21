@@ -1,6 +1,7 @@
 package com.example.elixir.calendar.viewmodel
 
 import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -31,4 +32,7 @@ class DietLogViewModel(private val repository: DietLogRepository) : ViewModel() 
             Log.d("RoomTest", "저장된 데이터: $dietLogEntity")
         }
     }
+
+    fun getDietLogsByDate(date: String): LiveData<List<DietLogEntity>> =
+        repository.getDietLogsByDate(date)
 }

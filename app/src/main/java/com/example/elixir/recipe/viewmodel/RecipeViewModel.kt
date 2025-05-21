@@ -10,57 +10,46 @@ import com.example.elixir.recipe.data.RecipeRepository
 import com.example.elixir.recipe.data.RecipeStepData
 import com.example.elixir.recipe.data.entity.RecipeEntity
 import kotlinx.coroutines.launch
+import org.threeten.bp.LocalDateTime
 
 class RecipeViewModel(private val repository: RecipeRepository) : ViewModel() {
-    private var recipeTitle = ""
-    private var thumbnail = ""
-    private var recipeDescription = ""
-    var categorySlowAging = ""
-    var categoryType = ""
-    private var difficulty = ""
-    var ingredients = MutableLiveData<List<FlavoringData>>()
-    var seasoning = MutableLiveData<List<FlavoringData>>()
-    private var steps = MutableLiveData<List<RecipeStepData>>()
-    private var tips = ""
+    private lateinit var recipeEntity: RecipeEntity // Room DB에 저장할 객체
 
-    private val recipeList = MutableLiveData<MutableList<RecipeData>>(mutableListOf())
+    // 레시피를 DB에 저장하는 메서드
+    /*
+    fun saveRecipeToDB(data: RecipeData) {
+        recipeEntity = RecipeEntity(
+            email = data.email,
+            title = recipeTitle,
+            description = recipeDescription,
+            categorySlowAging = categorySlowAging,
+            categoryType = categoryType,
+            difficulty = difficulty,
+            timeHours = data.timeHours,
+            timeMinutes = data.timeMinutes,
+            ingredientTagIds = data.ingredientTagIds,
+            ingredients = data.ingredients,
+            seasoning = data.seasoning,
+            stepDescriptions = data.stepDescriptions.map { it.description },
+            stepImageUrls = data.stepDescriptions.map { it.imageUrl },
+            tips = data.tips,
+            allergies = data.allergies,
+            imageUrl = data.imageUrl,
+            authorFollowByCurrentUser = false,
+            likedByCurrentUser = false,
+            scrappedByCurrentUser = false,
+            authorNickname = data.authorNickname,
+            authorTitle = data.authorTitle,
+            likes = 0,
+            scraps = 0,
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now(),
+            isSynced = false
+        )
 
-    val allRecipes: LiveData<List<RecipeEntity>> = repository.getAllRecipes()
-
-    fun addRecipe(recipe: RecipeData) {
-        val currentList = recipeList.value ?: mutableListOf()
-        currentList.add(recipe)
-        recipeList.value = currentList
-    }
-
-    // 데이터 저장 메서드
-    fun saveRecipeData(
-        title: String,
-        thumbnail: String,
-        description: String,
-        slowAging: String,
-        type: String,
-        difficulty: String,
-        ingredientsList: List<FlavoringData>,
-        seasoningList: List<FlavoringData>,
-        stepsList: List<RecipeStepData>,
-        tipsText: String
-    ) {
-        recipeTitle = title
-        this.thumbnail = thumbnail
-        recipeDescription = description
-        categorySlowAging = slowAging
-        categoryType = type
-        this.difficulty = difficulty
-        ingredients.value = ingredientsList
-        seasoning.value = seasoningList
-        steps.value = stepsList
-        tips = tipsText
-    }
-
-    fun saveRecipeToDB(recipeEntity: RecipeEntity) {
+        // Room DB에 저장할 객체 생성
         viewModelScope.launch {
             repository.insertRecipe(recipeEntity)
         }
-    }
+    }*/
 }

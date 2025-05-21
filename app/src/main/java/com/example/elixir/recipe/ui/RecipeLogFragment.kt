@@ -14,17 +14,19 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.elixir.R
 import com.example.elixir.databinding.FragmentRecipeLogBinding
 import com.example.elixir.dialog.SaveDialog
 import com.example.elixir.dialog.SelectImgDialog
-import com.example.elixir.recipe.data.entity.RecipeEntity
+import com.example.elixir.network.AppDatabase
 import com.example.elixir.recipe.viewmodel.RecipeViewModel
 import com.example.elixir.recipe.data.FlavoringData
+import com.example.elixir.recipe.data.RecipeRepository
 import com.example.elixir.recipe.data.RecipeStepData
+import com.example.elixir.recipe.viewmodel.RecipeViewModelFactory
 
 class RecipeLogFragment : Fragment() {
     // 프래그먼트 바인딩 정의
@@ -77,9 +79,12 @@ class RecipeLogFragment : Fragment() {
     // 선택된 단계의 위치
     private var selectedPosition: Int = -1
 
-    // 뷰모델
-    private lateinit var recipeViewModel: RecipeViewModel
+    private lateinit var repository: RecipeRepository
 
+    // 뷰모델
+    private val recipeViewModel: RecipeViewModel by viewModels {
+        RecipeViewModelFactory(repository)
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -90,52 +95,17 @@ class RecipeLogFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        val recipeData = arguments?.getParcelable<RecipeData>("recipeData")
-//
-//        recipeData?.let {
-//            recipeBinding.enterRecipeTitle.setText(it.title)
-//            recipeBinding.enterRecipeDescription.setText(it.tips ?: "")
-//            val hourIndex = (recipeBinding.selectHour.adapter as? ArrayAdapter<String>)?.getPosition(it.timeHours.toString()) ?: -1
-//            if (hourIndex != -1) {
-//                recipeBinding.selectHour.setSelection(hourIndex)
-//            } else {
-//                // 기본값 설정 또는 로그 출력
-//                android.util.Log.e("RecipeLogFragment", "시간 값이 어댑터에 없습니다: ${it.timeHours}")
-//            }
-//
-//            val minIndex = (recipeBinding.selectMin.adapter as? ArrayAdapter<String>)?.getPosition(it.timeMinutes.toString()) ?: -1
-//            if (minIndex != -1) {
-//                recipeBinding.selectMin.setSelection(minIndex)
-//            } else {
-//                // 기본값 설정 또는 로그 출력
-//                android.util.Log.e("RecipeLogFragment", "시간 값이 어댑터에 없습니다: ${it.timeMinutes}")
-//            }
-//
-//
-//            val difficultyList = listOf(recipeBinding.levelEasy, recipeBinding.levelNormal, recipeBinding.levelHard)
-//            difficultyList.forEach { chip ->
-//                chip.isChecked = chip.text.toString() == it.difficulty
-//            }
-//
-//            val ingredientChips = listOf(
-//                recipeBinding.ingredientBrownRice, recipeBinding.ingredientBean, recipeBinding.ingredientGrain,
-//                recipeBinding.ingredientGreenLeafy, recipeBinding.ingredientBerry, recipeBinding.ingredientNuts,
-//                recipeBinding.ingredientOliveOil, recipeBinding.ingredientFish, recipeBinding.ingredientPoultry
-//            )
-//
-//            ingredientChips.forEach { chip ->
-//                chip.isChecked = it.ingredients.contains(chip.text.toString())
-//            }
-//        }
 
-        // ViewModel 초기화
-        recipeViewModel = ViewModelProvider(this)[RecipeViewModel::class.java]
+        // Room DB 초기화
+        val dao = AppDatabase.getInstance(requireContext()).recipeDao()
+        repository = RecipeRepository(dao)
 
         // 썸네일 URI 초기화
         context?.let {
             thumbnailUri = Uri.parse("android.resource://${it.packageName}/${R.drawable.img_blank}")
         }
 
+        // 재료, 양념 초기화
         ingredients.clear()
         ingredients.add(FlavoringData("", ""))
 
@@ -169,7 +139,6 @@ class RecipeLogFragment : Fragment() {
                 thumbnail = uri.toString()
             }
         }
-        
 
         // 프로필 이미지를 눌렀을 때, 선택 다이얼로그 띄우기
         recipeBinding.recipeThumbnail.setOnClickListener {

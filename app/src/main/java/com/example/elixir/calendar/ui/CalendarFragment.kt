@@ -27,25 +27,50 @@ import androidx.activity.result.contract.ActivityResultContracts
 import com.example.elixir.ToolbarActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.example.elixir.R
-import com.example.elixir.calendar.data.MealPlanData
+import com.example.elixir.calendar.data.DietLogData
+import com.example.elixir.calendar.network.db.DietLogRepository
+import com.example.elixir.calendar.viewmodel.DietLogViewModel
+import com.example.elixir.calendar.viewmodel.DietLogViewModelFactory
 import com.example.elixir.databinding.FragmentCalendarBinding
+import com.example.elixir.network.AppDatabase
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.gson.Gson
 import com.prolificinteractive.materialcalendarview.*
 import com.prolificinteractive.materialcalendarview.format.TitleFormatter
 import com.prolificinteractive.materialcalendarview.format.WeekDayFormatter
+import org.threeten.bp.format.DateTimeFormatter
 import java.math.BigInteger
 
 // ----------------------------- 프래그먼트 클래스 -------------------------------------
-class CalendarFragment : Fragment() {
+class CalendarFragment : Fragment(), OnMealClickListener {
+    override fun onMealClick(item: DietLogData) {
+        val intent = Intent(requireContext(), ToolbarActivity::class.java).apply {
+            putExtra("mode", 4)
+            putExtra("mealName", item.dietTitle)
+            putExtra("mealData", Gson().toJson(item))
+        }
+        mealDetailLauncher.launch(intent)
+    }
 
     // 뷰 바인딩 변수
     private var _binding: FragmentCalendarBinding? = null
     private val binding get() = _binding!!
 
+    private lateinit var repository: DietLogRepository
+
+    private val dietLogViewModel: DietLogViewModel by viewModels {
+        DietLogViewModelFactory(repository)
+    }
+
+    // 상세 화면 런처 등록
+    private lateinit var mealDetailLauncher: ActivityResultLauncher<Intent>
+
+
     // 어댑터 및 데이터 변수
     private lateinit var mealAdapter: MealListAdapter
-    private val eventMap = mutableMapOf<String, MutableList<MealPlanData>>() // 날짜별 식단 데이터 저장
+    private val eventMap = mutableMapOf<String, MutableList<DietLogData>>() // 날짜별 식단 데이터 저장
     private var selectedCalendarDay: CalendarDay = CalendarDay.today() // 선택된 날짜
     private var selectedTextDecorator: SelectedDateTextColorDecorator? = null // 선택 날짜 텍스트 색상 데코레이터
     private var todayTextDecorator: TodayTextColorDecorator? = null // 오늘 날짜 텍스트 색상 데코레이터
@@ -102,10 +127,14 @@ class CalendarFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val dao = AppDatabase.getInstance(requireContext()).dietLogDao()
+        repository = DietLogRepository(dao)
+
         // -------------------- 리스트뷰 설정 --------------------
-        mealAdapter = MealListAdapter(requireContext(), mutableListOf())
+        mealAdapter = MealListAdapter(requireContext(), mutableListOf(), this)
         binding.mealPlanList.adapter = mealAdapter
         addDummyEvents() // 더미 데이터 세팅
+
 
         // -------------------- 캘린더 설정 ----------------------
         binding.calendarView.setWeekDayFormatter(CustomWeekDayFormatter(requireContext()))
@@ -121,8 +150,6 @@ class CalendarFragment : Fragment() {
         catch (e: Exception) {
             Log.e("CalendarFragment", "오늘 날짜 배경 설정 오류: ${e.message}")
         }
-
-
 
         // ----------------- FAB 및 바텀시트 ---------------------
         val behavior = BottomSheetBehavior.from(binding.bottomSheet)
@@ -168,7 +195,6 @@ class CalendarFragment : Fragment() {
                 putExtra("month", selectedCalendarDay.month + 1)
                 putExtra("day", selectedCalendarDay.day)
             }
-
             dietLogLauncher.launch(intent)
         }
 
@@ -177,34 +203,32 @@ class CalendarFragment : Fragment() {
             ActivityResultContracts.StartActivityForResult()
         ) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
-                val intent = result.data
-                val mealPlanData = intent?.extras?.getSerializable("mealData") as? MealPlanData
-                // 로그로 mealPlanData 확인
-                Log.d("DietLogFragment", "Received mealPlanData: $mealPlanData")
-
-                if (intent != null) {
-
-                    //Toast.makeText(context, mealPlanData?.name, Toast.LENGTH_SHORT).show()
-                    mealPlanData?.let {
-                        val selectedDateStr = "%04d-%02d-%02d".format(
-                            selectedCalendarDay.year,
-                            selectedCalendarDay.month + 1,
-                            selectedCalendarDay.day
-                        )
-                        if (eventMap[selectedDateStr] == null) {
-                            eventMap[selectedDateStr] = mutableListOf()
-                        }
-                        eventMap[selectedDateStr]?.add(it)
-                        updateEventList(selectedDateStr) // 리스트 갱신
-                    }
+                val data = result.data?.getStringExtra("dietLogData")
+                if (data != null) {
+                    val newDietLog = Gson().fromJson(data, DietLogData::class.java)
+                    // 리스트에 추가
+                    val date = newDietLog.time.toLocalDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) // 날짜 필드명에 맞게 수정
+                    val list = eventMap[date] ?: mutableListOf()
+                    list.add(newDietLog)
+                    eventMap[date] = list
+                    // 어댑터 갱신
+                    mealAdapter.updateData(list)
+                    updateSelectedDateDecorator()
+                    processDietLogScores(binding.calendarView)
                 }
             } else {
                 Toast.makeText(context, "식단 작성 실패", Toast.LENGTH_SHORT).show()
             }
         }
 
+        // 상세 화면 런처 등록
+        mealDetailLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            // 상세 화면에서 돌아온 후 처리 (필요시)
+        }
+
         // 바텀시트 설정
-        //val behavior = BottomSheetBehavior.from(calendarBinding.bottomSheet)
         behavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 bottomSheetState = newState
@@ -372,7 +396,7 @@ class CalendarFragment : Fragment() {
         } else {
             binding.mealPlanList.visibility = View.VISIBLE
             binding.emptyMealText.visibility = View.GONE
-            mealAdapter.updateData(events)
+            //mealAdapter.updateData(events)
             binding.mealPlanList.smoothScrollToPosition(0)
         }
     }
@@ -384,6 +408,7 @@ class CalendarFragment : Fragment() {
      * 개발 및 테스트를 위한 더미 데이터
      */
     private fun addDummyEvents() {
+        /*
         eventMap["2025-03-29"] = mutableListOf(
             MealPlanData(
                 id = BigInteger("1001"),
@@ -448,7 +473,7 @@ class CalendarFragment : Fragment() {
                 score = 5,
                 mealPlanIngredients = listOf("딸기", "블루베리", "바나나", "아몬드밀크")
             )
-        )
+        )*/
     }
 
     /**

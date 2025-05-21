@@ -106,7 +106,7 @@ class SearchFragment : Fragment() {
         }
 
         // 인기 검색어 리스트 Flexbox 설정
-        val dummyData = listOf("1", "2", "3", "4", "5")
+        /*val dummyData = listOf("1", "2", "3", "4", "5")
         binding.popularSearchList.apply {
             layoutManager = FlexboxLayoutManager(context).apply {
                 flexDirection = FlexDirection.ROW
@@ -122,7 +122,7 @@ class SearchFragment : Fragment() {
                 justifyContent = JustifyContent.FLEX_START
             }
             adapter = RecipeIngredientAdapter(dummyData)
-        }
+        }*/
 
         // 뒤로 가기 버튼 클릭 시 이전 프래그먼트로 돌아가기
         binding.backButton.setOnClickListener {

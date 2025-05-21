@@ -2,19 +2,24 @@ package com.example.elixir.calendar.ui
 
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.elixir.R
+import com.example.elixir.calendar.data.DietLogData
 import com.example.elixir.calendar.data.MealPlanData
 import com.example.elixir.databinding.FragmentMealDetailBinding
 import com.example.elixir.recipe.ui.RecipeTagAdapter
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
+import com.google.gson.Gson
+import org.threeten.bp.format.DateTimeFormatter
 import java.math.BigInteger
+import java.util.Locale
 
 class MealDetailFragment : Fragment() {
     private var _binding: FragmentMealDetailBinding? = null
@@ -32,7 +37,7 @@ class MealDetailFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // ------------------------ 더미 데이터 적용 ------------------------
-        val dummyData = MealPlanData(
+        /*val dummyData = MealPlanData(
             id = BigInteger("1001"),
             memberId = BigInteger("1"),
             name = "연어 아보카도 샐러드",
@@ -41,7 +46,7 @@ class MealDetailFragment : Fragment() {
             mealtimes = "아침",
             score = 5,
             mealPlanIngredients = listOf("연어", "아보카도", "올리브유", "잣")
-        )
+        )*/
 
         // ------------------------ 데이터 바인딩 ------------------------
         //binding.mealTitle.text = dummyData.name
@@ -54,8 +59,17 @@ class MealDetailFragment : Fragment() {
         val timeOrangeBackground = ContextCompat.getDrawable(requireContext(), R.drawable.bg_rect_filled_orange_5)
         val timeGrayBackground = ContextCompat.getDrawable(requireContext(), R.drawable.bg_rect_outline_gray_5)
 
-        val selectedMealTime = dummyData.mealtimes
-        val selectedScore = dummyData.score
+        //val selectedMealTime = dummyData.mealtimes
+       // val selectedScore = dummyData.score
+        // 데이터 불러오기
+        val mealDataJson = arguments?.getString("mealData")
+        val dietLogData = mealDataJson?.let {
+            Gson().fromJson(it, DietLogData::class.java)
+        }
+        Log.d("MealDetailFragment", "mealDataJson: $mealDataJson")
+
+        // 이미지 url
+        binding.recipeImage.setImageURI(Uri.parse(dietLogData?.dietImg))
 
         // 식사시간 버튼 리스트
         val mealTimeButtons = listOf(
@@ -72,7 +86,7 @@ class MealDetailFragment : Fragment() {
         }
 
         // 선택된 식사 시간만 오렌지로 변경
-        when (selectedMealTime) {
+        when (dietLogData?.dietCategory) {
             "아침" -> {
                 binding.mealTimeMorning.background = timeOrangeBackground
                 binding.mealTimeMorning.setTextColor(whiteColor)
@@ -91,6 +105,11 @@ class MealDetailFragment : Fragment() {
             }
         }
 
+        // 시간 반영
+        binding.timeText.text = dietLogData?.time?.format(DateTimeFormatter.ofPattern("a h:mm", Locale.ENGLISH))
+
+        val score = dietLogData?.score ?: 0
+
         // 점수 버튼 리스트로 묶기
         val scoreButtons = listOf(
             binding.score1,
@@ -108,8 +127,8 @@ class MealDetailFragment : Fragment() {
         }
 
         // 2. 선택된 점수만 오렌지 배경 & 흰색 텍스트로 변경
-        if (selectedScore in 1..5) {
-            val selectedButton = scoreButtons[selectedScore - 1]
+        if (score in 1..5) {
+            val selectedButton = scoreButtons[score - 1]
             selectedButton.background = scoreOrangeBackground
             selectedButton.setTextColor(whiteColor)
         }
@@ -120,7 +139,7 @@ class MealDetailFragment : Fragment() {
                 flexDirection = FlexDirection.ROW
                 justifyContent = JustifyContent.FLEX_START
             }
-            adapter = RecipeTagAdapter(dummyData.mealPlanIngredients)
+            //adapter = RecipeTagAdapter(dummyData.mealPlanIngredients)
         }
     }
 
