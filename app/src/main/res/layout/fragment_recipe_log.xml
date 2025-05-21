@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:paddingHorizontal="16dp"
     android:fitsSystemWindows="true"
-    tools:context=".recipe.RecipeLogFragment">
+    tools:context=".recipe.ui.RecipeLogFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -187,7 +187,7 @@
             app:layout_constraintBottom_toTopOf="@id/allergy">
 
             <com.google.android.material.chip.Chip
-                android:id="@id/ingredient_challenge"
+                android:id="@+id/ingredient_challenge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/ChipStyle_Short"
@@ -197,7 +197,7 @@
                 android:textSize="16sp" />
 
             <com.google.android.material.chip.Chip
-                android:id="@id/ingredient_brown_rice"
+                android:id="@+id/ingredient_brown_rice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/ChipStyle_Short"
@@ -205,7 +205,7 @@
                 android:textSize="16sp"/>
 
             <com.google.android.material.chip.Chip
-                android:id="@id/ingredient_bean"
+                android:id="@+id/ingredient_bean"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/ChipStyle_Short"
@@ -213,7 +213,7 @@
                 android:textSize="16sp" />
 
             <com.google.android.material.chip.Chip
-                android:id="@id/ingredient_grain"
+                android:id="@+id/ingredient_grain"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/ChipStyle_Short"
@@ -221,7 +221,7 @@
                 android:textSize="16sp" />
 
             <com.google.android.material.chip.Chip
-                android:id="@id/ingredient_green_leafy"
+                android:id="@+id/ingredient_green_leafy"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/ChipStyle_Short"
@@ -229,7 +229,7 @@
                 android:textSize="16sp" />
 
             <com.google.android.material.chip.Chip
-                android:id="@id/ingredient_berry"
+                android:id="@+id/ingredient_berry"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/ChipStyle_Short"
@@ -237,7 +237,7 @@
                 android:textSize="16sp" />
 
             <com.google.android.material.chip.Chip
-                android:id="@id/ingredient_nuts"
+                android:id="@+id/ingredient_nuts"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/ChipStyle_Short"
@@ -245,7 +245,7 @@
                 android:textSize="16sp" />
 
             <com.google.android.material.chip.Chip
-                android:id="@id/ingredient_olive_oil"
+                android:id="@+id/ingredient_olive_oil"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/ChipStyle_Short"
@@ -253,7 +253,7 @@
                 android:textSize="16sp" />
 
             <com.google.android.material.chip.Chip
-                android:id="@id/ingredient_fish"
+                android:id="@+id/ingredient_fish"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/ChipStyle_Short"
@@ -261,7 +261,7 @@
                 android:textSize="16sp" />
 
             <com.google.android.material.chip.Chip
-                android:id="@id/ingredient_poultry"
+                android:id="@+id/ingredient_poultry"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/ChipStyle_Short"

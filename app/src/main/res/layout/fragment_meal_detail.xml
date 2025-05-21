@@ -14,10 +14,13 @@
         android:padding="16dp"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
+        <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/recipeImage"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            app:shapeAppearanceOverlay="@style/ImgDefault_Rect"
+            android:adjustViewBounds="true"
+            app:layout_constraintDimensionRatio="1:1"
             android:background="@drawable/bg_rect_filled_white_15"
             android:src="@drawable/img_blank"
             android:scaleType="centerCrop"

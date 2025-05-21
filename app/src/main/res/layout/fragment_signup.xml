@@ -17,8 +17,10 @@
         android:id="@+id/signup_content"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:paddingHorizontal="16dp"
+        app:layout_constraintBottom_toTopOf="@id/layout_bottom_btn"
         app:layout_constraintTop_toBottomOf="@id/survey_step"
-        app:layout_constraintBottom_toTopOf="@id/layout_bottom_btn"/>
+        tools:layout_editor_absoluteX="0dp" />
 
     <LinearLayout
         android:id="@+id/layout_bottom_btn"

@@ -9,9 +9,16 @@
     </style>
 
     <!-- 프로필 사진 윤곽 -->
-    <style name="ImgProfile_Circle">
+    <!-- 회원가입 프로필 (150dp * 150dp) -->
+    <style name="ImgProfile_Setting">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">75dp</item>
+    </style>
+
+    <!-- 마이페이지 프로필 (100dp * 100dp) -->
+    <style name="ImgProfile_Mypage">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50dp</item>
     </style>
 
     <style name="ImgDefault_Rect">
