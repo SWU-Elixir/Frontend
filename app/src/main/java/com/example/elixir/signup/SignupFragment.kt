@@ -10,12 +10,30 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.example.elixir.R
 import com.example.elixir.databinding.FragmentSignupBinding
+import com.example.elixir.member.network.MemberDB
+import com.example.elixir.member.network.MemberRepository
+import com.example.elixir.member.viewmodel.MemberService
 
 class SignupFragment : Fragment() {
     private lateinit var signupBinding: FragmentSignupBinding
     private val userModel: UserInfoViewModel by activityViewModels()
+
+    // MemberViewModel을 Factory로 생성
+    private val memberViewModel: com.example.elixir.member.viewmodel.MemberViewModel by activityViewModels {
+        val api = com.example.elixir.RetrofitClient.instanceMemberApi
+        val db = MemberDB.getInstance(requireContext())
+        val dao = db.memberDao()
+        MemberViewModelFactory(
+            MemberService(
+                MemberRepository(api, dao)
+            )
+        )
+    }
+    private var profileImageFile: java.io.File? = null // 실제 파일 경로로 설정 필요
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -54,13 +72,27 @@ class SignupFragment : Fragment() {
             // 다음 버튼 클릭 이벤트 처리
             btnNext.setOnClickListener {
                 if (userModel.currentStep == userModel.maxStep) {
-                    // 마지막 단계면 액티비티 종료 (회원가입 완료)
-                    Toast.makeText(requireContext(), "회원가입 성공!", Toast.LENGTH_SHORT).show()
-                    activity?.finish()
+                    val signupRequest = userModel.toSignupRequest()
+                    if (signupRequest != null) {
+                        // profileImageFile은 SettingProfileFragment에서 파일 경로를 저장해두고 여기서 할당해야 함
+                        memberViewModel.signup(signupRequest, profileImageFile)
+                    } else {
+                        Toast.makeText(requireContext(), "입력값을 모두 확인해주세요.", Toast.LENGTH_SHORT).show()
+                    }
                 } else {
                     // 다음 단계로 이동
                     userModel.currentStep += 1
                     setSurveyStepFragment(userModel.currentStep)
+                }
+            }
+
+            // 회원가입 결과 관찰
+            memberViewModel.signupResult.observe(viewLifecycleOwner) { result ->
+                if (result != null) {
+                    Toast.makeText(requireContext(), "회원가입 성공!", Toast.LENGTH_SHORT).show()
+                    activity?.finish()
+                } else {
+                    Toast.makeText(requireContext(), "회원가입 실패", Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -199,5 +231,18 @@ class SignupFragment : Fragment() {
 
         // 버튼 상태 업데이트 (현재 단계의 완료 여부 기준으로)
         setButtonState(userModel.completedStep.value?.get(step) == true)
+    }
+}
+
+// MemberViewModelFactory 정의
+class MemberViewModelFactory(
+    private val service: MemberService
+) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(com.example.elixir.member.viewmodel.MemberViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return com.example.elixir.member.viewmodel.MemberViewModel(service) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

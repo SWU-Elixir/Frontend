@@ -11,9 +11,10 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import com.example.elixir.calendar.ui.CalendarFragment
-import com.example.elixir.challenge.ChallengeFragment
+import com.example.elixir.challenge.ui.ChallengeFragment
 import com.example.elixir.chatbot.ChatBotActivity
 import com.example.elixir.databinding.ActivityHomeBinding
+import com.example.elixir.member.MyPageFragment
 import com.example.elixir.recipe.ui.RecipeFragment
 
 class HomeActivity : AppCompatActivity() {
