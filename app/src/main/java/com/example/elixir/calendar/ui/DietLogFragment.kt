@@ -16,6 +16,7 @@ import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.fragment.app.viewModels
 import com.example.elixir.R
 import com.example.elixir.dialog.SelectImgDialog
@@ -46,7 +47,7 @@ class DietLogFragment : Fragment() {
     private lateinit var formattedTime: String
     private var selectedHour: Int = -1
     private var selectedMin: Int = -1
-    private lateinit var selectedTime: LocalTime
+    private var selectedTime: LocalTime? = null
 
     // 이미지
     private lateinit var imgUri: Uri
@@ -75,22 +76,68 @@ class DietLogFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         // -------------------------------------------- 초기화 -----------------------------------------------//
-        // 이미지뷰: 기본 이미지로 설정
-        imgUri = Uri.parse("android.resource://${requireContext().packageName}/${R.drawable.img_blank}")
-        dietLogBinding.dietImg.setImageURI(imgUri)
-        dietImg = imgUri.toString()
+        super.onViewCreated(view, savedInstanceState)
+        val mealDataJson = arguments?.getString("mealData")
+        if (mealDataJson != null) {
+            val mealData = Gson().fromJson(mealDataJson, DietLogData::class.java)
+            dietLogBinding.enterDietTitle.setText(mealData.dietTitle)
 
-        // 현재 시간 체크 박스: 체크
-        dietLogBinding.setNowCb.isChecked = true
+            // 이미지 처리
+            val dietImgUri = try {
+                val uri = Uri.parse(mealData.dietImg)
+                if (uri.scheme == "file" || uri.scheme == "android.resource") uri else null
+            } catch (e: Exception) {
+                null
+            }
 
-        // 선택된 시간 초기화: 현재 시간으로 설정
-        selectedTime = LocalTime.now()
-        selectedHour = selectedTime.hour
-        selectedMin = selectedTime.minute
+            if (dietImgUri != null) {
+                dietLogBinding.dietImg.setImageURI(dietImgUri)
+                dietImg = dietImgUri.toString()
+            } else {
+                val defaultUri = Uri.parse("android.resource://${requireContext().packageName}/${R.drawable.img_blank}")
+                dietLogBinding.dietImg.setImageURI(defaultUri)
+                dietImg = defaultUri.toString()
+            }
 
-        // 현재 시간 텍스트뷰에 띄워주기
-        formattedTime = DateTimeFormatter.ofPattern("a h:mm", Locale.ENGLISH).format(selectedTime)
-        dietLogBinding.time12h.text = formattedTime
+            // 시간 처리
+            selectedTime = mealData.time.toLocalTime()
+            selectedHour = selectedTime!!.hour
+            selectedMin = selectedTime!!.minute
+            dietLogBinding.setNowCb.isChecked = selectedTime == LocalTime.now()
+            dietLogBinding.time12h.text = mealData.time.format(DateTimeFormatter.ofPattern("a h:mm", Locale.ENGLISH))
+
+            // 점수(1~5)에 따라 라디오버튼 체크
+            when (mealData.score) {
+                1 -> dietLogBinding.selectScore.check(dietLogBinding.btn1.id)
+                2 -> dietLogBinding.selectScore.check(dietLogBinding.btn2.id)
+                3 -> dietLogBinding.selectScore.check(dietLogBinding.btn3.id)
+                4 -> dietLogBinding.selectScore.check(dietLogBinding.btn4.id)
+                5 -> dietLogBinding.selectScore.check(dietLogBinding.btn5.id)
+            }
+
+            // 카테고리(아침, 점심, 저녁, 간식)에 따라 라디오버튼 체크
+            when (mealData.dietCategory) {
+                getString(R.string.breakfast) -> dietLogBinding.selectDiet.check(dietLogBinding.btnBreakfast.id)
+                getString(R.string.lunch) -> dietLogBinding.selectDiet.check(dietLogBinding.btnLunch.id)
+                getString(R.string.dinner) -> dietLogBinding.selectDiet.check(dietLogBinding.btnDinner.id)
+                getString(R.string.snack) -> dietLogBinding.selectDiet.check(dietLogBinding.btnSnack.id)
+            }
+        } else {
+            // 기본 이미지로 설정
+            val defaultUri = Uri.parse("android.resource://${requireContext().packageName}/${R.drawable.img_blank}")
+            dietLogBinding.dietImg.setImageURI(defaultUri)
+            dietImg = defaultUri.toString()
+
+            // 현재 시간으로 초기화
+            selectedTime = LocalTime.now()
+            dietLogBinding.setNowCb.isChecked = true
+
+            selectedHour = selectedTime!!.hour
+            selectedMin = selectedTime!!.minute
+
+            formattedTime = DateTimeFormatter.ofPattern("a h:mm", Locale.ENGLISH).format(selectedTime)
+            dietLogBinding.time12h.text = formattedTime
+        }
 
         val dao = AppDatabase.getInstance(requireContext()).dietLogDao()
         repository = DietLogRepository(dao)
@@ -102,8 +149,8 @@ class DietLogFragment : Fragment() {
             if (isChecked) {
                 // 시간 현재로 재설정
                 selectedTime = LocalTime.now()
-                selectedHour = selectedTime.hour
-                selectedMin = selectedTime.minute
+                selectedHour = selectedTime!!.hour
+                selectedMin = selectedTime!!.minute
 
                 formattedTime = DateTimeFormatter.ofPattern("a h:mm", Locale.ENGLISH).format(selectedTime)
                 dietLogBinding.time12h.text = formattedTime

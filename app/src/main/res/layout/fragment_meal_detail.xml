@@ -8,9 +8,8 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical"
-        android:layout_marginBottom="150dp"
         android:padding="16dp"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -23,7 +22,7 @@
             app:layout_constraintDimensionRatio="1:1"
             android:background="@drawable/bg_rect_filled_white_15"
             android:src="@drawable/img_blank"
-            android:scaleType="centerCrop"
+            android:scaleType="fitCenter"
             android:clipToOutline="true"
             android:layout_marginBottom="16dp"
             tools:ignore="ContentDescription,UnusedAttribute"/>

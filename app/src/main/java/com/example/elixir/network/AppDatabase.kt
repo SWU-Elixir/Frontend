@@ -12,7 +12,7 @@ import com.example.elixir.recipe.data.entity.RecipeEntity
 import com.example.elixir.utils.DBConverters
 
 // 데이터베이스 안 객체와 데이터 정의
-@Database(entities = [DietLogEntity::class, RecipeEntity::class], version = 2)
+@Database(entities = [DietLogEntity::class, RecipeEntity::class], version = 3)
 @TypeConverters(DBConverters::class)
 abstract class AppDatabase : RoomDatabase() {
     // DAO 객체를 가져오는 메서드

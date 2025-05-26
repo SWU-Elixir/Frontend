@@ -34,8 +34,7 @@ data class RecipeEntity(
     @ColumnInfo(name = "likes") val likes: Int = 0,                                         // 좋아요 수
     @ColumnInfo(name = "scraps") val scraps: Int = 0,                                       // 스크랩 수
     @ColumnInfo(name = "createdAt") val createdAt: LocalDateTime,
-    @ColumnInfo(name = "updatedAt") val updatedAt: LocalDateTime,
-    @ColumnInfo(name = "isSynced") val isSynced: Boolean = false                            // 서버와 동기화 여부
+    @ColumnInfo(name = "updatedAt") val updatedAt: LocalDateTime
 )
 // 서버에서 받은 ID가 null인 경우는 로컬에서만 사용되는 레시피임을 나타냄
 fun RecipeEntity.toDto(): RecipeDto {

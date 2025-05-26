@@ -68,6 +68,7 @@ open class ToolbarActivity : AppCompatActivity() {
                 val year = intent.getIntExtra("year", -1)
                 val month = intent.getIntExtra("month", -1)
                 val day = intent.getIntExtra("day", -1)
+                val mealDataJson = intent.getStringExtra("mealData")
 
                 // 타이틀: yyyy년 m월 d일로
                 toolBinding.title.text = "${year}년 ${month}월 ${day}일"
@@ -78,8 +79,14 @@ open class ToolbarActivity : AppCompatActivity() {
                     AlertExitDialog(this).show()
                 }
 
+                val fragment = DietLogFragment().apply {
+                    arguments = Bundle().apply {
+                        putString("mealData", mealDataJson)
+                    }
+                }
+
                 // 식단 기록 프래그먼트 띄우기
-                setFragment(DietLogFragment())
+                setFragment(fragment)
             }
 
             // 레시피 기록 모드
@@ -91,6 +98,18 @@ open class ToolbarActivity : AppCompatActivity() {
                 // 뒤로가기 버튼을 누르면 레시피 리스트 페이지로 이동
                 toolBinding.btnBack.setOnClickListener {
                     AlertExitDialog(this).show()
+                }
+
+                val recipeDataJson = intent.getStringExtra("recipeData")
+                if( recipeDataJson != null) {
+                    val fragment = RecipeLogFragment().apply {
+                        arguments = Bundle().apply {
+                            putString("recipeData", recipeDataJson)
+                            putBoolean("isEdit", true)
+                        }
+                    }
+                    // 레시피 기록 프래그먼트 띄워주기
+                    setFragment(fragment)
                 }
 
                 // 레시피 프레그먼트 띄워주기
@@ -123,7 +142,21 @@ open class ToolbarActivity : AppCompatActivity() {
                     popupMenu.setOnMenuItemClickListener { menuItem ->
                         when (menuItem.itemId) {
                             R.id.menu_edit -> {
-                                Toast.makeText(this, "식단 수정 클릭됨", Toast.LENGTH_SHORT).show()
+                                // 기존 상세 intent에서 받은 mealData를 그대로 사용
+                                val mealDataJson = intent.getStringExtra("mealData")
+                                val year = intent.getIntExtra("year", -1)
+                                val month = intent.getIntExtra("month", -1)
+                                val day = intent.getIntExtra("day", -1)
+
+                                val editIntent = Intent(this, ToolbarActivity::class.java).apply {
+                                    putExtra("mode", 2)
+                                    putExtra("year", year)
+                                    putExtra("month", month)
+                                    putExtra("day", day)
+                                    putExtra("mealData", mealDataJson) // 추가: 수정할 데이터 전달
+                                }
+                                startActivity(editIntent)
+                                finish()
                                 true
                             }
                             R.id.menu_delete -> {

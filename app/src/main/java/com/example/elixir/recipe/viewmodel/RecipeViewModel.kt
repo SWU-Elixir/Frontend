@@ -16,22 +16,21 @@ class RecipeViewModel(private val repository: RecipeRepository) : ViewModel() {
     private lateinit var recipeEntity: RecipeEntity // Room DB에 저장할 객체
 
     // 레시피를 DB에 저장하는 메서드
-    /*
     fun saveRecipeToDB(data: RecipeData) {
         recipeEntity = RecipeEntity(
             email = data.email,
-            title = recipeTitle,
-            description = recipeDescription,
-            categorySlowAging = categorySlowAging,
-            categoryType = categoryType,
-            difficulty = difficulty,
+            title = data.title,
+            description = data.description,
+            categorySlowAging = data.categorySlowAging,
+            categoryType = data.categoryType,
+            difficulty = data.difficulty,
             timeHours = data.timeHours,
             timeMinutes = data.timeMinutes,
             ingredientTagIds = data.ingredientTagIds,
             ingredients = data.ingredients,
             seasoning = data.seasoning,
-            stepDescriptions = data.stepDescriptions.map { it.description },
-            stepImageUrls = data.stepDescriptions.map { it.imageUrl },
+            stepDescriptions = data.stepDescriptions,
+            stepImageUrls = data.stepImageUrls,
             tips = data.tips,
             allergies = data.allergies,
             imageUrl = data.imageUrl,
@@ -43,13 +42,12 @@ class RecipeViewModel(private val repository: RecipeRepository) : ViewModel() {
             likes = 0,
             scraps = 0,
             createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now(),
-            isSynced = false
+            updatedAt = LocalDateTime.now()
         )
 
         // Room DB에 저장할 객체 생성
         viewModelScope.launch {
             repository.insertRecipe(recipeEntity)
         }
-    }*/
+    }
 }
