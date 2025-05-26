@@ -2,16 +2,15 @@ package com.example.elixir.login
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import com.example.elixir.HomeActivity
-import com.example.elixir.R
-import com.example.elixir.signup.RetrofitClient
+import com.example.elixir.RetrofitClient
 import com.example.elixir.ToolbarActivity
 import com.example.elixir.databinding.ActivityLoginBinding
 import retrofit2.Call
@@ -27,6 +26,11 @@ class LoginActivity : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
         installSplashScreen()
+
+        // 앱 시작 시 저장된 토큰 불러와서 RetrofitClient에 세팅
+        loadToken()?.let { token ->
+            RetrofitClient.setAuthToken(token)
+        }
 
         // 초기화
         // 바인딩 정의
@@ -85,7 +89,7 @@ class LoginActivity : AppCompatActivity() {
 //    else {
 //        loginBinding.errorLogin.text = "이메일이나 비밀번호가 일치하지 않습니다."
 
-        // 로그인 성공 시
+    // 로그인 성공 시
     private fun login(email: String, password: String) {
         val request = LoginRequest(email, password)
 
@@ -96,15 +100,29 @@ class LoginActivity : AppCompatActivity() {
             ) {
                 if (response.isSuccessful) {
                     val result = response.body()
+                    Log.d("LoginActivity", "API Response: $result")
+
                     if (result?.status == 200) {
-                        // 토큰 저장
-                        result.token?.let { token ->
+                        // 토큰 저장 - data.accessToken으로 접근
+                        result.data?.accessToken?.let { token ->
+                            Log.d("LoginActivity", "Access Token: $token")
                             RetrofitClient.setAuthToken(token)
+                            saveToken(token)
+
+                            // 저장 확인
+                            val savedToken = loadToken()
+                            Log.d("LoginActivity", "Saved Token: $savedToken")
+                        } ?: run {
+                            Log.e("LoginActivity", "Access token is null")
                         }
-                        
+
+                        result.data?.refreshToken?.let { refreshToken ->
+                            saveRefreshToken(refreshToken)
+                            Log.d("LoginActivity", "Refresh Token saved")
+                        }
+
                         // 자동 로그인 정보 저장
                         saveAutoLogin(email, password)
-                        
                         Toast.makeText(this@LoginActivity, "로그인 성공!", Toast.LENGTH_SHORT).show()
                         val intent = Intent(this@LoginActivity, HomeActivity::class.java)
                         startActivity(intent)
@@ -120,9 +138,34 @@ class LoginActivity : AppCompatActivity() {
             }
 
             override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+                Log.e("LoginActivity", "Network error: ${t.message}")
                 loginBinding.errorLogin.text = "네트워크 오류가 발생했습니다."
                 loginBinding.errorLogin.visibility = View.VISIBLE
             }
         })
     }
+
+    // Refresh Token 저장 메서드 추가
+    private fun saveRefreshToken(refreshToken: String) {
+        val prefs = getSharedPreferences("authPrefs", MODE_PRIVATE)
+        prefs.edit().putString("refreshToken", refreshToken).apply()
+    }
+
+    // 토큰을 SharedPreferences에 저장
+    private fun saveToken(token: String) {
+        Log.d("LoginActivity", "Saving token: $token")
+        val prefs = getSharedPreferences("authPrefs", MODE_PRIVATE)
+        val success = prefs.edit()
+            .putString("accessToken", token)
+            .commit() // apply() 대신 commit()으로 즉시 저장 확인
+        Log.d("LoginActivity", "Token save success: $success")
+    }
+
+    private fun loadToken(): String? {
+        val prefs = getSharedPreferences("authPrefs", MODE_PRIVATE)
+        val token = prefs.getString("accessToken", null)
+        Log.d("LoginActivity", "Loaded token: $token")
+        return token
+    }
+
 }

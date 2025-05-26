@@ -3,11 +3,13 @@ package com.example.elixir.calendar.ui
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.ContextThemeWrapper
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -18,6 +20,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.fragment.app.viewModels
+import com.example.elixir.ingredient.ui.IngredientSearchFragment
 import com.example.elixir.R
 import com.example.elixir.dialog.SelectImgDialog
 import com.example.elixir.calendar.data.DietLogData
@@ -209,43 +212,65 @@ class DietLogFragment : Fragment() {
             checkAllValid()
         }
 
-        // 식재료 태그 선택
-        with(dietLogBinding) {
-            // 칩 ID와 지정된 번호를 매핑하는 Map
-            val chipMap: Map<Int, Int> = mapOf(
-                ingredientSeasonedCabbage.id to 614,
-                ingredientStrawberry.id to 388,
-                ingredientSpinach.id to 768,
-                ingredientAlmond.id to 802
-            )
+        // SearchFragment에서 전달된 결과 수신
+        parentFragmentManager.setFragmentResultListener("ingredient_selection", viewLifecycleOwner) { _, bundle ->
+            val ingredientId = bundle.getInt("ingredientId", -1)
+            val ingredientName = bundle.getString("ingredientName") ?: return@setFragmentResultListener
+            
+            if (ingredientId == -1) return@setFragmentResultListener
+            val findIngredientChip = dietLogBinding.findIngredient
 
-            // 일반 칩 리스트
-            val chipList = listOf(
-                ingredientSeasonedCabbage, ingredientStrawberry, ingredientSpinach,
-                ingredientAlmond)
+            // 중복 방지
+            if (ingredientTags.contains(ingredientId)) {
+                Toast.makeText(requireContext(), "이미 추가된 재료입니다.", Toast.LENGTH_SHORT).show()
+                return@setFragmentResultListener
+            }
 
-            val searchBtn = dietLogBinding.findIngredient
+            // 일반 태그 개수 제한
+            if (ingredientTags.size >= 5) {
+                Toast.makeText(requireContext(), "일반 재료는 최대 5개까지만 선택할 수 있습니다.", Toast.LENGTH_SHORT).show()
+                return@setFragmentResultListener
+            }
 
-            chipList.forEach { chip ->
-                chip.setOnCheckedChangeListener { _, isChecked ->
-                    val chipTag = chipMap[chip.id] ?: return@setOnCheckedChangeListener
-                    if (isChecked) {
-                        if (ingredientTags.size >= 5) {
-                            // 5개 이상을 선택 못하게
-                            chip.isChecked = false
-                            Toast.makeText(requireContext(), "식재료 태그는 최대 5개까지 선택 가능합니다", Toast.LENGTH_SHORT).show()
-
-                        } else {
-                            // 체크된 태그 추가
-                            ingredientTags.add(chipTag)
-                        }
-                    } else {
-                        // 체크 해제된 태그 삭제
-                        ingredientTags.remove(chipTag)
-                    }
+            // 칩 생성 및 추가
+            val chip = com.google.android.material.chip.Chip(
+                ContextThemeWrapper(requireContext(), R.style.ChipStyle_Short)
+            ).apply {
+                text = ingredientName
+                isClickable = true
+                isCheckable = false
+                chipBackgroundColor = ColorStateList.valueOf(
+                    ContextCompat.getColor(context, R.color.elixir_orange)
+                )
+                setTextColor(ContextCompat.getColor(context, R.color.white))
+                
+                // 칩 삭제 리스너
+                setOnCloseIconClickListener {
+                    ingredientTags.remove(ingredientId)
+                    dietLogBinding.tagsIngredient.removeView(this)
                     checkAllValid()
                 }
             }
+
+            // findIngredient Chip 앞에 삽입
+            val index = dietLogBinding.tagsIngredient.indexOfChild(findIngredientChip)
+            dietLogBinding.tagsIngredient.addView(chip, index)
+            
+            // 리스트에 추가 (ID 저장)
+            ingredientTags.add(ingredientId)
+            checkAllValid()
+        }
+
+        // 식재료 검색 버튼 클릭 리스너
+        dietLogBinding.findIngredient.setOnClickListener {
+            // IngredientSearchFragment로 이동
+            val ingredientSearchFragment = IngredientSearchFragment()
+            
+            // Activity의 레이아웃을 사용하여 Fragment 전환
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(android.R.id.content, ingredientSearchFragment)
+                .addToBackStack(null)
+                .commit()
         }
 
         // 라디오 버튼: 점수
