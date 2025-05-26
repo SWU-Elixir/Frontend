@@ -1,7 +1,6 @@
 package com.example.elixir
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -17,7 +16,8 @@ import com.example.elixir.chatbot.ChatBotActivity
 import com.example.elixir.databinding.ActivityToolbarBinding
 import com.example.elixir.dialog.AlertExitDialog
 import com.example.elixir.calendar.ui.DietLogFragment
-import com.example.elixir.recipe.ui.RecipeFragment
+import com.example.elixir.member.MyPageImageGridFragment
+import com.example.elixir.member.MypageFollowListFragment
 import com.example.elixir.recipe.ui.RecipeLogFragment
 import com.example.elixir.signup.CreateAccountFragment
 import com.example.elixir.signup.SettingProfileFragment
@@ -251,7 +251,7 @@ open class ToolbarActivity : AppCompatActivity() {
                 setFragment(MyPageImageGridFragment.newInstance(MyPageImageGridFragment.TYPE_BADGE))
             }
 
-            // 내 뱃지 모드
+            // 팔로워 모드
             8 -> {
                 // 툴바의 제목은 보이게, 더보기 버튼 안보이게
                 toolBinding.title.visibility = View.VISIBLE
@@ -267,7 +267,26 @@ open class ToolbarActivity : AppCompatActivity() {
                 toolBinding.title.text = title
 
                 // 내 스크랩 프래그먼트 띄워주기
-                setFragment(MypageFollowListFragment())
+                setFragment(MypageFollowListFragment.newInstance(MypageFollowListFragment.MODE_FOLLOWER))
+            }
+
+            // 팔로잉 모드
+            11 -> {
+                // 툴바의 제목은 보이게, 더보기 버튼 안보이게
+                toolBinding.title.visibility = View.VISIBLE
+                toolBinding.btnMore.visibility = View.INVISIBLE
+
+                // 뒤로가기 버튼을 누르면 이전 화면으로 돌아가기
+                toolBinding.btnBack.setOnClickListener {
+                    finish()
+                }
+
+                // 제목 설정
+                val title = intent.getStringExtra("title")
+                toolBinding.title.text = title
+
+                // 내 스크랩 프래그먼트 띄워주기
+                setFragment(MypageFollowListFragment.newInstance(MypageFollowListFragment.MODE_FOLLOWING))
             }
 
             // 프로필 수정 모드
