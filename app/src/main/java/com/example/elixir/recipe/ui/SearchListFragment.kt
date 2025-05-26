@@ -197,18 +197,18 @@ class SearchListFragment : Fragment() {
      */
     private fun initializeRecipeList() {
         // 더미 데이터 초기화
-        sampleRecipes = getDummyRecipeData()
+        //sampleRecipes = getDummyRecipeData()
 
         // RecyclerView 설정
         binding.recipeList.layoutManager = LinearLayoutManager(requireContext())
         recipeListAdapter = RecipeListAdapter(
             sampleRecipes.toMutableList(),
             onBookmarkClick = { recipe ->
-                recipe.isBookmarked = !recipe.isBookmarked
+                recipe.scrappedByCurrentUser = !recipe.scrappedByCurrentUser
                 recipeListAdapter.notifyItemChanged(sampleRecipes.indexOf(recipe))
             },
             onHeartClick = { recipe ->
-                recipe.isLiked = !recipe.isLiked
+                recipe.likedByCurrentUser = !recipe.likedByCurrentUser
                 recipeListAdapter.notifyItemChanged(sampleRecipes.indexOf(recipe))
             },
             fragmentManager = parentFragmentManager
@@ -250,12 +250,12 @@ class SearchListFragment : Fragment() {
 
         val filtered = sampleRecipes.filter { recipe ->
             val keywordMatch = recipe.title.contains(keyword, ignoreCase = true)
-                    || recipe.ingredients.any { it.contains(keyword, ignoreCase = true) }
+                    || recipe.ingredients.keys.any { it.contains(keyword, ignoreCase = true) }
+                    || recipe.ingredients.values.any { it.contains(keyword, ignoreCase = true) }
             val methodMatch = selectedMethod == "저속노화" || recipe.categorySlowAging == selectedMethod
             val typeMatch = selectedType == "종류" || recipe.categoryType == selectedType
             keywordMatch && methodMatch && typeMatch
         }
-
         // 결과 적용
         recipeListAdapter.updateData(filtered)
 
@@ -284,7 +284,7 @@ class SearchListFragment : Fragment() {
 
     /**
      * 더미 레시피 데이터 생성
-     */
+     *//*
     private fun getDummyRecipeData(): List<RecipeData> =
         listOf(
             RecipeData(
@@ -407,6 +407,6 @@ class SearchListFragment : Fragment() {
                 isLiked = false,
                 likeCount = 19
             )
-        )
+        )*/
 }
 

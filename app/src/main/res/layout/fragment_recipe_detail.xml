@@ -91,16 +91,17 @@
                     android:textColor="@color/white"
                     android:fontFamily="@font/pretendard_medium" />
             </LinearLayout>
-            <ImageView
+            <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/recipeImage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_rect_filled_white_15"
-                android:src="@drawable/img_blank"
+                android:layout_marginTop="5dp"
+                style="@style/ImgDefault_Rect"
                 android:scaleType="centerCrop"
-                android:clipToOutline="true"
-                android:layout_marginTop="16dp"
-                tools:ignore="ContentDescription,UnusedAttribute"/>
+                android:src="@drawable/img_blank"
+                android:adjustViewBounds="true"
+                android:contentDescription="@string/thumbnail"
+                app:layout_constraintDimensionRatio="1:1" />
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

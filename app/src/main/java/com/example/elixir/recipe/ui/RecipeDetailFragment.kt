@@ -1,21 +1,30 @@
 package com.example.elixir.recipe.ui
 
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.elixir.R
+import com.example.elixir.ToolbarActivity
 import com.example.elixir.databinding.FragmentRecipeDetailBinding
 import com.example.elixir.recipe.data.CommentData
+import com.example.elixir.recipe.data.FlavoringData
 import com.example.elixir.recipe.data.RecipeData
+import com.example.elixir.recipe.data.RecipeStepData
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
-import java.math.BigInteger
+import com.google.gson.Gson
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -45,77 +54,72 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // ------------------------ 더미 데이터 적용 ------------------------
-        val dummyRecipe = RecipeData(
-            id = BigInteger.valueOf(1),
-            memberId = BigInteger.valueOf(1001),
-            title = "케일 항염 그린 스무디",
-            imageUrl = "android.resource://com.example.elixir.recipe/${R.drawable.img_blank}",
-            categorySlowAging = "염증 감소",
-            categoryType = "음료/차",
-            difficulty = "쉬움",
-            timeHours = 0,
-            timeMinutes = 3,
-            ingredients = listOf("케일", "바나나", "아몬드밀크", "아몬드밀크", "아몬드밀크", "아몬드밀크"),
-            seasoning = listOf("꿀", "얼음", "얼음", "얼음", "얼음", "얼음", "얼음"),
-            recipeOrder = listOf("재료를 믹서에 넣는다", "곱게 갈아 컵에 담는다"),
-            tips = "단맛이 부족하면 꿀 대신 대추즙도 좋아요.",
-            createdAt = "2025-04-25",
-            updateAt = "2025-04-25",
-            isBookmarked = true,
-            isLiked = true,
-            likeCount = 42
-        )
+        // ------------------------ 데이터 적용 ------------------------
+        // arguments에서 JSON 문자열 꺼내서 객체로 변환
+        val recipeDataJson = arguments?.getString("recipeDataJson")
+        val recipeData = recipeDataJson?.let { Gson().fromJson(it, RecipeData::class.java) }
 
         // ------------------------ 데이터 바인딩 ------------------------
         // 레시피 기본 정보 설정
-        binding.recipeNameText.text = dummyRecipe.title
-        binding.categorySlowAging.text = dummyRecipe.categorySlowAging
-        binding.categoryType.text = dummyRecipe.categoryType
-        binding.recipeLevel.text = dummyRecipe.difficulty
+        binding.recipeNameText.text = recipeData?.title
+        binding.categorySlowAging.text = recipeData?.categorySlowAging
+        binding.categoryType.text = recipeData?.categoryType
+        binding.recipeLevel.text = recipeData?.difficulty
+        binding.recipeImage.setImageURI(Uri.parse(recipeData?.imageUrl))
+
+        // 순서
+        // 조리순서 데이터 변환
+        val stepList = recipeData!!.stepDescriptions.zip(recipeData.stepImageUrls) { desc, imgUrl ->
+            RecipeStepData(stepDescription = desc, stepImg = imgUrl)
+        }
+
+        // 조리순서 RecyclerView에 어댑터 연결
+        binding.stepList.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+        binding.stepList.adapter = RecipeStepAdapter(stepList)
 
         // 조리 시간 설정 (시간이 있는 경우에만 표시)
-        binding.recipeTimeHour.text = if (dummyRecipe.timeHours > 0) getString(R.string.recipe_time_hour_format, dummyRecipe.timeHours) else ""
-        binding.recipeTimeMin.text = getString(R.string.recipe_time_min_format, dummyRecipe.timeMinutes)
+        binding.recipeTimeHour.text = if (recipeData.timeHours > 0) getString(R.string.recipe_time_hour_format, recipeData.timeHours) else ""
+        binding.recipeTimeMin.text = getString(R.string.recipe_time_min_format, recipeData.timeMinutes)
 
         // 팁과 좋아요 수 설정
-        binding.tipText.text = dummyRecipe.tips
-        binding.heartCount.text = formatCount(dummyRecipe.likeCount)
+        binding.tipText.text = recipeData.tips
+        binding.heartCount.text = formatCount(recipeData.likes)
 
         // 북마크/좋아요 버튼 초기 상태 설정
         binding.bookmarkButton.setBackgroundResource(
-            if(dummyRecipe.isBookmarked) R.drawable.ic_recipe_bookmark_selected
+            if(recipeData.scrappedByCurrentUser) R.drawable.ic_recipe_bookmark_selected
             else R.drawable.ic_recipe_bookmark_normal
         )
+
         binding.heartButton.setBackgroundResource(
-            if(dummyRecipe.isLiked) R.drawable.ic_recipe_heart_selected
+            if(recipeData.likedByCurrentUser) R.drawable.ic_recipe_heart_selected
             else R.drawable.ic_recipe_heart_normal
         )
 
         // 북마크 버튼 클릭 이벤트 처리
         binding.bookmarkButton.setOnClickListener{
-            dummyRecipe.isBookmarked = !dummyRecipe.isBookmarked
+            recipeData.scrappedByCurrentUser = !recipeData.scrappedByCurrentUser
             binding.bookmarkButton.setBackgroundResource(
-                if(dummyRecipe.isBookmarked) R.drawable.ic_recipe_bookmark_selected
+                if(recipeData.scrappedByCurrentUser) R.drawable.ic_recipe_bookmark_selected
                 else R.drawable.ic_recipe_bookmark_normal
             )
         }
 
         // 좋아요 버튼 클릭 이벤트 처리
         binding.heartButton.setOnClickListener{
-            dummyRecipe.isLiked = !dummyRecipe.isLiked
+            recipeData.likedByCurrentUser = !recipeData.likedByCurrentUser
             // 좋아요 상태에 따라 카운트 증가/감소
-            if (dummyRecipe.isLiked) {
-                dummyRecipe.likeCount++
+            if (recipeData.likedByCurrentUser) {
+                recipeData.likes++
             } else {
-                dummyRecipe.likeCount--
+                recipeData.likes--
             }
             // 버튼 이미지와 카운트 업데이트
             binding.heartButton.setBackgroundResource(
-                if(dummyRecipe.isLiked) R.drawable.ic_recipe_heart_selected
+                if(recipeData.likedByCurrentUser) R.drawable.ic_recipe_heart_selected
                 else R.drawable.ic_recipe_heart_normal
             )
-            binding.heartCount.text = formatCount(dummyRecipe.likeCount)
+            binding.heartCount.text = formatCount(recipeData.likes)
         }
 
         // 팔로우 버튼 클릭 이벤트 처리
@@ -136,6 +140,51 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
             )
         }
 
+        // 수정 런처 설정
+        val editRecipeLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val recipeDataJson = result.data?.getStringExtra("recipeData")
+                val recipeData = recipeDataJson?.let { Gson().fromJson(it, RecipeData::class.java) }
+                if (recipeData != null) {
+                    // 레시피 데이터 업데이트
+                    binding.memberTitle.text = recipeData.authorTitle
+                    binding.memberNickname.text = recipeData.authorNickname
+                    binding.recipeNameText.text = recipeData.title
+                    val imagePath = recipeData.imageUrl ?: ""
+                    if (imagePath.startsWith("/")) {
+                        binding.recipeImage.setImageURI(Uri.fromFile(File(imagePath)))
+                    } else {
+                        binding.recipeImage.setImageURI(Uri.parse(imagePath))
+                    }
+                    binding.categorySlowAging.text = recipeData.categorySlowAging
+                    binding.categoryType.text = recipeData.categoryType
+                    binding.recipeLevel.text = recipeData.difficulty
+                    binding.recipeTimeHour.text =
+                        if (recipeData.timeHours > 0)
+                            getString(R.string.recipe_time_hour_format, recipeData.timeHours)
+                        else
+                            ""
+                    binding.recipeTimeMin.text =
+                        if(recipeData.timeMinutes > 0)
+                            getString(R.string.recipe_time_min_format, recipeData.timeMinutes)
+                        else
+                            ""
+                    binding.tipText.text = recipeData.tips
+                    binding.heartCount.text = formatCount(recipeData.likes)
+                    binding.bookmarkButton.setBackgroundResource(
+                        if (recipeData.scrappedByCurrentUser) R.drawable.ic_recipe_bookmark_selected
+                        else R.drawable.ic_recipe_bookmark_normal
+                    )
+                    binding.heartButton.setBackgroundResource(
+                        if (recipeData.likedByCurrentUser) R.drawable.ic_recipe_heart_selected
+                        else R.drawable.ic_recipe_heart_normal
+                    )
+                }
+            }
+        }
+
         // 메뉴 버튼 클릭 시 팝업 메뉴 표시
         binding.menuButton.setOnClickListener {
             val popupMenu = PopupMenu(context, binding.menuButton)
@@ -145,27 +194,13 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
             popupMenu.setOnMenuItemClickListener { menuItem ->
                 when (menuItem.itemId) {
                     R.id.menu_edit -> {
-                        Toast.makeText(context, "댓글 수정 클릭됨", Toast.LENGTH_SHORT).show()
-                        val recipeData = RecipeData(
-                            id = BigInteger.valueOf(1), // 예시 데이터
-                            memberId = BigInteger.valueOf(1001),
-                            title = "블루베리 항산화 스무디",
-                            imageUrl = "image_url",
-                            categorySlowAging = "항산화 강화",
-                            categoryType = "음료/차",
-                            difficulty = "쉬움",
-                            timeHours = 0,
-                            timeMinutes = 5,
-                            ingredients = listOf("블루베리", "그릭요거트", "꿀"),
-                            seasoning = listOf("얼음", "시나몬 파우더"),
-                            recipeOrder = listOf("모든 재료를 믹서에 넣는다", "곱게 갈아 컵에 담는다"),
-                            tips = "시나몬을 추가하면 향과 항산화 성분이 강화됩니다.",
-                            createdAt = "2025-04-22",
-                            updateAt = "2025-04-22",
-                            isBookmarked = false,
-                            isLiked = false,
-                            likeCount = 42
-                        )
+                        // arguments에서 JSON 문자열 꺼내서 객체로 변환
+                        val recipeDataJson = Gson().toJson(recipeData)
+                        val intent = Intent(requireContext(), ToolbarActivity::class.java).apply {
+                            putExtra("mode", 9)
+                            putExtra("recipeData", recipeDataJson)
+                        }
+                        editRecipeLauncher.launch(intent)
                         true
                     }
                     R.id.menu_delete -> {
@@ -194,7 +229,7 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                 flexDirection = FlexDirection.ROW
                 justifyContent = JustifyContent.FLEX_START
             }
-            adapter = RecipeTagAdapter(dummyRecipe.ingredients)
+            adapter = IngredientTagChipAdapter(recipeData.ingredientTagIds)
         }
 
         // 재료 리스트 설정
@@ -203,7 +238,8 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                 flexDirection = FlexDirection.ROW
                 justifyContent = JustifyContent.FLEX_START
             }
-            adapter = RecipeSeasoningAdapter(dummyRecipe.ingredients)
+
+            adapter = FlavoringAdapter(recipeData.ingredients.map { FlavoringData(it.key, it.value) })
         }
 
         // 양념 리스트 설정
@@ -212,12 +248,8 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                 flexDirection = FlexDirection.ROW
                 justifyContent = JustifyContent.FLEX_START
             }
-            adapter = RecipeSeasoningAdapter(dummyRecipe.seasoning)
+            adapter = FlavoringAdapter(recipeData.seasoning.map { FlavoringData(it.key, it.value) })
         }
-
-        // 조리 순서 리스트 설정
-        binding.stepList.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
-        binding.stepList.adapter = RecipeStepAdapter(dummyRecipe.recipeOrder)
 
         // ------------------------ 더미 댓글 데이터 ------------------------
         comments.addAll(listOf(

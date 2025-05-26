@@ -1,10 +1,13 @@
 package com.example.elixir.recipe.ui
 
+import android.app.Activity
 import android.app.AlertDialog
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -12,8 +15,10 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.view.children
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -24,424 +29,291 @@ import com.example.elixir.dialog.SelectImgDialog
 import com.example.elixir.network.AppDatabase
 import com.example.elixir.recipe.viewmodel.RecipeViewModel
 import com.example.elixir.recipe.data.FlavoringData
+import com.example.elixir.recipe.data.RecipeData
 import com.example.elixir.recipe.data.RecipeRepository
 import com.example.elixir.recipe.data.RecipeStepData
 import com.example.elixir.recipe.viewmodel.RecipeViewModelFactory
+import com.google.android.material.chip.Chip
+import com.google.gson.Gson
+import org.threeten.bp.LocalDateTime
+import java.io.File
+import java.io.FileOutputStream
 
 class RecipeLogFragment : Fragment() {
-    // 프래그먼트 바인딩 정의
     private var recipeLogBinding: FragmentRecipeLogBinding? = null
     private val recipeBinding get() = recipeLogBinding!!
 
-    // 정보
-    // 레시피 제목, 썸네일, 설명
-    private var recipeTitle: String = ""
-    private var thumbnail: String = ""
+    // 데이터 변수
+    private var recipeTitle = ""
+    private var thumbnail = ""
     private lateinit var thumbnailUri: Uri
-    private var recipeDescription: String = ""
-
-    // 카테고리 (저속노화, 종류(한식, 양식 등)), 난이도
-    private var categorySlowAging: String = ""
-    private var categoryType: String = ""
-    private var difficulty: String = ""
-
-    // 식재료 태그, 알레르기 태그
-    private var ingredientTags = mutableListOf<String>()
+    private var recipeDescription = ""
+    private var categorySlowAging = ""
+    private var categoryType = ""
+    private var difficulty = ""
+    private var ingredientTags = mutableListOf<Int>()
     private var allergies = mutableListOf<String>()
-
-    // 재료, 양념, 조리법, 팁
-    private val ingredients = mutableListOf<FlavoringData>()
-    private val seasoning = mutableListOf<FlavoringData>()
+    private val ingredientList = mutableListOf<FlavoringData>()
+    private val seasoningList = mutableListOf<FlavoringData>()
     private val steps = mutableListOf<RecipeStepData>()
-    private var tips: String = ""
+    private var tips = ""
+    private var timeHours = 0
+    private var timeMinutes = 0
 
-    // 조리 시간 (시, 분)
-    private var timeHours: Int = 0
-    private var timeMinutes: Int = 0
-
-    // 어댑터 정의
+    // 어댑터
     private lateinit var ingredientsAdapter: FlavoringLogAdapter
     private lateinit var seasoningAdapter: FlavoringLogAdapter
     private lateinit var stepAdapter: RecipeStepLogAdapter
 
-    // 이미지 피커
-    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
-        if (uri != null) {
-            // 선택된 이미지를 해당 단계 데이터에 반영
-            steps[selectedPosition].stepImg = uri.toString()
-            stepAdapter.notifyItemChanged(selectedPosition)
-        } else {
-            // 이미지 선택 취소 시 메시지 표시
-            Toast.makeText(requireContext(), "이미지를 선택하지 않았습니다.", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    // 선택된 단계의 위치
+    private lateinit var chipMap: Map<Int, Int>
     private var selectedPosition: Int = -1
-
     private lateinit var repository: RecipeRepository
 
-    // 뷰모델
+    private lateinit var pickThumbnailLauncher: ActivityResultLauncher<PickVisualMediaRequest>
+
+    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
+        uri?.let {
+            val file = File(requireContext().filesDir, "step_image_${System.currentTimeMillis()}_$selectedPosition.jpg")
+            requireContext().contentResolver.openInputStream(uri)?.use { input ->
+                FileOutputStream(file).use { output -> input.copyTo(output) }
+            }
+            steps[selectedPosition].stepImg = file.absolutePath
+            stepAdapter.notifyItemChanged(selectedPosition)
+        } ?: Toast.makeText(requireContext(), "이미지를 선택하지 않았습니다.", Toast.LENGTH_SHORT).show()
+    }
+
     private val recipeViewModel: RecipeViewModel by viewModels {
         RecipeViewModelFactory(repository)
     }
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         recipeLogBinding = FragmentRecipeLogBinding.inflate(inflater, container, false)
         return recipeBinding.root
     }
 
+    private var isBindingData = false
+
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Room DB 초기화
-        val dao = AppDatabase.getInstance(requireContext()).recipeDao()
-        repository = RecipeRepository(dao)
+        repository = RecipeRepository(AppDatabase.getInstance(requireContext()).recipeDao())
+        chipMap = mapOf(
+            recipeBinding.ingredientSeasonedCabbage.id to 614,
+            recipeBinding.ingredientStrawberry.id to 388,
+            recipeBinding.ingredientSpinach.id to 768,
+            recipeBinding.ingredientAlmond.id to 802
+        )
+        thumbnailUri = Uri.parse("android.resource://${requireContext().packageName}/${R.drawable.img_blank}")
 
-        // 썸네일 URI 초기화
-        context?.let {
-            thumbnailUri = Uri.parse("android.resource://${it.packageName}/${R.drawable.img_blank}")
-        }
+        // 데이터 초기화
+        initData()
 
-        // 재료, 양념 초기화
-        ingredients.clear()
-        ingredients.add(FlavoringData("", ""))
-
-        seasoning.clear()
-        seasoning.add(FlavoringData("", ""))
-
-        // 단계 리스트 초기화
-        steps.clear()
-        context?.let {
-            steps.add(RecipeStepData("android.resource://${it.packageName}/${R.drawable.img_blank}", ""))
-        }
-
-        // 레시피명 입력
-        recipeBinding.enterRecipeTitle.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable?) {
-                recipeTitle = s.toString().trim()
-                updateWriteButtonState()
+        pickThumbnailLauncher = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
+            uri?.let {
+                val file = File(requireContext().filesDir, "picked_image_${System.currentTimeMillis()}.jpg")
+                requireContext().contentResolver.openInputStream(it)?.use { input ->
+                    FileOutputStream(file).use { output -> input.copyTo(output) }
+                }
+                recipeBinding.recipeThumbnail.setImageURI(Uri.fromFile(file))
+                thumbnail = file.absolutePath
             }
-        })
+        }
 
-        // 레시피 썸네일 초기화: 기본 이미지로 설정
+        recipeBinding.recipeThumbnail.setOnClickListener {
+            showThumbnailDialog()
+        }
+
+        // 스피너 설정
+        setupSpinner(recipeBinding.selectLowAging, R.array.method_list) { categorySlowAging = if (it != "저속노화") it else "" }
+        setupSpinner(recipeBinding.selectType, R.array.type_list) { categoryType = if (it != "종류") it else "" }
+        setupSpinner(recipeBinding.selectHour, R.array.cookingHours) {
+            timeHours = when (it) { "시" -> 0; "12시간 이상" -> 12; else -> it.toIntOrNull() ?: 0 }
+        }
+        setupSpinner(recipeBinding.selectMin, R.array.cookingMinutes) {
+            timeMinutes = if (it == "분") 0 else it.toIntOrNull() ?: 0
+        }
+
+        // 식재료
+        setupIngredientChips()
+
+        // 알러지 설정
+        setupAllergyChips()
+
+        // 난이도 설정
+        setupDifficultyChips()
+
+        // 리사이클러뷰 설정
+        setupRecyclerViews()
+
+        // 추가 버튼 설정
+        setupAddButtons()
+
+        setupWriteButton()
+
+        // 수정 모드 진입 시
+        arguments?.let {
+            if (it.getBoolean("isEdit", false)) {
+                Gson().fromJson(it.getString("recipeData"), RecipeData::class.java)?.let { data ->
+                    setRecipeDataToUI(data)
+                }
+            }
+            else {
+
+                // UI 바인딩 및 리스너 설정
+                bindTextInputs()
+            }
+        }
+    }
+
+    // 데이터 초기화
+    private fun initData() {
+        ingredientList.clear();
+        ingredientList.add(FlavoringData("", ""))
+
+        seasoningList.clear();
+        seasoningList.add(FlavoringData("", ""))
+
+        steps.clear();
+        steps.add(RecipeStepData(thumbnailUri.toString(), ""))
+
         recipeBinding.recipeThumbnail.setImageURI(thumbnailUri)
         thumbnail = thumbnailUri.toString()
+    }
 
-        // 이미지 피커 선언 (PickVisualMedia)
-        val imgSelector = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
-            uri?.let {
-                recipeBinding.recipeThumbnail.setImageURI(uri)
-                thumbnail = uri.toString()
-            }
-        }
-
-        // 프로필 이미지를 눌렀을 때, 선택 다이얼로그 띄우기
-        recipeBinding.recipeThumbnail.setOnClickListener {
-            SelectImgDialog(requireContext(),
-                {
-                    // 기본 이미지 선택 시 기본 이미지로 설정
-                    val uri = Uri.parse("android.resource://${requireContext().packageName}/${R.drawable.img_blank}")
-                    recipeBinding.recipeThumbnail.setImageURI(uri)
-                    thumbnail = uri.toString()
-                },
-                {
-                    // 갤러리에서 이미지 선택
-                    imgSelector.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                }
-            ).show()
-        }
-
-        // 레시피 설명 입력
-        recipeBinding.enterRecipeDescription.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable?) {
-                recipeDescription = s.toString().trim()
+    // 텍스트 설정
+    private fun bindTextInputs() {
+        recipeBinding.enterRecipeTitle.addTextChangedListener(simpleTextWatcher {
+            if (!isBindingData) {
+                recipeTitle = it
                 updateWriteButtonState()
             }
         })
-
-        // 카테고리 선택
-        // 저속노화 Spinner 설정
-        val lowAgingOptions = resources.getStringArray(R.array.method_list)
-        val lowAgingAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, lowAgingOptions)
-        lowAgingAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        recipeBinding.selectLowAging.adapter = lowAgingAdapter
-
-        // 저속노화 Spinner 아이템 선택 리스너 설정
-        recipeBinding.selectLowAging.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                val selectedOption = parent.getItemAtPosition(position).toString()
-                categorySlowAging = if (selectedOption != "저속노화") { selectedOption } else { "" }
+        recipeBinding.enterRecipeDescription.addTextChangedListener(simpleTextWatcher {
+            if (!isBindingData) {
+                recipeDescription = it
+                updateWriteButtonState()
             }
-            override fun onNothingSelected(parent: AdapterView<*>) {}
-        }
-
-        // 종류 Spinner 설정
-        val typeOptions = resources.getStringArray(R.array.type_list)
-        val typeAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, typeOptions)
-        typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        recipeBinding.selectType.adapter = typeAdapter
-
-        // 종류 Spinner 아이템 선택 리스너 설정
-        recipeBinding.selectType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                val selectedOption = parent.getItemAtPosition(position).toString()
-                categoryType = if (selectedOption != "종류") { selectedOption } else { "" }
-            }
-            override fun onNothingSelected(parent: AdapterView<*>) {}
-        }
-
-        // 식재료 태그 선택
-        with(recipeBinding) {
-            // 일반 칩 리스트
-            val ingredientsList = listOf(
-                ingredientBrownRice, ingredientBean, ingredientGrain,
-                ingredientGreenLeafy, ingredientBerry, ingredientNuts, ingredientOliveOil,
-                ingredientFish, ingredientPoultry)
-
-            // 챌린지 칩
-            val chipChallenge = ingredientChallenge
-
-            ingredientsList.forEach { chip ->
-                chip.setOnCheckedChangeListener { _, isChecked ->
-                    val tagText = chip.text.toString()
-
-                    if (isChecked) {
-                        if (chip != chipChallenge) {
-                            // 일반 칩이면 5개 제한 체크
-                            val normalTagCount = ingredientTags.count { it != chipChallenge.text.toString() }
-                            if (normalTagCount >= 5) {
-                                chip.isChecked = false
-                                Toast.makeText(requireContext(), "일반 재료는 최대 5개까지만 선택할 수 있습니다.", android.widget.Toast.LENGTH_SHORT).show()
-                                return@setOnCheckedChangeListener
-                            }
-                        }
-
-                        // 추가 (챌린지든 일반이든)
-                        if (!ingredientTags.contains(tagText)) {
-                            ingredientTags.add(tagText)
-                        }
-                    } else {
-                        // 체크 해제: 무조건 제거
-                        ingredientTags.remove(tagText)
-                    }
-                }
-            }
-        }
-
-        // 알레르기 태그 선택
-        with(recipeBinding) {
-            // 일반 칩 리스트
-            val allergyList = listOf(
-                allergyEgg, allergyMilk, allergyBuckwheat, allergyPeanut,
-                allergySoybean, allergyWheat, allergyMackerel, allergyCrab, allergyShrimp,
-                allergyPig, allergyPeach, allergyTomato, allergyDioxide, allergyWalnut,
-                allergyChicken, allergyCow, allergySquid, allergySeashell, allergyOyster,
-                allergyPinenut)
-
-            // 해당 없음 칩
-            val chipNone = nA
-
-            // 일반 칩 선택 시
-            allergyList.forEach { chip ->
-                chip.setOnCheckedChangeListener { _, isChecked ->
-                    // 일반 칩을 선택했다면 해당 없음 칩을 리스트에서 제거
-                    if (isChecked) {
-                        chipNone.isChecked = false
-                        allergies.remove(chipNone.text.toString())
-
-                        // 중복 저장 방지
-                        if (!allergies.contains(chip.text.toString()))
-                            allergies.add(chip.text.toString())
-                    }
-                    // 두번 클릭 시 리스트에서 제거
-                    else allergies.remove(chip.text.toString())
-                }
-            }
-
-            // 특별히 없음 선택 시
-            chipNone.setOnCheckedChangeListener { _, isChecked ->
-                // 일반 칩 모두 선택 해제, 리스트에서 제거하고 특별히 없음을 저장
-                if (isChecked) {
-                    allergyList.forEach { it.isChecked = false }
-                    allergies.clear()
-                    allergies.add(chipNone.text.toString())
-                }
-                // 두 번 클릭 시 리스트에서 제거
-                else allergies.remove(chipNone.text.toString())
-            }
-        }
-
-        // 난이도 칩 선택
-        with(recipeBinding) {
-            val difficultyList = listOf(levelEasy, levelNormal, levelHard)
-
-            difficultyList.forEach { chip ->
-                chip.setOnCheckedChangeListener { _, isChecked ->
-                    if (isChecked) {
-                        // 선택된 난이도 저장
-                        difficulty = chip.text.toString()
-                    } else {
-                        // 체크 해제 시 난이도 초기화
-                        if (difficulty == chip.text.toString()) {
-                            difficulty = ""
-                        }
-                    }
-                }
-            }
-        }
-
-        // 시간 Spinner 설정
-        val hourOptions = resources.getStringArray(R.array.cookingHours)
-        val hourAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, hourOptions)
-        hourAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        recipeBinding.selectHour.adapter = hourAdapter
-
-        // 시간 Spinner 선택 리스너 설정
-        recipeBinding.selectHour.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                when (val selectedOption = parent.getItemAtPosition(position).toString()) {
-                    "시" -> timeHours = 0 // 기본값
-                    "12시간 이상" -> timeHours = 12 // 12시간 이상을 특정 값으로 설정
-                    else -> selectedOption.toIntOrNull() ?: 0 // 숫자로 변환 가능하면 변환, 아니면 기본값
-                }
-            }
-            override fun onNothingSelected(parent: AdapterView<*>) {}
-        }
-
-        // 분 Spinner 설정
-        val minuteSpinner = recipeBinding.selectMin
-        val minuteOptions = resources.getStringArray(R.array.cookingMinutes)
-        val minuteAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, minuteOptions)
-        minuteAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        minuteSpinner.adapter = minuteAdapter
-
-        // 분 Spinner 선택 리스너 설정
-        minuteSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                when (val selectedOption = parent.getItemAtPosition(position).toString()) {
-                    "분" -> timeMinutes = 0 // 기본값
-                    else -> selectedOption.toIntOrNull() ?: 0 // 숫자로 변환 가능하면 변환, 아니면 기본값
-                }
-            }
-            override fun onNothingSelected(parent: AdapterView<*>) {}
-        }
-
-
-        // 재료 RecyclerView 삭제 버튼 클릭 시 해당 아이템 삭제
-        ingredientsAdapter = FlavoringLogAdapter(ingredients, { position ->
-            removeFlavoringItem(ingredients, position, ingredientsAdapter, recipeBinding.frameEnterIngredients)
-        }, {
-            updateAddButtonState()
         })
+        recipeBinding.enterTipCaution.addTextChangedListener(simpleTextWatcher {
+            if (!isBindingData) {
+                tips = it
+                updateWriteButtonState()
+            }
+        })
+    }
 
-        // 재료 RecyclerView 어댑터, 레이아웃 설정
-        recipeBinding.frameEnterIngredients.apply {
-            adapter = ingredientsAdapter
-            layoutManager = LinearLayoutManager(requireContext())
-            setHasFixedSize(true)
+    // 식재료 설정
+    private fun setupIngredientChips() {
+        val chipList = listOf(recipeBinding.ingredientSeasonedCabbage, recipeBinding.ingredientStrawberry, recipeBinding.ingredientSpinach, recipeBinding.ingredientAlmond)
+        chipList.forEach { chip ->
+            chip.setOnCheckedChangeListener { _, isChecked ->
+                val chipTag = chipMap[chip.id] ?: return@setOnCheckedChangeListener
+                if (isChecked) {
+                    if (ingredientTags.size >= 5) {
+                        chip.isChecked = false
+                        Toast.makeText(requireContext(), "식재료 태그는 최대 5개까지 선택 가능합니다", Toast.LENGTH_SHORT).show()
+                    } else ingredientTags.add(chipTag)
+                } else ingredientTags.remove(chipTag)
+            }
         }
+        updateWriteButtonState()
+    }
 
-        // 초기 상태에서 추가 버튼 비활성화
+    // 알러지 설정
+    private fun setupAllergyChips() {
+        val allergyList = listOf(
+            recipeBinding.allergyEgg, recipeBinding.allergyMilk, recipeBinding.allergyBuckwheat, recipeBinding.allergyPeanut,
+            recipeBinding.allergySoybean, recipeBinding.allergyWheat, recipeBinding.allergyMackerel, recipeBinding.allergyCrab, recipeBinding.allergyShrimp,
+            recipeBinding.allergyPig, recipeBinding.allergyPeach, recipeBinding.allergyTomato, recipeBinding.allergyDioxide, recipeBinding.allergyWalnut,
+            recipeBinding.allergyChicken, recipeBinding.allergyCow, recipeBinding.allergySquid, recipeBinding.allergySeashell, recipeBinding.allergyOyster,
+            recipeBinding.allergyPinenut
+        )
+        val chipNone = recipeBinding.nA
+        allergyList.forEach { chip ->
+            chip.setOnCheckedChangeListener { _, isChecked ->
+                if (isChecked) {
+                    if (allergies.size >= 5) {
+                        chip.isChecked = false
+                        Toast.makeText(requireContext(), "알레르기는 최대 5개까지 선택 가능합니다.", Toast.LENGTH_SHORT).show()
+                        return@setOnCheckedChangeListener
+                    }
+                    chipNone.isChecked = false
+                    allergies.remove(chipNone.text.toString())
+                    if (!allergies.contains(chip.text.toString())) allergies.add(chip.text.toString())
+                } else allergies.remove(chip.text.toString())
+            }
+        }
+        chipNone.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                allergyList.forEach { it.isChecked = false }
+                allergies.clear()
+                allergies.add(chipNone.text.toString())
+            } else allergies.remove(chipNone.text.toString())
+        }
+        updateWriteButtonState()
+    }
+
+    // 난이도 설정
+    private fun setupDifficultyChips() {
+        val difficultyList = listOf(recipeBinding.levelEasy, recipeBinding.levelNormal, recipeBinding.levelHard)
+        difficultyList.forEach { chip ->
+            chip.setOnCheckedChangeListener { _, isChecked ->
+                if (isChecked) {
+                    difficultyList.filter { it != chip }.forEach { it.isChecked = false }
+                    difficulty = chip.text.toString()
+                } else if (difficulty == chip.text.toString()) difficulty = ""
+            }
+        }
+        updateWriteButtonState()
+    }
+
+    // RecyclerView 설정
+    private fun setupRecyclerViews() {
+        ingredientsAdapter = FlavoringLogAdapter(ingredientList,
+            { removeFlavoringItem(ingredientList, it, ingredientsAdapter, recipeBinding.frameEnterIngredients) },
+            { updateAddButtonState() }
+        )
+        seasoningAdapter = FlavoringLogAdapter(seasoningList,
+            { removeFlavoringItem(seasoningList, it, seasoningAdapter, recipeBinding.frameEnterSeasoning) },
+            { updateAddButtonState() }
+        )
+        stepAdapter = RecipeStepLogAdapter(steps,
+            { removeStepItem(it) }, { showSelectImgDialog(it) }, { updateAddButtonState() }
+        )
+        setupRecyclerView(recipeBinding.frameEnterIngredients, ingredientsAdapter)
+        setupRecyclerView(recipeBinding.frameEnterSeasoning, seasoningAdapter)
+        setupRecyclerView(recipeBinding.frameEnterRecipeStep, stepAdapter)
+        updateWriteButtonState()
+    }
+
+    // 추가 버튼 설정
+    private fun setupAddButtons() {
         recipeBinding.btnIngredientsAdd.setOnClickListener {
-            ingredients.add(FlavoringData("", ""))
-            ingredientsAdapter.notifyItemInserted(ingredients.size - 1)
-            // 리사이클러뷰 높이 업데이트
+            ingredientList.add(FlavoringData("", ""))
+            ingredientsAdapter.notifyItemInserted(ingredientList.size - 1)
             updateRecyclerViewHeight(recipeBinding.frameEnterIngredients, ingredientsAdapter)
         }
-
-        // 양념 RecyclerView 어댑터 설정
-        seasoningAdapter = FlavoringLogAdapter(seasoning, { position ->
-            removeFlavoringItem(seasoning, position, seasoningAdapter, recipeBinding.frameEnterSeasoning)
-        }, {
-            updateAddButtonState() // 버튼 상태 업데이트 함수 전달
-        })
-
-        // 양념 RecyclerView 어댑터, 레이아웃 설정
-        recipeBinding.frameEnterSeasoning.apply {
-            adapter = seasoningAdapter
-            layoutManager = LinearLayoutManager(requireContext())
-            setHasFixedSize(true)
-        }
-
-        // 초기 상태에서 추가 버튼 비활성화
         recipeBinding.btnSeasoningAdd.setOnClickListener {
-            seasoning.add(FlavoringData("", ""))
-            seasoningAdapter.notifyItemInserted(seasoning.size - 1)
-            // 리사이클러뷰 높이 업데이트
+            seasoningList.add(FlavoringData("", ""))
+            seasoningAdapter.notifyItemInserted(seasoningList.size - 1)
             updateRecyclerViewHeight(recipeBinding.frameEnterSeasoning, seasoningAdapter)
         }
-
-        // 단계 RecyclerView 설정
-        stepAdapter = RecipeStepLogAdapter(steps,
-            // 삭제 처리
-            { position ->
-                if (steps.size > 1) {
-                    steps.removeAt(position)
-                    stepAdapter.notifyItemRemoved(position)
-                    stepAdapter.notifyItemRangeChanged(position, steps.size)// 리사이클러뷰 높이 업데이트
-                    updateRecyclerViewHeight(recipeBinding.frameEnterRecipeStep, stepAdapter)
-                } else {
-                    Toast.makeText(requireContext(), "최소 하나의 항목은 필요합니다.", Toast.LENGTH_SHORT).show()
-                }
-                updateAddButtonState() // 버튼 상태 업데이트 호출
-            },
-            // 이미지 클릭 시 다이얼로그 열기
-            { position ->
-                showSelectImgDialog(position)
-            },
-            // 버튼 상태 업데이트
-            {
-                updateAddButtonState()
-            }
-        )
-
-        // 단계 RecyclerView 어댑터 설정
-        recipeBinding.frameEnterRecipeStep.apply {
-            adapter = stepAdapter
-            layoutManager = LinearLayoutManager(requireContext())
-            setHasFixedSize(true)
-        }
-
-        // 초기 상태에서 추가 버튼 클릭 시 기본 이미지로 초기화
         recipeBinding.btnRecipeStepAdd.setOnClickListener {
             steps.add(RecipeStepData("android.resource://${requireContext().packageName}/${R.drawable.img_blank}", ""))
             stepAdapter.notifyItemInserted(steps.size - 1)
-            // 리사이클러뷰 높이 업데이트
             updateRecyclerViewHeight(recipeBinding.frameEnterRecipeStep, stepAdapter)
         }
+        updateWriteButtonState()
+    }
 
-        // 팁/주의사항 입력
-        recipeBinding.enterTipCaution.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable?) {
-                tips = s.toString().trim()
-                updateWriteButtonState()
-            }
-        })
-
+    // 작성 버튼 설정
+    private fun setupWriteButton() {
         recipeBinding.btnWriteRecipe.setOnClickListener {
             if (isAllFieldsValid()) {
-                val saveDialog = SaveDialog(requireActivity()) {
-                    /*
-                    val recipeEntity = RecipeEntity(
+                SaveDialog(requireActivity()) {
+                    val recipeData = RecipeData(
+                        email = "email",
                         title = recipeTitle,
                         description = recipeDescription,
                         categorySlowAging = categorySlowAging,
@@ -449,101 +321,154 @@ class RecipeLogFragment : Fragment() {
                         difficulty = difficulty,
                         timeHours = timeHours,
                         timeMinutes = timeMinutes,
-                        ingredientTagIds = ingredientTagIds,
-                        ingredients = ingredients.associate { it.name to it.unit },
-                        seasoning = seasoning.associate { it.name to it.unit },
+                        ingredientTagIds = ingredientTags,
+                        ingredients = ingredientList.associate { it.name to it.unit },
+                        seasoning = seasoningList.associate { it.name to it.unit },
                         stepDescriptions = steps.map { it.stepDescription },
                         stepImageUrls = steps.map { it.stepImg },
                         tips = tips,
                         allergies = allergies,
                         imageUrl = thumbnail,
-                        createdAt = System.currentTimeMillis().toString(),
-                        updatedAt = System.currentTimeMillis().toString()
+                        authorFollowByCurrentUser = false,
+                        likedByCurrentUser = false,
+                        scrappedByCurrentUser = false,
+                        authorNickname = "작성자 닉네임",
+                        authorTitle = "작성자 직책",
+                        likes = 0,
+                        scraps = 0,
+                        createdAt = org.threeten.bp.LocalDateTime.now(),
+                        updatedAt = org.threeten.bp.LocalDateTime.now()
                     )
-
-                    recipeViewModel.saveRecipeToDB(recipeEntity)*/
-                    Toast.makeText(requireContext(), "레시피가 저장되었습니다.", Toast.LENGTH_SHORT).show()
+                    recipeViewModel.saveRecipeToDB(recipeData)
+                    val intent = Intent().apply {
+                        putExtra("mode", if (arguments?.getBoolean("isEdit") == true) 9 else 0)
+                        putExtra("recipeData", Gson().toJson(recipeData))
+                    }
+                    Toast.makeText(requireContext(), if (arguments?.getBoolean("isEdit") == true) "레시피가 수정되었습니다." else "레시피가 저장되었습니다.", Toast.LENGTH_SHORT).show()
+                    requireActivity().setResult(Activity.RESULT_OK, intent)
                     requireActivity().finish()
-                }
-                saveDialog.show()
+                }.show()
             }
         }
     }
 
-    // 이미지 선택 다이얼로그
+    // 스피너 설정
+    private fun setupSpinner(spinner: android.widget.Spinner, arrayRes: Int, onSelected: (String) -> Unit) {
+        val options = resources.getStringArray(arrayRes)
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, options)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner.adapter = adapter
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                onSelected(parent.getItemAtPosition(position).toString())
+                updateWriteButtonState()
+            }
+            override fun onNothingSelected(parent: AdapterView<*>) {}
+        }
+    }
+
+    // TextWatcher 생성
+    private fun simpleTextWatcher(afterChanged: (String) -> Unit) = object : TextWatcher {
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        override fun afterTextChanged(s: Editable?) {
+            afterChanged(s.toString().trim())
+            updateWriteButtonState()
+        }
+    }
+
+    // RecyclerView 설정
+    private fun setupRecyclerView(recyclerView: RecyclerView, adapter: RecyclerView.Adapter<*>) {
+        recyclerView.apply {
+            this.adapter = adapter
+            layoutManager = LinearLayoutManager(requireContext())
+            setHasFixedSize(true)
+        }
+    }
+
+    // RecyclerView 높이 업데이트
+    private fun updateRecyclerViewHeight(recyclerView: RecyclerView, adapter: RecyclerView.Adapter<*>) {
+        recyclerView.post {
+            val itemCount = adapter.itemCount
+            val itemHeight = recyclerView.getChildAt(0)?.measuredHeight ?: 0
+            val totalHeight = itemHeight * itemCount * 1.2
+            recyclerView.layoutParams = recyclerView.layoutParams.apply { height = totalHeight.toInt() }
+        }
+    }
+
+    // 식재료 없애기
+    private fun removeFlavoringItem(list: MutableList<FlavoringData>, position: Int, adapter: FlavoringLogAdapter, recyclerView: RecyclerView) {
+        if (list.size > 1) {
+            list.removeAt(position)
+            adapter.notifyItemRemoved(position)
+            adapter.notifyItemRangeChanged(position, list.size)
+            updateRecyclerViewHeight(recyclerView, adapter)
+            updateWriteButtonState()
+        } else
+            Toast.makeText(requireContext(), "최소 하나의 항목은 필요합니다.", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun removeStepItem(position: Int) {
+        if (steps.size > 1) {
+            steps.removeAt(position)
+            stepAdapter.notifyItemRemoved(position)
+            stepAdapter.notifyItemRangeChanged(position, steps.size)
+            updateRecyclerViewHeight(recipeBinding.frameEnterRecipeStep, stepAdapter)
+            updateWriteButtonState()
+        } else
+            Toast.makeText(requireContext(), "최소 하나의 항목은 필요합니다.", Toast.LENGTH_SHORT).show()
+        updateAddButtonState()
+    }
+
     private fun showSelectImgDialog(position: Int) {
         if (!isAdded) {
             Toast.makeText(activity, "Fragment가 연결되지 않았습니다.", Toast.LENGTH_SHORT).show()
             return
         }
-
-        val options = arrayOf("기본 이미지 선택", "갤러리에서 선택")
-        val builder = AlertDialog.Builder(requireContext())
-        builder.setTitle("이미지 선택")
-        builder.setItems(options) { _, which ->
-            when (which) {
-                0 -> {
-                    // 기본 이미지 선택
-                    steps[position].stepImg =
-                        "android.resource://com.example.elixir/drawable/img_blank"
-                    stepAdapter.notifyItemChanged(position)
+        AlertDialog.Builder(requireContext())
+            .setTitle("이미지 선택")
+            .setItems(arrayOf("기본 이미지 선택", "갤러리에서 선택")) { _, which ->
+                when (which) {
+                    0 -> {
+                        steps[position].stepImg = "android.resource://com.example.elixir/drawable/img_blank"
+                        stepAdapter.notifyItemChanged(position)
+                    }
+                    1 -> {
+                        selectedPosition = position
+                        pickImageLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    }
                 }
+            }.show()
+        updateWriteButtonState()
+    }
 
-                1 -> {
-                    // 갤러리에서 이미지 선택
-                    selectedPosition = position
-                    pickImageLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                }
+    private fun showThumbnailDialog() {
+        SelectImgDialog(requireContext(),
+            {
+                val uri = Uri.parse("android.resource://${requireContext().packageName}/${R.drawable.img_blank}")
+                recipeBinding.recipeThumbnail.setImageURI(uri)
+                thumbnail = uri.toString()
+            },
+            {
+                pickThumbnailLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
             }
-        }
-        builder.show()
+        ).show()
     }
 
-    // 재료와 양념 추가 버튼 상태 업데이트
     private fun updateAddButtonState() {
-        val isIngredientsValid = flavoringValid(ingredients)
-        val isSeasoningValid = flavoringValid(seasoning)
-        val isStepsValid = stepsValid(steps)
-
-        // 재료 추가 버튼 상태 업데이트
-        recipeBinding.btnIngredientsAdd.apply {
-            isEnabled = isIngredientsValid
-            backgroundTintList = resources.getColorStateList(
-                if (isIngredientsValid) R.color.elixir_orange else R.color.elixir_gray,
-                null
-            )
-        }
-
-        // 양념 추가 버튼 상태 업데이트
-        recipeBinding.btnSeasoningAdd.apply {
-            isEnabled = isSeasoningValid
-            backgroundTintList = resources.getColorStateList(
-                if (isSeasoningValid) R.color.elixir_orange else R.color.elixir_gray,
-                null
-            )
-        }
-
-        // 단계 추가 버튼 상태 업데이트
-        recipeBinding.btnRecipeStepAdd.apply {
-            isEnabled = isStepsValid
-            backgroundTintList = resources.getColorStateList(
-                if (isStepsValid) R.color.elixir_orange else R.color.elixir_gray,
-                null
-            )
-        }
+        val isIngredientsValid = ingredientList.all { it.name.isNotBlank() && it.unit.isNotBlank() }
+        val isSeasoningValid = seasoningList.all { it.name.isNotBlank() && it.unit.isNotBlank() }
+        val isStepsValid = steps.all { it.stepDescription.isNotBlank() && it.stepImg.isNotBlank() }
+        setAddButtonState(recipeBinding.btnIngredientsAdd, isIngredientsValid)
+        setAddButtonState(recipeBinding.btnSeasoningAdd, isSeasoningValid)
+        setAddButtonState(recipeBinding.btnRecipeStepAdd, isStepsValid)
     }
 
-    // 리사이클러뷰 높이 업데이트
-    private fun updateRecyclerViewHeight(recyclerView: RecyclerView, adapter: RecyclerView.Adapter<*>) {
-        recyclerView.post {
-            val itemCount = adapter.itemCount
-            val itemHeight = recyclerView.getChildAt(0)?.measuredHeight ?: 0
-            val totalHeight = itemHeight * itemCount * 1.2 // 1.2배 여유 공간 추가
-
-            val layoutParams = recyclerView.layoutParams
-            layoutParams.height = totalHeight.toInt()
-            recyclerView.layoutParams = layoutParams
-        }
+    private fun setAddButtonState(button: View, isEnabled: Boolean) {
+        button.isEnabled = isEnabled
+        button.backgroundTintList = resources.getColorStateList(
+            if (isEnabled) R.color.elixir_orange else R.color.elixir_gray, null
+        )
     }
 
     // 모든 단계가 유효한지 확인하는 함수
@@ -561,19 +486,7 @@ class RecipeLogFragment : Fragment() {
         return list.all { it.name.isNotBlank() && it.unit.isNotBlank() }
     }
 
-    // FlavoringData 리스트에서 아이템 삭제 함수
-    private fun removeFlavoringItem(list: MutableList<FlavoringData>, position: Int,
-                                    adapter: FlavoringLogAdapter, recyclerView: RecyclerView) {
-        if (list.size > 1) {
-            list.removeAt(position)
-            adapter.notifyItemRemoved(position)
-            adapter.notifyItemRangeChanged(position, list.size)
-            updateRecyclerViewHeight(recyclerView, adapter) // 높이 업데이트 호출
-        } else {
-            Toast.makeText(requireContext(), "최소 하나의 항목은 필요합니다.", Toast.LENGTH_SHORT).show()
-        }
-    }
-
+    // 모든 필드가 유효한지 확인하는 함수
     // isAllFieldsValid 함수 분리
     private fun isAllFieldsValid(): Boolean {
         return recipeTitle.isNotBlank() &&
@@ -582,24 +495,222 @@ class RecipeLogFragment : Fragment() {
                 categorySlowAging.isNotBlank() &&
                 categoryType.isNotBlank() &&
                 difficulty.isNotBlank() &&
-                ingredients.isNotEmpty() &&
-                seasoning.isNotEmpty() &&
+                ingredientList.isNotEmpty() &&
+                seasoningList.isNotEmpty() &&
                 steps.isNotEmpty() &&
                 tips.isNotBlank()
     }
 
-    // updateWriteButtonState에서 호출
+    // 작성 버튼 활성화 상태 갱신
     private fun updateWriteButtonState() {
         val isValid = isAllFieldsValid()
 
-        recipeBinding.btnWriteRecipe.isEnabled = isValid
-        recipeBinding.btnWriteRecipe.apply {
-            backgroundTintList = resources.getColorStateList(
-                if (isValid) R.color.elixir_orange else R.color.elixir_gray,
-                null
-            )
+        Log.d("Recipe", "isAllFieldsValid: $isValid")
+        Log.d("Recipe", "title=$recipeTitle, thumbnail=$thumbnail, " +
+                "desc=$recipeDescription, slowAging=$categorySlowAging, type=$categoryType, " +
+                "diff=$difficulty, ingredients=${ingredientList.size}, seasoning=${seasoningList.size}, " +
+                "steps=${steps.size}, tips=$tips")
+        setButtonState(recipeBinding.btnWriteRecipe, isValid)
+    }
+
+    // 버튼 활성화/비활성화 및 색상 처리
+    private fun setButtonState(button: View, isEnabled: Boolean) {
+        button.isEnabled = isEnabled
+        button.backgroundTintList = resources.getColorStateList(
+            if (isEnabled) R.color.elixir_orange else R.color.elixir_gray, null
+        )
+    }
+
+    // Spinner 리스너 생성 함수
+    private fun simpleSpinnerListener(onSelected: (String) -> Unit) = object : AdapterView.OnItemSelectedListener {
+        override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+            onSelected(parent.getItemAtPosition(position).toString())
+        }
+        override fun onNothingSelected(parent: AdapterView<*>) {}
+    }
+
+    // 레시피 데이터를 UI에 설정하는 함수
+    private fun setRecipeDataToUI(recipeData: RecipeData) {
+        isBindingData = true
+        with(recipeBinding) {
+            // 텍스트 필드
+            Log.d("Recipe", "title from recipeData = ${recipeData.title}")
+            recipeBinding.enterRecipeTitle.setText(recipeData.title)
+            Log.d("Recipe", "EditText after setText = ${recipeBinding.enterRecipeTitle.text}")
+            enterRecipeDescription.setText(recipeData.description)
+            enterTipCaution.setText(recipeData.tips)
+
+            // 썸네일 이미지
+            thumbnail = recipeData.imageUrl
+            recipeThumbnail.setImageURI(Uri.parse(recipeData.imageUrl))
+
+            // 카테고리 스피너
+            setSpinnerSelection(selectLowAging, recipeData.categorySlowAging)
+            setSpinnerSelection(selectType, recipeData.categoryType)
+
+            // 시간 스피너
+            setSpinnerSelection(selectHour, if (recipeData.timeHours == 0) "시" else recipeData.timeHours.toString())
+            setSpinnerSelection(selectMin, if (recipeData.timeMinutes == 0) "분" else recipeData.timeMinutes.toString())
+
+            // 식재료 태그 칩
+            ingredientTags.clear()
+            ingredientTags.addAll(recipeData.ingredientTagIds)
+            setIngredientChips(recipeData.ingredientTagIds)
+
+            // 알러지 칩
+            allergies.clear()
+            allergies.addAll(recipeData.allergies)
+            setupAllergyChips(allergies)
+
+            // 난이도 칩
+            difficulty = recipeData.difficulty
+            setDifficultyChipFromData(recipeData.difficulty)
+
+            // 재료 리스트
+            ingredientList.clear()
+            ingredientList.addAll(recipeData.ingredients.map { FlavoringData(it.key, it.value) })
+            ingredientsAdapter.notifyDataSetChanged()
+            updateRecyclerViewHeight(frameEnterIngredients, ingredientsAdapter)
+
+            // 양념 리스트
+            seasoningList.clear()
+            seasoningList.addAll(recipeData.seasoning.map { FlavoringData(it.key, it.value) })
+            seasoningAdapter.notifyDataSetChanged()
+            updateRecyclerViewHeight(frameEnterSeasoning, seasoningAdapter)
+
+            // 단계 리스트
+            steps.clear()
+            val stepCount = maxOf(recipeData.stepDescriptions.size, recipeData.stepImageUrls.size)
+            for (i in 0 until stepCount) {
+                val desc = recipeData.stepDescriptions.getOrNull(i) ?: ""
+                val img = recipeData.stepImageUrls.getOrNull(i) ?: ""
+                steps.add(RecipeStepData(img, desc))
+            }
+            stepAdapter.notifyDataSetChanged()
+            updateRecyclerViewHeight(frameEnterRecipeStep, stepAdapter)
+        }
+
+        isBindingData = false
+        bindTextInputs()
+        updateWriteButtonState()
+    }
+
+    // 스피너 카테고리 설정
+    private fun setSpinnerSelection(spinner: android.widget.Spinner, value: String?) {
+        value ?: return
+        val adapter = spinner.adapter
+        for (i in 0 until adapter.count) {
+            if (adapter.getItem(i).toString() == value) {
+                spinner.setSelection(i)
+                break
+            }
         }
     }
+
+    // 카테고리(저속노화, 종류) 스피너
+    private fun setCategorySpinner(category: String?) {
+        category?.let {
+            val adapter = recipeBinding.selectLowAging.adapter
+            for (i in 0 until adapter.count) {
+                if (adapter.getItem(i).toString() == category) {
+                    recipeBinding.selectLowAging.setSelection(i)
+                    break
+                }
+            }
+        }
+    }
+
+    // 시간 설정 스피너
+    private fun setTimeSpinners(hour: Int, minute: Int) {
+        val hourAdapter = recipeBinding.selectHour.adapter as? ArrayAdapter<String>
+        hourAdapter?.let {
+            val hourPosition = it.getPosition(hour.toString())
+            recipeBinding.selectHour.setSelection(hourPosition)
+        }
+
+        val minuteAdapter = recipeBinding.selectMin.adapter as? ArrayAdapter<String>
+        minuteAdapter?.let {
+            val minutePosition = it.getPosition(minute.toString())
+            recipeBinding.selectMin.setSelection(minutePosition)
+        }
+    }
+
+    // 식재료 태그
+    private fun setIngredientChips(ingredientTags: List<Int>?) {
+        if (ingredientTags.isNullOrEmpty()) return
+
+        // DB 태그 ID로 직접 비교
+        recipeBinding.tagsIngredient.children.forEach { view ->
+            if (view is Chip) {
+                val tagId = chipMap[view.id] // chipMap: chipId -> tagId
+                if (tagId in ingredientTags) {
+                    view.isChecked = true
+                }
+            }
+        }
+    }
+
+    // 알러지 태그 설정
+    private fun setupAllergyChips(allergies: MutableList<String>) {
+        val allergyList = listOf(
+            recipeBinding.allergyEgg, recipeBinding.allergyMilk, recipeBinding.allergyBuckwheat,
+            recipeBinding.allergyPeanut, recipeBinding.allergySoybean, recipeBinding.allergyWheat,
+            recipeBinding.allergyMackerel, recipeBinding.allergyCrab, recipeBinding.allergyShrimp,
+            recipeBinding.allergyPig, recipeBinding.allergyPeach, recipeBinding.allergyTomato,
+            recipeBinding.allergyDioxide, recipeBinding.allergyWalnut, recipeBinding.allergyChicken,
+            recipeBinding.allergyCow, recipeBinding.allergySquid, recipeBinding.allergySeashell,
+            recipeBinding.allergyOyster, recipeBinding.allergyPinenut
+        )
+        val chipNone = recipeBinding.nA // '해당 없음' 칩
+
+        // 1. 기존 선택 상태 복원
+        allergyList.forEach { chip ->
+            chip.isChecked = allergies.contains(chip.text.toString())
+        }
+        chipNone.isChecked = allergies.contains(chipNone.text.toString())
+
+        // 2. 체크 변경 리스너 설정
+        allergyList.forEach { chip ->
+            chip.setOnCheckedChangeListener { button, isChecked ->
+                if (isChecked) {
+                    // 최대 5개 제한
+                    if (allergies.size >= 5) {
+                        button.isChecked = false // 선택 취소
+                        Toast.makeText(button.context, "알레르기는 최대 5개까지 선택 가능합니다.", Toast.LENGTH_SHORT).show()
+                        return@setOnCheckedChangeListener
+                    }
+
+                    chipNone.isChecked = false
+                    allergies.remove(chipNone.text.toString())
+
+                    if (!allergies.contains(chip.text.toString())) {
+                        allergies.add(chip.text.toString())
+                    }
+                } else {
+                    allergies.remove(chip.text.toString())
+                }
+            }
+        }
+
+        chipNone.setOnCheckedChangeListener { button, isChecked ->
+            if (isChecked) {
+                allergyList.forEach { it.isChecked = false }
+                allergies.clear()
+                allergies.add(chipNone.text.toString())
+            } else {
+                allergies.remove(chipNone.text.toString())
+            }
+        }
+    }
+
+    // RecipeData의 difficulty 값을 받아서 난이도 칩 초기 선택 상태 설정
+    private fun setDifficultyChipFromData(difficultyValue: String) {
+        val difficultyList = listOf(recipeBinding.levelEasy, recipeBinding.levelNormal, recipeBinding.levelHard)
+        difficultyList.forEach { chip ->
+            chip.isChecked = (chip.text.toString() == difficultyValue)
+        }
+    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

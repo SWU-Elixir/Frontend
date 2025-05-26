@@ -10,15 +10,12 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.elixir.R
 import com.example.elixir.calendar.data.DietLogData
-import com.example.elixir.calendar.data.MealPlanData
 import com.example.elixir.databinding.FragmentMealDetailBinding
-import com.example.elixir.recipe.ui.RecipeTagAdapter
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 import com.google.gson.Gson
 import org.threeten.bp.format.DateTimeFormatter
-import java.math.BigInteger
 import java.util.Locale
 
 class MealDetailFragment : Fragment() {
@@ -36,21 +33,6 @@ class MealDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // ------------------------ 더미 데이터 적용 ------------------------
-        /*val dummyData = MealPlanData(
-            id = BigInteger("1001"),
-            memberId = BigInteger("1"),
-            name = "연어 아보카도 샐러드",
-            imageUrl = Uri.parse("android.resource://${context?.packageName}/${R.drawable.png_recipe_sample}").toString(),
-            createdAt = "2025-03-29",
-            mealtimes = "아침",
-            score = 5,
-            mealPlanIngredients = listOf("연어", "아보카도", "올리브유", "잣")
-        )*/
-
-        // ------------------------ 데이터 바인딩 ------------------------
-        //binding.mealTitle.text = dummyData.name
-
         // 색상 및 배경 drawable 준비
         val whiteColor = ContextCompat.getColor(requireContext(), R.color.white)
         val grayColor = ContextCompat.getColor(requireContext(), R.color.elixir_gray)
@@ -59,8 +41,6 @@ class MealDetailFragment : Fragment() {
         val timeOrangeBackground = ContextCompat.getDrawable(requireContext(), R.drawable.bg_rect_filled_orange_5)
         val timeGrayBackground = ContextCompat.getDrawable(requireContext(), R.drawable.bg_rect_outline_gray_5)
 
-        //val selectedMealTime = dummyData.mealtimes
-       // val selectedScore = dummyData.score
         // 데이터 불러오기
         val mealDataJson = arguments?.getString("mealData")
         val dietLogData = mealDataJson?.let {
@@ -139,7 +119,6 @@ class MealDetailFragment : Fragment() {
                 flexDirection = FlexDirection.ROW
                 justifyContent = JustifyContent.FLEX_START
             }
-            //adapter = RecipeTagAdapter(dummyData.mealPlanIngredients)
         }
     }
 

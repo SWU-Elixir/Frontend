@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.elixir.R
 import com.example.elixir.databinding.ItemRecipeRecommendationListBinding
+import com.example.elixir.recipe.data.FlavoringData
 import com.example.elixir.recipe.data.RecipeData
 
 class RecipeRecommendationListAdapter(
@@ -36,11 +37,11 @@ class RecipeRecommendationListAdapter(
             if (layoutManager == null) {
                 layoutManager = LinearLayoutManager(holder.itemView.context, LinearLayoutManager.HORIZONTAL, false)
             }
-            adapter = RecipeIngredientAdapter(recipe.ingredients)
+            adapter = FlavoringAdapter(recipe.ingredients.map { FlavoringData(it.key, it.value) })
         }
 
         // 북마크 상태에 따라 버튼 이미지 설정
-        if (recipe.isBookmarked) {
+        if (recipe.scrappedByCurrentUser) {
             holder.binding.bookmarkButton.setImageResource(R.drawable.ic_recipe_bookmark_selected)
         } else {
             holder.binding.bookmarkButton.setImageResource(R.drawable.ic_recipe_bookmark_normal)
@@ -51,9 +52,9 @@ class RecipeRecommendationListAdapter(
 
         // 북마크 버튼 클릭 이벤트 처리
         holder.binding.bookmarkButton.setOnClickListener {
-            recipe.isBookmarked = !recipe.isBookmarked
+            recipe.scrappedByCurrentUser = !recipe.scrappedByCurrentUser
             notifyItemChanged(position) // 변경된 항목 갱신
-            Log.d("RecipeRecommendationListAdapter", "북마크 상태 변경: ${recipe.title} -> ${recipe.isBookmarked}")
+            Log.d("RecipeRecommendationListAdapter", "북마크 상태 변경: ${recipe.title} -> ${recipe.scrappedByCurrentUser}")
         }
 
         holder.itemView.setOnClickListener {

@@ -1,27 +1,32 @@
 package com.example.elixir.recipe.data
 
-import java.math.BigInteger
+import org.threeten.bp.LocalDateTime
+
 
 data class RecipeData(
-    val id: BigInteger,
-    val memberId: BigInteger,           // 레시피 작성자 ID
-    val title: String,                  // 레시피 이름
-    val imageUrl: String,               // 레시피 이미지 리소스 ID (nullable)
-    val categorySlowAging: String,      // 항산화 강화, 혈당 조절, 염증 감소
-    val categoryType: String,           // 한식, 양식, 중식, 일식, 디저트, 음료/차, 양념/소스/잼
-
-    val difficulty: String,             // 쉬움, 보통, 어려움
-    val timeHours: Int,                 // 조리 시간 (시간 단위)
-    val timeMinutes: Int,               // 조리 시간 (분 단위)
-    val ingredients: List<String>,      // 사용된 재료 목록
-    val seasoning: List<String>,        // 사용된 양념 목록
-    val recipeOrder: List<String>,      // 레시피 순서 (조리법)
-    val tips: String,                   // 레시피 팁
-
-    val createdAt: String,
-    val updateAt: String,
-
-    var isBookmarked: Boolean = false,   // 북마크 여부
-    var isLiked: Boolean = false,        // 좋아요 클릭 여부
-    var likeCount: Int
+    var email: String,                          // 작성자 이메일
+    var title: String,                          // 레시피 제목
+    var description: String,
+    var categorySlowAging: String,
+    var categoryType: String,
+    var difficulty: String,
+    var timeHours: Int,
+    var timeMinutes: Int,
+    var ingredientTagIds: List<Int>,            // 태그 목록
+    var ingredients: Map<String, String>,       // 재료와 양념
+    var seasoning: Map<String, String>,
+    var stepDescriptions: List<String>,         // 조리 단계 설명
+    var stepImageUrls: List<String>,            // 조리 단계 이미지 URL (nullable)
+    var tips: String,
+    var allergies: List<String>,                // 알레르기 정보
+    var imageUrl: String,
+    var authorFollowByCurrentUser: Boolean,     // 현재 사용자가 작성자를 팔로우하고 있는지 여부
+    var likedByCurrentUser: Boolean,            // 현재 사용자가 좋아요를 눌렀는지 여부
+    var scrappedByCurrentUser: Boolean,         // 현재 사용자가 스크랩을 눌렀는지 여부
+    var authorNickname: String,                 // 작성자 닉네임
+    var authorTitle: String,                    // 작성자 직책
+    var likes: Int = 0,                         // 좋아요 수
+    var scraps: Int = 0,                        // 스크랩 수
+    var createdAt: LocalDateTime,
+    var updatedAt: LocalDateTime
 )

@@ -1,5 +1,6 @@
 package com.example.elixir.recipe.ui
 
+import android.annotation.SuppressLint
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -9,10 +10,12 @@ import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.elixir.R
 import com.example.elixir.databinding.ItemRecipeListBinding
+import com.example.elixir.recipe.data.FlavoringData
 import com.example.elixir.recipe.data.RecipeData
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
+import com.google.gson.Gson
 
 /**
  * 레시피 리스트 화면에서 사용되는 RecyclerView 어댑터
@@ -38,12 +41,13 @@ class RecipeListAdapter(
 
     override fun getItemCount(): Int = recipeList.size
 
+    @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: RecipeViewHolder, position: Int) {
         val item = recipeList[position]
 
         // 이미지 설정 (없을 경우 기본 이미지 사용)
-        val pictureRes = item.imageUrl ?: R.drawable.ic_recipe_white
-        holder.binding.recipePicture.setImageURI(Uri.parse("android.resource://${holder.itemView.context.packageName}/$pictureRes"))
+        val pictureRes = item.imageUrl
+        holder.binding.recipePicture.setImageURI(Uri.parse(pictureRes))
 
 
         // 텍스트 정보 설정
@@ -51,7 +55,7 @@ class RecipeListAdapter(
         holder.binding.categorySlowAging.text = item.categorySlowAging
         holder.binding.categoryType.text = item.categoryType
         holder.binding.recipeLevel.text = item.difficulty
-        holder.binding.heartCount.text = formatCount(item.likeCount)
+        holder.binding.heartCount.text = formatCount(item.likes)
 
         // 조리 시간 표시
         holder.binding.recipeTimeHour.text = if (item.timeHours == 0) "" else "${item.timeHours}시간"
@@ -63,42 +67,42 @@ class RecipeListAdapter(
                 flexDirection = FlexDirection.ROW
                 justifyContent = JustifyContent.FLEX_START
             }
-            adapter = RecipeIngredientAdapter(item.ingredients)
+            adapter = FlavoringAdapter(item.ingredients.map { FlavoringData(it.key, it.value) })
         }
 
         // 초기 버튼 상태 설정
         holder.binding.bookmarkButton.setBackgroundResource(
-            if(item.isBookmarked) R.drawable.ic_recipe_bookmark_selected
+            if(item.scrappedByCurrentUser) R.drawable.ic_recipe_bookmark_selected
             else R.drawable.ic_recipe_bookmark_normal
         )
         holder.binding.heartButton.setBackgroundResource(
-            if(item.isLiked) R.drawable.ic_recipe_heart_selected
+            if(item.likedByCurrentUser) R.drawable.ic_recipe_heart_selected
             else R.drawable.ic_recipe_heart_normal
         )
 
         // 북마크 버튼 클릭 이벤트
         holder.binding.bookmarkButton.setOnClickListener {
-            item.isBookmarked = !item.isBookmarked
+            item.scrappedByCurrentUser = !item.scrappedByCurrentUser
             holder.binding.bookmarkButton.setBackgroundResource(
-                if(item.isBookmarked) R.drawable.ic_recipe_bookmark_selected
+                if(item.scrappedByCurrentUser) R.drawable.ic_recipe_bookmark_selected
                 else R.drawable.ic_recipe_bookmark_normal
             )
         }
 
         // 좋아요 버튼 클릭 이벤트
         holder.binding.heartButton.setOnClickListener {
-            item.isLiked = !item.isLiked
+            item.likedByCurrentUser = !item.likedByCurrentUser
             holder.binding.heartButton.setBackgroundResource(
-                if(item.isLiked) R.drawable.ic_recipe_heart_selected
+                if(item.likedByCurrentUser) R.drawable.ic_recipe_heart_selected
                 else R.drawable.ic_recipe_heart_normal
             )
-            if (!item.isLiked) {
-                item.likeCount--
+            if (!item.likedByCurrentUser) {
+                item.likes--
             } else {
-                item.likeCount++
+                item.likes++
             }
-            item.isLiked = !item.isLiked
-            holder.binding.heartCount.text = formatCount(item.likeCount)
+            item.likedByCurrentUser = !item.likedByCurrentUser
+            holder.binding.heartCount.text = formatCount(item.likes)
 
             onHeartClick(item)
         }
@@ -110,19 +114,10 @@ class RecipeListAdapter(
         holder.binding.root.setOnClickListener {
             Log.d("RecipeAdapter", "아이템 클릭됨: ${item.title}")
 
-            // 레시피 상세 프래그먼트 생성 및 데이터 전달
+            // 레시피 상세 프래그먼트 생성 및 데이터 전달: JSON 문자열로 변환해 전달
             val detailFragment = RecipeDetailFragment().apply {
                 arguments = Bundle().apply {
-                    putString("title", item.title)
-                    putString("categorySlowAging", item.categorySlowAging)
-                    putString("categoryType", item.categoryType)
-                    putString("tip", item.tips)
-                    putStringArrayList("ingredients", ArrayList(item.ingredients))
-                    putStringArrayList("seasoning", ArrayList(item.seasoning))
-                    //putInt("imageUrl", item.imageUrl ?: u),
-                    putString("difficulty", item.difficulty)
-                    putInt("hour", item.timeHours)
-                    putInt("minute", item.timeMinutes)
+                    putString("recipeDataJson", Gson().toJson(item))
                 }
             }
 
