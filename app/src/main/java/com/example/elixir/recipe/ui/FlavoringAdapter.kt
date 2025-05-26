@@ -1,0 +1,33 @@
+package com.example.elixir.recipe.ui
+
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
+import com.example.elixir.databinding.ItemRecipeRecommendationListIndeterminateBinding
+import com.example.elixir.recipe.data.FlavoringData
+
+// FlavoringAdapter.kt
+class FlavoringAdapter(private val flavors: List<FlavoringData>) :
+    RecyclerView.Adapter<FlavoringAdapter.FlavorViewHolder>() {
+
+    inner class FlavorViewHolder(private val binding: ItemRecipeRecommendationListIndeterminateBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(flavor: FlavoringData) {
+            binding.indeterminateName.text = "${flavor.name} ${flavor.unit}"
+        }
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FlavorViewHolder {
+        val binding = ItemRecipeRecommendationListIndeterminateBinding.inflate(
+            LayoutInflater.from(parent.context), parent, false
+        )
+        return FlavorViewHolder(binding)
+    }
+
+    override fun onBindViewHolder(holder: FlavorViewHolder, position: Int) {
+        holder.bind(flavors[position])
+    }
+
+    override fun getItemCount(): Int = flavors.size
+}
+

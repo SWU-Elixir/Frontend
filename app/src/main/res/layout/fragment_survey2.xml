@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".signup.Survey2Fragment">
+
+    <TextView
+        android:id="@+id/q2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/select_diet"
+        android:layout_marginVertical="20dp"
+        android:text="@string/survey_q2"
+        android:textColor="@color/black"
+        android:textSize="22sp"
+        android:fontFamily="@font/pretendard_bold"/>
+
+    <!-- 선택지 -->
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/select_diet"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="100dp"
+        app:chipSpacingVertical="10dp"
+        app:layout_constraintTop_toBottomOf="@id/q2"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/diet_meat"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/ChipStyle_Long"
+            app:chipIcon="@drawable/ic_meat"
+            app:chipIconVisible="true"
+            android:text="@string/diet_meat"
+            android:textSize="16sp"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/diet_vegetable"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/ChipStyle_Long"
+            app:chipIcon="@drawable/ic_vegetable"
+            app:chipIconVisible="true"
+            android:text="@string/diet_vegetable"
+            android:textSize="16sp"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/diet_meat_vegetable"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/ChipStyle_Long"
+            app:chipIcon="@drawable/ic_sandwich"
+            app:chipIconVisible="true"
+            android:text="@string/diet_meat_vegetable"
+            android:textSize="16sp"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/diet_nothing"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/ChipStyle_Long"
+            app:chipIcon="@drawable/ic_plate"
+            app:chipIconVisible="true"
+            android:text="@string/diet_noting"
+            android:textSize="16sp"/>
+    </com.google.android.material.chip.ChipGroup>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

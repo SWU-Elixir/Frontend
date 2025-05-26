@@ -1,0 +1,123 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="220dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
+        android:background="@color/white">
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="220dp">
+
+
+            <!-- 이미지뷰 -->
+            <ImageView
+                android:id="@+id/recipeImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@color/elixir_gray"
+                tools:ignore="ContentDescription" />
+
+            <!-- 그라데이션 오버레이 -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_gravity="top"
+                android:background="@drawable/bg_gradient_top_overlay"/>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="160dp"
+                android:layout_gravity="bottom"
+                android:background="@drawable/bg_gradient_bottom_overlay"/>
+        </FrameLayout>
+
+
+        <ImageButton
+            android:id="@+id/bookmarkButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_recipe_bookmark_normal"
+            android:layout_gravity="end"
+            android:adjustViewBounds="true"
+            android:background="@android:color/transparent"
+            android:maxWidth="45dp"
+            android:maxHeight="45dp"
+            android:padding="8dp"
+            android:scaleType="fitCenter"
+            android:contentDescription="@string/bookmark"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="bottom"
+            android:padding="16dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                    <TextView
+                        android:id="@+id/category_slow_aging"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/recipe_cat_1"
+                        android:textSize="10sp"
+                        android:background="@drawable/bg_rect_filled_white_5"
+                        android:paddingTop="1dp"
+                        android:paddingBottom="1dp"
+                        android:paddingStart="6dp"
+                        android:paddingEnd="6dp"
+                        android:layout_marginEnd="5dp"
+                        android:textColor="@color/elixir_orange"
+                        android:fontFamily="@font/pretendard_medium"
+                        tools:ignore="MissingConstraints" />
+                <TextView
+                    android:id="@+id/category_type"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/recipe_cat_2"
+                    android:textSize="10sp"
+                    android:background="@drawable/bg_rect_filled_white_5"
+                    android:paddingTop="1dp"
+                    android:paddingBottom="1dp"
+                    android:paddingStart="6dp"
+                    android:paddingEnd="6dp"
+                    android:textColor="@color/elixir_orange"
+                    android:fontFamily="@font/pretendard_medium"
+                    tools:ignore="MissingConstraints" />
+
+            </LinearLayout>
+            <TextView
+                android:id="@+id/recipeNameText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/recipe_name"
+                android:textColor="@color/black"
+                android:fontFamily="@font/pretendard_bold"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:layout_marginBottom="3dp"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/ingredientList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_recipe_recommendation_list_indeterminate"/>
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</LinearLayout>

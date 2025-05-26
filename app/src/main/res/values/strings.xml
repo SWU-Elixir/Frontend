@@ -1,3 +1,388 @@
 <resources>
     <string name="app_name">Elixir</string>
+
+    <!-- 로그인/회원가입 관련 -->
+    <string name="login">로그인</string>
+    <string name="signup">회원가입</string>
+    <string name="email">이메일</string>
+    <string name="email_hint">example@example.com</string>
+    <string name="error_login">이메일이나 비밀번호가 일치하지 않습니다.</string>
+    <string name="auto_login">자동 로그인</string>
+    <string name="pw">비밀번호</string>
+    <string name="check_pw">비밀번호 확인</string>
+    <string name="find_pw">비밀번호 찾기</string>
+    <string name="check">확인</string>
+    <string name="error_email">올바른 형식으로 입력해주세요</string>
+    <string name="error_pw">비밀번호는 영문 대소문자, 숫자, 특수문자(.!@#$%)를 혼합하여 8~20자 이내로 입력해주세요</string>
+    <string name="incorrect_pw">비밀번호가 일치하지 않습니다.</string>
+    <string name="nickname">별명</string>
+    <string name="img_profile">프로필 사진</string>
+    <string name="birth_year">출생년도</string>
+    <string name="birth_year_hint">----</string>
+
+    <!-- 툴바 -->
+    <string name="back">뒤로 가기</string>
+    <string name="more">더보기</string>
+    <string name="next">다음</string>
+    <string name="prev">이전</string>
+    <string name="start">엘릭서 시작하기!</string>
+
+    <!-- 돌아가기 다이얼로그 -->
+    <string name="alert_exit_title">이전 화면으로 돌아가기</string>
+    <string name="alert_exit_message">작성하신 내용은 저장되지 않습니다.</string>
+
+    <!-- 회원가입 : 계정 생성 -->
+    <string name="create_account">계정 생성</string>
+    <string name="exist_account">이미 계정이 있나요?</string>
+
+    <!-- 회원가입 : 계정 생성 -->
+    <string name="set_profile">프로필 설정</string>
+
+    <!-- 회원가입: 이미지 선택 -->
+    <string name="set_profile_img">프로필 이미지 선택</string>
+    <string name="set_img_default">기본 이미지로 설정</string>
+    <string name="set_img_gallery">갤러리에서 가져오기</string>
+
+    <!-- 회원가입: 성별 -->
+    <string name="sex">성별</string>
+    <string name="female">여성</string>
+    <string name="male">남성</string>
+    <string name="other">기타</string>
+
+    <!-- 회원가입: 설문 단계 -->
+    <string name="num_1">1</string>
+    <string name="num_2">2</string>
+    <string name="num_3">3</string>
+    <string name="num_4">4</string>
+
+    <!-- 회원가입: 질문 -->
+    <string name="survey_q1">알레르기 반응이 있는 식품을\n모두 선택해주세요.</string>
+    <string name="survey_q2">선호하는 식단 스타일을\n알려주세요.</string>
+    <string name="survey_q3">관심있는 레시피 종류를\n알려주세요.</string>
+    <string name="survey_q4">저속노화를 하게 된 이유를\n알려주세요.</string>
+
+    <!-- 회원가입: 질문 1(알러지) -->
+    <string name="allergy_egg">알류</string>
+    <string name="allergy_milk">우유</string>
+    <string name="allergy_buckwheat">메밀</string>
+    <string name="allergy_peanut">땅콩</string>
+    <string name="allergy_soybean">대두</string>
+    <string name="allergy_wheat">밀</string>
+    <string name="allergy_mackerel">고등어</string>
+    <string name="allergy_crab">게</string>
+    <string name="allergy_shrimp">새우</string>
+    <string name="allergy_pig">돼지고기</string>
+    <string name="allergy_peach">복숭아</string>
+    <string name="allergy_tomato">토마토</string>
+    <string name="allergy_dioxide">아황산류</string>
+    <string name="allergy_walnut">호두</string>
+    <string name="allergy_chicken">닭고기</string>
+    <string name="allergy_cow">쇠고기</string>
+    <string name="allergy_squid">오징어</string>
+    <string name="allergy_seashell">조개류</string>
+    <string name="allergy_oyster">굴, 전복, 홍합</string>
+    <string name="allergy_pinenut">잣</string>
+
+    <!-- 회원가입: 질문 2(식단) -->
+    <string name="diet_meat">고기 위주의 식단</string>
+    <string name="diet_vegetable">채소 위주의 식단</string>
+    <string name="diet_meat_vegetable">고기와 채소가 어우러진 혼합식 식단</string>
+    <string name="diet_noting">특별히 선호하는 식단 없음</string>
+
+    <!-- 회원가입: 질문 3(관심 레시피) -->
+    <string name="diet_korean">한식</string>
+    <string name="diet_japanese">일식</string>
+    <string name="diet_chinese">중식</string>
+    <string name="diet_western">양식</string>
+    <string name="diet_dessert">디저트</string>
+    <string name="diet_beverage">음료/차</string>
+    <string name="diet_sauce">양념/소스/잼</string>
+    <string name="diet_n_a">특별히 없음</string>
+
+    <!-- 회원가입: 질문 4(이유) -->
+    <!-- 아이콘 -->
+    <string name="ic_antiox">💪</string>
+    <string name="ic_blood">🍚</string>
+    <string name="ic_inflam">🩺</string>
+    <string name="ic_no_recommend">✨</string>
+
+    <!-- 이유 -->
+    <string name="title_antiox">항산화 강화</string>
+    <string name="title_blood">혈당 조절</string>
+    <string name="title_inflam">염증 감소</string>
+    <string name="title_no_recommend">특별한 이유 없음</string>
+
+    <!-- 세부 내용 -->
+    <string name="content_antiox">몸속 나쁜 활성산소를 없애서 세포가 늙거나 손상되는 걸 막아줌</string>
+    <string name="content_blood">혈당이 너무 오르거나 내려가지 않게 도와줘 당뇨를 예방</string>
+    <string name="content_inflam">몸속 염증을 줄여서 건강을 지키고 면역력을 높이는 데 도움</string>
+
+    <!-- 선택되지 않음 -->
+    <string name="selected_not">선택안함</string>
+    <string name="n_a">해당없음</string>
+
+    <!-- 식단 기록 -->
+    <!-- 시간 -->
+    <string name="time">시간</string>
+    <string name="am">AM</string>
+    <string name="pm">PM</string>
+    <string name="set_time_now">현재 시간으로 설정</string>
+
+    <!-- 식단명 -->
+    <string name="diet_name">식단명</string>
+
+    <!-- 식사 유형 -->
+    <string name="diet_category">식사 유형</string>
+    <string name="breakfast">아침</string>
+    <string name="lunch">점심</string>
+    <string name="dinner">저녁</string>
+    <string name="snack">간식</string>
+
+    <!-- 대표 식재료 태그 -->
+    <string name="represent_ingredient">대표 식재료 태그</string>
+    <string name="rule_ingredient">* 식재료는 최대 5개까지 태그할 수 있습니다.</string>
+    <string name="brown_rice">현미</string>
+    <string name="bean">콩</string>
+    <string name="grain">통곡물</string>
+    <string name="green_leafy">푸른잎채소</string>
+    <string name="berry">베리류</string>
+    <string name="nuts">견과류</string>
+    <string name="olive_oil">올리브 오일</string>
+    <string name="fish">생선</string>
+    <string name="poultry">가금류</string>
+    <string name="find_ingredient">식재료 검색</string>
+
+    <!-- 식재료 챌린지 - 2월 -->
+    <string name="seasoned_cabbage">봄동</string>
+    <string name="strawberry">딸기</string>
+    <string name="spinach">시금치</string>
+    <string name="almond">아몬드</string>
+
+    <!-- 식단 점수 -->
+    <string name="diet_score">저속노화에 얼마나 적합한 식단인가요?</string>
+    <string name="score_1">1</string>
+    <string name="score_2">2</string>
+    <string name="score_3">3</string>
+    <string name="score_4">4</string>
+    <string name="score_5">5</string>
+
+    <string name="btn_write">작성</string>
+  
+    <!-- 레시피 작성 -->
+    <!-- 내용 -->
+    <string name="recipe_name">레시피명</string>
+    <string name="thumbnail">대표 사진</string>
+    <string name="recipe_description">설명</string>
+    <string name="recipe_description_hint">200자 내로 작성해주세요.</string>
+    <string name="category">카테고리</string>
+    <string name="low_aging">저속노화</string>
+    <string name="type">종류</string>
+    <string name="allergy">알레르기</string>
+
+    <!-- 난이도 -->
+    <string name="level">난이도</string>
+    <string name="level_easy">쉬움</string>
+    <string name="level_common">보통</string>
+    <string name="level_difficult">어려움</string>
+
+    <!-- 소요시간 -->
+    <string name="duration_time">소요시간</string>
+    <string name="hour">시</string>
+    <string name="min">분</string>
+
+    <!-- 재료 -->
+    <string name="material">재료</string>
+    <string name="material_item_hint">예) 양배추</string>
+    <string name="material_item_unit_hint">예) 200g</string>
+
+    <!-- 추가 버튼 -->
+    <string name="btn_add">추가</string>
+
+    <!-- 양념 -->
+    <string name="sauce">양념</string>
+    <string name="sauce_item_hint">예) 간장</string>
+    <string name="sauce_item_unit_hint">예) 1 작은술</string>
+
+    <!-- 요리 순서 -->
+    <string name="cooking_order">요리 순서</string>
+    <string name="cooking_order_hint">예) 양배추를 한입 크기로 자릅니다.</string>
+
+    <!-- 팁/주의사항 -->
+    <string name="tip_caution">팁/주의사항</string>
+    <string name="tip_caution_hint">팁 및 주의사항을 200자 내로 적어주세요.</string>
+
+    <!-- 마이페이지 -->
+    <string name="btn_logout"><u>로그아웃</u></string>
+    <string name="logout">로그아웃</string>
+    <string name="logout_message">정말 로그아웃 하시겠습니까?</string>
+    <string name="follow">팔로우</string>
+    <string name="follower">팔로워</string>
+    <string name="following">팔로잉</string>
+    <string name="modify_profile">프로필 수정</string>
+    <string name="badge">뱃지</string>
+    <string name="my_recipe">내 레시피</string>
+    <string name="my_scrap">내 스크랩</string>
+
+    <!-- 네비게이션 -->
+    <string name="navi_calendar">캘린더</string>
+    <string name="navi_recipe">레시피</string>
+    <string name="navi_challenge">챌린지</string>
+    <string name="navi_chatbot">챗봇</string>
+    <string name="navi_mypage">마이페이지</string>
+
+    <!-- 다이얼로그 -->
+    <string name="alert_save_title">저장</string>
+    <string name="alert_save_content">저장하시겠습니까?</string>
+
+    <string name="alert_delete_title">삭제</string>
+    <string name="alert_delete_content">삭제하시겠습니까?</string>
+
+    <string-array name="cookingHours">
+        <item>시</item>
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12시간 이상</item>
+    </string-array>
+
+    <string-array name="cookingMinutes">
+        <item>분</item>
+        <item>00</item>
+        <item>05</item>
+        <item>10</item>
+        <item>15</item>
+        <item>20</item>
+        <item>30</item>
+        <item>40</item>
+        <item>50</item>
+    </string-array>
+
+    <!-- 캘린더: 커스텀 주 -->
+    <string-array name="custom_weekdays">
+        <item>S</item>
+        <item>M</item>
+        <item>T</item>
+        <item>W</item>
+        <item>T</item>
+        <item>F</item>
+        <item>S</item>
+    </string-array>
+
+    <!-- 캘린더: 커스텀 월 -->
+    <string-array name="custom_months">
+        <item>01</item>
+        <item>02</item>
+        <item>03</item>
+        <item>04</item>
+        <item>05</item>
+        <item>06</item>
+        <item>07</item>
+        <item>08</item>
+        <item>09</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+    </string-array>
+
+    <!-- 캘린더 -->
+    <string name="no_mealplan">기록된 식단이 없습니다.</string>
+    <string name="tag">태그</string>
+
+    <string-array name="ingredient_list">
+        <item>식재료</item>
+        <item>계란</item>
+        <item>소고기</item>
+        <item>닭고기</item>
+    </string-array>
+
+    <string-array name="method_list">
+        <item>저속노화</item>
+        <item>항산화 강화</item>
+        <item>혈당 조절</item>
+        <item>염증 감소</item>
+    </string-array>
+
+    <string-array name="type_list">
+        <item>종류</item>
+        <item>한식</item>
+        <item>양식</item>
+        <item>중식</item>
+        <item>일식</item>
+        <item>디저트</item>
+        <item>음료/차</item>
+        <item>양념/소스/잼</item>
+    </string-array>
+
+    <!-- 챌린지: 포멧 -->
+    <string name="challenge_period_format">%1$s ~ %2$s</string>
+    <string name="challenge_sub1_format">🌱 %1$s, 함께 도전해요!</string>
+    <string name="challenge_sub2_format">🌳 %1$s를 성공하고\n\'%2$s\' 칭호 및 배지를 획득하세요!</string>
+    <string name="challenge_completion_title">챌린지 완료!</string>
+    <string name="challenge_completion_message">\'%1$s\' 칭호 및 뱃지를 획득했습니다.</string>
+    <string name="challenge_step">%1d단계</string>
+
+    <!-- 챌린지: 메인 화면 -->
+    <string name="challenge_name">챌린지 제목</string>
+    <string name="challenge_period">챌린지 기간</string>
+    <string name="challenge_purpose_title">챌린지 목적 제목</string>
+    <string name="challenge_purpose">챌린지 목적</string>
+    <string name="challenge_sub1">🍀 챌린지는 이렇게 진행됩니다!</string>
+    <string name="challenge_sub2">챌린지는 이렇게 진행됩니다!</string>
+    <string name="challenge_discripetion">챌린지 설명</string>
+    <string name="challenge_list_step">단계</string>
+    <string name="challenge_list_mission">미션</string>
+
+    <!-- 챌린지: 다이얼로그 -->
+    <string name="challenge_complete">챌린지 완료!</string>
+    <string name="challenge_complete_messege">칭호 및 뱃지를 획득했습니다.</string>
+    <string name="challenge_complete_image">챌린지 완료 이미지</string>
+
+    <!-- Recipe Detail Fragment Strings -->
+    <string name="recipe_time_hour_format">%d시간</string>
+    <string name="recipe_time_min_format">%d분</string>
+    <string name="please_enter_comment">댓글을 입력해주세요</string>
+
+    <!-- Recipe Step Format -->
+    <string name="recipe_step_format">STEP %d</string>
+    <string name="search_put_something">검색어를 입력하세요</string>
+    <string name="recipe_nothing_text">검색 결과가 없습니다</string>
+
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="recipe_reload">재설정</string>
+    <string name="recipe_write">레시피 작성</string>
+    <string name="recipe_recommend_title">오늘의 추천 레시피는?</string>
+    <string name="search_hint">검색어를 입력하세요</string>
+    <string name="member_title">칭호</string>
+    <string name="member_nickname">닉네임</string>
+    <string name="recipe_cat_1">저속노화</string>
+    <string name="recipe_cat_2">종류</string>
+    <string name="recipe_difficult">난이도</string>
+    <string name="recipe_hour">시간</string>
+    <string name="recipe_minute">분</string>
+    <string name="recipe_indeterminate">재료</string>
+    <string name="recipe_seasoning">양념</string>
+    <string name="recipe_step">조리 순서</string>
+    <string name="recipe_tip">팁 / 주의 사항</string>
+    <string name="recipe_tip_context">내용</string>
+    <string name="recipe_comment">댓글</string>
+    <string name="comment_nickname">닉네임</string>
+    <string name="comment_hint">댓글을 입력해주세요</string>
+    <string name="search_populer">인기 검색어</string>
+    <string name="search_recommendation">추천 검색어</string>
+    <string name="comment_date">날짜</string>
+    <string name="step">STEP</string>
+    <string name="bookmark">북마크</string>
+    <string name="chatbot_hint">무엇이든 물어보세요!</string>
+
 </resources>

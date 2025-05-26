@@ -9,9 +9,11 @@
     <color name="white">#FFFFFFFF</color>
     <color name="transparency">#00FFFFFF</color>
     <color name="elixir_green">#FFD5F438</color>
+    <color name="elixir_green_20">#33D5F438</color>
     <color name="elixir_orange">#FFFDA150</color>
+    <color name="elixir_orange_20">#33FDA150</color>
+    <color name="elixir_orange_10">#1AFDA150</color>
     <color name="elixir_gray">#FFD0D0D0</color>
     <color name="elixir_darkgray">#FF7B7B7B</color>
     <color name="elixir_lightgray">#FFEFEFEF</color>
-
 </resources>

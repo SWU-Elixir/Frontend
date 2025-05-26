@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp">
+    <!-- 재료 입력 -->
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/step_img"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/ImgDefault_Rect"
+        android:maxWidth="100dp"
+        android:maxHeight="100dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/img_blank"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/thumbnail"
+        app:layout_constraintDimensionRatio="1:1"
+        app:shapeAppearanceOverlay="@style/ImgDefault_Rect"
+        app:layout_constraintTop_toBottomOf="@id/recipe_thumbnail_text"
+        app:layout_constraintBottom_toTopOf="@id/recipe_description"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="ImageContrastCheck" />
+
+    <EditText
+        android:id="@+id/step_description"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="5dp"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="15dp"
+        android:background="@drawable/bg_rect_outline_orange"
+        android:layout_weight="1"
+        android:hint="@string/cooking_order_hint"
+        android:textColor="@color/black"
+        android:textColorHint="@color/elixir_gray"
+        android:textSize="16sp"
+        android:fontFamily="@font/pretendard_medium"
+        android:gravity="top|start"
+        android:maxLength="200"
+        android:inputType="textMultiLine"
+        android:importantForAutofill="no"
+        tools:ignore="DuplicateSpeakableTextCheck,VisualLintTextFieldSize,TextContrastCheck" />
+
+    <ImageButton
+        android:id="@+id/btn_del"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginStart="10dp"
+        android:background="@null"
+        android:contentDescription="@string/alert_delete_title"
+        android:importantForAccessibility="no"
+        android:src="@drawable/btn_del"
+        android:scaleType="fitCenter"
+        tools:ignore="ImageContrastCheck" />
+</LinearLayout>

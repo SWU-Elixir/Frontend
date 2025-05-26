@@ -1,11 +1,18 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.ksp)
 }
 
 android {
     namespace = "com.example.elixir"
     compileSdk = 34
+
+    composeCompiler {
+        reportsDestination = layout.buildDirectory.dir("compose_compiler")
+        stabilityConfigurationFiles.set(listOf(rootProject.layout.projectDirectory.file("stability_config.conf")))
+    }
 
     defaultConfig {
         applicationId = "com.example.elixir"
@@ -38,6 +45,7 @@ android {
     }
     buildFeatures {
         compose = true
+        viewBinding = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -59,6 +67,8 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -66,4 +76,31 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(libs.androidx.fragment.ktx)
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation (libs.logging.interceptor)
+    implementation (libs.androidx.core.splashscreen)
+    implementation(libs.kotlin.stdlib)
+    
+    // Material Components 라이브러리 추가
+    implementation (libs.material)
+    // calendarview 라이브러리 추가
+    implementation (libs.material.calendarview)
+    // flexboxLayout 라이브러리 추가
+    implementation (libs.flexbox)
+    implementation(libs.dotsindicator)
+    implementation(libs.lottie)
+
+    // Room DB 라이브러리 추가
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+
+    // API 23 이하에서 LocalDateTime 타입 변환을 위한 라이브러리 추가
+    implementation (libs.threetenabp)
+
+    // Glide 라이브러리 추가
+    implementation(libs.glide)
+    ksp(libs.glide.compiler)
 }

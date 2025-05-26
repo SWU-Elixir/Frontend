@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/elixir_orange"/> <!-- 눌렀을 때 색 -->
+            <corners android:radius="16dp"/> <!-- 둥근 모서리 -->
+        </shape>
+    </item>
+
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/white"/> <!-- 기본 색 -->
+            <corners android:radius="16dp"/> <!-- 둥근 모서리 -->
+        </shape>
+    </item>
+
+</selector>

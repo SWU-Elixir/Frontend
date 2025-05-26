@@ -1,0 +1,443 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingHorizontal="16dp"
+    android:fitsSystemWindows="true"
+    tools:context=".signup.SettingProfileFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <!-- 이미지 삽입 -->
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/diet_img"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/img_profile"
+            android:scaleType="centerCrop"
+            android:src="@drawable/img_blank"
+            app:layout_constraintDimensionRatio="1:1"
+            app:shapeAppearanceOverlay="@style/ImgDefault_Rect"
+            tools:ignore="ImageContrastCheck"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/time_title"/>
+
+        <!--타임 스탬프-->
+        <!--
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@id/diet_img"
+            app:layout_constraintBottom_toBottomOf="@id/diet_img">
+            <TextView
+                android:id="@+id/timestamp_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/time"
+                android:textColor="@color/white"
+                android:textSize="28sp"
+                android:textAlignment="center"
+                android:fontFamily="@font/pretendard_bold"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/timestamp_date"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            <TextView
+                android:id="@+id/timestamp_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/calendar"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textAlignment="center"
+                android:fontFamily="@font/pretendard_medium"
+                app:layout_constraintTop_toBottomOf="@id/timestamp_time"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+        </androidx.constraintlayout.widget.ConstraintLayout> -->
+
+        <TextView
+            android:id="@+id/time_title"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="20dp"
+            android:text="@string/time"
+            android:fontFamily="@font/pretendard_bold"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            app:layout_constraintTop_toBottomOf="@id/diet_img"
+            app:layout_constraintBottom_toTopOf="@id/layout_time"/>
+
+        <!-- 시간 -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/time_title"
+            app:layout_constraintBottom_toTopOf="@id/diet_title">
+
+            <TextView
+                android:id="@+id/time_12h"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/pretendard_medium"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+            <!-- 시간 선택 -->
+            <android.widget.ImageButton
+                android:id="@+id/time_picker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:background="@drawable/bg_circle_filled_orange"
+                android:contentDescription="@string/time"
+                android:minWidth="24dp"
+                android:minHeight="24dp"
+                android:padding="10dp"
+                android:src="@drawable/ic_time"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/time_12h"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:ignore="ImageContrastCheck,TouchTargetSizeCheck" />
+
+            <!-- 현재 시간으로 설정 -->
+            <CheckBox
+                android:id="@+id/set_now_cb"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:buttonTint="@color/elixir_orange"
+                app:layout_constraintBaseline_toBaselineOf="@id/set_now_text"
+                app:layout_constraintEnd_toStartOf="@id/set_now_text"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
+            <TextView
+                android:id="@+id/set_now_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:text="@string/set_time_now"
+                android:textSize="12sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/pretendard_light"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- 식단명 -->
+        <TextView
+            android:id="@+id/diet_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/diet_name"
+            android:fontFamily="@font/pretendard_bold"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toBottomOf="@id/layout_time"
+            app:layout_constraintBottom_toTopOf="@id/enter_diet_title"/>
+
+        <EditText
+            android:id="@+id/enter_diet_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="5dp"
+            android:background="@drawable/bg_rect_outline_orange"
+            android:fontFamily="@font/pretendard_medium"
+            android:hint="@string/diet_name"
+            android:importantForAutofill="no"
+            android:inputType="text"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="15dp"
+            android:textColor="@color/black"
+            android:textColorHint="@color/elixir_gray"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toTopOf="@id/diet_category"
+            app:layout_constraintTop_toBottomOf="@id/diet_title"
+            tools:ignore="DuplicateSpeakableTextCheck,VisualLintTextFieldSize,TextContrastCheck" />
+
+        <!-- 식사 유형 -->
+        <TextView
+            android:id="@+id/diet_category"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/diet_category"
+            android:fontFamily="@font/pretendard_bold"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            app:layout_constraintTop_toBottomOf="@id/enter_diet_title"
+            app:layout_constraintBottom_toTopOf="@id/select_diet"/>
+
+        <!-- 식사 유형 선택지 -->
+        <RadioGroup
+            android:id="@+id/select_diet"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginVertical="5dp"
+            app:layout_constraintTop_toBottomOf="@id/diet_category"
+            app:layout_constraintBottom_toTopOf="@id/represent_ingredient">
+            <RadioButton
+                android:id="@+id/btn_breakfast"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="5dp"
+                android:background="@drawable/selector_btn_rect"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:button="@null"
+                android:text="@string/breakfast"
+                android:textSize="16sp"
+                android:textColor="@color/selector_btn_text"
+                android:fontFamily="@font/pretendard_medium"/>
+
+            <RadioButton
+                android:id="@+id/btn_lunch"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="5dp"
+                android:background="@drawable/selector_btn_rect"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:button="@null"
+                android:text="@string/lunch"
+                android:textSize="16sp"
+                android:textColor="@color/selector_btn_text"
+                android:fontFamily="@font/pretendard_medium"/>
+
+            <RadioButton
+                android:id="@+id/btn_dinner"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="5dp"
+                android:background="@drawable/selector_btn_rect"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:button="@null"
+                android:text="@string/dinner"
+                android:textSize="16sp"
+                android:textColor="@color/selector_btn_text"
+                android:fontFamily="@font/pretendard_medium"/>
+
+            <RadioButton
+                android:id="@+id/btn_snack"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:background="@drawable/selector_btn_rect"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:button="@null"
+                android:text="@string/snack"
+                android:textSize="16sp"
+                android:textColor="@color/selector_btn_text"
+                android:fontFamily="@font/pretendard_medium"/>
+        </RadioGroup>
+
+        <!-- 대표 식재료 태그 -->
+        <TextView
+            android:id="@+id/represent_ingredient"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:gravity="center_vertical"
+            android:text="@string/represent_ingredient"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:fontFamily="@font/pretendard_bold"
+            app:layout_constraintTop_toBottomOf="@id/select_diet"
+            app:layout_constraintBottom_toTopOf="@id/tags_ingredient"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <TextView
+            android:id="@+id/rule_ingredient"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:gravity="center_vertical"
+            android:text="@string/rule_ingredient"
+            android:textColor="@color/black"
+            android:textSize="12sp"
+            android:fontFamily="@font/pretendard_light"
+            app:layout_constraintTop_toBottomOf="@id/select_diet"
+            app:layout_constraintBottom_toTopOf="@id/tags_ingredient"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <!-- 태그 선택지 -->
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/tags_ingredient"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="20dp"
+            app:chipSpacingHorizontal="8dp"
+            app:layout_constraintBottom_toTopOf="@id/diet_score"
+            app:layout_constraintTop_toBottomOf="@id/represent_ingredient">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/ingredient_seasoned_cabbage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/seasoned_cabbage"
+                android:textSize="16sp"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/ingredient_strawberry"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/strawberry"
+                android:textSize="16sp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/ingredient_spinach"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/spinach"
+                android:textSize="16sp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/ingredient_almond"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                android:text="@string/almond"
+                android:textSize="16sp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/find_ingredient"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ChipStyle_Short"
+                app:chipStrokeColor="@color/elixir_orange"
+                app:chipIcon="@drawable/ic_search"
+                app:chipIconVisible="true"
+                android:text="@string/find_ingredient"
+                android:textSize="16sp"
+                android:textColor="@color/elixir_orange"/>
+        </com.google.android.material.chip.ChipGroup>
+
+        <!-- 점수 -->
+        <TextView
+            android:id="@+id/diet_score"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/diet_score"
+            android:fontFamily="@font/pretendard_bold"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            app:layout_constraintTop_toBottomOf="@id/tags_ingredient"
+            app:layout_constraintBottom_toTopOf="@id/select_score"/>
+
+        <!-- 점수 선택지 -->
+        <RadioGroup
+            android:id="@+id/select_score"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="5dp"
+            app:layout_constraintTop_toBottomOf="@id/diet_score"
+            app:layout_constraintBottom_toTopOf="@id/btn_write_diet_log"
+            app:layout_constraintStart_toStartOf="parent">
+            <RadioButton
+                android:id="@+id/btn_1"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/selector_btn_circle"
+                android:button="@null"
+                android:text="@string/score_1"
+                android:textSize="16sp"
+                android:textColor="@color/selector_btn_text"
+                android:textAlignment="center"
+                android:fontFamily="@font/pretendard_medium"/>
+
+            <RadioButton
+                android:id="@+id/btn_2"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/selector_btn_circle"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:button="@null"
+                android:text="@string/score_2"
+                android:textSize="16sp"
+                android:textColor="@color/selector_btn_text"
+                android:textAlignment="center"
+                android:fontFamily="@font/pretendard_medium"/>
+
+            <RadioButton
+                android:id="@+id/btn_3"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/selector_btn_circle"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:button="@null"
+                android:text="@string/score_3"
+                android:textSize="16sp"
+                android:textColor="@color/selector_btn_text"
+                android:textAlignment="center"
+                android:fontFamily="@font/pretendard_medium"/>
+
+            <RadioButton
+                android:id="@+id/btn_4"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/selector_btn_circle"
+                android:button="@null"
+                android:text="@string/score_4"
+                android:textSize="16sp"
+                android:textColor="@color/selector_btn_text"
+                android:textAlignment="center"
+                android:fontFamily="@font/pretendard_medium"/>
+
+            <RadioButton
+                android:id="@+id/btn_5"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:background="@drawable/selector_btn_circle"
+                android:button="@null"
+                android:text="@string/score_5"
+                android:textSize="16sp"
+                android:textColor="@color/selector_btn_text"
+                android:textAlignment="center"
+                android:fontFamily="@font/pretendard_medium"/>
+        </RadioGroup>
+
+        <android.widget.Button
+            android:id="@+id/btn_write_diet_log"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="20dp"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:background="@drawable/bg_rect_filled_gray"
+            android:enabled="false"
+            android:text="@string/btn_write"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:fontFamily="@font/pretendard_medium"
+            app:layout_constraintTop_toBottomOf="@id/select_score"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
