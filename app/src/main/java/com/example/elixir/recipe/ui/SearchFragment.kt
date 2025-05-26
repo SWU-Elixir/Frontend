@@ -121,7 +121,7 @@ class SearchFragment : Fragment() {
                 flexDirection = FlexDirection.ROW
                 justifyContent = JustifyContent.FLEX_START
             }
-            adapter = RecipeIngredientAdapter(dummyData)
+            adapter = FlavoringAdapter(dummyData)
         }*/
 
         // 뒤로 가기 버튼 클릭 시 이전 프래그먼트로 돌아가기

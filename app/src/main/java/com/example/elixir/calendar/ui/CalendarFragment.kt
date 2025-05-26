@@ -50,6 +50,9 @@ class CalendarFragment : Fragment(), OnMealClickListener {
             putExtra("mode", 4)
             putExtra("mealName", item.dietTitle)
             putExtra("mealData", Gson().toJson(item))
+            putExtra("year", item.time.year)
+            putExtra("month", item.time.monthValue)
+            putExtra("day", item.time.dayOfMonth)
         }
         mealDetailLauncher.launch(intent)
     }

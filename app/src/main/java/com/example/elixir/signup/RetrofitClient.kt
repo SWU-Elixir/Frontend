@@ -8,7 +8,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
     // 서버 주소
-    private const val BASE_URL = "https://d1bf510a-2bf3-4488-882e-35a80e460996.mock.pstmn.io"
+    private const val BASE_URL = "https://port-0-elixir-backend-g0424l70py8py.gksl2.cloudtype.app/swagger-ui/index.html#/"
 
     private val client = OkHttpClient.Builder()
         .addInterceptor(HttpLoggingInterceptor().apply {

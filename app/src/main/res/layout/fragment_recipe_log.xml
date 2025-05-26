@@ -31,6 +31,8 @@
             android:layout_marginVertical="5dp"
             android:paddingHorizontal="10dp"
             android:paddingVertical="15dp"
+            android:focusable="true"
+            android:enabled="true"
             android:background="@drawable/bg_rect_outline_orange"
             android:hint="@string/recipe_name"
             android:textColor="@color/black"
@@ -95,6 +97,8 @@
             android:layout_marginTop="5dp"
             android:paddingHorizontal="10dp"
             android:paddingVertical="15dp"
+            android:focusable="true"
+            android:enabled="true"
             android:background="@drawable/bg_rect_outline_orange"
             android:gravity="top|start"
             android:hint="@string/recipe_description_hint"
@@ -187,89 +191,39 @@
             app:layout_constraintBottom_toTopOf="@id/allergy">
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/ingredient_challenge"
+                android:id="@+id/ingredient_seasoned_cabbage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/ChipStyle_Short"
-                app:chipIcon="@drawable/ic_challenge"
-                app:chipIconVisible="true"
-                android:text="@string/navi_challenge"
-                android:textSize="16sp" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/ingredient_brown_rice"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/ChipStyle_Short"
-                android:text="@string/brown_rice"
+                android:text="@string/seasoned_cabbage"
                 android:textSize="16sp"/>
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/ingredient_bean"
+                android:id="@+id/ingredient_strawberry"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/ChipStyle_Short"
-                android:text="@string/bean"
+                android:text="@string/strawberry"
                 android:textSize="16sp" />
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/ingredient_grain"
+                android:id="@+id/ingredient_spinach"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/ChipStyle_Short"
-                android:text="@string/grain"
+                android:text="@string/spinach"
                 android:textSize="16sp" />
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/ingredient_green_leafy"
+                android:id="@+id/ingredient_almond"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/ChipStyle_Short"
-                android:text="@string/green_leafy"
+                android:text="@string/almond"
                 android:textSize="16sp" />
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/ingredient_berry"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/ChipStyle_Short"
-                android:text="@string/berry"
-                android:textSize="16sp" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/ingredient_nuts"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/ChipStyle_Short"
-                android:text="@string/nuts"
-                android:textSize="16sp" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/ingredient_olive_oil"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/ChipStyle_Short"
-                android:text="@string/olive_oil"
-                android:textSize="16sp" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/ingredient_fish"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/ChipStyle_Short"
-                android:text="@string/fish"
-                android:textSize="16sp" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/ingredient_poultry"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/ChipStyle_Short"
-                android:text="@string/poultry"
-                android:textSize="16sp" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@id/find_ingredient"
+                android:id="@+id/find_ingredient"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/ChipStyle_Short"
@@ -712,6 +666,8 @@
             android:layout_marginTop="5dp"
             android:paddingHorizontal="10dp"
             android:paddingVertical="15dp"
+            android:focusable="true"
+            android:enabled="true"
             android:background="@drawable/bg_rect_outline_orange"
             android:gravity="top|start"
             android:hint="@string/tip_caution_hint"
