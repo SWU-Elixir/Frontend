@@ -115,6 +115,7 @@ class HomeActivity : AppCompatActivity() {
         chatbotButton.setOnClickListener {
             savePreviousState()
             updateSelectedButton(chatbotButton, chatbotTitle)
+
             chatBotLauncher.launch(Intent(this, ChatBotActivity::class.java))
         }
 
