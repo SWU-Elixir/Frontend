@@ -206,7 +206,7 @@ class ChallengeFragment : Fragment() {
 
         // 챌린지 상세 정보 표시
         binding.apply {
-            challengeSub3.text = R.string.challenge_sub1.toString()
+            challengeSub3.text = getString(R.string.challenge_sub1)
             challengeTitleText.text = challenge.name
             challengePeriodText.text = challenge.period ?: ""
             challengeSub1.text = getString(R.string.challenge_sub1_format, challenge.name)
