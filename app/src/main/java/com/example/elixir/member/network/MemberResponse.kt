@@ -1,14 +1,7 @@
 package com.example.elixir.member.network
 
 import com.example.elixir.member.data.MemberEntity
-
-// 리스트 응답용
-data class MemberListResponse(
-    val status: Int,
-    val code: String,
-    val message: String,
-    val data: List<MemberEntity>
-)
+import com.example.elixir.member.data.ProfileEntity
 
 data class SignupResponse(
     val status: Int,
@@ -22,6 +15,13 @@ data class MemberSingleResponse(
     val code: String,
     val message: String,
     val data: MemberEntity
+)
+
+data class ProfileResponse(
+    val status: Int,
+    val code: String,
+    val message: String,
+    val data: ProfileEntity
 )
 
 data class AchievementResponse(

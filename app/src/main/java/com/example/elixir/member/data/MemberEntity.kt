@@ -13,6 +13,16 @@ data class MemberEntity (
     val profileUrl: String?
 )
 
+@Entity(tableName = "profile")
+data class ProfileEntity (
+    @PrimaryKey val id: Int,
+    val nickname: String?,
+    val title: String?,
+    val profileUrl: String?,
+    val followerCount: Int,
+    val followingCount: Int
+)
+
 @Entity(tableName = "achievement")
 data class AchievementEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,

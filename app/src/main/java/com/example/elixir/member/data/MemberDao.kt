@@ -8,8 +8,14 @@ interface MemberDao {
     @Query("SELECT * FROM member")
     suspend fun getMember() : MemberEntity
 
+    @Query("SELECT * FROM profile")
+    suspend fun getProfile() : ProfileEntity
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMember(member: MemberEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertProfile(member: ProfileEntity)
 
     @Query("SELECT * FROM achievement")
     suspend fun getAchievements(): List<AchievementEntity>

@@ -4,6 +4,7 @@ import com.example.elixir.member.data.AchievementEntity
 import com.example.elixir.member.data.MemberEntity
 import com.example.elixir.member.network.MemberRepository
 import com.example.elixir.member.data.FollowEntity
+import com.example.elixir.member.data.ProfileEntity
 import com.example.elixir.member.data.RecipeEntity
 import com.example.elixir.signup.SignupRequest
 import java.io.File
@@ -17,6 +18,14 @@ class MemberService (
 
     suspend fun getMemberFromDb(): MemberEntity? {
         return repository.getMemberFromDb()
+    }
+
+    suspend fun getProfile(): ProfileEntity? {
+        return repository.fetchAndSaveProfile()
+    }
+
+    suspend fun getProfileFromDb(): ProfileEntity? {
+        return repository.getProfileFromDb()
     }
 
     suspend fun getAchievement(): List<AchievementEntity> {

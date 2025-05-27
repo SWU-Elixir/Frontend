@@ -17,6 +17,7 @@ import com.example.elixir.ToolbarActivity
 import com.example.elixir.databinding.FragmentMypageBinding
 import com.example.elixir.dialog.LogoutDialog
 import com.example.elixir.member.data.MemberEntity
+import com.example.elixir.member.data.ProfileEntity
 import kotlinx.coroutines.launch
 
 class MyPageFragment : Fragment() {
@@ -67,7 +68,7 @@ class MyPageFragment : Fragment() {
         lifecycleScope.launch {
             try {
                 val api = RetrofitClient.instanceMemberApi
-                val response = api.getMember()
+                val response = api.getProfile()
                 if (response.status == 200) {
                     response.data?.let { member ->
                         setProfile(member)
@@ -212,7 +213,7 @@ class MyPageFragment : Fragment() {
         }
     }
 
-    private fun setProfile(profile: MemberEntity) {
+    private fun setProfile(profile: ProfileEntity) {
         binding.apply {
             Glide.with(requireContext())
                 .load(profile.profileUrl)
@@ -220,6 +221,9 @@ class MyPageFragment : Fragment() {
                 .error(R.drawable.img_blank)
                 .into(mypageProfileImg)
             userNickname.text = profile.nickname
+            cntFollower.text = profile.followerCount.toString()
+            cntFollowing.text = profile.followingCount.toString()
+            userTitle.text = profile.title
         }
     }
 
