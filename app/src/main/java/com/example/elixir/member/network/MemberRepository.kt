@@ -205,6 +205,7 @@ class MemberRepository (
                 val entities = response.data.map {
                     FollowEntity(
                         followId = it.followId,
+                        id = it.id ?: it.followId,
                         nickname = it.nickname,
                         profileUrl = it.profileUrl,
                         title = it.title
@@ -239,6 +240,7 @@ class MemberRepository (
                 val entities = response.data.map {
                     FollowEntity(
                         followId = it.followId,
+                        id = it.id ?: it.followId,
                         nickname = it.nickname,
                         profileUrl = it.profileUrl,
                         title = it.title
@@ -273,6 +275,7 @@ class MemberRepository (
                 val entities = response.data.map {
                     FollowEntity(
                         followId = it.followId,
+                        id = it.id ?: it.followId,
                         nickname = it.nickname,
                         profileUrl = it.profileUrl,
                         title = it.title
@@ -307,6 +310,7 @@ class MemberRepository (
                 val entities = response.data.map {
                     FollowEntity(
                         followId = it.followId,
+                        id = it.id ?: it.followId,
                         nickname = it.nickname,
                         profileUrl = it.profileUrl,
                         title = it.title

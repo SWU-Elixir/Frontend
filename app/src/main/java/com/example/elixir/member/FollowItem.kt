@@ -2,7 +2,10 @@ package com.example.elixir.member
 
 
 data class FollowItem(
-    val profileImageRes: Int,
-    val memberTitle: String,
-    val memberNickname: String
+    val followId: Int,
+    val targetMemberId: Int,
+    val profileImageRes: String?,
+    val memberTitle: String? = null,
+    val memberNickname: String,
+    val isFollowing: Boolean = false
 )

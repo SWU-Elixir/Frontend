@@ -26,7 +26,7 @@ interface MemberDao {
     @Query("SELECT * FROM follow")
     suspend fun getFollow(): List<FollowEntity>
 
-    @Query("SELECT * FROM follow WHERE followId = :memberId")
+    @Query("SELECT * FROM follow WHERE id = :memberId")
     suspend fun getFollowByMemberId(memberId: Int): List<FollowEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

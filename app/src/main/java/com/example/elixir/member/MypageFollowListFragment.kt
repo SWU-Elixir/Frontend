@@ -1,6 +1,8 @@
 package com.example.elixir.member
 
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +19,7 @@ class MypageFollowListFragment : Fragment() {
     private var mode: Int = 0 // 0: follower, 1: following
 
     companion object {
+        private const val TAG = "MypageFollowListFragment"
         const val MODE_FOLLOWER = 0
         const val MODE_FOLLOWING = 1
         fun newInstance(mode: Int): MypageFollowListFragment {
@@ -45,19 +48,47 @@ class MypageFollowListFragment : Fragment() {
         lifecycleScope.launch {
             try {
                 val api = com.example.elixir.RetrofitClient.instanceMemberApi
+                // 1. 내가 팔로우하는 사람들의 id set 만들기
+                val myFollowingResponse = api.getFollowing()
+                val myFollowingIds = myFollowingResponse.data.map { it.id ?: it.followId }.toSet()
+
+                // 2. 팔로워/팔로잉 리스트 불러오기
                 val followList = when (mode) {
                     MODE_FOLLOWING -> {
-                        val response = api.getFollowing()
-                        response.data.map { FollowItem(R.drawable.ic_profile, it.title, it.nickname) }
+                        val response = api.getFollower()
+                        Log.d(TAG, "팔로잉 목록 응답: ${response.data}")
+                        response.data.map {
+                            FollowItem(
+                                followId = it.followId,
+                                targetMemberId = it.id ?: it.followId,
+                                profileImageRes = it.profileUrl ?: "",
+                                memberTitle = it.title ?: "칭호 없음",
+                                memberNickname = it.nickname ?: "알 수 없음",
+                                isFollowing = myFollowingIds.contains(it.id ?: it.followId)
+                            )
+                        }
                     }
                     else -> {
-                        val response = api.getFollower()
-                        response.data.map { FollowItem(R.drawable.ic_profile, it.title, it.nickname) }
+                        val response = api.getFollowing()
+                        Log.d(TAG, "팔로워 목록 응답: ${response.data}")
+                        response.data.map {
+                            FollowItem(
+                                followId = it.followId,
+                                targetMemberId = it.id ?: it.followId,
+                                profileImageRes = it.profileUrl ?: "",
+                                memberTitle = it.title ?: "칭호 없음",
+                                memberNickname = it.nickname ?: "알 수 없음",
+                                isFollowing = myFollowingIds.contains(it.id ?: it.followId)
+                            )
+                        }
                     }
                 }
-                binding.recyclerView.adapter = FollowListAdapter(followList)
+                binding.recyclerView.adapter = FollowListAdapter(followList) {
+                    setupRecyclerView()
+                }
+                Log.d(TAG, "팔로우 목록 로드 완료: ${followList.size}개")
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e(TAG, "팔로우 목록 로드 실패", e)
                 binding.recyclerView.adapter = FollowListAdapter(emptyList())
             }
         }

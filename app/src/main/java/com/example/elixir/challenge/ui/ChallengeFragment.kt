@@ -96,11 +96,11 @@ class ChallengeFragment : Fragment() {
                 updateSpinner(sortedChallenges)
                 
                 // 첫 번째 챌린지 자동 선택 (초기 로드 시에만)
-                if (isInitialLoad && sortedChallenges.isNotEmpty()) {
-                    val firstChallenge = sortedChallenges.first()
-                    lastSelectedChallengeId = firstChallenge.id
-                    viewModel.loadChallengesById(firstChallenge.id)
-                }
+//                if (isInitialLoad && sortedChallenges.isNotEmpty()) {
+//                    val firstChallenge = sortedChallenges.first()
+//                    lastSelectedChallengeId = firstChallenge.id
+//                    viewModel.loadChallengesById(firstChallenge.id)
+//                }
             } else {
                 Log.d("ChallengeFragment", "챌린지 목록 없음")
                 showEmptyState()
@@ -206,6 +206,7 @@ class ChallengeFragment : Fragment() {
 
         // 챌린지 상세 정보 표시
         binding.apply {
+            challengeSub3.text = R.string.challenge_sub1.toString()
             challengeTitleText.text = challenge.name
             challengePeriodText.text = challenge.period ?: ""
             challengeSub1.text = getString(R.string.challenge_sub1_format, challenge.name)

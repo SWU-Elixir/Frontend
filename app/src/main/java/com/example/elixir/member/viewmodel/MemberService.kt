@@ -50,6 +50,7 @@ class MemberService (
         return repository.getIdFollowerFromDb(targetMemberId)
     }
 
+    // targetMemberId는 API 응답의 id 필드를 사용해야 함
     suspend fun follow(targetMemberId: Int): Boolean {
         return repository.follow(targetMemberId)
     }

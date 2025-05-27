@@ -60,6 +60,7 @@ data class FollowResponse(
 
 data class FollowData(
     val followId: Int,
+    val id: Int?,
     val nickname: String,
     val profileUrl: String,
     val title: String

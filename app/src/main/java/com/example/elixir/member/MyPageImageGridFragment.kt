@@ -1,6 +1,7 @@
 package com.example.elixir.member
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,6 +10,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.RequestOptions
 import com.example.elixir.R
 import com.example.elixir.databinding.FragmentMypageImageGridBinding
 import com.example.elixir.RetrofitClient
@@ -21,6 +24,7 @@ class MyPageImageGridFragment : Fragment() {
     private var contentType: Int = 0 // 0: 레시피, 1: 스크랩, 2: 뱃지
 
     companion object {
+        private const val TAG = "MyPageImageGridFragment"
         const val TYPE_RECIPE = 0
         const val TYPE_SCRAP = 1
         const val TYPE_BADGE = 2
@@ -67,22 +71,55 @@ class MyPageImageGridFragment : Fragment() {
                 val api = RetrofitClient.instanceMemberApi
                 val response = api.getMyRecipes()
                 val recipeList = response.data
-                val adapter = object : androidx.recyclerview.widget.RecyclerView.Adapter<RecipeViewHolder>() {
-                    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecipeViewHolder {
-                        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_mypage_badge_grid, parent, false)
-                        return RecipeViewHolder(view)
+                
+                if (recipeList.isNullOrEmpty()) {
+                    Log.d(TAG, "레시피 목록이 비어있습니다")
+                    binding.imageRecyclerView.adapter = BadgeGridAdapter(emptyList())
+                    return@launch
+                }
+
+                val adapter = object : androidx.recyclerview.widget.RecyclerView.Adapter<BadgeViewHolder>() {
+                    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BadgeViewHolder {
+                        val binding = com.example.elixir.databinding.ItemMypageBadgeGridBinding.inflate(
+                            LayoutInflater.from(parent.context), 
+                            parent, 
+                            false
+                        )
+                        return BadgeViewHolder(binding)
                     }
-                    override fun onBindViewHolder(holder: RecipeViewHolder, position: Int) {
-                        val item = recipeList[position]
-                        Glide.with(holder.itemView).load(item.imageUrl).into(holder.itemView.findViewById(R.id.badgeImage))
-                        holder.itemView.findViewById<TextView>(R.id.badgeTitle).text = ""
-                        holder.itemView.findViewById<TextView>(R.id.badgeSubtitle).text = ""
+
+                    override fun onBindViewHolder(holder: BadgeViewHolder, position: Int) {
+                        val (item, imageUrl) = recipeList[position]
+                        
+                        // Glide 옵션 설정
+                        val requestOptions = RequestOptions()
+                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                            .placeholder(R.drawable.ic_recipe_white)
+                            .error(R.drawable.ic_recipe_white)
+
+                        // 이미지 로드
+                        if (!imageUrl.isNullOrEmpty()) {
+                            Glide.with(holder.binding.root)
+                                .load(imageUrl)
+                                .centerCrop()
+                                .apply(requestOptions)
+                                .into(holder.binding.badgeImage)
+                        } else {
+                            // 이미지 URL이 null이거나 비어있는 경우 기본 이미지 표시
+                            holder.binding.badgeImage.setImageResource(R.drawable.ic_recipe_white)
+                        }
+
+                        holder.binding.badgeTitle.visibility = View.GONE
+                        holder.binding.badgeSubtitle.visibility = View.GONE
                     }
+
                     override fun getItemCount() = recipeList.size
                 }
+                
                 binding.imageRecyclerView.adapter = adapter
+                Log.d(TAG, "레시피 목록 로드 완료: ${recipeList.size}개")
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e(TAG, "레시피 목록 로드 실패", e)
                 binding.imageRecyclerView.adapter = BadgeGridAdapter(emptyList())
             }
         }
@@ -94,22 +131,55 @@ class MyPageImageGridFragment : Fragment() {
                 val api = RetrofitClient.instanceMemberApi
                 val response = api.getScrapRecipes()
                 val recipeList = response.data
-                val adapter = object : androidx.recyclerview.widget.RecyclerView.Adapter<RecipeViewHolder>() {
-                    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecipeViewHolder {
-                        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_mypage_badge_grid, parent, false)
-                        return RecipeViewHolder(view)
+                
+                if (recipeList.isNullOrEmpty()) {
+                    Log.d(TAG, "스크랩 목록이 비어있습니다")
+                    binding.imageRecyclerView.adapter = BadgeGridAdapter(emptyList())
+                    return@launch
+                }
+
+                val adapter = object : androidx.recyclerview.widget.RecyclerView.Adapter<BadgeViewHolder>() {
+                    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BadgeViewHolder {
+                        val binding = com.example.elixir.databinding.ItemMypageBadgeGridBinding.inflate(
+                            LayoutInflater.from(parent.context), 
+                            parent, 
+                            false
+                        )
+                        return BadgeViewHolder(binding)
                     }
-                    override fun onBindViewHolder(holder: RecipeViewHolder, position: Int) {
-                        val item = recipeList[position]
-                        Glide.with(holder.itemView).load(item.imageUrl).into(holder.itemView.findViewById(R.id.badgeImage))
-                        holder.itemView.findViewById<TextView>(R.id.badgeTitle).text = ""
-                        holder.itemView.findViewById<TextView>(R.id.badgeSubtitle).text = ""
+
+                    override fun onBindViewHolder(holder: BadgeViewHolder, position: Int) {
+                        val (item, imageUrl) = recipeList[position]
+                        
+                        // Glide 옵션 설정
+                        val requestOptions = RequestOptions()
+                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                            .placeholder(R.drawable.ic_recipe_white)
+                            .error(R.drawable.ic_recipe_white)
+
+                        // 이미지 로드
+                        if (!imageUrl.isNullOrEmpty()) {
+                            Glide.with(holder.binding.root)
+                                .load(imageUrl)
+                                .centerCrop()
+                                .apply(requestOptions)
+                                .into(holder.binding.badgeImage)
+                        } else {
+                            // 이미지 URL이 null이거나 비어있는 경우 기본 이미지 표시
+                            holder.binding.badgeImage.setImageResource(R.drawable.ic_recipe_white)
+                        }
+
+                        holder.binding.badgeTitle.visibility = View.GONE
+                        holder.binding.badgeSubtitle.visibility = View.GONE
                     }
+
                     override fun getItemCount() = recipeList.size
                 }
+                
                 binding.imageRecyclerView.adapter = adapter
+                Log.d(TAG, "스크랩 목록 로드 완료: ${recipeList.size}개")
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e(TAG, "스크랩 목록 로드 실패", e)
                 binding.imageRecyclerView.adapter = BadgeGridAdapter(emptyList())
             }
         }
@@ -149,7 +219,6 @@ class MyPageImageGridFragment : Fragment() {
         }
     }
 
-    class RecipeViewHolder(view: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(view)
     class BadgeViewHolder(val binding: com.example.elixir.databinding.ItemMypageBadgeGridBinding) : androidx.recyclerview.widget.RecyclerView.ViewHolder(binding.root)
 
     override fun onDestroyView() {

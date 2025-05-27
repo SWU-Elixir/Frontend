@@ -191,6 +191,7 @@ class MemberViewModel (
         }
     }
 
+    // targetMemberId는 API 응답의 id 필드를 사용해야 함
     fun follow(targetMemberId: Int) {
         viewModelScope.launch {
             _followResult.value = service.follow(targetMemberId)
@@ -218,10 +219,20 @@ class MemberViewModel (
     fun loadTop3Achievements() {
         viewModelScope.launch {
             try {
-                val data = service.getTop3Achievements()
-                _top3Achievements.value = data
+                _error.value = null
+                _achievement.value = service.getTop3Achievements()
             } catch (e: Exception) {
-                _top3Achievements.value = emptyList()
+                Log.e("MemberViewModel", "팔로워 API 호출 실패, DB에서 데이터 로드 시도", e)
+                try {
+                    val dbData = service.getTop3AchievementsFromDb()
+                    if (dbData.isEmpty()) {
+                        _error.value = "팔로워 목록을 불러올 수 없습니다. 인터넷 연결을 확인해주세요."
+                    } else {
+                        _achievement.value = dbData
+                    }
+                } catch (e: Exception) {
+                    _error.value = "팔로워 목록 로드 실패: ${e.message}"
+                }
             }
         }
     }
@@ -237,13 +248,19 @@ class MemberViewModel (
         }
     }
 
+
     fun loadTop3Scraps() {
         viewModelScope.launch {
             try {
-                val data = service.getScrapRecipes().take(3).map { it.imageUrl }
-                _top3Scraps.value = data
+                val fullList = service.getScrapRecipes()
+                val top3 = if (fullList.size >= 3) {
+                    fullList.take(3)
+                } else {
+                    fullList // 3개 미만이어도 그대로 반환
+                }
+                _top3Recipes.value = top3.map { it.imageUrl }
             } catch (e: Exception) {
-                _top3Scraps.value = emptyList()
+                _top3Recipes.value = emptyList()
             }
         }
     }

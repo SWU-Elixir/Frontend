@@ -5,6 +5,9 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.RequestOptions
+import com.example.elixir.R
 import com.example.elixir.databinding.ItemMypageCollectionBadgeBinding
 import com.example.elixir.databinding.ItemMypageCollectionBinding
 class MyPageCollectionAdapter(
@@ -44,14 +47,21 @@ class MyPageCollectionAdapter(
         // Glide를 사용하여 이미지 로드
         // 뱃지일 경우 BadgeViewHolder에 이미지 로드
         if (holder is BadgeViewHolder) {
-            Glide.with(holder.itemView)
+            Glide.with(holder.itemView.context)
                 .load(uri)
+                .placeholder(R.drawable.bg_badge_empty)
+                .error(R.drawable.bg_badge_empty)
+                .centerCrop()
                 .into(holder.badgeBinding.mypageCollectionBadgeImg)
         }
         // 아닐 경우 CollectionViewHolder에 이미지 로드
         else if (holder is CollectionViewHolder) {
-            Glide.with(holder.itemView)
+            Glide.with(holder.itemView.context)
                 .load(uri)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .placeholder(R.drawable.ic_recipe_white)
+                .error(R.drawable.ic_recipe_white)
+                .centerCrop()
                 .into(holder.binding.mypageCollectionImg)
         }
     }

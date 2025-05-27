@@ -1,7 +1,6 @@
 package com.example.elixir.challenge.viewmodel
 
 import com.example.elixir.challenge.data.ChallengeEntity
-import com.example.elixir.challenge.network.ChallengeProgress
 import com.example.elixir.challenge.network.ChallengeRepository
 
 class ChallengeService(private val repository: ChallengeRepository) {
@@ -19,8 +18,16 @@ class ChallengeService(private val repository: ChallengeRepository) {
         return repository.fetchAndSaveChallengeById(id)
     }
 
+    suspend fun getChallengeByIdFromDb(id: Int): List<ChallengeEntity> {
+        return repository.getChallengeByIdFromDb(id)
+    }
+
     suspend fun getChallengeProgress() {
         repository.fetchChallengeProgress()
+    }
+
+    suspend fun getChallengeCompletionFromDb() {
+        repository.getChallengeCompletionFromDb()
     }
 
     suspend fun getChallengeCompletion(): List<ChallengeEntity> {

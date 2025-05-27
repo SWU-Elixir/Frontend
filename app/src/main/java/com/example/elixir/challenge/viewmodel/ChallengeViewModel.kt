@@ -86,7 +86,7 @@ class ChallengeViewModel(
 
                 // [2] 상세 정보가 아직 없다면 로컬 DB에서 시도
                 if (_selectedChallenge.value == null) {
-                    val dbChallenge = service.getChallengeById(id)
+                    val dbChallenge = service.getChallengeByIdFromDb(id)
                     if (dbChallenge.isNotEmpty()) {
                         Log.d("ChallengeViewModel", "DB에서 챌린지 상세 정보 로드됨: id=$id")
                         _selectedChallenge.value = dbChallenge[0]
