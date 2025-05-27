@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import org.threeten.bp.LocalDateTime
+import org.threeten.bp.format.DateTimeFormatter
 
 @Entity(tableName = "diet_table")
 data class DietLogEntity(
@@ -25,5 +26,18 @@ fun DietLogEntity.toDto(): DietLogDto {
         score = this.score,
         ingredientTagId = this.ingredientTagId,
         time = this.time.toString()
+    )
+}
+
+fun DietLogEntity.toMealDto(memberId: Int): MealDto {
+    return MealDto(
+        id = this.id,
+        memberId = memberId,
+        name = this.name,
+        imageUrl = this.imageUrl,
+        type = this.type,
+        score = this.score,
+        ingredientTagId = this.ingredientTagId,
+        time = this.time.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
     )
 }

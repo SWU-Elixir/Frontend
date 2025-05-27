@@ -1,23 +1,33 @@
 package com.example.elixir
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
+import com.example.elixir.calendar.network.db.DietLogRepository
 import com.example.elixir.calendar.ui.MealDetailFragment
 import com.example.elixir.chatbot.ChatBotActivity
 import com.example.elixir.databinding.ActivityToolbarBinding
 import com.example.elixir.dialog.AlertExitDialog
 import com.example.elixir.calendar.ui.DietLogFragment
+import com.example.elixir.calendar.viewmodel.MealViewModel
+import com.example.elixir.calendar.viewmodel.MealViewModelFactory
 import com.example.elixir.member.MyPageImageGridFragment
 import com.example.elixir.member.MypageFollowListFragment
+import com.example.elixir.member.network.MemberDB
+import com.example.elixir.member.network.MemberRepository
+import com.example.elixir.network.AppDatabase
 import com.example.elixir.recipe.ui.RecipeLogFragment
 import com.example.elixir.signup.CreateAccountFragment
 import com.example.elixir.signup.SettingProfileFragment
@@ -25,6 +35,13 @@ import com.example.elixir.signup.SettingProfileFragment
 open class ToolbarActivity : AppCompatActivity() {
     // 선언부
     protected lateinit var toolBinding: ActivityToolbarBinding
+    private val mealViewModel: MealViewModel by viewModels {
+        MealViewModelFactory(dietRepository, memberRepository)
+    }
+
+    private lateinit var dietRepository: DietLogRepository
+    private lateinit var memberRepository: MemberRepository
+
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,6 +53,15 @@ open class ToolbarActivity : AppCompatActivity() {
         // 바인딩 정의
         toolBinding = ActivityToolbarBinding.inflate(layoutInflater)
         setContentView(toolBinding.root)
+
+        // 데이터베이스와 API 초기화
+        val dao = AppDatabase.getInstance(this).dietLogDao()
+        val api = RetrofitClient.instanceDietApi
+        dietRepository = DietLogRepository(dao, api)
+        memberRepository = MemberRepository(
+            RetrofitClient.instanceMemberApi,
+            MemberDB.getInstance(this).memberDao()
+        )
 
         //val recipeData = intent.getParcelableExtra<RecipeData>("recipeData")
 
@@ -138,6 +164,7 @@ open class ToolbarActivity : AppCompatActivity() {
                 toolBinding.btnMore.setOnClickListener {
                     val popupMenu = PopupMenu(this, it)
                     popupMenu.menuInflater.inflate(R.menu.item_menu_drop, popupMenu.menu)
+                    val dietLogId = intent.getIntExtra("dietLogId", -1)
 
                     popupMenu.setOnMenuItemClickListener { menuItem ->
                         when (menuItem.itemId) {
@@ -153,6 +180,7 @@ open class ToolbarActivity : AppCompatActivity() {
                                     putExtra("year", year)
                                     putExtra("month", month)
                                     putExtra("day", day)
+                                    putExtra("dietLogId", dietLogId)
                                     putExtra("mealData", mealDataJson) // 추가: 수정할 데이터 전달
                                 }
                                 startActivity(editIntent)
@@ -160,13 +188,19 @@ open class ToolbarActivity : AppCompatActivity() {
                                 true
                             }
                             R.id.menu_delete -> {
-                                // 식단 삭제 확인 다이얼로그 표시
                                 AlertDialog.Builder(this)
                                     .setTitle("식단 삭제")
                                     .setMessage("식단을 삭제하시겠습니까?")
                                     .setPositiveButton("삭제") { _, _ ->
-                                        Toast.makeText(this, "식단이 삭제되었습니다", Toast.LENGTH_SHORT).show()
-                                        finish()
+                                        if (dietLogId != -1) {
+                                            mealViewModel.deleteDietLog(dietLogId)
+                                            val resultIntent = Intent().putExtra("deletedDietLogId", dietLogId)
+                                            setResult(Activity.RESULT_OK, resultIntent)
+                                            Toast.makeText(this, "식단이 삭제되었습니다", Toast.LENGTH_SHORT).show()
+                                            finish()
+                                        } else {
+                                            Toast.makeText(this, "삭제할 식단 ID가 없습니다.", Toast.LENGTH_SHORT).show()
+                                        }
                                     }
                                     .setNegativeButton("취소", null)
                                     .show()

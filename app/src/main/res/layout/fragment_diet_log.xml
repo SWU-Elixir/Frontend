@@ -26,44 +26,6 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toTopOf="@id/time_title"/>
 
-        <!--타임 스탬프-->
-        <!--
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="@id/diet_img"
-            app:layout_constraintBottom_toBottomOf="@id/diet_img">
-            <TextView
-                android:id="@+id/timestamp_time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="@string/time"
-                android:textColor="@color/white"
-                android:textSize="28sp"
-                android:textAlignment="center"
-                android:fontFamily="@font/pretendard_bold"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toTopOf="@id/timestamp_date"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
-
-            <TextView
-                android:id="@+id/timestamp_date"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="@string/calendar"
-                android:textColor="@color/white"
-                android:textSize="16sp"
-                android:textAlignment="center"
-                android:fontFamily="@font/pretendard_medium"
-                app:layout_constraintTop_toBottomOf="@id/timestamp_time"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
-        </androidx.constraintlayout.widget.ConstraintLayout> -->
-
         <TextView
             android:id="@+id/time_title"
             android:layout_width="match_parent"

@@ -1,6 +1,7 @@
 package com.example.elixir
 
 import android.util.Log
+import com.example.elixir.calendar.network.DietApi
 import com.example.elixir.login.LoginService
 import com.example.elixir.ingredient.network.IngredientApi
 import com.example.elixir.challenge.network.ChallengeApi
@@ -121,5 +122,14 @@ object RetrofitClient {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(ChatApi::class.java)
+    }
+
+    val instanceDietApi: DietApi by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(DietApi::class.java)
     }
 }

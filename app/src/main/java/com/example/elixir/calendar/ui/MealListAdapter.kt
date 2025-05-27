@@ -8,14 +8,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import androidx.activity.result.ActivityResultLauncher
+import com.bumptech.glide.Glide
 import com.example.elixir.R
-import com.example.elixir.ToolbarActivity
 import com.example.elixir.calendar.data.DietLogData
 import com.example.elixir.databinding.ItemMealListBinding
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
-import com.google.gson.Gson
 
 class MealListAdapter(
     private val context: Context,
@@ -45,7 +44,11 @@ class MealListAdapter(
 
         val item = getItem(position)
 
-        binding.dietPicture.setImageURI(Uri.parse(item.dietImg))
+        Glide.with(context)
+            .load(item.dietImg) // file://, content://, http:// 모두 지원
+            .placeholder(R.drawable.img_blank) // 로딩 중 표시할 이미지
+            .into(binding.dietPicture)
+        
         binding.dietNameText.text = item.dietTitle
 
         // 식단 점수에 따른 아이콘 설정 (1~5점)

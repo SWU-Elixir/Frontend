@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import com.bumptech.glide.Glide
 import com.example.elixir.R
 import com.example.elixir.calendar.data.DietLogData
 import com.example.elixir.databinding.FragmentMealDetailBinding
@@ -49,7 +50,13 @@ class MealDetailFragment : Fragment() {
         Log.d("MealDetailFragment", "mealDataJson: $mealDataJson")
 
         // 이미지 url
-        binding.recipeImage.setImageURI(Uri.parse(dietLogData?.dietImg))
+        context?.let {
+            Glide.with(it)
+                .load(dietLogData?.dietImg) // file://, content://, http:// 모두 지원
+                .placeholder(R.drawable.img_blank) // 로딩 중 표시할 이미지
+                .error(R.drawable.img_blank) // 실패 시 표시할 이미지
+                .into(binding.recipeImage)
+        }
 
         // 식사시간 버튼 리스트
         val mealTimeButtons = listOf(

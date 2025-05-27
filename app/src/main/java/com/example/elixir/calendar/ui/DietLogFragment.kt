@@ -18,17 +18,19 @@ import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
-import androidx.core.net.toUri
 import androidx.fragment.app.viewModels
 import com.example.elixir.ingredient.ui.IngredientSearchFragment
 import com.example.elixir.R
+import com.example.elixir.RetrofitClient
 import com.example.elixir.dialog.SelectImgDialog
 import com.example.elixir.calendar.data.DietLogData
-import com.example.elixir.calendar.viewmodel.DietLogViewModel
-import com.example.elixir.calendar.viewmodel.DietLogViewModelFactory
 import com.example.elixir.calendar.network.db.DietLogRepository
+import com.example.elixir.calendar.viewmodel.MealViewModel
+import com.example.elixir.calendar.viewmodel.MealViewModelFactory
 import com.example.elixir.databinding.FragmentDietLogBinding
 import com.example.elixir.dialog.SaveDialog
+import com.example.elixir.member.network.MemberDB
+import com.example.elixir.member.network.MemberRepository
 import com.example.elixir.network.AppDatabase
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
@@ -61,11 +63,13 @@ class DietLogFragment : Fragment() {
     private var dietCategory: String = ""
     private var ingredientTags = mutableListOf<Int>()
     private var score: Int = 0
+    private var isEditMode: Boolean = false
 
-    private lateinit var repository: DietLogRepository
+    private lateinit var dietRepository: DietLogRepository
+    private lateinit var memberRepository: MemberRepository
 
-    private val dietLogViewModel: DietLogViewModel by viewModels {
-        DietLogViewModelFactory(repository)
+    private val dietLogViewModel: MealViewModel by viewModels {
+        MealViewModelFactory(dietRepository, memberRepository)
     }
 
     override fun onCreateView(
@@ -83,6 +87,7 @@ class DietLogFragment : Fragment() {
         val mealDataJson = arguments?.getString("mealData")
         if (mealDataJson != null) {
             val mealData = Gson().fromJson(mealDataJson, DietLogData::class.java)
+            isEditMode = true
             dietLogBinding.enterDietTitle.setText(mealData.dietTitle)
 
             // 이미지 처리
@@ -142,9 +147,14 @@ class DietLogFragment : Fragment() {
             dietLogBinding.time12h.text = formattedTime
         }
 
+        // 데이터베이스와 API 초기화
         val dao = AppDatabase.getInstance(requireContext()).dietLogDao()
-        repository = DietLogRepository(dao)
-
+        val api = RetrofitClient.instanceDietApi
+        dietRepository = DietLogRepository(dao, api)
+        memberRepository = MemberRepository(
+            RetrofitClient.instanceMemberApi,
+            MemberDB.getInstance(requireContext()).memberDao()
+        )
 
         // -------------------------------------------- 리스너 -----------------------------------------------//
         // 현재 시간으로 설정: 체크하면 현재 시간으로 설정되도록
@@ -287,10 +297,9 @@ class DietLogFragment : Fragment() {
 
         // 작성 버튼
         dietLogBinding.btnWriteDietLog.setOnClickListener {
-            // 식단 기록을 DB에 업로드
-            // 식단 기록 저장 다이얼로그 띄우기
             SaveDialog(requireActivity()) {
                 val dietLogData = DietLogData(
+                    id= 0, // ID는 Room DB에서 자동 생성되므로 0으로 설정
                     dietTitle = dietTitle,
                     dietCategory = dietCategory,
                     score = score,
@@ -298,19 +307,68 @@ class DietLogFragment : Fragment() {
                     time = LocalDateTime.now(),
                     dietImg = dietImg
                 )
-                dietLogViewModel.saveDietLogDB(dietLogData)
-                val dietLogDataJson = Gson().toJson(dietLogData)
+
+                // 업로드용 이미지 File 객체 생성
+                // 이미지 경로에 따라 File 객체 생성
+                val imageFile: File? = when {
+                    dietImg.startsWith("android.resource://") -> {
+                        // 리소스 ID 추출
+                        val resId = dietImg.substringAfterLast("/").toIntOrNull()
+                        if (resId != null) copyResourceToFile(requireContext(), resId) else null
+                    }
+                    dietImg.startsWith("content://") -> {
+                        // content URI를 내부 파일로 복사
+                        val uri = Uri.parse(dietImg)
+                        val copiedUri = copyUriToInternal(requireContext(), uri)
+                        copiedUri?.let { File(it.path!!) }
+                    }
+                    dietImg.startsWith("file://") -> {
+                        File(Uri.parse(dietImg).path!!)
+                    }
+                    else -> {
+                        File(dietImg)
+                    }
+                }
+
+                // 이미지 파일이 null이거나 존재하지 않으면 에러 메시지 표시
+                if (imageFile == null || !imageFile.exists()) {
+                    Toast.makeText(requireContext(), "이미지 파일 생성에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                    return@SaveDialog
+                }
+
+                // 수정 모드
+                if(isEditMode) {
+                    try {
+                        // Room DB 업데이트 + 서버 업로드 동시 실행
+                        dietLogViewModel.updateDietLog(dietLogData, imageFile)
+                    } catch (e: Exception) {
+                        // 로컬 DB에만 저장
+                        dietLogViewModel.updateToLocalDB(dietLogData)
+                        Toast.makeText(requireContext(), "식단 기록 수정에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                        return@SaveDialog
+                    }
+
+                } else {
+                    try {
+                        // Room 저장 + 서버 업로드 동시 실행
+                        dietLogViewModel.saveAndUpload(dietLogData, imageFile)
+                    } catch (e: Exception) {
+                        // 로컬에만 저장
+                        dietLogViewModel.saveToLocalDB(dietLogData)
+                        Toast.makeText(requireContext(), "식단 기록 저장에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                        return@SaveDialog
+                    }
+                }
 
                 // 식단 기록 완료 후 메인 화면으로 이동
+                val dietLogDataJson = Gson().toJson(dietLogData)
                 val intent = Intent().apply {
-                    putExtra("mode", 0) // 메인 화면으로 이동
+                    putExtra("mode", 0)
                     putExtra("dietLogData", dietLogDataJson)
                 }
 
                 requireActivity().setResult(Activity.RESULT_OK, intent)
                 requireActivity().finish()
-
-                Toast.makeText(requireContext(), "식단 기록이 저장되었습니다", Toast.LENGTH_SHORT).show()
             }.show()
         }
 
@@ -421,6 +479,20 @@ class DietLogFragment : Fragment() {
             inputStream.close()
             outputStream.close()
             Uri.fromFile(file)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    fun copyResourceToFile(context: Context, resId: Int): File? {
+        return try {
+            val inputStream = context.resources.openRawResource(resId)
+            val file = File(context.cacheDir, "temp_image_${System.currentTimeMillis()}.jpg")
+            val outputStream = FileOutputStream(file)
+            inputStream.copyTo(outputStream)
+            inputStream.close()
+            outputStream.close()
+            file
         } catch (e: Exception) {
             null
         }
