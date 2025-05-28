@@ -7,7 +7,9 @@ import retrofit2.http.Path
 import retrofit2.Response
 import retrofit2.http.DELETE
 import retrofit2.http.Multipart
+import retrofit2.http.PATCH
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Part
 
 interface MemberApi {
@@ -25,11 +27,37 @@ interface MemberApi {
     @GET("/api/member/profile")
     suspend fun getProfile() : ProfileResponse
 
+    @GET("/api/member/{memberId}/profile")
+    suspend fun getProfile(@Path("memberId") id: Int) : ProfileResponse
+
+    @PATCH("/api/member/profile")
+    suspend fun patchProfile(
+        @Part("dto") dto: RequestBody,
+        @Part profileImage: MultipartBody.Part?
+    ): SignupResponse
+
     @GET("/api/member/achievement")
     suspend fun getAchievements(): AchievementResponse
 
+    @GET("/api/member/achievement/title")
+    suspend fun getTitle() : MemberSingleResponse
+
+    @GET("/api/member/survey")
+    suspend fun getSurvey() : MemberSingleResponse
+
+    @PUT("/api/member/survey")
+    suspend fun putSurvey(
+        @Part("dto") dto: RequestBody
+    ): MemberSingleResponse
+
+    @GET("/api/member/check-email")
+    suspend fun getCheckEmail() : MemberSingleResponse
+
     @GET("/api/member/recipe")
     suspend fun getMyRecipes(): RecipeListResponse
+
+    @GET("/api/member/{memberId}/recipes")
+    suspend fun getMyRecipes(@Path("memberId") id: Int): RecipeListResponse
 
     @GET("/api/member/recipe/scrap")
     suspend fun getScrapRecipes(): RecipeListResponse
@@ -52,6 +80,12 @@ interface MemberApi {
     @DELETE("/api/member/{targetMemberId}/follow")
     suspend fun unfollow(@Path("targetMemberId") id: Int): Response<Unit>
 
-    @GET("/api/member/achievement/top3")
+    @DELETE("/api/member/withdrawal")
+    suspend fun withdrawal(): Response<Unit>
+
+    @GET("/api/member/achievements/top3")
     suspend fun getTop3Achievements(): AchievementResponse
+
+    @GET("/api/member/{memberId}/achievements")
+    suspend fun getTop3Achievements(@Path("memberId") id: Int): AchievementResponse
 }
