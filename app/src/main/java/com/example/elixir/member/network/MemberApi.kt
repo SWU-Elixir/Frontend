@@ -22,6 +22,9 @@ interface MemberApi {
     @GET("/api/member")
     suspend fun getMember() : MemberSingleResponse
 
+    @GET("/api/member/profile")
+    suspend fun getProfile() : ProfileResponse
+
     @GET("/api/member/achievement")
     suspend fun getAchievements(): AchievementResponse
 
