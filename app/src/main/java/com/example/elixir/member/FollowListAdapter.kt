@@ -44,7 +44,7 @@ class FollowListAdapter(
             .into(holder.binding.profileImage)
 
         // 타이틀 설정 (null이면 숨김)
-        if (item.memberTitle.isNullOrEmpty()) {
+        if (item.memberTitle.isNullOrEmpty() || item.memberTitle == "칭호 없음") {
             holder.binding.memberTitle.visibility = View.GONE
         } else {
             holder.binding.memberTitle.visibility = View.VISIBLE

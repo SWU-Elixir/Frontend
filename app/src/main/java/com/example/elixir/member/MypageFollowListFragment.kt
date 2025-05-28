@@ -62,7 +62,7 @@ class MypageFollowListFragment : Fragment() {
                                 followId = it.followId,
                                 targetMemberId = it.id ?: it.followId,
                                 profileImageRes = it.profileUrl ?: "",
-                                memberTitle = it.title ?: "칭호 없음",
+                                memberTitle = it.title,
                                 memberNickname = it.nickname ?: "알 수 없음",
                                 isFollowing = myFollowingIds.contains(it.id ?: it.followId)
                             )
@@ -76,7 +76,7 @@ class MypageFollowListFragment : Fragment() {
                                 followId = it.followId,
                                 targetMemberId = it.id ?: it.followId,
                                 profileImageRes = it.profileUrl ?: "",
-                                memberTitle = it.title ?: "칭호 없음",
+                                memberTitle = it.title,
                                 memberNickname = it.nickname ?: "알 수 없음",
                                 isFollowing = myFollowingIds.contains(it.id ?: it.followId)
                             )
