@@ -60,6 +60,13 @@ class LoginActivity : AppCompatActivity() {
             intent.putExtra("mode", 1)
             startActivity(intent)
         }
+
+        loginBinding.findPw.setOnClickListener {
+            val intent = Intent(this, ToolbarActivity::class.java).apply {
+                putExtra("mode", 12)
+            }
+            startActivity(intent)
+        }
     }
 
     // 로그인 검증

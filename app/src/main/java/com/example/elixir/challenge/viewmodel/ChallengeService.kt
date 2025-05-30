@@ -22,8 +22,8 @@ class ChallengeService(private val repository: ChallengeRepository) {
         return repository.getChallengeByIdFromDb(id)
     }
 
-    suspend fun getChallengeProgress() {
-        repository.fetchChallengeProgress()
+    suspend fun getChallengeProgress(id: Int): com.example.elixir.challenge.network.ChallengeProgressData {
+        return repository.fetchChallengeProgress(id)
     }
 
     suspend fun getChallengeCompletionFromDb() {
@@ -32,6 +32,10 @@ class ChallengeService(private val repository: ChallengeRepository) {
 
     suspend fun getChallengeCompletion(): List<ChallengeEntity> {
         return repository.fetchChallengeCompletion()
+    }
+
+    suspend fun getChallengeCompletionRaw(): com.example.elixir.challenge.network.ChallengeCompletionRawData {
+        return repository.fetchChallengeCompletionRaw()
     }
 }
 

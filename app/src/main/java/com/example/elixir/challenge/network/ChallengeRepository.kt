@@ -45,9 +45,9 @@ class ChallengeRepository(
     }
 
     @Transaction
-    suspend fun fetchChallengeProgress() {
-        try {
-            val response = api.getChallengeProgress()
+    suspend fun fetchChallengeProgress(id: Int): com.example.elixir.challenge.network.ChallengeProgressData {
+        return try {
+            val response = api.getChallengeProgress(id)
             if (response.status == 200) {
                 val progress = response.data
                 challengeDao.updateProgressFields(
@@ -67,11 +67,14 @@ class ChallengeRepository(
                     step4Goal1Achieved = progress.step4Goal1Achieved,
                     step4Goal2Achieved = progress.step4Goal2Achieved
                 )
+                progress
             } else {
                 Log.e("ChallengeRepository", "progress 업데이트 실패: ${response.message}")
+                throw Exception(response.message)
             }
         } catch (e: Exception) {
             Log.e("ChallengeRepository", "progress 업데이트 예외", e)
+            throw e
         }
     }
 
@@ -80,8 +83,9 @@ class ChallengeRepository(
         return try {
             val response = api.getChallengeCompletion()
             if (response.status == 200) {
-                challengeDao.insertChallenges(listOf(response.data))
-                listOf(response.data)
+                // completion 응답은 ChallengeEntity와 구조가 다르므로 DB에 저장하지 않음
+                // UI에서만 사용하고, DB에는 저장하지 않는다
+                emptyList() // 또는 필요하다면 적절히 변환해서 반환
             } else {
                 Log.e("ChallengeRepository", "API 호출 실패: ${response.message}")
                 getChallengeCompletionFromDb()
@@ -123,6 +127,16 @@ class ChallengeRepository(
             Log.e("ChallengeRepository", "DB 조회 실패", e)
             emptyList()
         }
+    }
+
+    suspend fun fetchChallengeCompletionRaw(): com.example.elixir.challenge.network.ChallengeCompletionRawData {
+        val response = api.getChallengeCompletion()
+        // ChallengeCompletionRawData는 completion API의 data 구조와 일치해야 함
+        return com.example.elixir.challenge.network.ChallengeCompletionRawData(
+            challengeCompleted = response.data.challengeCompleted,
+            achievementName = response.data.achievementName,
+            achievementImageUrl = response.data.achievementImageUrl
+        )
     }
 
 }

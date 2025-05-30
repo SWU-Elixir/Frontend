@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.elixir.RetrofitClient
 import com.example.elixir.member.data.ProfileEntity
+import com.example.elixir.member.network.SignupResponse
 import kotlinx.coroutines.launch
 import com.example.elixir.signup.SignupRequest
 import java.io.File
@@ -26,6 +27,12 @@ class MemberViewModel( private val service: MemberService ) : ViewModel() {
 
     private val _signupResult = MutableLiveData<Any?>()
     val signupResult: LiveData<Any?> = _signupResult
+
+    private val _emailVerificationResult = MutableLiveData<SignupResponse?>()
+    val emailVerificationResult: LiveData<SignupResponse?> = _emailVerificationResult
+
+    private val _emailCodeVerifyResult = MutableLiveData<SignupResponse?>()
+    val emailCodeVerifyResult: LiveData<SignupResponse?> = _emailCodeVerifyResult
 
     private val _error = MutableLiveData<String>()
     val error: LiveData<String> = _error
@@ -98,6 +105,28 @@ class MemberViewModel( private val service: MemberService ) : ViewModel() {
                 }
             } catch (e: Exception) {
                 _error.value = "스크랩 목록을 불러올 수 없습니다: ${e.message}"
+            }
+        }
+    }
+
+    fun requestEmailVerification(email: String) {
+        viewModelScope.launch {
+            try {
+                val result = service.requestEmailVerification(email)
+                _emailVerificationResult.value = result
+            } catch (e: Exception) {
+                _error.value = "이메일 인증을 불러올 수 없습니다.: ${e.message}"
+            }
+        }
+    }
+
+    fun verifyEmailCode(email: String, code: String) {
+        viewModelScope.launch {
+            try {
+                val result = service.verifyEmailCode(email, code)
+                _emailCodeVerifyResult.value = result
+            } catch (e: Exception) {
+                _error.value = "인증번호 확인을 불러올 수 없습니다.: ${e.message}"
             }
         }
     }

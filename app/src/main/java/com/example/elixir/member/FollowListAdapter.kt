@@ -1,6 +1,8 @@
 package com.example.elixir.member
 
+import android.content.Intent
 import android.net.Uri
+import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -14,11 +16,14 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.example.elixir.databinding.ItemMypageFollowListBinding
 import com.example.elixir.R
+import com.example.elixir.ToolbarActivity
 import kotlinx.coroutines.launch
 
 class FollowListAdapter(
     private val items: List<FollowItem>,
-    private val onFollowChanged: (() -> Unit)? = null
+    private val myId: Int,
+    private val onFollowChanged: (() -> Unit)? = null ,
+    private val onItemClick: ((FollowItem) -> Unit)? = null
 ) : RecyclerView.Adapter<FollowListAdapter.FollowViewHolder>() {
     companion object {
         private const val TAG = "FollowListAdapter"
@@ -72,11 +77,6 @@ class FollowListAdapter(
 
             Log.d("FollowListAdapter", "targetMemberId: $targetMemberId") // 로그 추가
 
-            // 임시로 조건 주석처리
-            // if (targetMemberId <= 1) {
-            //     Toast.makeText(context, "이 계정은 팔로우/언팔로우 할 수 없습니다.", Toast.LENGTH_SHORT).show()
-            //     return@setOnClickListener
-            // }
 
             (holder.itemView.context as? FragmentActivity)?.lifecycleScope?.launch {
                 try {
@@ -94,6 +94,31 @@ class FollowListAdapter(
                 } catch (e: Exception) {
                     Toast.makeText(context, "네트워크 오류: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
+            }
+        }
+
+        // 전체 아이템 클릭 → 콜백 전달
+        holder.binding.root.setOnClickListener {
+            onItemClick?.invoke(item)
+        }
+
+        // 내 아이디면 팔로우 버튼 숨김
+        if (item.targetMemberId == myId) {
+            holder.binding.followButton.visibility = View.GONE
+        } else {
+            holder.binding.followButton.visibility = View.VISIBLE
+        }
+
+        // 전체 아이템 클릭 → 콜백 전달
+        holder.binding.root.setOnClickListener {
+            if (item.targetMemberId == myId) {
+                // 내 아이디면 마이페이지로 이동
+                val intent = Intent(context, ToolbarActivity::class.java).apply {
+                    putExtra("mode", 0) // MyPageFragment가 뜨는 모드로
+                }
+                context.startActivity(intent)
+            } else {
+                onItemClick?.invoke(item)
             }
         }
     }

@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit
 object RetrofitClient {
     // 서버 주소
     private const val BASE_URL = "https://port-0-elixir-backend-g0424l70py8py.gksl2.cloudtype.app/"
-    private var authToken: String? = "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJBQGV4YW1wbGUuY29tIiwiYXV0aCI6IlVTRVIiLCJleHAiOjE3NDg0MTI5MTd9.hDa--SbGmV_j5fHSP7czbtJLJwPHuvIBKC6ZmifEoPweH8qL143-Ongz4hoLdVCd" // Bearer 토큰을 저장할 변수
+    private var authToken: String? = "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJBQGV4YW1wbGUuY29tIiwiYXV0aCI6IlVTRVIiLCJleHAiOjE3NDg1NzUxNDF9.kMIOGOriNQMs-EJ19xWRwe4LthfqdCV5rPDVbMm-eBrVrv2yFqCb5NyeTF4Qo4WP" // Bearer 토큰을 저장할 변수
 
     fun setAuthToken(token: String) {
         authToken = token

@@ -22,6 +22,7 @@ class MyPageImageGridFragment : Fragment() {
     private val binding get() = _binding!!
     
     private var contentType: Int = 0 // 0: 레시피, 1: 스크랩, 2: 뱃지
+    private var member: Int = -1
 
     companion object {
         private const val TAG = "MyPageImageGridFragment"
@@ -29,11 +30,22 @@ class MyPageImageGridFragment : Fragment() {
         const val TYPE_SCRAP = 1
         const val TYPE_BADGE = 2
 
-        fun newInstance(type: Int): MyPageImageGridFragment {
+        fun newInstance(type: Int, memberId: Int = -1): MyPageImageGridFragment {
+            Log.d(TAG, "newInstance - type: $type, memberId: $memberId")
             return MyPageImageGridFragment().apply {
-                contentType = type
+                arguments = Bundle().apply {
+                    putInt("type", type)
+                    putInt("memberId", memberId)
+                }
             }
         }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        contentType = arguments?.getInt("type", TYPE_RECIPE) ?: TYPE_RECIPE
+        member = arguments?.getInt("memberId", -1) ?: -1
+        Log.d(TAG, "onCreate - contentType: $contentType, member: $member")
     }
 
     override fun onCreateView(
@@ -47,6 +59,7 @@ class MyPageImageGridFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         setupRecyclerView()
     }
 
@@ -69,7 +82,14 @@ class MyPageImageGridFragment : Fragment() {
         lifecycleScope.launch {
             try {
                 val api = RetrofitClient.instanceMemberApi
-                val response = api.getMyRecipes()
+                Log.d(TAG, "레시피 로드 시작 - memberId: $member")
+                val response = if (member != -1) {
+                    Log.d(TAG, "특정 사용자의 레시피 목록 요청 - memberId: $member")
+                    api.getMyRecipes(member)
+                } else {
+                    Log.d(TAG, "현재 사용자의 레시피 목록 요청")
+                    api.getMyRecipes()
+                }
                 val recipeList = response.data
                 
                 if (recipeList.isNullOrEmpty()) {
@@ -129,6 +149,8 @@ class MyPageImageGridFragment : Fragment() {
         lifecycleScope.launch {
             try {
                 val api = RetrofitClient.instanceMemberApi
+                Log.d(TAG, "스크랩 로드 - memberId: $member")
+                // 스크랩은 항상 현재 사용자의 것만 가져옴
                 val response = api.getScrapRecipes()
                 val recipeList = response.data
                 
@@ -189,7 +211,14 @@ class MyPageImageGridFragment : Fragment() {
         lifecycleScope.launch {
             try {
                 val api = RetrofitClient.instanceMemberApi
-                val response = api.getAchievements()
+                Log.d(TAG, "뱃지 로드 시작 - memberId: $member")
+                val response = if (member != -1) {
+                    Log.d(TAG, "특정 사용자의 뱃지 목록 요청 - memberId: $member")
+                    api.getAchievements(member)
+                } else {
+                    Log.d(TAG, "현재 사용자의 뱃지 목록 요청")
+                    api.getAchievements()
+                }
                 val badgeList = response.data.map {
                     BadgeItem(
                         imageRes = 0, // Glide로 imageUrl 사용

@@ -379,4 +379,25 @@ class MemberRepository (
             null
         }
     }
+
+    // 이메일 인증 요청
+    suspend fun requestEmailVerification(email: String): SignupResponse? {
+        return try {
+            val json = """{"email":"$email"}"""
+            val body = RequestBody.create("application/json; charset=utf-8".toMediaTypeOrNull(), json)
+            api.emailVerification(body)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    suspend fun verifyEmailCode(email: String, code: String): SignupResponse? {
+        return try {
+            val json = """{"email":"$email","code":"$code"}"""
+            val body = RequestBody.create("application/json; charset=utf-8".toMediaTypeOrNull(), json)
+            api.emailVerify(body)
+        } catch (e: Exception) {
+            null
+        }
+    }
 }

@@ -3,6 +3,7 @@ package com.example.elixir
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.PopupMenu
 import android.widget.Toast
@@ -16,10 +17,12 @@ import com.example.elixir.chatbot.ChatBotActivity
 import com.example.elixir.databinding.ActivityToolbarBinding
 import com.example.elixir.dialog.AlertExitDialog
 import com.example.elixir.calendar.ui.DietLogFragment
+import com.example.elixir.member.MyPageFragmentId
 import com.example.elixir.member.MyPageImageGridFragment
 import com.example.elixir.member.MypageFollowListFragment
 import com.example.elixir.recipe.ui.RecipeLogFragment
 import com.example.elixir.signup.CreateAccountFragment
+import com.example.elixir.signup.FindPasswordFragment
 import com.example.elixir.signup.SettingProfileFragment
 
 open class ToolbarActivity : AppCompatActivity() {
@@ -57,6 +60,22 @@ open class ToolbarActivity : AppCompatActivity() {
 
                 // 계정 생성 프래그먼트 띄워주기
                 setFragment(CreateAccountFragment())
+            }
+
+            // 비밀번호 찾기 모드
+            12 -> {
+                // 툴바의 제목, 더보기 버튼 안보이게, 작동 x
+                toolBinding.title.visibility = View.INVISIBLE
+                toolBinding.btnMore.visibility = View.INVISIBLE
+
+                // 뒤로가기 버튼을 누르면 로그인 페이지로 돌아가기
+                // 돌아가기 전 다이얼로그 띄우기
+                toolBinding.btnBack.setOnClickListener {
+                    AlertExitDialog(this).show()
+                }
+
+                // 계정 생성 프래그먼트 띄워주기
+                setFragment(FindPasswordFragment())
             }
 
             // 식단 기록 모드
@@ -209,8 +228,9 @@ open class ToolbarActivity : AppCompatActivity() {
                 val title = intent.getStringExtra("title")
                 toolBinding.title.text = title
 
-                // 내 레시피 프래그먼트 띄워주기
-                setFragment(MyPageImageGridFragment.newInstance(MyPageImageGridFragment.TYPE_RECIPE))
+                // memberId가 있으면 해당 사용자의 레시피, 없으면 현재 사용자의 레시피
+                val memberId = intent.getIntExtra("memberId", -1)
+                setFragment(MyPageImageGridFragment.newInstance(MyPageImageGridFragment.TYPE_RECIPE, memberId))
             }
 
             // 내 스크랩 모드
@@ -228,7 +248,7 @@ open class ToolbarActivity : AppCompatActivity() {
                 val title = intent.getStringExtra("title")
                 toolBinding.title.text = title
 
-                // 내 스크랩 프래그먼트 띄워주기
+                // 스크랩은 항상 현재 사용자의 것만 보여줌
                 setFragment(MyPageImageGridFragment.newInstance(MyPageImageGridFragment.TYPE_SCRAP))
             }
 
@@ -247,8 +267,9 @@ open class ToolbarActivity : AppCompatActivity() {
                 val title = intent.getStringExtra("title")
                 toolBinding.title.text = title
 
+                val memberId = intent.getIntExtra("memberId", -1)
                 // 내 스크랩 프래그먼트 띄워주기
-                setFragment(MyPageImageGridFragment.newInstance(MyPageImageGridFragment.TYPE_BADGE))
+                setFragment(MyPageImageGridFragment.newInstance(MyPageImageGridFragment.TYPE_BADGE, memberId))
             }
 
             // 팔로워 모드
@@ -266,8 +287,10 @@ open class ToolbarActivity : AppCompatActivity() {
                 val title = intent.getStringExtra("title")
                 toolBinding.title.text = title
 
-                // 내 스크랩 프래그먼트 띄워주기
-                setFragment(MypageFollowListFragment.newInstance(MypageFollowListFragment.MODE_FOLLOWER))
+                // memberId가 있으면 해당 사용자의 팔로잉, 없으면 현재 사용자의 팔로잉
+                val memberId = intent.getIntExtra("memberId", -1)
+                Log.d("ToolbarActivity", "팔로잉 모드 - memberId: $memberId")
+                setFragment(MypageFollowListFragment.newInstance(MypageFollowListFragment.MODE_FOLLOWING, memberId))
             }
 
             // 팔로잉 모드
@@ -285,8 +308,10 @@ open class ToolbarActivity : AppCompatActivity() {
                 val title = intent.getStringExtra("title")
                 toolBinding.title.text = title
 
-                // 내 스크랩 프래그먼트 띄워주기
-                setFragment(MypageFollowListFragment.newInstance(MypageFollowListFragment.MODE_FOLLOWING))
+                // memberId가 있으면 해당 사용자의 팔로워, 없으면 현재 사용자의 팔로워
+                val memberId = intent.getIntExtra("memberId", -1)
+                Log.d("ToolbarActivity", "팔로워 모드 - memberId: $memberId")
+                setFragment(MypageFollowListFragment.newInstance(MypageFollowListFragment.MODE_FOLLOWER, memberId))
             }
 
             // 프로필 수정 모드
@@ -303,6 +328,29 @@ open class ToolbarActivity : AppCompatActivity() {
 
                 // 계정 생성 프래그먼트 띄워주기
                 setFragment(SettingProfileFragment())
+            }
+
+            13 -> {
+                // 툴바의 제목, 더보기 버튼 안보이게, 작동 x
+                toolBinding.title.visibility = View.INVISIBLE
+                toolBinding.btnMore.visibility = View.INVISIBLE
+
+                // 뒤로가기 버튼을 누르면 로그인 페이지로 돌아가기
+                // 돌아가기 전 다이얼로그 띄우기
+                toolBinding.btnBack.setOnClickListener {
+                    finish()
+                }
+
+                // memberId를 Int로 받기
+                val memberId = intent.getIntExtra("memberId", -1)
+
+                // 프래그먼트에 arguments로 memberId 넘기기
+                val fragment = MyPageFragmentId().apply {
+                    arguments = Bundle().apply {
+                        putInt("memberId", memberId)
+                    }
+                }
+                setFragment(fragment)
             }
         }
     }

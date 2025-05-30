@@ -1,7 +1,6 @@
 package com.example.elixir.member.data
 
 import androidx.room.*
-import com.example.elixir.challenge.data.ChallengeEntity
 
 @Dao
 interface MemberDao {

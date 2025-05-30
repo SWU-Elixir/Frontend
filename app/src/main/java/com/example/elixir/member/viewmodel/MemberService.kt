@@ -6,6 +6,7 @@ import com.example.elixir.member.network.MemberRepository
 import com.example.elixir.member.data.FollowEntity
 import com.example.elixir.member.data.ProfileEntity
 import com.example.elixir.member.data.RecipeEntity
+import com.example.elixir.member.network.SignupResponse
 import com.example.elixir.signup.SignupRequest
 import java.io.File
 
@@ -87,5 +88,8 @@ class MemberService (
     suspend fun getScrapRecipesFromDb() : List<RecipeEntity> {
         return repository.getScrapRecipesFromDb()
     }
+
+    suspend fun requestEmailVerification(email: String): SignupResponse? = repository.requestEmailVerification(email)
+    suspend fun verifyEmailCode(email: String, code: String): SignupResponse? = repository.verifyEmailCode(email, code)
 
 }

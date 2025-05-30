@@ -65,3 +65,30 @@ data class FollowData(
     val profileUrl: String,
     val title: String
 )
+
+data class TitleResponse(
+    val status: Int,
+    val code: String,
+    val message: String,
+    val data: List<TitleData>
+)
+
+data class TitleData(
+    val memberId: Int,
+    val titles: List<String>
+)
+
+data class SurveyResponse(
+    val status: Int,
+    val code: String,
+    val message: String,
+    val data: List<SurveyData>
+)
+
+data class SurveyData(
+    val memberId: Int,
+    val allergies: List<String>,
+    val mealStyles: List<String>,
+    val recipeStyles: List<String>,
+    val reasons: List<String>
+)
