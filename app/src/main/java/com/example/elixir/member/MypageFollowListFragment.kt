@@ -2,15 +2,19 @@ package com.example.elixir.member
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.elixir.R
 import com.example.elixir.databinding.FragmentMypageFollowListBinding
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 
 class MypageFollowListFragment : Fragment() {
@@ -124,7 +128,14 @@ class MypageFollowListFragment : Fragment() {
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+        try {
+            // Fragment가 destroy될 때 코루틴 작업 취소
+            viewLifecycleOwner.lifecycleScope.coroutineContext.cancelChildren()
+        } catch (e: Exception) {
+            Log.e(TAG, "코루틴 취소 실패", e)
+        } finally {
+            super.onDestroyView()
+            _binding = null
+        }
     }
 }

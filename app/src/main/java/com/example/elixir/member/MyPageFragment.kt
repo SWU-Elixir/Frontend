@@ -158,8 +158,7 @@ class MyPageFragment : Fragment() {
         // 프로필 수정 버튼
         binding.btnProfileEdit.setOnClickListener {
             val intent = Intent(context, ToolbarActivity::class.java).apply {
-                putExtra("mode", 10)
-                putExtra("nickname", "닉네임")
+                putExtra("mode", 14)
             }
             startActivity(intent)
         }

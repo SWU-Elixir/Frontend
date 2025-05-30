@@ -1,8 +1,6 @@
 package com.example.elixir.member
 
 import android.content.Intent
-import android.net.Uri
-import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -12,8 +10,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.request.RequestOptions
+import com.example.elixir.HomeActivity
 import com.example.elixir.databinding.ItemMypageFollowListBinding
 import com.example.elixir.R
 import com.example.elixir.ToolbarActivity
@@ -23,7 +20,7 @@ class FollowListAdapter(
     private val items: List<FollowItem>,
     private val myId: Int,
     private val onFollowChanged: (() -> Unit)? = null ,
-    private val onItemClick: ((FollowItem) -> Unit)? = null
+    private val onItemClick: ((FollowItem) -> Unit)? = null,
 ) : RecyclerView.Adapter<FollowListAdapter.FollowViewHolder>() {
     companion object {
         private const val TAG = "FollowListAdapter"
@@ -97,11 +94,6 @@ class FollowListAdapter(
             }
         }
 
-        // 전체 아이템 클릭 → 콜백 전달
-        holder.binding.root.setOnClickListener {
-            onItemClick?.invoke(item)
-        }
-
         // 내 아이디면 팔로우 버튼 숨김
         if (item.targetMemberId == myId) {
             holder.binding.followButton.visibility = View.GONE
@@ -109,16 +101,24 @@ class FollowListAdapter(
             holder.binding.followButton.visibility = View.VISIBLE
         }
 
-        // 전체 아이템 클릭 → 콜백 전달
+        // 전체 아이템 클릭 이벤트 통합
         holder.binding.root.setOnClickListener {
             if (item.targetMemberId == myId) {
-                // 내 아이디면 마이페이지로 이동
-                val intent = Intent(context, ToolbarActivity::class.java).apply {
-                    putExtra("mode", 0) // MyPageFragment가 뜨는 모드로
+                val context = holder.itemView.context
+
+                // 현재 Activity가 ToolbarActivity이면 닫고, HomeActivity로 이동
+                if (context is ToolbarActivity) {
+                    // HomeActivity에서 MyPageFragment가 보이도록 모드 전달
+                    val intent = Intent(context, HomeActivity::class.java).apply {
+                        putExtra("navigateTo", "mypage") // HomeActivity가 이걸 보고 MyPageFragment로 전환하게
+                        flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    }
+
+                    context.startActivity(intent)
+                    context.finish() // 현재 ToolbarActivity 종료
                 }
-                context.startActivity(intent)
             } else {
-                onItemClick?.invoke(item)
+                onItemClick?.invoke(item) // 상대방 프로필로 이동
             }
         }
     }

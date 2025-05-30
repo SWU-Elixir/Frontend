@@ -22,6 +22,7 @@ import com.example.elixir.member.MyPageImageGridFragment
 import com.example.elixir.member.MypageFollowListFragment
 import com.example.elixir.recipe.ui.RecipeLogFragment
 import com.example.elixir.signup.CreateAccountFragment
+import com.example.elixir.signup.EditProfileFragment
 import com.example.elixir.signup.FindPasswordFragment
 import com.example.elixir.signup.SettingProfileFragment
 
@@ -330,12 +331,12 @@ open class ToolbarActivity : AppCompatActivity() {
                 setFragment(SettingProfileFragment())
             }
 
+            // 상대 프로필
             13 -> {
                 // 툴바의 제목, 더보기 버튼 안보이게, 작동 x
                 toolBinding.title.visibility = View.INVISIBLE
                 toolBinding.btnMore.visibility = View.INVISIBLE
 
-                // 뒤로가기 버튼을 누르면 로그인 페이지로 돌아가기
                 // 돌아가기 전 다이얼로그 띄우기
                 toolBinding.btnBack.setOnClickListener {
                     finish()
@@ -351,6 +352,22 @@ open class ToolbarActivity : AppCompatActivity() {
                     }
                 }
                 setFragment(fragment)
+            }
+
+            // 프로필 수정 모드
+            14 -> {
+                // 툴바의 제목, 더보기 버튼 안보이게, 작동 x
+                toolBinding.title.visibility = View.INVISIBLE
+                toolBinding.btnMore.visibility = View.INVISIBLE
+
+                // 뒤로가기 버튼을 누르면 로그인 페이지로 돌아가기
+                // 돌아가기 전 다이얼로그 띄우기
+                toolBinding.btnBack.setOnClickListener {
+                    AlertExitDialog(this).show()
+                }
+
+                // 계정 생성 프래그먼트 띄워주기
+                setFragment(EditProfileFragment())
             }
         }
     }
