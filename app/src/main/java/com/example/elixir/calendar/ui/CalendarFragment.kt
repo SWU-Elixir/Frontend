@@ -36,6 +36,8 @@ import com.example.elixir.calendar.network.db.DietLogRepository
 import com.example.elixir.calendar.viewmodel.MealViewModel
 import com.example.elixir.calendar.viewmodel.MealViewModelFactory
 import com.example.elixir.databinding.FragmentCalendarBinding
+import com.example.elixir.ingredient.network.IngredientDB
+import com.example.elixir.ingredient.network.IngredientRepository
 import com.example.elixir.member.network.MemberDB
 import com.example.elixir.member.network.MemberRepository
 import com.example.elixir.network.AppDatabase
@@ -68,9 +70,10 @@ class CalendarFragment : Fragment(), OnMealClickListener {
 
     private lateinit var dietRepository: DietLogRepository
     private lateinit var memberRepository: MemberRepository
+    private lateinit var ingredientRepository: IngredientRepository
 
     private val mealViewModel: MealViewModel by viewModels {
-        MealViewModelFactory(dietRepository, memberRepository)
+        MealViewModelFactory(dietRepository, memberRepository, ingredientRepository)
     }
 
     // 상세 화면 런처 등록
@@ -144,6 +147,9 @@ class CalendarFragment : Fragment(), OnMealClickListener {
         val memberApi = RetrofitClient.instanceMemberApi
         memberRepository = MemberRepository(memberApi, memberDao)
 
+        val ingredientDao = IngredientDB.getInstance(requireContext()).ingredientDao()
+        val ingredientApi = RetrofitClient.instanceIngredientApi
+        ingredientRepository = IngredientRepository(ingredientApi, ingredientDao)
 
         // -------------------- 리스트뷰 설정 --------------------
         // 1. 어댑터를 빈 리스트로 먼저 생성
@@ -186,7 +192,15 @@ class CalendarFragment : Fragment(), OnMealClickListener {
             selectedCalendarDay = today
             isFirstLaunch = false
         }
-        
+
+        // 식재료 불러오기
+        mealViewModel.loadIngredients()
+        mealViewModel.ingredientList.observe(viewLifecycleOwner) { ingredientList ->
+            val ingredientMap = ingredientList.associateBy { it.id }
+
+            mealAdapter.setIngredientMap(ingredientMap)
+        }
+
         // 초기 상태 설정
         val initialDateStr = "%04d-%02d-%02d".format(selectedCalendarDay.year, selectedCalendarDay.month + 1, selectedCalendarDay.day)
         updateEventList(initialDateStr)
@@ -477,7 +491,7 @@ class CalendarFragment : Fragment(), OnMealClickListener {
         }
     }
 
-            /**
+    /**
      * 뷰 제거 시 바인딩 해제
      */
     override fun onDestroyView() {

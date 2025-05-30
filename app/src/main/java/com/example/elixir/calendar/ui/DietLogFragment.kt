@@ -24,11 +24,19 @@ import com.example.elixir.R
 import com.example.elixir.RetrofitClient
 import com.example.elixir.dialog.SelectImgDialog
 import com.example.elixir.calendar.data.DietLogData
+import com.example.elixir.calendar.network.DietApi
+import com.example.elixir.calendar.network.db.DietLogDao
 import com.example.elixir.calendar.network.db.DietLogRepository
 import com.example.elixir.calendar.viewmodel.MealViewModel
 import com.example.elixir.calendar.viewmodel.MealViewModelFactory
 import com.example.elixir.databinding.FragmentDietLogBinding
 import com.example.elixir.dialog.SaveDialog
+import com.example.elixir.ingredient.data.IngredientDao
+import com.example.elixir.ingredient.network.IngredientApi
+import com.example.elixir.ingredient.network.IngredientDB
+import com.example.elixir.ingredient.network.IngredientRepository
+import com.example.elixir.member.data.MemberDao
+import com.example.elixir.member.network.MemberApi
 import com.example.elixir.member.network.MemberDB
 import com.example.elixir.member.network.MemberRepository
 import com.example.elixir.network.AppDatabase
@@ -67,9 +75,22 @@ class DietLogFragment : Fragment() {
 
     private lateinit var dietRepository: DietLogRepository
     private lateinit var memberRepository: MemberRepository
+    private lateinit var ingredientRepository: IngredientRepository
+
+    private lateinit var dietDao: DietLogDao
+    private lateinit var memberDao: MemberDao
+    private lateinit var ingredientDao: IngredientDao
+
+    private lateinit var dietApi: DietApi
+    private lateinit var memberApi: MemberApi
+    private lateinit var ingredientApi: IngredientApi
+
+    private lateinit var mealData: DietLogData
+    private var mealDataJson: String? = null
+    private var dietId: Int = -1
 
     private val dietLogViewModel: MealViewModel by viewModels {
-        MealViewModelFactory(dietRepository, memberRepository)
+        MealViewModelFactory(dietRepository, memberRepository, ingredientRepository)
     }
 
     override fun onCreateView(
@@ -84,9 +105,9 @@ class DietLogFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         // -------------------------------------------- 초기화 -----------------------------------------------//
         super.onViewCreated(view, savedInstanceState)
-        val mealDataJson = arguments?.getString("mealData")
+        mealDataJson = arguments?.getString("mealData")
         if (mealDataJson != null) {
-            val mealData = Gson().fromJson(mealDataJson, DietLogData::class.java)
+            mealData = Gson().fromJson(mealDataJson, DietLogData::class.java)
             isEditMode = true
             dietLogBinding.enterDietTitle.setText(mealData.dietTitle)
 
@@ -148,13 +169,17 @@ class DietLogFragment : Fragment() {
         }
 
         // 데이터베이스와 API 초기화
-        val dao = AppDatabase.getInstance(requireContext()).dietLogDao()
-        val api = RetrofitClient.instanceDietApi
-        dietRepository = DietLogRepository(dao, api)
-        memberRepository = MemberRepository(
-            RetrofitClient.instanceMemberApi,
-            MemberDB.getInstance(requireContext()).memberDao()
-        )
+        dietDao = AppDatabase.getInstance(requireContext()).dietLogDao()
+        dietApi = RetrofitClient.instanceDietApi
+        dietRepository = DietLogRepository(dietDao, dietApi)
+
+        memberDao = MemberDB.getInstance(requireContext()).memberDao()
+        memberApi = RetrofitClient.instanceMemberApi
+        memberRepository = MemberRepository(memberApi, memberDao)
+
+        ingredientDao = IngredientDB.getInstance(requireContext()).ingredientDao()
+        ingredientApi = RetrofitClient.instanceIngredientApi
+        ingredientRepository = IngredientRepository(ingredientApi, ingredientDao)
 
         // -------------------------------------------- 리스너 -----------------------------------------------//
         // 현재 시간으로 설정: 체크하면 현재 시간으로 설정되도록
@@ -295,6 +320,22 @@ class DietLogFragment : Fragment() {
             checkAllValid()
         }
 
+        dietLogViewModel.uploadResult.observe(viewLifecycleOwner) { result ->
+            if (result.isSuccess) {
+                // 성공: 결과 intent 전달 후 종료
+                mealDataJson = Gson().toJson(mealData)
+                val intent = Intent().apply {
+                    putExtra("mode", 0)
+                    putExtra("dietLogData", mealDataJson)
+                }
+                requireActivity().setResult(Activity.RESULT_OK, intent)
+                requireActivity().finish()
+            } else {
+                // 실패: 사용자에게 안내, 로컬 저장 안내 등
+                Toast.makeText(requireContext(), "서버 업로드에 실패했습니다. 로컬에 저장되었습니다.", Toast.LENGTH_SHORT).show()
+            }
+        }
+
         // 작성 버튼
         dietLogBinding.btnWriteDietLog.setOnClickListener {
             SaveDialog(requireActivity()) {
@@ -359,16 +400,6 @@ class DietLogFragment : Fragment() {
                         return@SaveDialog
                     }
                 }
-
-                // 식단 기록 완료 후 메인 화면으로 이동
-                val dietLogDataJson = Gson().toJson(dietLogData)
-                val intent = Intent().apply {
-                    putExtra("mode", 0)
-                    putExtra("dietLogData", dietLogDataJson)
-                }
-
-                requireActivity().setResult(Activity.RESULT_OK, intent)
-                requireActivity().finish()
             }.show()
         }
 
@@ -484,7 +515,7 @@ class DietLogFragment : Fragment() {
         }
     }
 
-    fun copyResourceToFile(context: Context, resId: Int): File? {
+    private fun copyResourceToFile(context: Context, resId: Int): File? {
         return try {
             val inputStream = context.resources.openRawResource(resId)
             val file = File(context.cacheDir, "temp_image_${System.currentTimeMillis()}.jpg")

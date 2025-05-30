@@ -15,6 +15,9 @@ import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
+import com.example.elixir.calendar.data.MealDto
+import com.example.elixir.calendar.network.DietApi
+import com.example.elixir.calendar.network.db.DietLogDao
 import com.example.elixir.calendar.network.db.DietLogRepository
 import com.example.elixir.calendar.ui.MealDetailFragment
 import com.example.elixir.chatbot.ChatBotActivity
@@ -23,8 +26,14 @@ import com.example.elixir.dialog.AlertExitDialog
 import com.example.elixir.calendar.ui.DietLogFragment
 import com.example.elixir.calendar.viewmodel.MealViewModel
 import com.example.elixir.calendar.viewmodel.MealViewModelFactory
+import com.example.elixir.ingredient.data.IngredientDao
+import com.example.elixir.ingredient.network.IngredientApi
+import com.example.elixir.ingredient.network.IngredientDB
+import com.example.elixir.ingredient.network.IngredientRepository
 import com.example.elixir.member.MyPageImageGridFragment
 import com.example.elixir.member.MypageFollowListFragment
+import com.example.elixir.member.data.MemberDao
+import com.example.elixir.member.network.MemberApi
 import com.example.elixir.member.network.MemberDB
 import com.example.elixir.member.network.MemberRepository
 import com.example.elixir.network.AppDatabase
@@ -36,12 +45,24 @@ open class ToolbarActivity : AppCompatActivity() {
     // 선언부
     protected lateinit var toolBinding: ActivityToolbarBinding
     private val mealViewModel: MealViewModel by viewModels {
-        MealViewModelFactory(dietRepository, memberRepository)
+        MealViewModelFactory(dietRepository, memberRepository, ingredientRepository)
     }
 
+    // DB, API 관련
     private lateinit var dietRepository: DietLogRepository
     private lateinit var memberRepository: MemberRepository
+    private lateinit var ingredientRepository: IngredientRepository
 
+    private lateinit var dietDao: DietLogDao
+    private lateinit var memberDao: MemberDao
+    private lateinit var ingredientDao: IngredientDao
+
+    private lateinit var dietApi: DietApi
+    private lateinit var memberApi: MemberApi
+    private lateinit var ingredientApi: IngredientApi
+
+    private var mealDataJson: String? = null
+    private var dietId: Int = -1
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,15 +76,17 @@ open class ToolbarActivity : AppCompatActivity() {
         setContentView(toolBinding.root)
 
         // 데이터베이스와 API 초기화
-        val dao = AppDatabase.getInstance(this).dietLogDao()
-        val api = RetrofitClient.instanceDietApi
-        dietRepository = DietLogRepository(dao, api)
-        memberRepository = MemberRepository(
-            RetrofitClient.instanceMemberApi,
-            MemberDB.getInstance(this).memberDao()
-        )
+        dietDao = AppDatabase.getInstance(this).dietLogDao()
+        dietApi = RetrofitClient.instanceDietApi
+        dietRepository = DietLogRepository(dietDao, dietApi)
 
-        //val recipeData = intent.getParcelableExtra<RecipeData>("recipeData")
+        memberDao = MemberDB.getInstance(this).memberDao()
+        memberApi = RetrofitClient.instanceMemberApi
+        memberRepository = MemberRepository(memberApi, memberDao)
+
+        ingredientDao = IngredientDB.getInstance(this).ingredientDao()
+        ingredientApi = RetrofitClient.instanceIngredientApi
+        ingredientRepository = IngredientRepository(ingredientApi, ingredientDao)
 
         // 전 액티비티에서 정보 불러오기
         // 어떤 모드인지 확인하고, 맞는 화면 띄워주기
@@ -94,7 +117,7 @@ open class ToolbarActivity : AppCompatActivity() {
                 val year = intent.getIntExtra("year", -1)
                 val month = intent.getIntExtra("month", -1)
                 val day = intent.getIntExtra("day", -1)
-                val mealDataJson = intent.getStringExtra("mealData")
+                mealDataJson = intent.getStringExtra("mealData")
 
                 // 타이틀: yyyy년 m월 d일로
                 toolBinding.title.text = "${year}년 ${month}월 ${day}일"
@@ -164,13 +187,13 @@ open class ToolbarActivity : AppCompatActivity() {
                 toolBinding.btnMore.setOnClickListener {
                     val popupMenu = PopupMenu(this, it)
                     popupMenu.menuInflater.inflate(R.menu.item_menu_drop, popupMenu.menu)
-                    val dietLogId = intent.getIntExtra("dietLogId", -1)
+                    dietId = intent.getIntExtra("dietLogId", -1)
 
                     popupMenu.setOnMenuItemClickListener { menuItem ->
                         when (menuItem.itemId) {
                             R.id.menu_edit -> {
                                 // 기존 상세 intent에서 받은 mealData를 그대로 사용
-                                val mealDataJson = intent.getStringExtra("mealData")
+                                mealDataJson = intent.getStringExtra("mealData")
                                 val year = intent.getIntExtra("year", -1)
                                 val month = intent.getIntExtra("month", -1)
                                 val day = intent.getIntExtra("day", -1)
@@ -180,7 +203,7 @@ open class ToolbarActivity : AppCompatActivity() {
                                     putExtra("year", year)
                                     putExtra("month", month)
                                     putExtra("day", day)
-                                    putExtra("dietLogId", dietLogId)
+                                    putExtra("dietLogId", dietId)
                                     putExtra("mealData", mealDataJson) // 추가: 수정할 데이터 전달
                                 }
                                 startActivity(editIntent)
@@ -192,9 +215,9 @@ open class ToolbarActivity : AppCompatActivity() {
                                     .setTitle("식단 삭제")
                                     .setMessage("식단을 삭제하시겠습니까?")
                                     .setPositiveButton("삭제") { _, _ ->
-                                        if (dietLogId != -1) {
-                                            mealViewModel.deleteDietLog(dietLogId)
-                                            val resultIntent = Intent().putExtra("deletedDietLogId", dietLogId)
+                                        if (dietId != -1) {
+                                            mealViewModel.deleteDietLog(dietId)
+                                            val resultIntent = Intent().putExtra("deletedDietLogId", dietId)
                                             setResult(Activity.RESULT_OK, resultIntent)
                                             Toast.makeText(this, "식단이 삭제되었습니다", Toast.LENGTH_SHORT).show()
                                             finish()
@@ -216,7 +239,7 @@ open class ToolbarActivity : AppCompatActivity() {
                 val mealName = intent.getStringExtra("mealName")
                 toolBinding.title.text = mealName
 
-                val mealDataJson = intent.getStringExtra("mealData")
+                mealDataJson = intent.getStringExtra("mealData")
 
                 // MealDetailFragment에 Bundle로 전달
                 val fragment = MealDetailFragment()

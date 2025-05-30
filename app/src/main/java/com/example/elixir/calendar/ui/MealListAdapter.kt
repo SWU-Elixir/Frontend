@@ -12,6 +12,7 @@ import com.bumptech.glide.Glide
 import com.example.elixir.R
 import com.example.elixir.calendar.data.DietLogData
 import com.example.elixir.databinding.ItemMealListBinding
+import com.example.elixir.ingredient.data.IngredientItem
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
@@ -19,7 +20,8 @@ import com.google.android.flexbox.JustifyContent
 class MealListAdapter(
     private val context: Context,
     private var data: MutableList<DietLogData>,
-    private val listener: OnMealClickListener
+    private val listener: OnMealClickListener,
+    private var ingredientMap: Map<Int, IngredientItem> = emptyMap()
 ) : BaseAdapter() {
     override fun getCount(): Int = data.size
     override fun getItem(position: Int): DietLogData = data[position]
@@ -64,7 +66,7 @@ class MealListAdapter(
 
         // 재료 목록을 FlexboxLayoutManager를 사용하여 표시
         binding.dietIngredientList.layoutManager = FlexboxLayoutManager(context)
-        binding.dietIngredientList.adapter = MealListIngredientAdapter(item.ingredientTags)
+        binding.dietIngredientList.adapter = MealListIngredientAdapter(item.ingredientTags, ingredientMap)
 
         // Flexbox 레이아웃 매니저 설정
         val layoutManager = FlexboxLayoutManager(context)
@@ -85,6 +87,12 @@ class MealListAdapter(
     fun updateData(newData: List<DietLogData>) {
         data.clear()
         data.addAll(newData)
+        notifyDataSetChanged()
+    }
+
+    // 식재료 세팅
+    fun setIngredientMap(map: Map<Int, IngredientItem>) {
+        this.ingredientMap = map
         notifyDataSetChanged()
     }
 }

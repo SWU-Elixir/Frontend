@@ -12,12 +12,15 @@ import com.example.elixir.calendar.network.response.GetScoreResponse
 import com.example.elixir.member.network.MemberRepository
 import kotlinx.coroutines.launch
 import com.example.elixir.calendar.data.toEntity
+import com.example.elixir.ingredient.data.IngredientItem
+import com.example.elixir.ingredient.network.IngredientRepository
 import java.io.File
 import kotlin.coroutines.cancellation.CancellationException
 
 class MealViewModel(
     private val dietRepository: DietLogRepository,
-    private val memberRepository: MemberRepository
+    private val memberRepository: MemberRepository,
+    private val ingredientRepository: IngredientRepository
 ) : ViewModel() {
 
     private val _dietLogDetail = MutableLiveData<MealDto>()
@@ -28,6 +31,13 @@ class MealViewModel(
 
     private val _monthlyScore = MutableLiveData<GetScoreResponse>()
     val monthlyScore: LiveData<GetScoreResponse> = _monthlyScore
+
+    private val _uploadResult = MutableLiveData<Result<Boolean>>() // 성공/실패 구분
+    val uploadResult: LiveData<Result<Boolean>> get() = _uploadResult
+
+    // ViewModel에서 전체 식재료 리스트를 불러와 LiveData로 노출
+    val ingredientList = MutableLiveData<List<IngredientItem>>()
+
 
     // 특정 ID의 식단 기록 가져오기
     fun getDietLogById(dietLogId: Int) {
@@ -58,16 +68,21 @@ class MealViewModel(
                     val updatedEntity = entity.copy(imageUrl = serverImageUrl)
                     dietRepository.updateDietLog(updatedEntity)
                     Log.d("Upload", "서버 업로드 성공, imageUrl=$serverImageUrl")
+                    _uploadResult.postValue(Result.success(true))
                 } else {
                     Log.e("Upload", "서버 업로드 실패, entity=$entity, imageFile=${imageFile.path}")
+                    _uploadResult.postValue(Result.failure(Exception("서버 업로드 실패")))
                 }
             } catch (e: CancellationException) {
                 Log.w("Upload", "코루틴 취소됨: ${e.message}")
+                _uploadResult.postValue(Result.failure(e))
             } catch (e: Exception) {
                 Log.e("Upload", "예외 발생: ${e.message}", e)
+                _uploadResult.postValue(Result.failure(e))
             }
         }
     }
+
 
     // 특정 날짜의 식단 기록 목록
     fun getDietLogsByDate(date: String) {
@@ -132,11 +147,26 @@ class MealViewModel(
         }
     }
 
+    // 
     fun updateToLocalDB(data: DietLogData) {
         val entity = data.toEntity()
         viewModelScope.launch {
             dietRepository.updateDietLog(entity)
             Log.d("RoomTest", "로컬 저장됨: $entity")
         }
+    }
+
+    fun loadIngredients() {
+        viewModelScope.launch {
+            ingredientList.value = ingredientRepository.fetchAndSaveIngredients()
+        }
+    }
+
+    fun getSelectedIngredientNames(
+        ingredientTags: List<Int>,
+        ingredientList: List<IngredientItem>
+    ): List<String> {
+        val ingredientMap = ingredientList.associateBy { it.id }
+        return ingredientTags.mapNotNull { id -> ingredientMap[id]?.name }
     }
 }
