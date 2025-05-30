@@ -184,15 +184,30 @@ open class ToolbarActivity : AppCompatActivity() {
                     finish()
                 }
 
+                // 삭제 전송이 다 끝났는지 관찰
+                mealViewModel.deleteResult.observe(this) { result ->
+                    if (result.isSuccess) {
+                        val resultIntent = Intent().putExtra("deletedDietLogId", dietId)
+                        setResult(Activity.RESULT_OK, resultIntent)
+                        Toast.makeText(this, "식단이 삭제되었습니다", Toast.LENGTH_SHORT).show()
+                        finish()
+                    } else {
+                        Toast.makeText(this, "식단 삭제에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                // 더보기 버튼(수정/삭제)을 눌렀을 때
                 toolBinding.btnMore.setOnClickListener {
+                    // 드롭 메뉴 보여주기
                     val popupMenu = PopupMenu(this, it)
                     popupMenu.menuInflater.inflate(R.menu.item_menu_drop, popupMenu.menu)
                     dietId = intent.getIntExtra("dietLogId", -1)
 
+                    // 드롭 메뉴 아이템 선택
                     popupMenu.setOnMenuItemClickListener { menuItem ->
                         when (menuItem.itemId) {
+                            // 수정 모드
                             R.id.menu_edit -> {
-                                // 기존 상세 intent에서 받은 mealData를 그대로 사용
                                 mealDataJson = intent.getStringExtra("mealData")
                                 val year = intent.getIntExtra("year", -1)
                                 val month = intent.getIntExtra("month", -1)
@@ -210,6 +225,8 @@ open class ToolbarActivity : AppCompatActivity() {
                                 finish()
                                 true
                             }
+
+                            // 삭제 모드
                             R.id.menu_delete -> {
                                 AlertDialog.Builder(this)
                                     .setTitle("식단 삭제")
@@ -217,10 +234,6 @@ open class ToolbarActivity : AppCompatActivity() {
                                     .setPositiveButton("삭제") { _, _ ->
                                         if (dietId != -1) {
                                             mealViewModel.deleteDietLog(dietId)
-                                            val resultIntent = Intent().putExtra("deletedDietLogId", dietId)
-                                            setResult(Activity.RESULT_OK, resultIntent)
-                                            Toast.makeText(this, "식단이 삭제되었습니다", Toast.LENGTH_SHORT).show()
-                                            finish()
                                         } else {
                                             Toast.makeText(this, "삭제할 식단 ID가 없습니다.", Toast.LENGTH_SHORT).show()
                                         }

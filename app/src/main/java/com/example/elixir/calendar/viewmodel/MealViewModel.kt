@@ -35,6 +35,9 @@ class MealViewModel(
     private val _uploadResult = MutableLiveData<Result<Boolean>>() // 성공/실패 구분
     val uploadResult: LiveData<Result<Boolean>> get() = _uploadResult
 
+    private val _deleteResult = MutableLiveData<Result<Boolean>>()
+    val deleteResult: LiveData<Result<Boolean>> get() = _deleteResult
+
     // ViewModel에서 전체 식재료 리스트를 불러와 LiveData로 노출
     val ingredientList = MutableLiveData<List<IngredientItem>>()
 
@@ -108,14 +111,13 @@ class MealViewModel(
     }
 
     // 식단 삭제
-    fun deleteDietLog(dietLogId: Int) {
+    fun deleteDietLog(dietId: Int) {
         viewModelScope.launch {
-            dietRepository.deleteDietLog(dietLogId) //
-            val success = dietRepository.deleteDietLog(dietLogId)
-            if (success) {
-                Log.d("Delete", "식단 기록 삭제 성공")
-            } else {
-                Log.e("Delete", "식단 기록 삭제 실패")
+            try {
+                dietRepository.deleteDietLog(dietId)
+                _deleteResult.postValue(Result.success(true))
+            } catch (e: Exception) {
+                _deleteResult.postValue(Result.failure(e))
             }
         }
     }
