@@ -1,10 +1,10 @@
 package com.example.elixir.calendar.network.response
 
-import com.example.elixir.calendar.data.DietLogData
+import com.example.elixir.calendar.data.MealDto
 
-data class GetDietLogResponse(
+data class GetMealListResponse(
     val status: Int,
     val code: String,
     val message: String,
-    val data: DietLogData?
+    val data: List<MealDto>?
 )

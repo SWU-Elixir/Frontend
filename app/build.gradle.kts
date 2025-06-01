@@ -97,7 +97,7 @@ dependencies {
     implementation (libs.logging.interceptor)
     implementation (libs.androidx.core.splashscreen)
     implementation(libs.kotlin.stdlib)
-    
+
     // Material Components 라이브러리 추가
     implementation (libs.material)
     // calendarview 라이브러리 추가

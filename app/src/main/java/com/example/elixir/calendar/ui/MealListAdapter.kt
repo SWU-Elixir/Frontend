@@ -8,19 +8,20 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import androidx.activity.result.ActivityResultLauncher
+import com.bumptech.glide.Glide
 import com.example.elixir.R
-import com.example.elixir.ToolbarActivity
 import com.example.elixir.calendar.data.DietLogData
 import com.example.elixir.databinding.ItemMealListBinding
+import com.example.elixir.ingredient.data.IngredientItem
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
-import com.google.gson.Gson
 
 class MealListAdapter(
     private val context: Context,
     private var data: MutableList<DietLogData>,
-    private val listener: OnMealClickListener
+    private val listener: OnMealClickListener,
+    private var ingredientMap: Map<Int, IngredientItem> = emptyMap()
 ) : BaseAdapter() {
     override fun getCount(): Int = data.size
     override fun getItem(position: Int): DietLogData = data[position]
@@ -45,7 +46,11 @@ class MealListAdapter(
 
         val item = getItem(position)
 
-        binding.dietPicture.setImageURI(Uri.parse(item.dietImg))
+        Glide.with(context)
+            .load(item.dietImg) // file://, content://, http:// 모두 지원
+            .placeholder(R.drawable.img_blank) // 로딩 중 표시할 이미지
+            .into(binding.dietPicture)
+        
         binding.dietNameText.text = item.dietTitle
 
         // 식단 점수에 따른 아이콘 설정 (1~5점)
@@ -61,7 +66,7 @@ class MealListAdapter(
 
         // 재료 목록을 FlexboxLayoutManager를 사용하여 표시
         binding.dietIngredientList.layoutManager = FlexboxLayoutManager(context)
-        binding.dietIngredientList.adapter = MealListIngredientAdapter(item.ingredientTags)
+        binding.dietIngredientList.adapter = MealListIngredientAdapter(item.ingredientTags, ingredientMap)
 
         // Flexbox 레이아웃 매니저 설정
         val layoutManager = FlexboxLayoutManager(context)
@@ -82,6 +87,12 @@ class MealListAdapter(
     fun updateData(newData: List<DietLogData>) {
         data.clear()
         data.addAll(newData)
+        notifyDataSetChanged()
+    }
+
+    // 식재료 세팅
+    fun setIngredientMap(map: Map<Int, IngredientItem>) {
+        this.ingredientMap = map
         notifyDataSetChanged()
     }
 }

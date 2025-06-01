@@ -1,11 +1,13 @@
 package com.example.elixir
 
 import android.util.Log
+import com.example.elixir.calendar.network.DietApi
 import com.example.elixir.login.LoginService
 import com.example.elixir.ingredient.network.IngredientApi
 import com.example.elixir.challenge.network.ChallengeApi
 import com.example.elixir.member.network.MemberApi
 import com.example.elixir.chatbot.ChatApi
+import com.example.elixir.recipe.network.RecipeAPI
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
@@ -133,5 +135,23 @@ object RetrofitClient {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(ChatApi::class.java)
+    }
+
+    val instanceDietApi: DietApi by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(DietApi::class.java)
+    }
+
+    val instanceRecipeApi: RecipeAPI by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(RecipeAPI::class.java)
     }
 }
