@@ -44,10 +44,5 @@ class RecipeViewModel(private val repository: RecipeRepository) : ViewModel() {
             createdAt = LocalDateTime.now(),
             updatedAt = LocalDateTime.now()
         )
-
-        // Room DB에 저장할 객체 생성
-        viewModelScope.launch {
-            repository.insertRecipe(recipeEntity)
-        }
     }
 }

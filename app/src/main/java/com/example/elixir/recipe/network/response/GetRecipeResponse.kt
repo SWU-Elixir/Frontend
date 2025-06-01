@@ -6,5 +6,5 @@ data class GetRecipeResponse (
     val status: Int,
     val code: String,
     val message: String,
-    val data: List<RecipeData>?
+    val data: RecipeData?
 )

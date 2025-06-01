@@ -26,7 +26,7 @@ interface DietApi {
     @PATCH("/api/diet-log")
     suspend fun updateDietLog(
         @Part("dto") dto: RequestBody,
-        @Part image: MultipartBody.Part
+        @Part image: MultipartBody.Part?
     ) : Response<GetMealResponse>
 
     @GET("/api/diet-log/{dietLogId}")

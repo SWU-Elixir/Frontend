@@ -23,6 +23,7 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.elixir.R
+import com.example.elixir.RetrofitClient
 import com.example.elixir.databinding.FragmentRecipeLogBinding
 import com.example.elixir.dialog.SaveDialog
 import com.example.elixir.dialog.SelectImgDialog
@@ -97,7 +98,7 @@ class RecipeLogFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        repository = RecipeRepository(AppDatabase.getInstance(requireContext()).recipeDao())
+        repository = RecipeRepository(RetrofitClient.instanceRecipeApi, AppDatabase.getInstance(requireContext()).recipeDao())
         chipMap = mapOf(
             recipeBinding.ingredientSeasonedCabbage.id to 614,
             recipeBinding.ingredientStrawberry.id to 388,

@@ -1,6 +1,5 @@
 package com.example.elixir.calendar.ui
 
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -8,10 +7,21 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.bumptech.glide.Glide
 import com.example.elixir.R
+import com.example.elixir.RetrofitClient
 import com.example.elixir.calendar.data.DietLogData
+import com.example.elixir.calendar.network.db.DietLogRepository
+import com.example.elixir.calendar.viewmodel.MealViewModel
+import com.example.elixir.calendar.viewmodel.MealViewModelFactory
 import com.example.elixir.databinding.FragmentMealDetailBinding
+import com.example.elixir.ingredient.data.IngredientItem
+import com.example.elixir.ingredient.network.IngredientDB
+import com.example.elixir.ingredient.network.IngredientRepository
+import com.example.elixir.member.network.MemberDB
+import com.example.elixir.member.network.MemberRepository
+import com.example.elixir.network.AppDatabase
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
@@ -22,6 +32,14 @@ import java.util.Locale
 class MealDetailFragment : Fragment() {
     private var _binding: FragmentMealDetailBinding? = null
     private val binding get() = _binding!!
+
+    private lateinit var dietRepository: DietLogRepository
+    private lateinit var memberRepository: MemberRepository
+    private lateinit var ingredientRepository: IngredientRepository
+
+    private val mealViewModel: MealViewModel by viewModels {
+        MealViewModelFactory(dietRepository, memberRepository, ingredientRepository)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -41,6 +59,19 @@ class MealDetailFragment : Fragment() {
         val scoreGrayBackground = ContextCompat.getDrawable(requireContext(), R.drawable.bg_oval_outline_gray)
         val timeOrangeBackground = ContextCompat.getDrawable(requireContext(), R.drawable.bg_rect_filled_orange_5)
         val timeGrayBackground = ContextCompat.getDrawable(requireContext(), R.drawable.bg_rect_outline_gray_5)
+
+        // -------------- 레포지토리 및 뷰모델 초기화 --------------
+        val dietDao = AppDatabase.getInstance(requireContext()).dietLogDao()
+        val dietApi = RetrofitClient.instanceDietApi
+        dietRepository = DietLogRepository(dietDao, dietApi)
+
+        val memberDao = MemberDB.getInstance(requireContext()).memberDao()
+        val memberApi = RetrofitClient.instanceMemberApi
+        memberRepository = MemberRepository(memberApi, memberDao)
+
+        val ingredientDao = IngredientDB.getInstance(requireContext()).ingredientDao()
+        val ingredientApi = RetrofitClient.instanceIngredientApi
+        ingredientRepository = IngredientRepository(ingredientApi, ingredientDao)
 
         // 데이터 불러오기
         val mealDataJson = arguments?.getString("mealData")
@@ -118,6 +149,20 @@ class MealDetailFragment : Fragment() {
             val selectedButton = scoreButtons[score - 1]
             selectedButton.background = scoreOrangeBackground
             selectedButton.setTextColor(whiteColor)
+        }
+
+        mealViewModel.loadIngredients()
+
+        mealViewModel.ingredientList.observe(viewLifecycleOwner) { ingredientList ->
+            // ingredientMap 생성
+            val ingredientMap = ingredientList.associateBy { it.id }
+
+            // dietLogData?.ingredientTags는 태그로 보여줄 id 리스트라고 가정
+            val ingredientTags = dietLogData?.ingredientTags ?: emptyList()
+
+            // Adapter 연결
+            binding.tagList.layoutManager = FlexboxLayoutManager(requireContext())
+            binding.tagList.adapter = MealListIngredientAdapter(ingredientTags, ingredientMap)
         }
 
         // ------------------------ 리스트 ------------------------

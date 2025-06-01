@@ -197,7 +197,6 @@ class CalendarFragment : Fragment(), OnMealClickListener {
         mealViewModel.loadIngredients()
         mealViewModel.ingredientList.observe(viewLifecycleOwner) { ingredientList ->
             val ingredientMap = ingredientList.associateBy { it.id }
-
             mealAdapter.setIngredientMap(ingredientMap)
         }
 

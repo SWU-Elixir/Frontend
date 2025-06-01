@@ -6,7 +6,7 @@ import com.example.elixir.calendar.data.MealDto
 import com.example.elixir.calendar.data.ScoreData
 import com.example.elixir.calendar.data.toDto
 import com.example.elixir.calendar.network.DietApi
-import com.example.elixir.calendar.network.response.GetImgResult
+import com.example.elixir.calendar.network.response.GetMealResponse
 import com.google.gson.Gson
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -38,7 +38,7 @@ class DietLogRepository (private val dietLogDao: DietLogDao, private val dietApi
 
     // 서버
     // 식단 기록 등록
-    suspend fun uploadDietLog(dietLog: DietLogEntity, imageFile: File): GetImgResult? {
+    suspend fun uploadDietLog(dietLog: DietLogEntity, imageFile: File): GetMealResponse? {
         return try {
             val dto = dietLog.toDto()
             Log.d("DietLogRepository", "type: ${dto.type}")
@@ -51,7 +51,9 @@ class DietLogRepository (private val dietLogDao: DietLogDao, private val dietApi
 
             val response = dietApi.uploadDietLog(dtoRequestBody, imagePart)
             if (response.isSuccessful) {
-                response.body() as? GetImgResult // Ensure type safety
+                Log.d("DietLogRepository", "업로드 성공!: ${response.body()?.toString()}")
+                val result = response.body() // Ensure type safety
+                result
             } else {
                 Log.e("DietLogRepository", "Upload failed: ${response.errorBody()?.string()}")
                 null
@@ -62,52 +64,22 @@ class DietLogRepository (private val dietLogDao: DietLogDao, private val dietApi
         }
     }
 
-    suspend fun uploadDietLogAsBoolean(dietLog: DietLogEntity, imageFile: File): Boolean {
-        return try {
-            val dto = dietLog.toDto()
-            val json = Gson().toJson(dto)
-            val dtoRequestBody = json.toRequestBody("application/json".toMediaTypeOrNull())
-
-            val imageRequestBody = imageFile.asRequestBody("image/*".toMediaTypeOrNull())
-            val imagePart = MultipartBody.Part.createFormData("image", imageFile.name, imageRequestBody)
-
-            val response = dietApi.uploadDietLog(dtoRequestBody, imagePart)
-
-            if (response != null) {
-                Log.d("DietLogRepository", "Upload successful")
-                true
-            } else {
-                false
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            false
-        }
-    }
-
     // 식단 기록 수정
-    suspend fun updateDietLog(dietLog: DietLogEntity, imageFile: File): Boolean {
-        return try {
-            val dto = dietLog.toDto()
-            val json = Gson().toJson(dto)
-            val dtoRequestBody = json.toRequestBody("application/json".toMediaTypeOrNull())
+    suspend fun updateDietLog(dietLog: DietLogEntity, imageFile: File?): GetMealResponse? {
+        val dto = dietLog.toDto()
+        val json = Gson().toJson(dto)
+        val dtoRequestBody = json.toRequestBody("application/json".toMediaTypeOrNull())
 
+        val response = if (imageFile != null && imageFile.exists()) {
             val imageRequestBody = imageFile.asRequestBody("image/*".toMediaTypeOrNull())
             val imagePart = MultipartBody.Part.createFormData("image", imageFile.name, imageRequestBody)
-
-            val response = dietApi.updateDietLog(dtoRequestBody, imagePart)
-
-            if (response.isSuccessful) {
-                Log.d("DietLogRepository", "Update successful")
-                true
-            } else {
-                Log.e("DietLogRepository", "Update failed: ${response.errorBody()?.string()}")
-                false
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            false
+            dietApi.updateDietLog(dtoRequestBody, imagePart)
+        } else {
+            // 이미지 없이 PATCH (API에서 image 파트가 nullable이어야 함)
+            dietApi.updateDietLog(dtoRequestBody, null)
         }
+
+        return if (response.isSuccessful) response.body() else null
     }
 
     // 식단 기록 삭제

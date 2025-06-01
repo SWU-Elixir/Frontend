@@ -186,13 +186,16 @@ open class ToolbarActivity : AppCompatActivity() {
 
                 // 삭제 전송이 다 끝났는지 관찰
                 mealViewModel.deleteResult.observe(this) { result ->
-                    if (result.isSuccess) {
+                    result.onSuccess {
+                        // 성공: 결과 intent 전달 후 종료
                         val resultIntent = Intent().putExtra("deletedDietLogId", dietId)
                         setResult(Activity.RESULT_OK, resultIntent)
-                        Toast.makeText(this, "식단이 삭제되었습니다", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "삭제되었습니다", Toast.LENGTH_SHORT).show()
                         finish()
-                    } else {
-                        Toast.makeText(this, "식단 삭제에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                    }.onFailure { exception ->
+                        // 실패: 예외 메시지 활용 가능
+                        val message = exception?.localizedMessage ?: "삭제하지 못했습니다."
+                        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
                     }
                 }
 

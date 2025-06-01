@@ -2,7 +2,6 @@ package com.example.elixir.recipe.network
 
 import com.example.elixir.recipe.network.response.GetRecipeListResponse
 import com.example.elixir.recipe.network.response.GetRecipeResponse
-import com.example.elixir.recipe.network.response.UpdateRecipeResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
@@ -35,7 +34,7 @@ interface RecipeAPI {
         @Part("size") size: Int,
         @Part("categoryType") categoryType: String,
         @Part("categorySlowAging") categorySlowAging: String
-    ): Response<GetRecipeResponse>
+    ): Response<GetRecipeListResponse>
 
     @GET("/api/recipe/search/keyword")
     suspend fun getRecipeByKeyword(): Response<GetRecipeResponse>

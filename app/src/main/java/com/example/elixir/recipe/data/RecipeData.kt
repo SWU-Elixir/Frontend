@@ -1,5 +1,6 @@
 package com.example.elixir.recipe.data
 
+import com.example.elixir.recipe.data.entity.RecipeEntity
 import org.threeten.bp.LocalDateTime
 
 
@@ -30,3 +31,36 @@ data class RecipeData(
     var createdAt: LocalDateTime,
     var updatedAt: LocalDateTime
 )
+
+fun RecipeData.toEntity(): RecipeEntity {
+    return RecipeEntity(
+        // id는 DB에서 autoGenerate이므로 기본값(0) 사용
+        email = this.email,
+        title = this.title,
+        description = this.description,
+        categorySlowAging = this.categorySlowAging,
+        categoryType = this.categoryType,
+        difficulty = this.difficulty,
+        timeHours = this.timeHours,
+        timeMinutes = this.timeMinutes,
+        ingredientTagIds = this.ingredientTagIds,
+        ingredients = this.ingredients,
+        seasoning = this.seasoning,
+        stepDescriptions = this.stepDescriptions,
+        stepImageUrls = this.stepImageUrls,
+        tips = this.tips,
+        allergies = this.allergies,
+        imageUrl = this.imageUrl,
+        authorFollowByCurrentUser = this.authorFollowByCurrentUser,
+        likedByCurrentUser = this.likedByCurrentUser,
+        scrappedByCurrentUser = this.scrappedByCurrentUser,
+        authorNickname = this.authorNickname,
+        authorTitle = this.authorTitle,
+        likes = this.likes,
+        scraps = this.scraps,
+        createdAt = this.createdAt,
+        updatedAt = this.updatedAt
+    )
+}
+
+fun List<RecipeData>.toEntities(): List<RecipeEntity> = this.map { it.toEntity() }
