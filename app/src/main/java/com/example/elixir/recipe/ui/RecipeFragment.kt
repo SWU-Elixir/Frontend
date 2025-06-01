@@ -11,12 +11,17 @@ import android.widget.AdapterView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.elixir.R
+import com.example.elixir.RetrofitClient
 import com.example.elixir.ToolbarActivity
 import com.example.elixir.databinding.FragmentRecipeBinding
+import com.example.elixir.network.AppDatabase
 import com.example.elixir.recipe.viewmodel.RecipeViewModel
 import com.example.elixir.recipe.data.RecipeData
+import com.example.elixir.recipe.data.RecipeRepository
+import com.example.elixir.recipe.viewmodel.RecipeViewModelFactory
 import com.google.gson.Gson
 import org.threeten.bp.LocalDateTime
 import java.math.BigInteger
@@ -31,11 +36,15 @@ class RecipeFragment : Fragment() {
     private val binding get() = _binding!!
 
     // 데이터
-    private lateinit var sampleRecipes: MutableList<RecipeData>
+    private var recipeList: MutableList<RecipeData> = mutableListOf()
     private lateinit var recipeListAdapter: RecipeListAdapter
 
+    private lateinit var recipeRepository: RecipeRepository
+
     // 뷰모델
-    private lateinit var recipeViewModel: RecipeViewModel
+    private val recipeViewModel: RecipeViewModel by viewModels {
+        RecipeViewModelFactory(recipeRepository)
+    }
 
     private lateinit var recipeRegisterLauncher: ActivityResultLauncher<Intent>
 
@@ -49,6 +58,19 @@ class RecipeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        // db 초기화
+        val recipeDao = AppDatabase.getInstance(requireContext()).recipeDao()
+        val recipeApi = RetrofitClient.instanceRecipeApi
+        recipeRepository = RecipeRepository(recipeApi, recipeDao)
+
+        recipeViewModel.recipeList.observe(viewLifecycleOwner) { recipes ->
+            recipeList.clear()
+            recipeList.addAll(recipes)
+            recipeListAdapter.updateData(recipeList)
+        }
+
+        // 레시피 불러오기
+        recipeViewModel.getRecipes(0, 10, "항산화 강화", "한식")
 
         // FAB 클릭 이벤트 설정
         setupFabClickListener()
@@ -56,8 +78,11 @@ class RecipeFragment : Fragment() {
         // 스피너 설정
         setupSpinners()
 
-        // 더미 데이터 초기화 및 어댑터 설정
-        initializeDataAndAdapters()
+        // 추천 레시피 ViewPager 설정
+        setupRecommendationViewPager()
+
+        // 레시피 리스트 설정
+        setupRecipeList()
 
         // 검색 버튼 클릭 이벤트 설정
         setupSearchButton()
@@ -70,8 +95,8 @@ class RecipeFragment : Fragment() {
                 val data = result.data?.getStringExtra("recipeData")
                 if (data != null) {
                     val newRecipe = Gson().fromJson(data, RecipeData::class.java)
-                    sampleRecipes.add(newRecipe)
-                    recipeListAdapter.updateData(sampleRecipes)
+                    recipeList.add(newRecipe)
+                    recipeListAdapter.updateData(recipeList)
                 }
             }
         }
@@ -177,24 +202,10 @@ class RecipeFragment : Fragment() {
     }
 
     /**
-     * 데이터 초기화 및 어댑터 설정
-     */
-    private fun initializeDataAndAdapters() {
-        // 더미 데이터 초기화
-        sampleRecipes = getDummyRecipeData().toMutableList()
-
-        // 추천 레시피 ViewPager 설정
-        setupRecommendationViewPager()
-
-        // 레시피 리스트 설정
-        setupRecipeList()
-    }
-
-    /**
      * 추천 레시피 ViewPager 설정
      */
     private fun setupRecommendationViewPager() {
-        val recommendationAdapter = RecipeRecommendationListAdapter(sampleRecipes)
+        val recommendationAdapter = RecipeRecommendationListAdapter(recipeList)
         binding.recommendationList.adapter = recommendationAdapter
         
         // 페이지 전환 애니메이션 설정
@@ -221,20 +232,20 @@ class RecipeFragment : Fragment() {
         // RecipeListAdapter 초기화
         recipeListAdapter = RecipeListAdapter(
             // 전체 레시피 데이터 전달
-            sampleRecipes,
+            recipeList,
             // 북마크 버튼 클릭 이벤트 처리
             onBookmarkClick = { recipe ->
                 // 북마크 상태 토글
                 recipe.scrappedByCurrentUser = !recipe.scrappedByCurrentUser
                 // 변경된 상태를 리스트에 반영
-                recipeListAdapter.notifyItemChanged(sampleRecipes.indexOf(recipe))
+                recipeListAdapter.notifyItemChanged(recipeList.indexOf(recipe))
             },
             // 좋아요 버튼 클릭 이벤트 처리
             onHeartClick = { recipe ->
                 // 좋아요 상태 토글
                 recipe.likedByCurrentUser = !recipe.likedByCurrentUser
                 // 변경된 상태를 리스트에 반영
-                recipeListAdapter.notifyItemChanged(sampleRecipes.indexOf(recipe))
+                recipeListAdapter.notifyItemChanged(recipeList.indexOf(recipe))
             },
             // 프래그먼트 전환을 위한 FragmentManager 전달
             fragmentManager = parentFragmentManager
@@ -266,7 +277,7 @@ class RecipeFragment : Fragment() {
         val selectedType = binding.spinnerType.selectedItem?.toString()
 
         // 선택된 조건에 따라 레시피 필터링
-        val filtered = sampleRecipes.filter { recipe ->
+        val filtered = recipeList.filter { recipe ->
             // 저속노화 방법 필터링 조건
             // "저속노화"가 선택된 경우 모든 레시피 포함, 그 외에는 선택된 방법과 일치하는 레시피만 포함
             val methodMatch = selectedMethod == "저속노화" || recipe.categorySlowAging == selectedMethod

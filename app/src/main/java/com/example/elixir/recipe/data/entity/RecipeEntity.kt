@@ -3,6 +3,7 @@ package com.example.elixir.recipe.data.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.example.elixir.recipe.data.RecipeData
 import com.example.elixir.recipe.data.RecipeDto
 import org.threeten.bp.LocalDateTime
 
@@ -54,3 +55,31 @@ fun RecipeEntity.toDto(): RecipeDto {
         allergies = this.allergies
     )
 }
+
+fun RecipeEntity.toData(): RecipeData = RecipeData(
+    email = email,
+    title = title,
+    description = description,
+    categorySlowAging = categorySlowAging,
+    categoryType = categoryType,
+    difficulty = difficulty,
+    timeHours = timeHours,
+    timeMinutes = timeMinutes,
+    ingredientTagIds = ingredientTagIds,
+    ingredients = ingredients,
+    seasoning = seasoning,
+    stepDescriptions = stepDescriptions,
+    stepImageUrls = stepImageUrls,
+    tips = tips,
+    allergies = allergies,
+    imageUrl = imageUrl,
+    authorFollowByCurrentUser = authorFollowByCurrentUser,
+    likedByCurrentUser = likedByCurrentUser,
+    scrappedByCurrentUser = scrappedByCurrentUser,
+    authorNickname = authorNickname,
+    authorTitle = authorTitle,
+    likes = likes,
+    scraps = scraps,
+    createdAt = createdAt,
+    updatedAt = updatedAt
+)

@@ -340,7 +340,7 @@ class RecipeLogFragment : Fragment() {
                         createdAt = org.threeten.bp.LocalDateTime.now(),
                         updatedAt = org.threeten.bp.LocalDateTime.now()
                     )
-                    recipeViewModel.saveRecipeToDB(recipeData)
+                    //recipeViewModel.saveRecipeToDB(recipeData)
                     val intent = Intent().apply {
                         putExtra("mode", if (arguments?.getBoolean("isEdit") == true) 9 else 0)
                         putExtra("recipeData", Gson().toJson(recipeData))
