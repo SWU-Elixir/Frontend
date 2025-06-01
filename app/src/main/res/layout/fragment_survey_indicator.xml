@@ -5,6 +5,7 @@
     android:layout_height="wrap_content"
     android:paddingVertical="10dp"
     android:orientation="horizontal"
+    android:paddingHorizontal="16dp"
     android:gravity="center">
 
     <!-- Step 1 -->

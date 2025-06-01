@@ -44,3 +44,9 @@ data class ChallengeProgressData(
     val step4Goal2Achieved: Boolean = false,
     val challengeCompleted: Boolean = false,
 )
+
+data class ChallengeCompletionRawData(
+    val challengeCompleted: Boolean = false,
+    val achievementName: String? = null,
+    val achievementImageUrl: String? = null
+)

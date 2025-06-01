@@ -67,73 +67,54 @@ class ChallengeViewModel(
         }
     }
 
-    private fun loadChallengeDetails(id: Int) {
+    fun loadChallengeWithProgress(id: Int) {
         viewModelScope.launch {
             try {
-                _error.value = null
-                Log.d("ChallengeViewModel", "챌린지 상세 정보 로드 시작: id=$id")
-
-                // [1] 챌린지 상세 정보 API 호출 시도
-                try {
-                    val apiChallenge = service.getChallengeById(id)
-                    if (apiChallenge.isNotEmpty()) {
-                        Log.d("ChallengeViewModel", "API에서 챌린지 상세 정보 로드됨: id=$id")
-                        _selectedChallenge.value = apiChallenge[0]
-                    }
-                } catch (e: Exception) {
-                    Log.e("ChallengeViewModel", "API 상세 정보 로드 실패", e)
+                // 1. 상세 정보 먼저 가져오기 (name 등 null 아님)
+                val detail = service.getChallengeById(id).firstOrNull()
+                if (detail == null) {
+                    _error.value = "상세 정보를 찾을 수 없습니다"
+                    return@launch
                 }
 
-                // [2] 상세 정보가 아직 없다면 로컬 DB에서 시도
-                if (_selectedChallenge.value == null) {
-                    val dbChallenge = service.getChallengeById(id)
-                    if (dbChallenge.isNotEmpty()) {
-                        Log.d("ChallengeViewModel", "DB에서 챌린지 상세 정보 로드됨: id=$id")
-                        _selectedChallenge.value = dbChallenge[0]
-                    } else {
-                        val basicInfo = currentYearChallenges.find { it.id == id }
-                        if (basicInfo != null) {
-                            Log.d("ChallengeViewModel", "현재 연도 목록에서 기본 정보 사용: id=$id")
-                            _selectedChallenge.value = basicInfo
-                        } else {
-                            _error.value = "상세 정보를 찾을 수 없습니다"
-                        }
-                    }
-                }
+                // 2. 진행도 정보 가져오기
+                val progress = service.getChallengeProgress(id)
 
-                // [3] 챌린지 진행 정보도 함께 로드
-                try {
-                    val progress = service.getChallengeProgress()
-                    Log.d("ChallengeViewModel", "챌린지 진행도 로드됨: id=$id, progress=$progress")
-                    _challengeProgress.value = challengeProgress.value
-                } catch (e: Exception) {
-                    Log.e("ChallengeViewModel", "챌린지 진행도 로드 실패", e)
-                    // 실패해도 UI에는 영향 없이 넘어가도록 처리
-                }
-
+                // 3. 상세 정보 + 진행도 합쳐서 emit (name 등은 항상 null 아님)
+                val merged = detail.copy(
+                    step1Goal1Achieved = progress.step1Goal1Achieved,
+                    step1Goal2Achieved = progress.step1Goal2Achieved,
+                    step2Goal1Active = progress.step2Goal1Active,
+                    step2Goal2Active = progress.step2Goal2Active,
+                    step2Goal1Achieved = progress.step2Goal1Achieved,
+                    step2Goal2Achieved = progress.step2Goal2Achieved,
+                    step3Goal1Active = progress.step3Goal1Active,
+                    step3Goal2Active = progress.step3Goal2Active,
+                    step3Goal1Achieved = progress.step3Goal1Achieved,
+                    step3Goal2Achieved = progress.step3Goal2Achieved,
+                    step4Goal1Active = progress.step4Goal1Active,
+                    step4Goal2Active = progress.step4Goal2Active,
+                    step4Goal1Achieved = progress.step4Goal1Achieved,
+                    step4Goal2Achieved = progress.step4Goal2Achieved,
+                    challengeCompleted = progress.challengeCompleted
+                )
+                _selectedChallenge.value = merged
             } catch (e: Exception) {
-                Log.e("ChallengeViewModel", "상세 정보 로드 중 오류 발생", e)
-                _error.value = "상세 정보 로드 실패: ${e.message}"
+                _error.value = "챌린지 정보 로드 실패: ${e.message}"
             }
         }
     }
 
-    fun loadChallengeCompletion() {
+    fun loadChallengeCompletionForPopup(onResult: (Boolean, String?, String?) -> Unit) {
         viewModelScope.launch {
             try {
-                _error.value = null
-                // API에서 데이터 가져오기 시도
-                _challenges.value = service.getChallengeCompletion()
+                val response = service.getChallengeCompletionRaw()
+                // 팝업에 필요한 정보만 콜백으로 전달
+                onResult(response.challengeCompleted, response.achievementName, response.achievementImageUrl)
             } catch (e: Exception) {
-                    _error.value = "데이터 로드 실패: ${e.message}"
-                }
-
+                onResult(false, null, null)
+            }
         }
-    }
-
-
-    fun loadChallengesById(id: Int) {
-        loadChallengeDetails(id)
     }
 
 

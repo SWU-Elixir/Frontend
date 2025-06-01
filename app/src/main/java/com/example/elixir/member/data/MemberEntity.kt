@@ -13,14 +13,24 @@ data class MemberEntity (
     val profileUrl: String?
 )
 
+@Entity(tableName = "profile")
+data class ProfileEntity (
+    @PrimaryKey val id: Int,
+    val nickname: String?,
+    val title: String?,
+    val profileUrl: String?,
+    val followerCount: Int,
+    val followingCount: Int
+)
+
 @Entity(tableName = "achievement")
 data class AchievementEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val year: Int,
-    val month: Int,
-    val achievementName: String,
-    val achievementImageUrl: String,
-    val challengeCompleted: Boolean
+    val year: Int?,
+    val month: Int?,
+    val achievementName: String?,
+    val achievementImageUrl: String?,
+    val challengeCompleted: Boolean?
 )
 
 @Entity(tableName = "recipe")
@@ -32,7 +42,8 @@ data class RecipeEntity(
 @Entity(tableName = "follow")
 data class FollowEntity(
     @PrimaryKey val followId: Int,
-    val nickname: String,
-    val profileUrl: String,
-    val title: String
+    val id: Int?,
+    val nickname: String?,
+    val profileUrl: String?,
+    val title: String?
 )

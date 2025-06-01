@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="24dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/title_logout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="회원 탈퇴"
+        android:textSize="22sp"
+        android:textColor="@color/black"
+        android:fontFamily="@font/pretendard_bold" />
+
+    <TextView
+        android:id="@+id/msg_exit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="정말 회원 탈퇴를 하겠습니다?"
+        android:textSize="16sp"
+        android:textColor="@color/black"
+        android:fontFamily="@font/pretendard_medium" />
+</LinearLayout>

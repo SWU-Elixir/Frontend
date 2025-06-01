@@ -3,16 +3,23 @@ package com.example.elixir.signup
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import com.example.elixir.dialog.AlertExitDialog
 import com.example.elixir.R
 import com.example.elixir.databinding.FragmentCreateAccountBinding
+import com.example.elixir.RetrofitClient
+import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody
 
 class CreateAccountFragment : Fragment() {
     private lateinit var accountBinding: FragmentCreateAccountBinding
@@ -33,6 +40,8 @@ class CreateAccountFragment : Fragment() {
         accountBinding.errorPw.visibility = View.GONE
         accountBinding.checkPw.visibility = View.GONE
         accountBinding.incorrectPw.visibility = View.GONE
+        accountBinding.textPw.visibility = View.GONE
+        accountBinding.registPw.visibility = View.GONE
         accountBinding.registEmail.setCompoundDrawables(null, null, null, null)
         accountBinding.registPw.setCompoundDrawables(null, null, null, null)
         accountBinding.checkPw.setCompoundDrawables(null, null, null, null)
@@ -152,6 +161,51 @@ class CreateAccountFragment : Fragment() {
 
         // 이메일 확인
         accountBinding.checkEmail.setOnClickListener {
+            val email = accountBinding.registEmail.text.toString()
+
+            if (!isEmailValid(email)) {
+                Toast.makeText(requireContext(), "유효한 이메일을 입력해주세요.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            lifecycleScope.launch {
+                try {
+                    val api = RetrofitClient.instancePublicApi
+                    val response = api.getCheckEmail(email) // GET 방식: @Query 사용 가정
+
+                    Log.d("Email", email)
+                    if (response.status == 200 && !response.data) {
+                        // 이메일 사용 가능
+                        accountBinding.errorEmail.visibility = View.GONE
+                        accountBinding.errorEmail.text = ""
+                        accountBinding.registEmail.setCompoundDrawablesWithIntrinsicBounds(null, null,
+                            ContextCompat.getDrawable(requireContext(), R.drawable.ic_check), null)
+                        Toast.makeText(requireContext(), "사용 가능한 이메일입니다.", Toast.LENGTH_SHORT).show()
+
+                        updateSelection()
+
+                        // 추가 UI 설정
+                        accountBinding.textPw.visibility = View.VISIBLE
+                        accountBinding.registPw.visibility = View.VISIBLE
+                        accountBinding.checkEmail.background =
+                            ContextCompat.getDrawable(requireContext(), R.drawable.bg_rect_filled_gray)
+                        accountBinding.checkEmail.isEnabled = false
+                        accountBinding.registEmail.isEnabled = false
+
+                    } else {
+                        // 이메일 중복
+                        accountBinding.errorEmail.visibility = View.VISIBLE
+                        accountBinding.errorEmail.text = "이미 사용중인 이메일입니다"
+                        accountBinding.registEmail.setCompoundDrawablesWithIntrinsicBounds(null, null,
+                            ContextCompat.getDrawable(requireContext(), R.drawable.ic_not), null)
+                        Toast.makeText(requireContext(), "이미 사용중인 이메일입니다.", Toast.LENGTH_SHORT).show()
+                        updateSelection()
+                    }
+
+                } catch (e: Exception) {
+                    Toast.makeText(requireContext(), "이메일 확인 중 오류가 발생했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 
@@ -170,8 +224,10 @@ class CreateAccountFragment : Fragment() {
 
     // 작업 상태 갱신 & 값 저장 함수
     private fun updateSelection() {
-        // 다 유효한 상태일 떄만 버튼 활성화
-        val allValid = isEmailValid(email) && isPwValid(pw) && incorrectPw(pw, checkPw)
+        // 다 유효한 상태일 때만 버튼 활성화
+        val allValid = isEmailValid(email) && isPwValid(pw) && incorrectPw(pw, checkPw) && 
+                      accountBinding.errorEmail.visibility == View.GONE && 
+                      accountBinding.errorEmail.text.toString().isEmpty()
         accountBinding.btnNext.isEnabled = allValid
 
         // 버튼 색상 변경 (활성화: 주황, 비활성화: 회색)

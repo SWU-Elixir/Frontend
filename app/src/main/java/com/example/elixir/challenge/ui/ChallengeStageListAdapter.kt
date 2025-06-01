@@ -12,14 +12,14 @@ import com.example.elixir.databinding.ItemChallengeListBinding
 class ChallengeStageListAdapter(
     private val context: Context,
     private var stageList: MutableList<StageItem>,
-    private val currentStage: Int
+    private var currentStage: Int
 ) : BaseAdapter() {
 
     override fun getCount(): Int {
         return stageList.count { it.stepNumber <= currentStage }
     }
     override fun getItem(position: Int): StageItem {
-        val filtered = stageList.filter { it.stepNumber <= currentStage }
+        val filtered = stageList.filter { it.stepNumber <= currentStage }.reversed()
         return filtered[position]
     }
     override fun getItemId(position: Int): Long = position.toLong()
@@ -60,5 +60,12 @@ class ChallengeStageListAdapter(
 
         return view
     }
+
+    fun updateData(newStageList: MutableList<StageItem>, newCurrentStage: Int) {
+        this.stageList = newStageList
+        this.currentStage = newCurrentStage
+        notifyDataSetChanged()
+    }
 }
+
 

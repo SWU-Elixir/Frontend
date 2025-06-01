@@ -80,6 +80,9 @@ object RetrofitClient {
             }).build()
     }
 
+    val noAuthClient = OkHttpClient.Builder()
+        .build() // Interceptor 없이
+
     val instance: LoginService by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
@@ -111,6 +114,15 @@ object RetrofitClient {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(MemberApi::class.java)
+    }
+
+    val instancePublicApi: MemberApi by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(noAuthClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(MemberApi::class.java)

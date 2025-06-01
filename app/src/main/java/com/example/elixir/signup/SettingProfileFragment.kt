@@ -78,10 +78,10 @@ class SettingProfileFragment : Fragment() {
         // 라디오 버튼 : 성별 선택
         profileBinding.selectGender.setOnCheckedChangeListener { _, checkedId ->
             when(checkedId) {
-                R.id.btn_female -> gender = R.string.female.toString()
-                R.id.btn_male -> gender = R.string.male.toString()
-                R.id.btn_other -> gender = R.string.other.toString()
-                R.id.btn_selected_not -> gender = R.string.selected_not.toString()
+                R.id.btn_female -> gender = "female"
+                R.id.btn_male -> gender = "male"
+                R.id.btn_other -> gender = "other"
+                R.id.btn_selected_not -> gender = "not_selected"
             }
             checkAllValid()
         }

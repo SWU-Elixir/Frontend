@@ -21,6 +21,7 @@ import com.example.elixir.member.viewmodel.MemberService
 class SignupFragment : Fragment() {
     private lateinit var signupBinding: FragmentSignupBinding
     private val userModel: UserInfoViewModel by activityViewModels()
+    private var profileImageFile: java.io.File? = null
 
     // MemberViewModel을 Factory로 생성
     private val memberViewModel: com.example.elixir.member.viewmodel.MemberViewModel by activityViewModels {
@@ -33,7 +34,6 @@ class SignupFragment : Fragment() {
             )
         )
     }
-    private var profileImageFile: java.io.File? = null // 실제 파일 경로로 설정 필요
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -74,8 +74,12 @@ class SignupFragment : Fragment() {
                 if (userModel.currentStep == userModel.maxStep) {
                     val signupRequest = userModel.toSignupRequest()
                     if (signupRequest != null) {
-                        // profileImageFile은 SettingProfileFragment에서 파일 경로를 저장해두고 여기서 할당해야 함
-                        memberViewModel.signup(signupRequest, profileImageFile)
+                        // profileImageFile이 null이 아닐 때만 회원가입 진행
+                        if (profileImageFile != null) {
+                            memberViewModel.signup(signupRequest, profileImageFile)
+                        } else {
+                            Toast.makeText(requireContext(), "프로필 이미지를 선택해주세요.", Toast.LENGTH_SHORT).show()
+                        }
                     } else {
                         Toast.makeText(requireContext(), "입력값을 모두 확인해주세요.", Toast.LENGTH_SHORT).show()
                     }
@@ -163,6 +167,21 @@ class SignupFragment : Fragment() {
             0 -> SettingProfileFragment().apply {
                 listener = object : OnProfileCompletedListener {
                     override fun onProfileCompleted(profileImage: String, nickname: String, gender: String, birthYear: Int) {
+                        // 프로필 이미지 파일 생성
+                        profileImageFile = try {
+                            val imageUri = android.net.Uri.parse(profileImage)
+                            val inputStream = requireContext().contentResolver.openInputStream(imageUri)
+                            val file = java.io.File(requireContext().cacheDir, "profile_image.jpg")
+                            inputStream?.use { input ->
+                                file.outputStream().use { output ->
+                                    input.copyTo(output)
+                                }
+                            }
+                            file
+                        } catch (e: Exception) {
+                            null
+                        }
+                        
                         userModel.setProfile(profileImage, nickname, gender, birthYear)
                         handleChipSelection(0, true) {}
                     }

@@ -6,6 +6,7 @@ import com.example.elixir.member.data.MemberDao
 import com.example.elixir.member.data.MemberEntity
 import com.example.elixir.member.data.AchievementEntity
 import com.example.elixir.member.data.FollowEntity
+import com.example.elixir.member.data.ProfileEntity
 import com.example.elixir.member.data.RecipeEntity
 import com.example.elixir.signup.SignupRequest
 import okhttp3.MultipartBody
@@ -59,6 +60,32 @@ class MemberRepository (
     suspend fun getMemberFromDb(): MemberEntity? {
         return try {
             dao.getMember()
+        } catch (e: Exception) {
+            Log.e("MemberRepository", "DB 조회 실패", e)
+            null
+        }
+    }
+
+    @Transaction
+    suspend fun fetchAndSaveProfile(): ProfileEntity? {
+        return try {
+            val response = api.getProfile()
+            if (response.status == 200) {
+                dao.insertProfile(response.data)
+                response.data
+            } else {
+                Log.e("MemberRepository", "API 호출 실패: ${response.message}")
+                getProfileFromDb()
+            }
+        } catch (e: Exception) {
+            Log.e("MemberRepository", "데이터 저장 실패", e)
+            getProfileFromDb()
+        }
+    }
+
+    suspend fun getProfileFromDb(): ProfileEntity? {
+        return try {
+            dao.getProfile()
         } catch (e: Exception) {
             Log.e("MemberRepository", "DB 조회 실패", e)
             null
@@ -205,6 +232,7 @@ class MemberRepository (
                 val entities = response.data.map {
                     FollowEntity(
                         followId = it.followId,
+                        id = it.id ?: it.followId,
                         nickname = it.nickname,
                         profileUrl = it.profileUrl,
                         title = it.title
@@ -239,6 +267,7 @@ class MemberRepository (
                 val entities = response.data.map {
                     FollowEntity(
                         followId = it.followId,
+                        id = it.id ?: it.followId,
                         nickname = it.nickname,
                         profileUrl = it.profileUrl,
                         title = it.title
@@ -273,6 +302,7 @@ class MemberRepository (
                 val entities = response.data.map {
                     FollowEntity(
                         followId = it.followId,
+                        id = it.id ?: it.followId,
                         nickname = it.nickname,
                         profileUrl = it.profileUrl,
                         title = it.title
@@ -307,6 +337,7 @@ class MemberRepository (
                 val entities = response.data.map {
                     FollowEntity(
                         followId = it.followId,
+                        id = it.id ?: it.followId,
                         nickname = it.nickname,
                         profileUrl = it.profileUrl,
                         title = it.title
@@ -345,6 +376,27 @@ class MemberRepository (
             api.signup(dtoBody, imagePart)
         } catch (e: Exception) {
             Log.e("MemberRepository", "회원가입 실패", e)
+            null
+        }
+    }
+
+    // 이메일 인증 요청
+    suspend fun requestEmailVerification(email: String): SignupResponse? {
+        return try {
+            val json = """{"email":"$email"}"""
+            val body = RequestBody.create("application/json; charset=utf-8".toMediaTypeOrNull(), json)
+            api.emailVerification(body)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    suspend fun verifyEmailCode(email: String, code: String): SignupResponse? {
+        return try {
+            val json = """{"email":"$email","code":"$code"}"""
+            val body = RequestBody.create("application/json; charset=utf-8".toMediaTypeOrNull(), json)
+            api.emailVerify(body)
+        } catch (e: Exception) {
             null
         }
     }

@@ -4,10 +4,13 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.elixir.member.data.MemberDao
 import com.example.elixir.member.data.MemberEntity
 import com.example.elixir.member.data.AchievementEntity
 import com.example.elixir.member.data.FollowEntity
+import com.example.elixir.member.data.ProfileEntity
 import com.example.elixir.member.data.RecipeEntity
 
 @Database(
@@ -15,9 +18,10 @@ import com.example.elixir.member.data.RecipeEntity
         MemberEntity::class,
         AchievementEntity::class,
         RecipeEntity::class,
-        FollowEntity::class
+        FollowEntity::class,
+        ProfileEntity::class
     ],
-    version = 3
+    version = 4
 )
 abstract class MemberDB : RoomDatabase() {
     abstract fun memberDao(): MemberDao
