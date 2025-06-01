@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit
 object RetrofitClient {
     // 서버 주소
     private const val BASE_URL = "https://port-0-elixir-backend-g0424l70py8py.gksl2.cloudtype.app/"
-    private var authToken: String? = "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJBQGV4YW1wbGUuY29tIiwiYXV0aCI6IlVTRVIiLCJleHAiOjE3NDg1OTM0MTd9.0rxmhvr5vl_y-9pWZmccpMhtUnAF4_9mHYdxy9agdGe8DWLQRDnNzNByZjmaJvnl" // Bearer 토큰을 저장할 변수
+    private var authToken: String? = "" // Bearer 토큰을 저장할 변수
 
     fun setAuthToken(token: String) {
         authToken = token
@@ -78,6 +78,9 @@ object RetrofitClient {
             }).build()
     }
 
+    val noAuthClient = OkHttpClient.Builder()
+        .build() // Interceptor 없이
+
     val instance: LoginService by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
@@ -109,6 +112,15 @@ object RetrofitClient {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(MemberApi::class.java)
+    }
+
+    val instancePublicApi: MemberApi by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(noAuthClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(MemberApi::class.java)

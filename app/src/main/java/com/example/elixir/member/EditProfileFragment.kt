@@ -1,5 +1,6 @@
-package com.example.elixir.signup
+package com.example.elixir.member
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
@@ -14,14 +15,15 @@ import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.example.elixir.R
 import com.example.elixir.RetrofitClient
+import com.example.elixir.ToolbarActivity
 import com.example.elixir.databinding.FragmentEditProfileBinding
 import com.example.elixir.dialog.SelectImgDialog
 import com.example.elixir.dialog.WithdrawalDialog
+import com.example.elixir.signup.OnProfileCompletedListener
 import com.google.gson.Gson
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -33,6 +35,7 @@ class EditProfileFragment : Fragment() {
     private lateinit var profileBinding: FragmentEditProfileBinding
     var listener: OnProfileCompletedListener? = null
 
+    private var title: String = ""
     private var profileImage: String = ""
     private var nickname: String = ""
     private var gender: String = ""
@@ -78,6 +81,7 @@ class EditProfileFragment : Fragment() {
 
         // 생년월일 드롭다운 메뉴
         selectBirthYear()
+        setTitleSpinner()
 
         // 저장 버튼 클릭 리스너
         profileBinding.btnEdit.setOnClickListener {
@@ -86,6 +90,15 @@ class EditProfileFragment : Fragment() {
 
         profileBinding.btnWithdrawal.setOnClickListener{
             WithdrawalDialog(requireActivity()).show()
+        }
+
+        profileBinding.btnSurvey.setOnClickListener {
+            // ToolbarActivity로 이동
+            val intent = Intent(context, ToolbarActivity::class.java).apply {
+                putExtra("mode", 15)
+                putExtra("title", "설문 조사 수정")
+            }
+            startActivity(intent)
         }
     }
 
@@ -145,7 +158,7 @@ class EditProfileFragment : Fragment() {
 
                 // dto 객체 생성
                 val dtoMap = mapOf(
-                    "title" to "", // 필요시 값 입력
+                    "title" to title, // 필요시 값 입력
                     "nickname" to nickname,
                     "gender" to gender,
                     "birthYear" to birthYearInt
@@ -228,6 +241,38 @@ class EditProfileFragment : Fragment() {
                 },
                 { imgSelector.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }
             ).show()
+        }
+    }
+
+    private fun setTitleSpinner() {
+        lifecycleScope.launch {
+            try {
+                val api = RetrofitClient.instanceMemberApi
+                val response = api.getTitle()
+                if (response.status == 200) {
+                    val titleList = response.data?.titles ?: emptyList()
+                    if (titleList.isEmpty()) {
+                        val emptyList = listOf("칭호가 없습니다")
+                        val adapter = ArrayAdapter(requireContext(), R.layout.item_spinner_year, emptyList)
+                        profileBinding.title.adapter = adapter
+                        profileBinding.title.isEnabled = false
+                        title = ""
+                    } else {
+                        val adapter = ArrayAdapter(requireContext(), R.layout.item_spinner_year, titleList)
+                        profileBinding.title.adapter = adapter
+                        profileBinding.title.isEnabled = true
+                        // 선택 리스너
+                        profileBinding.title.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                                title = parent.getItemAtPosition(position).toString()
+                            }
+                            override fun onNothingSelected(parent: AdapterView<*>) {}
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "타이틀 정보를 불러올 수 없습니다: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 

@@ -149,9 +149,10 @@
 
             <!-- 마이페이지 -->
             <TextView
+                android:id="@+id/badgeText"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:text="@string/badge"
+                android:text="뱃지"
                 android:textColor="@color/black"
                 android:textSize="18sp"
                 android:fontFamily="@font/pretendard_bold"
@@ -170,6 +171,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"/>
+
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -206,6 +208,7 @@
 
             <!-- 마이페이지 -->
             <TextView
+                android:id="@+id/recipeText"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:text="레시피"
@@ -216,17 +219,6 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"/>
 
-            <TextView
-                android:id="@+id/btn_more_recipe"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:text="@string/more"
-                android:textColor="@color/elixir_orange"
-                android:textSize="16sp"
-                android:fontFamily="@font/pretendard_medium"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

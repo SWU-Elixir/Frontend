@@ -70,7 +70,7 @@ data class TitleResponse(
     val status: Int,
     val code: String,
     val message: String,
-    val data: List<TitleData>
+    val data: TitleData?
 )
 
 data class TitleData(
@@ -82,7 +82,7 @@ data class SurveyResponse(
     val status: Int,
     val code: String,
     val message: String,
-    val data: List<SurveyData>
+    val data: SurveyData?
 )
 
 data class SurveyData(
@@ -91,4 +91,11 @@ data class SurveyData(
     val mealStyles: List<String>,
     val recipeStyles: List<String>,
     val reasons: List<String>
+)
+
+data class EmailResponse(
+    val status: Int,
+    val code: String,
+    val message: String,
+    val data: Boolean
 )

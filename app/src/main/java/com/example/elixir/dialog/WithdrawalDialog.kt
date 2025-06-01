@@ -24,7 +24,7 @@ import retrofit2.Response
 
 class WithdrawalDialog(private val act: Activity) {
     @SuppressLint("InflateParams")
-    private val dialogView = LayoutInflater.from(act).inflate(R.layout.diallog_logout_confirm, null, false)
+    private val dialogView = LayoutInflater.from(act).inflate(R.layout.diallog_withdrawal_confirm, null, false)
 
     fun show() {
         val dialog = AlertDialog.Builder(act)

@@ -29,7 +29,9 @@ interface MemberApi {
     ): SignupResponse
 
     @GET("/api/member/check-email")
-    suspend fun getCheckEmail(): SignupResponse
+    suspend fun getCheckEmail(
+        @Query("email") email: String
+    ): EmailResponse
 
     @PUT("/api/member/update-password")
     suspend fun putUpdatePassword(
@@ -72,7 +74,7 @@ interface MemberApi {
 
     @PUT("/api/member/survey")
     suspend fun putSurvey(
-        @Part("dto") dto: RequestBody
+        @Body body: RequestBody
     ): SurveyResponse
 
 

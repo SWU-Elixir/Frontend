@@ -1,5 +1,6 @@
 package com.example.elixir.member
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -8,6 +9,7 @@ import android.util.TypedValue
 import android.view.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
@@ -29,6 +31,9 @@ class MyPageFragmentId : Fragment() {
     private val spanCount = 3 // 한 줄에 3개
     private val spacing = 16 // dp → px로 변환 필요
     private var memberId: Int = -1  // memberId를 클래스 변수로 선언
+    private var memberNickname: String = ""
+    private var myId: Int = -1 // 현재 로그인한 사용자의 ID
+    private var isFollowing: Boolean = false // 팔로우 상태
 
     companion object {
         private const val TAG = "MyPageFragment"
@@ -60,9 +65,11 @@ class MyPageFragmentId : Fragment() {
         binding.mypageRecipeGrid.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
 
         // 데이터 로드
+        loadMyId() // 내 ID 로드
         loadMemberProfile(memberId)
         loadTop3Achievements(memberId)
         loadTop3Recipes(memberId)
+        checkFollowStatus() // 팔로우 상태 확인
 
         // RecyclerView 간격 설정
         val spacingPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, spacing.toFloat(), resources.displayMetrics).toInt()
@@ -71,6 +78,91 @@ class MyPageFragmentId : Fragment() {
 
         // 버튼 클릭 이벤트 설정
         setupClickListeners()
+
+        // 팔로우 버튼 클릭 이벤트
+        binding.followButton.setOnClickListener {
+            if (myId == -1) {
+                Toast.makeText(requireContext(), "로그인이 필요합니다.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (myId == memberId) {
+                binding.followButton.visibility = View.GONE
+                return@setOnClickListener
+            }
+
+            lifecycleScope.launch {
+                try {
+                    val api = RetrofitClient.instanceMemberApi
+                    val response = if (isFollowing) {
+                        api.unfollow(memberId)
+                    } else {
+                        api.follow(memberId)
+                    }
+
+                    if (response.isSuccessful) {
+                        isFollowing = !isFollowing
+                        updateFollowButtonUI()
+                        // 팔로워 수 업데이트
+                        loadMemberProfile(memberId)
+                    } else {
+                        Toast.makeText(requireContext(), "요청 실패: ${response.code()}", Toast.LENGTH_SHORT).show()
+                    }
+                } catch (e: Exception) {
+                    Toast.makeText(requireContext(), "네트워크 오류: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    private fun loadMyId() {
+        lifecycleScope.launch {
+            try {
+                val api = RetrofitClient.instanceMemberApi
+                val response = api.getProfile()
+                if (response.status == 200) {
+                    myId = response.data.id
+                    // 내 ID와 현재 프로필 ID가 같으면 팔로우 버튼 숨기기
+                    if (myId == memberId) {
+                        binding.followButton.visibility = View.GONE
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "내 ID 로드 실패", e)
+            }
+        }
+    }
+
+    private fun checkFollowStatus() {
+        lifecycleScope.launch {
+            try {
+                val api = RetrofitClient.instanceMemberApi
+                val response = api.getFollowing()
+                if (response.status == 200) {
+                    isFollowing = response.data.any { it.id == memberId }
+                    updateFollowButtonUI()
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "팔로우 상태 확인 실패", e)
+            }
+        }
+    }
+
+    private fun updateFollowButtonUI() {
+        binding.followButton.apply {
+            text = if (isFollowing) getString(R.string.following) else getString(R.string.follow)
+            setBackgroundResource(
+                if (isFollowing) R.drawable.bg_rect_outline_gray
+                else R.drawable.bg_rect_filled_orange
+            )
+            setTextColor(
+                resources.getColor(
+                    if (isFollowing) R.color.black
+                    else R.color.white,
+                    null
+                )
+            )
+        }
     }
 
     private fun loadMemberProfile(memberId: Int) {
@@ -163,24 +255,26 @@ class MyPageFragmentId : Fragment() {
         }
 
         // 더보기 버튼들
-        binding.btnMoreRecipe.setOnClickListener {
-            val intent = Intent(context, ToolbarActivity::class.java).apply {
-                putExtra("mode", 5)
-                putExtra("memberId", memberId)
-                putExtra("title", "내 레시피")
-            }
-            startActivity(intent)
-        }
+//        binding.btnMoreRecipe.setOnClickListener {
+//            val intent = Intent(context, ToolbarActivity::class.java).apply {
+//                putExtra("mode", 5)
+//                putExtra("memberId", memberId)
+//                putExtra("title", "내 레시피")
+//            }
+//            startActivity(intent)
+//        }
 
         binding.btnMoreBadge.setOnClickListener {
             val intent = Intent(context, ToolbarActivity::class.java).apply {
                 putExtra("mode", 7)
-                putExtra("title", "내 뱃지")
+                putExtra("memberId", memberId)
+                putExtra("title", memberNickname + "의 뱃지")
             }
             startActivity(intent)
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private fun setProfile(profile: ProfileEntity) {
         binding.apply {
             Glide.with(requireContext())
@@ -192,6 +286,9 @@ class MyPageFragmentId : Fragment() {
             cntFollower.text = profile.followerCount.toString()
             cntFollowing.text = profile.followingCount.toString()
             userTitle.text = profile.title
+            badgeText.text = profile.nickname + " 의 뱃지";
+            recipeText.text = profile.nickname + " 의 레시피";
+            memberNickname = profile.nickname.toString()
         }
     }
 

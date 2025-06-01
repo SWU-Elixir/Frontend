@@ -54,6 +54,9 @@ class FindPasswordFragment :Fragment() {
         binding.incorrectPw.visibility = View.GONE
         binding.textPw.visibility = View.GONE
         binding.registPw.visibility = View.GONE
+        binding.textVerify.visibility = View.GONE
+        binding.verify.visibility = View.GONE
+        binding.checkVerify.visibility = View.GONE
         binding.registEmail.setCompoundDrawables(null, null, null, null)
         binding.registPw.setCompoundDrawables(null, null, null, null)
         binding.checkPw.setCompoundDrawables(null, null, null, null)
@@ -113,9 +116,14 @@ class FindPasswordFragment :Fragment() {
                     // 인증번호 입력란, 확인 버튼 활성화
                     binding.verify.isEnabled = true
                     binding.checkVerify.isEnabled = true
+                    binding.textVerify.visibility = View.GONE
+                    binding.verify.visibility = View.GONE
+                    binding.checkVerify.visibility = View.GONE
 
                     // 이메일 입력 고정 (수정 불가)
                     binding.registEmail.isEnabled = false
+                    binding.checkEmail.background =
+                        ContextCompat.getDrawable(requireContext(), R.drawable.bg_rect_filled_gray)
                 } else {
                     binding.checkEmail.isEnabled = true // 실패 시 다시 활성화
                 }
@@ -142,6 +150,8 @@ class FindPasswordFragment :Fragment() {
 
                     // 인증번호 입력 고정 (수정 불가)
                     binding.verify.isEnabled = false
+                    binding.checkVerify.background =
+                        ContextCompat.getDrawable(requireContext(), R.drawable.bg_rect_filled_gray)
                 } else {
                     binding.checkVerify.isEnabled = true // 실패 시 다시 활성화
                 }
