@@ -27,22 +27,20 @@ sealed class ChatItem {
 }
 
 data class ChatMeal(
-    val id: Long,
+    val id: Int,
     val imageUrl: String?,
     val date: String,
     val title: String,
     val subtitle: String,
     val badgeNumber: Int,
-    // 실제 데이터를 위한 필드 추가
-    //val mealData: MealPlanData? = null  // 실제 식단 데이터
+    val ingredientTags: List<Int>
 )
 
 data class ChatRecipe(
     val id: Long,
-    val iconResUrl: String, // drawable 리소스 ID
+    val iconResUrl: String?, // drawable 리소스 ID
     val title: String,
     val subtitle: String,
-    // 실제 데이터를 위한 필드 추가
-    //val recipeData: RecipeData? = null  // 실제 레시피 데이터
+    val ingredientTags: List<Int>
 )
 

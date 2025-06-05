@@ -135,16 +135,27 @@ class LoginActivity : AppCompatActivity() {
                         startActivity(intent)
                         finish()
                     } else {
+                        // 로그인 실패 시 토큰 제거
+                        clearTokens()
                         loginBinding.errorLogin.text = result?.message ?: "로그인에 실패했습니다."
                         loginBinding.errorLogin.visibility = View.VISIBLE
                     }
                 } else {
-                    loginBinding.errorLogin.text = "서버 오류가 발생했습니다."
+                    // 로그인 실패 시 토큰 제거
+                    clearTokens()
+                    // 401 오류 처리
+                    if (response.code() == 401) {
+                        loginBinding.errorLogin.text = "이메일 또는 비밀번호가 일치하지 않습니다."
+                    } else {
+                        loginBinding.errorLogin.text = "서버 오류가 발생했습니다."
+                    }
                     loginBinding.errorLogin.visibility = View.VISIBLE
                 }
             }
 
             override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+                // 네트워크 오류 시에도 토큰 제거
+                clearTokens()
                 Log.e("LoginActivity", "Network error: ${t.message}")
                 loginBinding.errorLogin.text = "네트워크 오류가 발생했습니다."
                 loginBinding.errorLogin.visibility = View.VISIBLE
@@ -175,4 +186,16 @@ class LoginActivity : AppCompatActivity() {
         return token
     }
 
+    // 토큰 제거 함수 추가
+    private fun clearTokens() {
+        // RetrofitClient의 토큰 제거
+        RetrofitClient.setAuthToken(null)
+        
+        // SharedPreferences에서 토큰 제거
+        val prefs = getSharedPreferences("authPrefs", MODE_PRIVATE)
+        prefs.edit()
+            .remove("accessToken")
+            .remove("refreshToken")
+            .apply()
+    }
 }

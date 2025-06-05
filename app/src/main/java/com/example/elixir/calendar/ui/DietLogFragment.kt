@@ -292,8 +292,8 @@ class DietLogFragment : Fragment() {
                 )
                 setTextColor(ContextCompat.getColor(context, R.color.white))
                 
-                // 칩 삭제 리스너
-                setOnCloseIconClickListener {
+                // 칩 클릭 리스너로 변경
+                setOnClickListener {
                     ingredientTags.remove(ingredientId)
                     dietLogBinding.tagsIngredient.removeView(this)
                     checkAllValid()
@@ -311,6 +311,9 @@ class DietLogFragment : Fragment() {
 
         // 식재료 검색 버튼 클릭 리스너
         dietLogBinding.findIngredient.setOnClickListener {
+            // 칩 상태 토글
+            dietLogBinding.findIngredient.isChecked = !dietLogBinding.findIngredient.isChecked
+            
             // IngredientSearchFragment로 이동
             val ingredientSearchFragment = IngredientSearchFragment()
             
@@ -320,6 +323,13 @@ class DietLogFragment : Fragment() {
                 .addToBackStack(null)
                 .commit()
         }
+
+        // Fragment가 다시 보일 때 검색 칩 상태 초기화
+        viewLifecycleOwner.lifecycle.addObserver(object : androidx.lifecycle.DefaultLifecycleObserver {
+            override fun onResume(owner: androidx.lifecycle.LifecycleOwner) {
+                dietLogBinding.findIngredient.isChecked = false
+            }
+        })
 
         // 라디오 버튼: 점수
         dietLogBinding.selectScore.setOnCheckedChangeListener { _, checkedId ->
@@ -570,8 +580,8 @@ class DietLogFragment : Fragment() {
                     ContextCompat.getColor(context, R.color.elixir_orange)
                 )
                 setTextColor(ContextCompat.getColor(context, R.color.white))
-                // 칩 삭제 리스너
-                setOnCloseIconClickListener {
+                // 칩 클릭 리스너로 변경
+                setOnClickListener {
                     (ingredientTags as? MutableList)?.remove(ingredientId)
                     chipGroup.removeView(this)
                     checkAllValid()

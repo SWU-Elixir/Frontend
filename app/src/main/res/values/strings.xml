@@ -384,5 +384,6 @@
     <string name="step">STEP</string>
     <string name="bookmark">북마크</string>
     <string name="chatbot_hint">무엇이든 물어보세요!</string>
+    <string name="userDrawal"><u>회원 탈퇴</u></string>
 
 </resources>

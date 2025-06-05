@@ -1,5 +1,6 @@
 package com.example.elixir.recipe.ui
 
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.os.Bundle
 import android.text.Editable
@@ -15,12 +16,16 @@ import androidx.core.content.ContextCompat
 import androidx.core.widget.ImageViewCompat
 import androidx.fragment.app.Fragment
 import com.example.elixir.R
-import com.example.elixir.calendar.ui.MealListIngredientAdapter
 import com.example.elixir.databinding.FragmentRecipeSearchBinding
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 import android.content.res.ColorStateList
+import androidx.lifecycle.lifecycleScope
+import com.example.elixir.RetrofitClient
+import com.example.elixir.adapter.RecipeKeywordAdapter
+import com.example.elixir.adapter.RecommendRecipeKeywordAdapter
+import kotlinx.coroutines.launch
 
 class SearchFragment : Fragment() {
 
@@ -105,28 +110,103 @@ class SearchFragment : Fragment() {
             binding.searchEditText.setText("")
         }
 
-        // 인기 검색어 리스트 Flexbox 설정
-        /*val dummyData = listOf("1", "2", "3", "4", "5")
-        binding.popularSearchList.apply {
-            layoutManager = FlexboxLayoutManager(context).apply {
-                flexDirection = FlexDirection.ROW
-                justifyContent = JustifyContent.FLEX_START
-            }
-            adapter = MealListIngredientAdapter(dummyData)
-        }
+        loadRecipeKeyword()
+        loadRecommendRecipeKeyword()
 
-        // 추천 검색어 리스트 Flexbox 설정
-        binding.recommendationSearchList.apply {
-            layoutManager = FlexboxLayoutManager(context).apply {
-                flexDirection = FlexDirection.ROW
-                justifyContent = JustifyContent.FLEX_START
-            }
-            adapter = FlavoringAdapter(dummyData)
-        }*/
 
         // 뒤로 가기 버튼 클릭 시 이전 프래그먼트로 돌아가기
         binding.backButton.setOnClickListener {
             parentFragmentManager.popBackStack()
+        }
+    }
+
+    private fun loadRecipeKeyword() {
+        lifecycleScope.launch {
+            try {
+                val api = RetrofitClient.instanceRecipeApi
+                val response = api.getRecipeByKeyword()
+                if (response.isSuccessful) {
+                    response.body()?.data?.let { keywordList ->
+                        val layoutManager = FlexboxLayoutManager(context).apply {
+                            flexDirection = FlexDirection.ROW
+                            justifyContent = JustifyContent.FLEX_START
+                        }
+
+                        val adapter = RecipeKeywordAdapter(keywordList) { keyword ->
+                            // Set the search text when a keyword is clicked
+                            binding.searchEditText.setText(keyword)
+
+                            binding.searchEditText.setSelection(keyword.length)
+                            
+                            // Update search button color
+                            ImageViewCompat.setImageTintList(
+                                binding.searchButton,
+                                ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.elixir_orange))
+                            )
+                            binding.clearButton.visibility = View.VISIBLE
+                            
+                            // Show keyboard
+                            binding.searchEditText.requestFocus()
+                            val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                            imm.showSoftInput(binding.searchEditText, InputMethodManager.SHOW_IMPLICIT)
+                        }
+
+                        binding.popularSearchList.apply {
+                            this.layoutManager = layoutManager
+                            this.adapter = adapter
+                        }
+                    }
+                } else {
+                    Log.e(TAG, "키워드 로드 실패: ${response.message()}")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "키워드 로드 실패", e)
+            }
+        }
+    }
+
+    private fun loadRecommendRecipeKeyword() {
+        lifecycleScope.launch {
+            try {
+                val api = RetrofitClient.instanceRecipeApi
+                val response = api.getRecipeByRecommendKeyword()
+                if (response.isSuccessful) {
+                    response.body()?.data?.let { keywordList ->
+                        val layoutManager = FlexboxLayoutManager(context).apply {
+                            flexDirection = FlexDirection.ROW
+                            justifyContent = JustifyContent.FLEX_START
+                        }
+
+                        val adapter = RecommendRecipeKeywordAdapter(keywordList) { keyword ->
+                            // Set the search text when a keyword is clicked
+                            binding.searchEditText.setText(keyword)
+
+                            binding.searchEditText.setSelection(keyword.length)
+
+                            // Update search button color
+                            ImageViewCompat.setImageTintList(
+                                binding.searchButton,
+                                ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.elixir_orange))
+                            )
+                            binding.clearButton.visibility = View.VISIBLE
+
+                            // Show keyboard
+                            binding.searchEditText.requestFocus()
+                            val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                            imm.showSoftInput(binding.searchEditText, InputMethodManager.SHOW_IMPLICIT)
+                        }
+
+                        binding.recommendationSearchList.apply {
+                            this.layoutManager = layoutManager
+                            this.adapter = adapter
+                        }
+                    }
+                } else {
+                    Log.e(TAG, "키워드 로드 실패: ${response.message()}")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "키워드 로드 실패", e)
+            }
         }
     }
 

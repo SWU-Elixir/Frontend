@@ -236,7 +236,7 @@ class MyPageImageGridFragment : Fragment() {
                         val (item, imageUrl) = badgeList[position]
                         Glide.with(holder.binding.root).load(imageUrl).into(holder.binding.badgeImage)
                         holder.binding.badgeTitle.text = item.title
-                        holder.binding.badgeSubtitle.text = "${item.year}년 ${item.month}월 챌린지 성공"
+                        holder.binding.badgeSubtitle.text = "${item.year}년 ${item.month}월 챌린지"
                     }
                     override fun getItemCount() = badgeList.size
                 }

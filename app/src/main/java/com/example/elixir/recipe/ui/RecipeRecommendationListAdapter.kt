@@ -5,14 +5,20 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.elixir.R
 import com.example.elixir.databinding.ItemRecipeRecommendationListBinding
 import com.example.elixir.recipe.data.FlavoringData
 import com.example.elixir.recipe.data.RecipeData
 
 class RecipeRecommendationListAdapter(
-    private val recipeList: List<RecipeData>
+    private var recipeList: List<RecipeData>
 ) : RecyclerView.Adapter<RecipeRecommendationListAdapter.RecipeViewHolder>() {
+
+    fun updateData(newRecipeList: List<RecipeData>) {
+        recipeList = newRecipeList
+        notifyDataSetChanged()
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecipeViewHolder {
         val binding = ItemRecipeRecommendationListBinding.inflate(
@@ -29,8 +35,12 @@ class RecipeRecommendationListAdapter(
         // 레시피 제목 설정
         holder.binding.recipeNameText.text = recipe.title
 
-        // 이미지 설정 (더미 이미지 사용 가능)
-        holder.binding.recipeImage.setImageResource(R.drawable.png_recipe_sample)
+        // 이미지 설정 (Glide 사용)
+        Glide.with(holder.itemView.context)
+            .load(recipe.imageUrl)
+            .placeholder(R.drawable.ic_recipe_white)
+            .error(R.drawable.ic_recipe_white)
+            .into(holder.binding.recipeImage)
 
         // 재료 태그 RecyclerView 설정 (LayoutManager를 apply로 한 번만 설정)
         holder.binding.ingredientList.apply {

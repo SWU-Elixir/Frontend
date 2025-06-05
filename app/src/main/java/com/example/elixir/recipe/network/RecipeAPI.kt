@@ -1,7 +1,9 @@
 package com.example.elixir.recipe.network
 
+import com.example.elixir.chatbot.RecipeListResponse
 import com.example.elixir.recipe.network.response.GetRecipeListResponse
 import com.example.elixir.recipe.network.response.GetRecipeResponse
+import com.example.elixir.recipe.network.response.GetSearchResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
@@ -28,6 +30,11 @@ interface RecipeAPI {
         @Path("recipeId") recipeId: Int
     ): Response<GetRecipeResponse>
 
+    @GET("/api/recipe/my")
+    suspend fun getRecipeMy(
+        @Query("size") size: Int
+    ): Response<RecipeListResponse>
+
     @GET("/api/recipe/search")
     suspend fun searchRecipe(
         @Query("keyword") keyword: String,
@@ -38,7 +45,16 @@ interface RecipeAPI {
     ): Response<GetRecipeListResponse>
 
     @GET("/api/recipe/search/keyword")
-    suspend fun getRecipeByKeyword(): Response<GetRecipeResponse>
+    suspend fun getRecipeByKeyword()
+    : Response<GetSearchResponse>
+
+    @GET("/api/recipe/recommend/search/keyword")
+    suspend fun getRecipeByRecommendKeyword()
+            : Response<GetSearchResponse>
+
+    @GET("/api/recipe/recommend")
+    suspend fun getRecipeByRecommend()
+            : Response<GetRecipeListResponse>
 
     @Multipart
     @POST("/api/recipe")
