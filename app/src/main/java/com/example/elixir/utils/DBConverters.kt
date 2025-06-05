@@ -43,9 +43,20 @@ object DBConverters {
     }
 
     @TypeConverter
-    fun fromListInt(list: List<Int>): String = list.joinToString(",")
+    fun fromIntList(list: List<Int>?): String = list?.joinToString(",") ?: ""
 
     @TypeConverter
-    fun toListInt(data: String): List<Int> =
-        if (data.isBlank()) emptyList() else data.split(",").map { it.toInt() }
+    fun toIntList(data: String): List<Int> = if (data.isEmpty()) emptyList() else data.split(",").map { it.toInt() }
+
+    @TypeConverter
+    fun toStringList(data: String): List<String> = if (data.isEmpty()) emptyList() else data.split(";;")
+
+
+    @TypeConverter
+    fun toStringMap(data: String): Map<String, String> =
+        if (data.isEmpty()) emptyMap()
+        else data.split("||").associate {
+            val (k, v) = it.split("::")
+            k to v
+        }
 }

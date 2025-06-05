@@ -64,23 +64,25 @@ class DietLogRepository (private val dietLogDao: DietLogDao, private val dietApi
         }
     }
 
-    // 식단 기록 수정
     suspend fun updateDietLog(dietLog: DietLogEntity, imageFile: File?): GetMealResponse? {
         val dto = dietLog.toDto()
         val json = Gson().toJson(dto)
         val dtoRequestBody = json.toRequestBody("application/json".toMediaTypeOrNull())
 
+        val dietLogId = dietLog.id // 혹은 dietLog.dietLogId 등 실제 PK 필드명에 맞게
+
         val response = if (imageFile != null && imageFile.exists()) {
             val imageRequestBody = imageFile.asRequestBody("image/*".toMediaTypeOrNull())
             val imagePart = MultipartBody.Part.createFormData("image", imageFile.name, imageRequestBody)
-            dietApi.updateDietLog(dtoRequestBody, imagePart)
+            dietApi.updateDietLog(dietLogId, dtoRequestBody, imagePart)
         } else {
             // 이미지 없이 PATCH (API에서 image 파트가 nullable이어야 함)
-            dietApi.updateDietLog(dtoRequestBody, null)
+            dietApi.updateDietLog(dietLogId, dtoRequestBody, null)
         }
 
         return if (response.isSuccessful) response.body() else null
     }
+
 
     // 식단 기록 삭제
     suspend fun deleteDietLog(dietLogId: Int): Boolean {

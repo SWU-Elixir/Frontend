@@ -205,9 +205,8 @@ class DietLogFragment : Fragment() {
         dietLogBinding.setNowCb.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 // 시간 현재로 재설정
-                selectedTime = LocalTime.now()
-                selectedHour = selectedTime.hour
-                selectedMin = selectedTime.minute
+                val now = LocalTime.now()
+                dietLogBinding.setNowCb.isChecked = selectedTime.hour == now.hour && selectedTime.minute == now.minute
 
                 formattedTime = DateTimeFormatter.ofPattern("a h:mm", Locale.ENGLISH).format(selectedTime)
                 dietLogBinding.time12h.text = formattedTime
@@ -233,11 +232,8 @@ class DietLogFragment : Fragment() {
                 selectedHour = picker.hour
                 selectedMin = picker.minute
                 selectedTime = LocalTime.of(selectedHour, selectedMin)
+                dietLogBinding.setNowCb.isChecked = false
 
-                // 선택된 시간이 현재가 아니면 현재 시간 체크 풀기
-                if (selectedTime != LocalTime.now()) {
-                    dietLogBinding.setNowCb.isChecked = false
-                }
                 // 선택된 시간 텍스트뷰에 띄워주기
                 formattedTime = DateTimeFormatter.ofPattern("a h:mm", Locale.ENGLISH).format(selectedTime)
                 dietLogBinding.time12h.text = formattedTime
@@ -287,9 +283,7 @@ class DietLogFragment : Fragment() {
             }
 
             // 칩 생성 및 추가
-            val chip = com.google.android.material.chip.Chip(
-                ContextThemeWrapper(requireContext(), R.style.ChipStyle_Short)
-            ).apply {
+            val chip = Chip(ContextThemeWrapper(requireContext(), R.style.ChipStyle_Short)).apply {
                 text = ingredientName
                 isClickable = true
                 isCheckable = false
@@ -341,6 +335,7 @@ class DietLogFragment : Fragment() {
 
         // 업로드 관찰
         dietLogViewModel.uploadResult.observe(viewLifecycleOwner) { result ->
+            Log.d("DietLogFragment", "uploadResult observed: $result")
             if (result.isSuccess) {
                 if (::mealData.isInitialized) {
                     mealDataJson = Gson().toJson(mealData)
@@ -348,6 +343,7 @@ class DietLogFragment : Fragment() {
                         putExtra("mode", 0)
                         putExtra("dietLogData", mealDataJson)
                     }
+                    Log.d("DietLogFragment", "Activity finish() 호출됨")
                     requireActivity().setResult(Activity.RESULT_OK, intent)
                     requireActivity().finish()
                 }
@@ -369,6 +365,7 @@ class DietLogFragment : Fragment() {
                     dietImg = dietImg
                 )
 
+                Log.d("DietLogFragment", "저장할 selectedTime: $selectedTime")
                 Log.d("DietLogFragment", dietImg)
 
                 // 업로드용 이미지 File 객체 생성

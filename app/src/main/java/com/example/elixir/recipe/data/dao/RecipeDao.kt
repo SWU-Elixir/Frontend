@@ -18,8 +18,8 @@ interface RecipeDao {
     @Query("SELECT * FROM recipe_table WHERE id = :recipeId")
     suspend fun getRecipeById(recipeId: Int): RecipeEntity?
 
-    @Query("SELECT * FROM recipe_table WHERE categoryType = :categoryType AND categorySlowAging = :categorySlowAging LIMIT :size OFFSET :page")
-    suspend fun getRecipes(page: Int, size: Int, categoryType: String, categorySlowAging: String): List<RecipeEntity>
+    @Query("SELECT * FROM recipe_table WHERE categoryType = :categoryType AND categorySlowAging = :categorySlowAging LIMIT :size OFFSET :offset")
+    suspend fun getRecipes(offset: Int, size: Int, categoryType: String, categorySlowAging: String): List<RecipeEntity>
 
     @Query("SELECT * FROM recipe_table WHERE title LIKE '%' || :keyword || '%' AND categoryType = :categoryType AND categorySlowAging = :categorySlowAging LIMIT :size OFFSET :page")
     suspend fun searchRecipes(keyword: String, page: Int, size: Int, categoryType: String, categorySlowAging: String): List<RecipeEntity>

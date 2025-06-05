@@ -12,14 +12,15 @@ import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Part
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface RecipeAPI {
     @GET("/api/recipe")
     suspend fun getRecipe(
-        @Part("page") page: Int,
-        @Part("size") size: Int,
-        @Part("categoryType") categoryType: String,
-        @Part("categorySlowAging") categorySlowAging: String
+        @Query("page") page: Int,
+        @Query("size") size: Int,
+        @Query("categoryType") categoryType: String,
+        @Query("categorySlowAging") categorySlowAging: String
     ) : Response<GetRecipeListResponse>
 
     @GET("/api/recipe/{recipeId}")
@@ -29,11 +30,11 @@ interface RecipeAPI {
 
     @GET("/api/recipe/search")
     suspend fun searchRecipe(
-        @Part("keyword") keyword: String,
-        @Part("page") page: Int,
-        @Part("size") size: Int,
-        @Part("categoryType") categoryType: String,
-        @Part("categorySlowAging") categorySlowAging: String
+        @Query("keyword") keyword: String,
+        @Query("page") page: Int,
+        @Query("size") size: Int,
+        @Query("categoryType") categoryType: String,
+        @Query("categorySlowAging") categorySlowAging: String
     ): Response<GetRecipeListResponse>
 
     @GET("/api/recipe/search/keyword")
@@ -43,7 +44,8 @@ interface RecipeAPI {
     @POST("/api/recipe")
     suspend fun uploadRecipe(
         @Part("dto") dto: RequestBody,
-        @Part image: MultipartBody.Part
+        @Part image: MultipartBody.Part,
+        @Part recipeStepImages: List<MultipartBody.Part>
     ): Response<GetRecipeResponse>
 
     @Multipart

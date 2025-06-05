@@ -11,7 +11,6 @@ import org.threeten.bp.LocalDateTime
 data class RecipeEntity(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id") val id: Int = 0,
-    @ColumnInfo(name = "email") val email: String,                                          // 작성자 이메일
     @ColumnInfo(name = "title") val title: String,                                          // 레시피 제목
     @ColumnInfo(name = "description") val description: String,
     @ColumnInfo(name = "categorySlowAging") val categorySlowAging: String,
@@ -30,13 +29,14 @@ data class RecipeEntity(
     @ColumnInfo(name = "authorFollowByCurrentUser") val authorFollowByCurrentUser: Boolean, // 현재 사용자가 작성자를 팔로우하고 있는지 여부
     @ColumnInfo(name = "likedByCurrentUser") val likedByCurrentUser: Boolean,               // 현재 사용자가 좋아요를 눌렀는지 여부
     @ColumnInfo(name = "scrappedByCurrentUser") val scrappedByCurrentUser: Boolean,         // 현재 사용자가 스크랩을 눌렀는지 여부
-    @ColumnInfo(name = "authorNickname") val authorNickname: String,                        // 작성자 닉네임
-    @ColumnInfo(name = "authorTitle") val authorTitle: String,                              // 작성자 직책
+    @ColumnInfo(name = "authorNickname") val authorNickname: String?,                        // 작성자 닉네임
+    @ColumnInfo(name = "authorTitle") val authorTitle: String?,                              // 작성자 직책
     @ColumnInfo(name = "likes") val likes: Int = 0,                                         // 좋아요 수
     @ColumnInfo(name = "scraps") val scraps: Int = 0,                                       // 스크랩 수
-    @ColumnInfo(name = "createdAt") val createdAt: LocalDateTime,
-    @ColumnInfo(name = "updatedAt") val updatedAt: LocalDateTime
+    @ColumnInfo(name = "createdAt") val createdAt: String,
+    @ColumnInfo(name = "updatedAt") val updatedAt: String
 )
+
 // 서버에서 받은 ID가 null인 경우는 로컬에서만 사용되는 레시피임을 나타냄
 fun RecipeEntity.toDto(): RecipeDto {
     return RecipeDto(
@@ -57,7 +57,7 @@ fun RecipeEntity.toDto(): RecipeDto {
 }
 
 fun RecipeEntity.toData(): RecipeData = RecipeData(
-    email = email,
+    id = id,
     title = title,
     description = description,
     categorySlowAging = categorySlowAging,

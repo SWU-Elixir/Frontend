@@ -20,7 +20,6 @@ data class RecipeDto(
 )
 
 fun RecipeDto.toEntity(
-    email: String = "",
     stepImageUrls: List<String> = emptyList(),
     imageUrl: String = "",
     authorFollowByCurrentUser: Boolean = false,
@@ -30,12 +29,11 @@ fun RecipeDto.toEntity(
     authorTitle: String = "",
     likes: Int = 0,
     scraps: Int = 0,
-    createdAt: LocalDateTime = LocalDateTime.now(),
-    updatedAt: LocalDateTime = LocalDateTime.now()
+    createdAt: String = LocalDateTime.now().toString(),
+    updatedAt: String = LocalDateTime.now().toString()
 ): RecipeEntity {
     return RecipeEntity(
         // id는 autoGenerate이므로 기본값(0) 사용
-        email = email,
         title = this.title,
         description = this.description,
         categorySlowAging = this.categorySlowAging,

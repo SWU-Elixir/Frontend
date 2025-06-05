@@ -36,4 +36,9 @@ class IngredientViewModel(
             }
         }
     }
+
+    // id-string 맵 변환
+    fun getIngredientNameMap(): Map<Int, String?> {
+        return _ingredients.value!!.associate { it.id to it.name } ?: emptyMap()
+    }
 } 
