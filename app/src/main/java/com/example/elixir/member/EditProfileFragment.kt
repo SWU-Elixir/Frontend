@@ -1,5 +1,6 @@
 package com.example.elixir.member
 
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -183,6 +184,8 @@ class EditProfileFragment : Fragment() {
 
                 if (response.isSuccessful) {
                     Toast.makeText(requireContext(), "프로필이 성공적으로 수정되었습니다.", Toast.LENGTH_SHORT).show()
+                    // 프로필 수정 성공 시 결과 설정
+                    requireActivity().setResult(Activity.RESULT_OK)
                     activity?.finish()
                 } else {
                     Toast.makeText(requireContext(), "프로필 수정에 실패했습니다: ${response.message()}", Toast.LENGTH_SHORT).show()

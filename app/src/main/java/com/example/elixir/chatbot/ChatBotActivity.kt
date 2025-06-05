@@ -11,6 +11,7 @@ import com.example.elixir.R
 import com.example.elixir.RetrofitClient
 import com.example.elixir.ToolbarActivity
 import com.example.elixir.databinding.ActivityChatbotBinding
+import com.example.elixir.ingredient.data.IngredientItem
 import kotlinx.coroutines.launch
 
 class ChatBotActivity : ToolbarActivity() {
@@ -18,6 +19,7 @@ class ChatBotActivity : ToolbarActivity() {
     private lateinit var binding: ActivityChatbotBinding
     private val chatList = mutableListOf<ChatItem>()
     private lateinit var chatAdapter: ChatAdapter
+    private var ingredientMap: Map<Int, IngredientItem> = emptyMap()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,21 +45,33 @@ class ChatBotActivity : ToolbarActivity() {
         binding = ActivityChatbotBinding.inflate(layoutInflater)
         toolBinding.fragmentRegistration.addView(binding.root)
 
-        setupRecyclerView()
-        showWelcomeMessage()
+        // 식재료 전체 리스트 받아오기
+        lifecycleScope.launch {
+            try {
+                val response = RetrofitClient.instanceIngredientApi.getAllIngredients()
+                ingredientMap = response.data.associateBy { it.id }
+                setupRecyclerView()
+                showWelcomeMessage()
+            } catch (e: Exception) {
+                ingredientMap = emptyMap()
+                setupRecyclerView()
+                showWelcomeMessage()
+            }
+        }
         setupListeners()
     }
 
     private fun setupRecyclerView() {
         chatAdapter = ChatAdapter(
             chatList = chatList,
+            ingredientMap = ingredientMap,
             onExampleClick = { item ->
                 when (item) {
                     is ChatMeal -> {
                         // ChatMeal 선택 시 실제 데이터로 API 요청
                         val requestDto = ChatRequestDto(
                             type = ChatRequestDto.TYPE_DIET_FEEDBACK,
-                            targetId = item.id,
+                            targetId = item.id.toLong(),
                             message = "식단 피드백 요청" // 서버에서 요구하는 필수 필드
                         )
                         // 로딩 메시지 추가
@@ -154,106 +168,43 @@ class ChatBotActivity : ToolbarActivity() {
             "나의 식단 피드백 받기" -> {
                 val requestDto = ChatRequestDto(type = ChatRequestDto.TYPE_DIET_FEEDBACK)
                 addBotMessage("피드백 받을 식단을 선택해 주세요. \n1개의 식단 선택이 가능합니다.", requestDto)
-                // 하드코딩된 예시 식단 리스트
-//                val mealExamples = listOf(
-//                    ChatMeal(
-//                        id = 1,
-//                        imageUrl = R.drawable.png_recipe_sample,
-//                        date = "2024-03-20",
-//                        title = "아침 식단",
-//                        subtitle = "현미밥 / 계란찜 / 미역국 / 김치",
-//                        badgeNumber = 1
-//                    ),
-//                    ChatMeal(
-//                        id = 2,
-//                        imageUrl = R.drawable.png_recipe_sample,
-//                        date = "2024-03-20",
-//                        title = "점심 식단",
-//                        subtitle = "잡곡밥 / 닭가슴살 / 샐러드 / 된장국",
-//                        badgeNumber = 2
-//                    ),
-//                    ChatMeal(
-//                        id = 3,
-//                        imageUrl = R.drawable.png_recipe_sample,
-//                        date = "2024-03-20",
-//                        title = "저녁 식단",
-//                        subtitle = "고구마 / 단백질 쉐이크 / 견과류 / 요구르트",
-//                        badgeNumber = 3
-//                    )
-//                )
-//                chatList.add(ChatItem.ChatMealList(mealExamples, requestDto))
-//                chatAdapter.notifyItemInserted(chatList.size - 1)
-//                binding.chatRecyclerView.scrollToPosition(chatList.size - 1)
-
-                // API로 실제 식단 목록 가져오기
-//                lifecycleScope.launch {
-//                    try {
-//                        val response = RetrofitClient.instanceMemberApi.get()
-//                        if (response.isSuccessful && response.body()?.data != null) {
-//                            val meals = response.body()?.data?.map { meal ->
-//                                ChatMeal(
-//                                    id = meal.id,
-//                                    imageUrl = R.drawable.png_recipe_sample, // TODO: 실제 이미지 URL로 교체
-//                                    date = meal.date,
-//                                    title = meal.title,
-//                                    subtitle = meal.description,
-//                                    badgeNumber = 1 // TODO: 필요한 경우 실제 값으로 교체
-//                                )
-//                            } ?: emptyList()
-//
-//                            chatList.add(ChatItem.ChatMealList(meals, requestDto))
-//                            chatAdapter.notifyItemInserted(chatList.size - 1)
-//                            binding.chatRecyclerView.scrollToPosition(chatList.size - 1)
-//                        } else {
-//                            addBotMessage("식단 목록을 가져오는데 실패했습니다. 다시 시도해주세요.")
-//                        }
-//                    } catch (e: Exception) {
-//                        addBotMessage("식단 목록을 가져오는데 실패했습니다. 다시 시도해주세요.")
-//                    }
-//                }
+                lifecycleScope.launch {
+                    try {
+                        val response = RetrofitClient.instanceDietApi.getDietLogRecent(10)
+                        val meals = response.body()?.data?.map { meal ->
+                            ChatMeal(
+                                id = meal.id,
+                                imageUrl = meal.imageUrl,
+                                date = meal.time.toString(),
+                                title = meal.name,
+                                subtitle = "",
+                                badgeNumber = meal.score,
+                                ingredientTags = meal.ingredientTagIds
+                            )
+                        } ?: emptyList()
+                        chatList.add(ChatItem.ChatMealList(meals, requestDto))
+                        chatAdapter.notifyItemInserted(chatList.size - 1)
+                        binding.chatRecyclerView.scrollToPosition(chatList.size - 1)
+                    } catch (e: Exception) {
+                        addBotMessage("식단 목록을 가져오는데 실패했습니다. 다시 시도해주세요.")
+                    }
+                }
             }
             "나의 레시피 피드백 받기" -> {
                 val requestDto = ChatRequestDto(type = ChatRequestDto.TYPE_RECIPE_FEEDBACK)
                 addBotMessage("피드백 받을 레시피를 선택해 주세요. \n1개의 레시피 선택이 가능합니다.", requestDto)
-
-//                val recipeExamples = listOf(
-//                    ChatRecipe(
-//                        id = 1,
-//                        iconResId = R.drawable.png_recipe_sample,
-//                        title = "흑임자 연근샐러드",
-//                        subtitle = "연근 / 흑임자 / 식초 / 깨",
-//                    ),
-//                    ChatRecipe(
-//                        id = 2,
-//                        iconResId = R.drawable.ic_meal_lunch,
-//                        title = "닭가슴살 샐러드",
-//                        subtitle = "닭가슴살 / 채소 / 드레싱",
-//                    ),
-//                    ChatRecipe(
-//                        id = 3,
-//                        iconResId = R.drawable.ic_meal_snack,
-//                        title = "오트밀볼",
-//                        subtitle = "오트밀 / 우유 / 견과류",
-//                    )
-//                )
-//
-//                chatList.add(ChatItem.ChatRecipeList(recipeExamples, requestDto))
-//                chatAdapter.notifyItemInserted(chatList.size - 1)
-//                binding.chatRecyclerView.scrollToPosition(chatList.size - 1)
-
-                // API로 실제 레시피 목록 가져오기
                 lifecycleScope.launch {
                     try {
-                        val response = RetrofitClient.instanceMemberApi.getMyRecipes()
-                        val recipes = response.data?.map { recipe ->
+                        val response = RetrofitClient.instanceRecipeApi.getRecipeMy(10)
+                        val recipes = response.body()?.data?.map { recipe ->
                             ChatRecipe(
                                 id = recipe.recipeId.toLong(),
                                 iconResUrl = recipe.imageUrl,
-                                title = "제목",
-                                subtitle = "부제목"
+                                title = recipe.title,
+                                subtitle = "",
+                                ingredientTags = recipe.ingredientTagIds
                             )
                         } ?: emptyList()
-
                         chatList.add(ChatItem.ChatRecipeList(recipes, requestDto))
                         chatAdapter.notifyItemInserted(chatList.size - 1)
                         binding.chatRecyclerView.scrollToPosition(chatList.size - 1)

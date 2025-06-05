@@ -1,5 +1,6 @@
 package com.example.elixir.member
 
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -7,6 +8,7 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.*
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -27,6 +29,13 @@ class MyPageFragment : Fragment() {
 
     private val spanCount = 3 // 한 줄에 3개
     private val spacing = 16 // dp → px로 변환 필요
+
+    private var profileEditLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            // 프로필 수정 성공 시 프로필 정보 새로고침
+            loadMemberProfile()
+        }
+    }
 
     companion object {
         private const val TAG = "MyPageFragment"
@@ -55,7 +64,11 @@ class MyPageFragment : Fragment() {
         loadTop3Scraps()
 
         // RecyclerView 간격 설정
-        val spacingPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, spacing.toFloat(), resources.displayMetrics).toInt()
+        val spacingPx = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            spacing.toFloat(),
+            resources.displayMetrics
+        ).toInt()
         binding.mypageBadgeGrid.addItemDecoration(GridItemDecoration(spanCount, spacingPx, 16))
         binding.mypageRecipeGrid.addItemDecoration(GridItemDecoration(spanCount, spacingPx, 16))
         binding.mypageScrapGrid.addItemDecoration(GridItemDecoration(spanCount, spacingPx, 16))
@@ -160,7 +173,7 @@ class MyPageFragment : Fragment() {
             val intent = Intent(context, ToolbarActivity::class.java).apply {
                 putExtra("mode", 14)
             }
-            startActivity(intent)
+            profileEditLauncher.launch(intent)
         }
 
         // 로그아웃 버튼

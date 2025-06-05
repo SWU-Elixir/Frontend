@@ -8,3 +8,10 @@ data class GetRecipeResponse (
     val message: String,
     val data: RecipeData?
 )
+
+data class GetSearchResponse(
+    val status: Int,
+    val code: String,
+    val message: String,
+    val data: List<String>
+)

@@ -9,9 +9,11 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.example.elixir.R
 import com.example.elixir.databinding.ItemChatMealBinding
+import com.example.elixir.ingredient.data.IngredientItem
 
 class ChatMealListAdapter(
     private val items: List<ChatMeal>,
+    private val ingredientMap: Map<Int, IngredientItem>,
     private val onClick: (ChatMeal) -> Unit
 ) : RecyclerView.Adapter<ChatMealListAdapter.ViewHolder>() {
 
@@ -38,7 +40,10 @@ class ChatMealListAdapter(
             }
             binding.date.text = item.date
             binding.title.text = item.title
-            binding.subtitle.text = item.subtitle
+            
+            val ingredientNames = item.ingredientTags.mapNotNull { ingredientMap[it]?.name }
+            val subtitle = ingredientNames.joinToString("/")
+            binding.subtitle.text = subtitle
             binding.badge.text = item.badgeNumber.toString()
 
             binding.root.isSelected = (position == selectedIndex)

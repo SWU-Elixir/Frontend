@@ -3,6 +3,7 @@ package com.example.elixir.calendar.network
 import com.example.elixir.calendar.network.response.GetMealResponse
 import com.example.elixir.calendar.network.response.GetMealListResponse
 import com.example.elixir.calendar.network.response.GetScoreResponse
+import com.example.elixir.chatbot.DietLogListResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
@@ -13,6 +14,7 @@ import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Part
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface DietApi {
     @Multipart
@@ -28,6 +30,11 @@ interface DietApi {
         @Part("dto") dto: RequestBody,
         @Part image: MultipartBody.Part?
     ) : Response<GetMealResponse>
+
+    @GET("/api/diet-log/recent")
+    suspend fun getDietLogRecent(
+        @Query("days") days: Int
+    ): Response<DietLogListResponse>
 
     @GET("/api/diet-log/{dietLogId}")
     suspend fun getDietLogById(
