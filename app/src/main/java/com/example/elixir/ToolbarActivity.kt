@@ -170,11 +170,11 @@ open class ToolbarActivity : AppCompatActivity() {
                     AlertExitDialog(this).show()
                 }
 
-                val recipeDataJson = intent.getStringExtra("recipeData")
-                if( recipeDataJson != null) {
+                val recipeId = intent.getIntExtra("recipeId", -1)
+                if(recipeId != -1) {
                     val fragment = RecipeLogFragment().apply {
                         arguments = Bundle().apply {
-                            putString("recipeData", recipeDataJson)
+                            putInt("recipeId", recipeId)
                             putBoolean("isEdit", true)
                         }
                     }

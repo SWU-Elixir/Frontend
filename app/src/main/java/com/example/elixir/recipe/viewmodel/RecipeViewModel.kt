@@ -1,5 +1,6 @@
 package com.example.elixir.recipe.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -14,6 +15,8 @@ import kotlinx.coroutines.launch
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import org.threeten.bp.LocalDateTime
+import java.io.File
+import kotlin.coroutines.cancellation.CancellationException
 
 class RecipeViewModel(
     private val repository: RecipeRepository
@@ -22,11 +25,11 @@ class RecipeViewModel(
     private val _recipeList = MutableLiveData<List<RecipeData>>()
     val recipeList: LiveData<List<RecipeData>> = _recipeList
 
-    private val _recipeDetail = MutableLiveData<RecipeEntity?>()
-    val recipeDetail: LiveData<RecipeEntity?> = _recipeDetail
+    private val _recipeDetail = MutableLiveData<RecipeData?>()
+    val recipeDetail: LiveData<RecipeData?> = _recipeDetail
 
-    private val _uploadResult = MutableLiveData<Result<RecipeEntity?>>()
-    val uploadResult: LiveData<Result<RecipeEntity?>> = _uploadResult
+    private val _uploadResult = MutableLiveData<Result<RecipeData?>>()
+    val uploadResult: LiveData<Result<RecipeData?>> = _uploadResult
 
     private val _updateResult = MutableLiveData<Result<RecipeEntity?>>()
     val updateResult: LiveData<Result<RecipeEntity?>> = _updateResult
@@ -40,13 +43,8 @@ class RecipeViewModel(
     // 레시피 목록 불러오기
     fun getRecipes(page: Int, size: Int, categoryType: String, categorySlowAging: String) {
         viewModelScope.launch {
-            try {
-                val entityList = repository.getRecipes(page, size, categoryType, categorySlowAging)
-                val dataList = entityList.map { it.toData() } // 변환 함수 필요
-                _recipeList.value = dataList
-            } catch (e: Exception) {
-                _error.value = e.message
-            }
+            val recipes = repository.getRecipes(page, size, categoryType, categorySlowAging)
+            _recipeList.value = recipes
         }
     }
 
@@ -56,8 +54,10 @@ class RecipeViewModel(
             try {
                 val detail = repository.getRecipeById(recipeId)
                 _recipeDetail.value = detail
+            } catch (e: CancellationException) {
+                Log.e("RecipeViewModel", "코루틴이 취소됨!", e)
             } catch (e: Exception) {
-                _error.value = e.message
+                Log.e("RecipeViewModel", "에러 발생", e)
             }
         }
     }
@@ -76,11 +76,13 @@ class RecipeViewModel(
     }*/
 
     // 레시피 업로드
-    fun uploadRecipe(dto: RequestBody, image: MultipartBody.Part) {
+    fun uploadRecipe(entity: RecipeEntity, thumbnailFile: File?, stepImageFiles: List<File?> ) {
         viewModelScope.launch {
             try {
-                val uploaded = repository.uploadRecipe(dto, image)
-                _uploadResult.value = Result.success(uploaded)
+                // Repository는 Entity 반환 → ViewModel에서 Data로 변환
+                val entityResult = repository.uploadRecipe(entity, thumbnailFile, stepImageFiles)
+                val dataResult = entityResult?.toData()
+                _uploadResult.value = Result.success(dataResult)
             } catch (e: Exception) {
                 _uploadResult.value = Result.failure(e)
             }

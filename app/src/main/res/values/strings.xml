@@ -107,9 +107,9 @@
     <string name="ic_no_recommend">✨</string>
 
     <!-- 이유 -->
-    <string name="title_antiox">항산화 강화</string>
-    <string name="title_blood">혈당 조절</string>
-    <string name="title_inflam">염증 감소</string>
+    <string name="title_antiox">항산화강화</string>
+    <string name="title_blood">혈당조절</string>
+    <string name="title_inflam">염증감소</string>
     <string name="title_no_recommend">특별한 이유 없음</string>
 
     <!-- 세부 내용 -->
@@ -306,9 +306,9 @@
 
     <string-array name="method_list">
         <item>저속노화</item>
-        <item>항산화 강화</item>
-        <item>혈당 조절</item>
-        <item>염증 감소</item>
+        <item>항산화강화</item>
+        <item>혈당조절</item>
+        <item>염증감소</item>
     </string-array>
 
     <string-array name="type_list">

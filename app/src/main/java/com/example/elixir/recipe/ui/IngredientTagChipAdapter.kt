@@ -4,18 +4,13 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.elixir.databinding.ItemRecipeRecommendationListIndeterminateBinding
+import com.example.elixir.ingredient.data.IngredientItem
+import com.example.elixir.ingredient.viewmodel.IngredientViewModel
 
 class IngredientTagChipAdapter(
-    private val tagList: List<Int>
+    private val tagList: List<Int>,
+    private val ingredientItems: List<IngredientItem>
 ) : RecyclerView.Adapter<IngredientTagChipAdapter.TagViewHolder>() {
-
-    // ID-이름 매핑
-    private val ingredientTagNameMap = mapOf(
-        614 to "절임배추",
-        388 to "딸기",
-        768 to "시금치",
-        802 to "아몬드"
-    )
 
     inner class TagViewHolder(val binding: ItemRecipeRecommendationListIndeterminateBinding) : RecyclerView.ViewHolder(binding.root)
 
@@ -26,7 +21,7 @@ class IngredientTagChipAdapter(
 
     override fun onBindViewHolder(holder: TagViewHolder, position: Int) {
         val tagId = tagList[position]
-        holder.binding.indeterminateName.text = ingredientTagNameMap[tagId] ?: tagId.toString()
+        holder.binding.indeterminateName.text = ingredientItems[tagId].name
     }
 
     override fun getItemCount(): Int = tagList.size

@@ -2,6 +2,7 @@ package com.example.elixir.recipe.ui
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.net.Uri
@@ -25,11 +26,13 @@ import androidx.core.view.children
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.elixir.R
 import com.example.elixir.RetrofitClient
 import com.example.elixir.databinding.FragmentRecipeLogBinding
 import com.example.elixir.dialog.SaveDialog
 import com.example.elixir.dialog.SelectImgDialog
+import com.example.elixir.ingredient.data.IngredientItem
 import com.example.elixir.ingredient.ui.IngredientSearchFragment
 import com.example.elixir.network.AppDatabase
 import com.example.elixir.recipe.viewmodel.RecipeViewModel
@@ -37,8 +40,10 @@ import com.example.elixir.recipe.data.FlavoringData
 import com.example.elixir.recipe.data.RecipeData
 import com.example.elixir.recipe.data.RecipeRepository
 import com.example.elixir.recipe.data.RecipeStepData
+import com.example.elixir.recipe.data.toEntity
 import com.example.elixir.recipe.viewmodel.RecipeViewModelFactory
 import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import com.google.gson.Gson
 import org.threeten.bp.LocalDateTime
 import java.io.File
@@ -58,9 +63,9 @@ class RecipeLogFragment : Fragment() {
     private var difficulty = ""
     private var ingredientTags = mutableListOf<Int>()
     private var allergies = mutableListOf<String>()
-    private val ingredientList = mutableListOf<FlavoringData>()
-    private val seasoningList = mutableListOf<FlavoringData>()
-    private val steps = mutableListOf<RecipeStepData>()
+    private var ingredientList = mutableListOf<FlavoringData>()
+    private var seasoningList = mutableListOf<FlavoringData>()
+    private var steps = mutableListOf<RecipeStepData>()
     private var tips = ""
     private var timeHours = 0
     private var timeMinutes = 0
@@ -98,22 +103,44 @@ class RecipeLogFragment : Fragment() {
 
     private var isBindingData = false
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         repository = RecipeRepository(RetrofitClient.instanceRecipeApi, AppDatabase.getInstance(requireContext()).recipeDao())
-//        chipMap = mapOf(
-//            recipeBinding.ingredientSeasonedCabbage.id to 614,
-//            recipeBinding.ingredientStrawberry.id to 388,
-//            recipeBinding.ingredientSpinach.id to 768,
-//            recipeBinding.ingredientAlmond.id to 802
-//        )
         thumbnailUri = Uri.parse("android.resource://${requireContext().packageName}/${R.drawable.img_blank}")
 
         // 데이터 초기화
         initData()
 
+        // 레시피 기본 정보 설정
+        recipeViewModel.recipeDetail.observe(viewLifecycleOwner) { recipeData ->
+            if (recipeData != null) {
+                // 저장된 데이터 값을 넣기
+                recipeTitle = recipeData.title
+                thumbnail = recipeData.imageUrl
+                recipeDescription = recipeData.description
+                categorySlowAging = recipeData.categorySlowAging
+                categoryType = recipeData.categoryType
+                difficulty = recipeData.difficulty
+                ingredientTags = recipeData.ingredientTagIds.toMutableList()
+                allergies = recipeData.allergies.toMutableList()
+                ingredientList = recipeData.ingredients.map { (key, value) -> FlavoringData(name = key, unit = value)}.toMutableList()
+                seasoningList = recipeData.seasoning.map { (key, value) -> FlavoringData(name = key, unit = value)}.toMutableList()
+                steps = recipeData.stepImageUrls.zip(recipeData.stepDescriptions) { img, desc -> RecipeStepData(stepImg = img, stepDescription = desc)}.toMutableList()
+                tips = recipeData.tips
+                timeHours = recipeData.timeHours
+                timeMinutes = recipeData.timeMinutes
+            }
+        }
+
+        // id 값 가져오기
+        val recipeId = arguments?.getInt("recipeId") ?: return
+        Log.d("RecipeLogFragment", "recipeID: ${recipeId}")
+        recipeViewModel.getRecipeById(recipeId)
+
+        Log.d("RECIPE", "Title: $recipeTitle, Description: $recipeDescription, Tips: $tips")
+
+        // 레시피 썸네일 사진 업로드
         pickThumbnailLauncher = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
             uri?.let {
                 val file = File(requireContext().filesDir, "picked_image_${System.currentTimeMillis()}.jpg")
@@ -125,6 +152,7 @@ class RecipeLogFragment : Fragment() {
             }
         }
 
+        // 레시피 썸네일 선택방식 다이얼로그
         recipeBinding.recipeThumbnail.setOnClickListener {
             showThumbnailDialog()
         }
@@ -139,8 +167,7 @@ class RecipeLogFragment : Fragment() {
             timeMinutes = if (it == "분") 0 else it.toIntOrNull() ?: 0
         }
 
-        // 식재료
-        setupIngredientChips()
+        bindTextInputs()
 
         // 알러지 설정
         setupAllergyChips()
@@ -154,6 +181,7 @@ class RecipeLogFragment : Fragment() {
         // 추가 버튼 설정
         setupAddButtons()
 
+        // 작성 버튼
         setupWriteButton()
 
         // 수정 모드 진입 시
@@ -164,7 +192,6 @@ class RecipeLogFragment : Fragment() {
                 }
             }
             else {
-
                 // UI 바인딩 및 리스너 설정
                 bindTextInputs()
             }
@@ -212,27 +239,20 @@ class RecipeLogFragment : Fragment() {
 
     // 텍스트 설정
     private fun bindTextInputs() {
+        recipeBinding.enterRecipeTitle.post { recipeBinding.enterRecipeTitle.setText(recipeTitle) }
+        recipeBinding.enterRecipeDescription.post { recipeBinding.enterRecipeDescription.setText(recipeDescription) }
+        recipeBinding.enterTipCaution.post { recipeBinding.enterTipCaution.setText(tips) }
+
         recipeBinding.enterRecipeTitle.addTextChangedListener(simpleTextWatcher {
-            if (!isBindingData) {
-                recipeTitle = it
-                updateWriteButtonState()
-            }
+            recipeTitle = it
         })
         recipeBinding.enterRecipeDescription.addTextChangedListener(simpleTextWatcher {
-            if (!isBindingData) {
-                recipeDescription = it
-                updateWriteButtonState()
-            }
+            recipeDescription = it
         })
         recipeBinding.enterTipCaution.addTextChangedListener(simpleTextWatcher {
-            if (!isBindingData) {
-                tips = it
-                updateWriteButtonState()
-            }
+            tips = it
         })
     }
-
-
 
     // 식재료 설정
     private fun setupIngredientChips() {
@@ -287,8 +307,6 @@ class RecipeLogFragment : Fragment() {
 
         updateWriteButtonState()
     }
-
-
     // 알러지 설정
     private fun setupAllergyChips() {
         val allergyList = listOf(
@@ -382,7 +400,7 @@ class RecipeLogFragment : Fragment() {
             if (isAllFieldsValid()) {
                 SaveDialog(requireActivity()) {
                     val recipeData = RecipeData(
-                        email = "email",
+                        id = 0,
                         title = recipeTitle,
                         description = recipeDescription,
                         categorySlowAging = categorySlowAging,
@@ -405,17 +423,34 @@ class RecipeLogFragment : Fragment() {
                         authorTitle = "작성자 직책",
                         likes = 0,
                         scraps = 0,
-                        createdAt = org.threeten.bp.LocalDateTime.now(),
-                        updatedAt = org.threeten.bp.LocalDateTime.now()
+                        createdAt = LocalDateTime.now().toString(),
+                        updatedAt = LocalDateTime.now().toString()
                     )
-                    //recipeViewModel.saveRecipeToDB(recipeData)
+
+                    val recipeEntity = recipeData.toEntity()
+
+                    val thumbnailFile = parseImagePathToFile(requireContext(), thumbnail)
+                    val stepImageFiles = parseStepImagesToFiles(requireContext(), recipeData.stepImageUrls)
+
+                    recipeViewModel.uploadRecipe(recipeEntity, thumbnailFile, stepImageFiles)
+
                     val intent = Intent().apply {
                         putExtra("mode", if (arguments?.getBoolean("isEdit") == true) 9 else 0)
                         putExtra("recipeData", Gson().toJson(recipeData))
                     }
-                    Toast.makeText(requireContext(), if (arguments?.getBoolean("isEdit") == true) "레시피가 수정되었습니다." else "레시피가 저장되었습니다.", Toast.LENGTH_SHORT).show()
-                    requireActivity().setResult(Activity.RESULT_OK, intent)
-                    requireActivity().finish()
+                    // 3. 업로드 결과 관찰 (observe)
+                    recipeViewModel.uploadResult.observe(viewLifecycleOwner) { result ->
+                        result.onSuccess { data ->
+                            Toast.makeText(requireContext(), "레시피가 업로드되었습니다.", Toast.LENGTH_SHORT).show()
+                            // 업로드 성공 시 결과 처리 (예: 화면 종료)
+                            requireActivity().setResult(Activity.RESULT_OK, intent)
+                            requireActivity().finish()
+                        }
+                        result.onFailure { e ->
+                            Log.e("RecipeUpload", "업로드 실패", e)
+                            Toast.makeText(requireContext(), "업로드 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 }.show()
             }
         }
@@ -611,7 +646,11 @@ class RecipeLogFragment : Fragment() {
 
             // 썸네일 이미지
             thumbnail = recipeData.imageUrl
-            recipeThumbnail.setImageURI(Uri.parse(recipeData.imageUrl))
+            Glide.with(requireContext())
+                .load(thumbnail)
+                .placeholder(R.drawable.img_blank)
+                .error(R.drawable.img_blank)
+                .into(recipeThumbnail)
 
             // 카테고리 스피너
             setSpinnerSelection(selectLowAging, recipeData.categorySlowAging)
@@ -778,7 +817,90 @@ class RecipeLogFragment : Fragment() {
         difficultyList.forEach { chip ->
             chip.isChecked = (chip.text.toString() == difficultyValue)
         }
+        updateWriteButtonState()
     }
+
+    private fun showInitialIngredientChips(
+        ingredientTags: List<Int>,
+        ingredientMap: Map<Int, IngredientItem>,
+        chipGroup: ChipGroup,
+        findIngredientChip: Chip
+    ) {
+        // 기존 Chip 모두 제거 (findIngredientChip만 남기기)
+        chipGroup.removeAllViews()
+        chipGroup.addView(findIngredientChip)
+
+        ingredientTags.forEach { ingredientId ->
+            val ingredientName = ingredientMap[ingredientId]?.name ?: "알 수 없음"
+            val chip = Chip(ContextThemeWrapper(chipGroup.context, R.style.ChipStyle_Short)).apply {
+                text = ingredientName
+                isClickable = true
+                isCheckable = false
+                chipBackgroundColor = ColorStateList.valueOf(
+                    ContextCompat.getColor(context, R.color.elixir_orange)
+                )
+                setTextColor(ContextCompat.getColor(context, R.color.white))
+                // 칩 삭제 리스너
+                setOnCloseIconClickListener {
+                    (ingredientTags as? MutableList)?.remove(ingredientId)
+                    chipGroup.removeView(this)
+                    updateWriteButtonState()
+                }
+            }
+            // findIngredientChip 앞에 삽입
+            val index = chipGroup.indexOfChild(findIngredientChip)
+            chipGroup.addView(chip, index)
+        }
+    }
+
+    // Photo Picker URI를 내부 캐시에 복사
+    private fun copyUriToInternal(context: Context, uri: Uri): Uri? {
+        return try {
+            val inputStream = context.contentResolver.openInputStream(uri) ?: return null
+            val file = File(context.cacheDir, "temp_image_${System.currentTimeMillis()}.jpg")
+            val outputStream = FileOutputStream(file)
+            inputStream.copyTo(outputStream)
+            inputStream.close()
+            outputStream.close()
+            Uri.fromFile(file)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    private fun copyResourceToFile(context: Context, resId: Int): File? {
+        return try {
+            val inputStream = context.resources.openRawResource(resId)
+            val file = File(context.cacheDir, "temp_image_${System.currentTimeMillis()}.jpg")
+            val outputStream = FileOutputStream(file)
+            inputStream.copyTo(outputStream)
+            inputStream.close()
+            outputStream.close()
+            file
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    // 1. 단일 이미지 경로를 File로 변환하는 함수
+    private fun parseImagePathToFile(context: Context, imagePath: String): File? = when {
+        imagePath.startsWith("http://") || imagePath.startsWith("https://") -> null
+        imagePath.startsWith("android.resource://") -> {
+            val resId = imagePath.substringAfterLast("/").toIntOrNull()
+            if (resId != null) copyResourceToFile(context, resId) else null
+        }
+        imagePath.startsWith("content://") -> {
+            val uri = Uri.parse(imagePath)
+            val copiedUri = copyUriToInternal(context, uri)
+            copiedUri?.let { File(it.path!!) }
+        }
+        imagePath.startsWith("file://") -> File(Uri.parse(imagePath).path!!)
+        else -> File(imagePath)
+    }
+
+    // 2. 여러 이미지 경로를 File 리스트로 변환하는 함수
+    private fun parseStepImagesToFiles(context: Context, stepImages: List<String>): List<File?> =
+        stepImages.map { parseImagePathToFile(context, it) }
 
 
     override fun onDestroyView() {

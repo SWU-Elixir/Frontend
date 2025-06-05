@@ -13,7 +13,12 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.elixir.R
+import com.example.elixir.RetrofitClient
 import com.example.elixir.databinding.FragmentRecipeSearchListBinding
+import com.example.elixir.ingredient.network.IngredientDB
+import com.example.elixir.ingredient.network.IngredientRepository
+import com.example.elixir.ingredient.viewmodel.IngredientService
+import com.example.elixir.ingredient.viewmodel.IngredientViewModel
 import com.example.elixir.recipe.data.RecipeData
 import java.math.BigInteger
 
@@ -196,24 +201,32 @@ class SearchListFragment : Fragment() {
      * 레시피 리스트 초기화
      */
     private fun initializeRecipeList() {
-        // 더미 데이터 초기화
-        //sampleRecipes = getDummyRecipeData()
+        val ingredientRepository = IngredientRepository(
+            RetrofitClient.instanceIngredientApi,
+            IngredientDB.getInstance(requireContext()).ingredientDao())
+        val ingredientService = IngredientService(ingredientRepository)
+        val ingredientViewModel = IngredientViewModel(ingredientService)
 
         // RecyclerView 설정
         binding.recipeList.layoutManager = LinearLayoutManager(requireContext())
-        recipeListAdapter = RecipeListAdapter(
-            sampleRecipes.toMutableList(),
-            onBookmarkClick = { recipe ->
-                recipe.scrappedByCurrentUser = !recipe.scrappedByCurrentUser
-                recipeListAdapter.notifyItemChanged(sampleRecipes.indexOf(recipe))
-            },
-            onHeartClick = { recipe ->
-                recipe.likedByCurrentUser = !recipe.likedByCurrentUser
-                recipeListAdapter.notifyItemChanged(sampleRecipes.indexOf(recipe))
-            },
-            fragmentManager = parentFragmentManager
-        )
-        binding.recipeList.adapter = recipeListAdapter
+
+        // 어댑터 초기화
+        ingredientViewModel.ingredients.observe(viewLifecycleOwner) { ingredientList ->
+            recipeListAdapter = RecipeListAdapter(
+                sampleRecipes.toMutableList(),
+                ingredientList,
+                onBookmarkClick = { recipe ->
+                    recipe.scrappedByCurrentUser = !recipe.scrappedByCurrentUser
+                    recipeListAdapter.notifyItemChanged(sampleRecipes.indexOf(recipe))
+                },
+                onHeartClick = { recipe ->
+                    recipe.likedByCurrentUser = !recipe.likedByCurrentUser
+                    recipeListAdapter.notifyItemChanged(sampleRecipes.indexOf(recipe))
+                },
+                fragmentManager = parentFragmentManager
+            )
+            binding.recipeList.adapter = recipeListAdapter
+        }
 
         // 검색어가 있으면 필터 적용
         val keyword = binding.searchEditText.text.toString()
