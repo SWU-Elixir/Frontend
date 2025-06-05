@@ -4,6 +4,7 @@ import com.example.elixir.chatbot.RecipeListResponse
 import com.example.elixir.recipe.network.response.GetRecipeListResponse
 import com.example.elixir.recipe.network.response.GetRecipeResponse
 import com.example.elixir.recipe.network.response.GetSearchResponse
+import com.example.elixir.recipe.network.response.GetRecipeRecommendResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
@@ -54,7 +55,7 @@ interface RecipeAPI {
 
     @GET("/api/recipe/recommend")
     suspend fun getRecipeByRecommend()
-            : Response<GetRecipeListResponse>
+            : Response<GetRecipeRecommendResponse>
 
     @Multipart
     @POST("/api/recipe")

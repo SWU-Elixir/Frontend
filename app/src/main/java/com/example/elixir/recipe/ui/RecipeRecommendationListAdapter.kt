@@ -8,14 +8,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.elixir.R
 import com.example.elixir.databinding.ItemRecipeRecommendationListBinding
-import com.example.elixir.recipe.data.FlavoringData
+import com.example.elixir.recipe.data.GetRecipeData
 import com.example.elixir.recipe.data.RecipeData
 
 class RecipeRecommendationListAdapter(
-    private var recipeList: List<RecipeData>
+    private var recipeList: List<GetRecipeData>
 ) : RecyclerView.Adapter<RecipeRecommendationListAdapter.RecipeViewHolder>() {
 
-    fun updateData(newRecipeList: List<RecipeData>) {
+    fun updateData(newRecipeList: List<GetRecipeData>) {
         recipeList = newRecipeList
         notifyDataSetChanged()
     }
@@ -47,7 +47,7 @@ class RecipeRecommendationListAdapter(
             if (layoutManager == null) {
                 layoutManager = LinearLayoutManager(holder.itemView.context, LinearLayoutManager.HORIZONTAL, false)
             }
-            adapter = FlavoringAdapter(recipe.ingredients.map { FlavoringData(it.key, it.value) })
+            //adapter = FlavoringAdapter(recipe.ingredientTagIds.map { FlavoringData(it.key, it.value) })
         }
 
         // 북마크 상태에 따라 버튼 이미지 설정

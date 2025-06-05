@@ -1,7 +1,6 @@
 package com.example.elixir.recipe.ui
 
 import android.app.Activity
-import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
@@ -33,9 +32,11 @@ import com.example.elixir.ingredient.viewmodel.IngredientService
 import com.example.elixir.ingredient.viewmodel.IngredientViewModel
 import com.example.elixir.ingredient.viewmodel.IngredientViewModelFactory
 import com.example.elixir.network.AppDatabase
+import com.example.elixir.recipe.data.GetRecipeData
 import com.example.elixir.recipe.viewmodel.RecipeViewModel
 import com.example.elixir.recipe.data.RecipeData
 import com.example.elixir.recipe.data.RecipeRepository
+import com.example.elixir.recipe.data.toRecipeData
 import com.example.elixir.recipe.viewmodel.RecipeViewModelFactory
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
@@ -51,17 +52,22 @@ import java.math.BigInteger
  */
 class RecipeFragment : Fragment() {
 
+    companion object {
+        private const val TAG = "RecipeFragment"
+    }
+
     private var _binding: FragmentRecipeBinding? = null
     private val binding get() = _binding!!
 
     // 데이터
     private var recipeList: MutableList<RecipeData> = mutableListOf()
+    private var recommendRecipeList: List<GetRecipeData> = emptyList()
     private lateinit var recipeListAdapter: RecipeListAdapter
 
     private lateinit var recipeRepository: RecipeRepository
 
-    private var selectedCategoryType = "항산화강화"
-    private var selectedSlowAging = "한식"
+    private var selectedCategoryType = "종류"
+    private var selectedSlowAging = "저속노화"
 
     // 뷰모델
     private val recipeViewModel: RecipeViewModel by viewModels {
@@ -125,7 +131,7 @@ class RecipeFragment : Fragment() {
         loadRecommendRecipe()
 
         // 레시피 리스트 설정
-        setupRecipeList()
+        //setupRecipeList()
 
         // 검색 버튼 클릭 이벤트 설정
         setupSearchButton()
@@ -306,7 +312,7 @@ class RecipeFragment : Fragment() {
      * 추천 레시피 ViewPager 설정
      */
     private fun setupRecommendationViewPager() {
-        val recommendationAdapter = RecipeRecommendationListAdapter(recipeList)
+        val recommendationAdapter = RecipeRecommendationListAdapter(recommendRecipeList)
         binding.recommendationList.adapter = recommendationAdapter
 
         // 페이지 전환 애니메이션 설정
@@ -391,43 +397,13 @@ class RecipeFragment : Fragment() {
                 val response = api.getRecipeByRecommend()
                 if (response.isSuccessful) {
                     response.body()?.data?.let { recommendList ->
-                        val recipeList = recommendList.map { recommend ->
-                            RecipeData(
-                                email = "recommend.id",
-                                title = recommend.title,
-                                imageUrl = recommend.imageUrl ?: "android.resource://com.example.elixir/${R.drawable.ic_recipe_white}",
-                                categorySlowAging = recommend.categorySlowAging,
-                                categoryType = recommend.categoryType,
-                                ingredients = mapOf(),
-                                scrappedByCurrentUser = recommend.scrappedByCurrentUser,
-                                // 기본값 설정
-                                description = "",
-                                difficulty = "",
-                                timeHours = 0,
-                                timeMinutes = 0,
-                                ingredientTagIds = recommend.ingredientTagIds,
-                                seasoning = mapOf(),
-                                stepDescriptions = listOf(),
-                                stepImageUrls = listOf(),
-                                tips = "",
-                                allergies = listOf(),
-                                authorFollowByCurrentUser = false,
-                                likedByCurrentUser = false,
-                                authorNickname = "",
-                                authorTitle = "",
-                                likes = 0,
-                                scraps = 0,
-                                createdAt = LocalDateTime.now(),
-                                updatedAt = LocalDateTime.now()
-                            )
-                        }
-                        
+                        recommendRecipeList = recommendList
                         // ViewPager2 어댑터 업데이트
                         (binding.recommendationList.adapter as? RecipeRecommendationListAdapter)?.let { adapter ->
-                            adapter.updateData(recipeList)
+                            adapter.updateData(recommendList)
                         } ?: run {
                             // 어댑터가 없는 경우 새로 생성
-                            binding.recommendationList.adapter = RecipeRecommendationListAdapter(recipeList)
+                            binding.recommendationList.adapter = RecipeRecommendationListAdapter(recommendList)
                         }
                     }
                 } else {
@@ -438,6 +414,7 @@ class RecipeFragment : Fragment() {
             }
         }
     }
+
 
     /**
      * 더미 레시피 데이터 생성
