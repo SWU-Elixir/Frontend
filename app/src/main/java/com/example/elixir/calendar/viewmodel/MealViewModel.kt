@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import com.example.elixir.calendar.data.toEntity
 import com.example.elixir.calendar.network.response.GetMealResponse
 import com.example.elixir.calendar.network.response.toEntity
-import com.example.elixir.ingredient.data.IngredientItem
+import com.example.elixir.ingredient.data.IngredientData
 import com.example.elixir.ingredient.network.IngredientRepository
 import java.io.File
 import kotlin.coroutines.cancellation.CancellationException
@@ -41,7 +41,7 @@ class MealViewModel(
     val deleteResult: LiveData<Result<Boolean>> get() = _deleteResult
 
     // ViewModel에서 전체 식재료 리스트를 불러와 LiveData로 노출
-    val ingredientList = MutableLiveData<List<IngredientItem>>()
+    val ingredientList = MutableLiveData<List<IngredientData>>()
 
     private val _updateResult = MutableLiveData<Result<Boolean>>()
     val updateResult: LiveData<Result<Boolean>> = _updateResult

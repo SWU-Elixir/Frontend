@@ -90,7 +90,12 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
         // 레시피 기본 정보 설정
         recipeViewModel.recipeDetail.observe(viewLifecycleOwner) { recipeData ->
             if (recipeData != null) {
-                // 아래처럼 기존 recipeData 사용 부분을 모두 recipeData로 바꿔서 UI 초기화
+                // recipeData에 저장된 값으로 UI 초기화
+                // 유저
+                binding.memberTitle.text = recipeData.authorTitle
+                binding.memberNickname.text = recipeData.authorNickname
+
+                // 레시피
                 binding.recipeNameText.text = recipeData.title
                 binding.categorySlowAging.text = recipeData.categorySlowAging
                 binding.categoryType.text = recipeData.categoryType

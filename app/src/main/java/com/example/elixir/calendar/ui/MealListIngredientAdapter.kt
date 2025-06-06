@@ -3,14 +3,13 @@ package com.example.elixir.calendar.ui
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.elixir.R
 import com.example.elixir.databinding.ItemMealListIndeterminateBinding
-import com.example.elixir.ingredient.data.IngredientItem
+import com.example.elixir.ingredient.data.IngredientData
 
 // 전체 식재료 맵을 같이 전달
 class MealListIngredientAdapter(
     private val ingredients: List<Int>,
-    private val ingredientMap: Map<Int, IngredientItem>
+    private val ingredientMap: Map<Int, IngredientData>
 ) : RecyclerView.Adapter<MealListIngredientAdapter.IngredientViewHolder>() {
 
     inner class IngredientViewHolder(private val binding: ItemMealListIndeterminateBinding) :

@@ -9,11 +9,11 @@ import com.example.elixir.databinding.ItemChatExampleListBinding
 import com.example.elixir.databinding.ItemChatTextMessageBinding
 import com.example.elixir.databinding.ItemChatTextMessageUserBinding
 import com.example.elixir.databinding.ItemChatMealListBinding
+import com.example.elixir.ingredient.data.IngredientData
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayout
 import com.google.android.flexbox.JustifyContent
-import com.example.elixir.ingredient.data.IngredientItem
 
 /**
  * ChatAdapter: 챗봇 메시지와 예시 버튼 리스트를 표시하는 RecyclerView 어댑터
@@ -23,7 +23,7 @@ import com.example.elixir.ingredient.data.IngredientItem
  */
 class ChatAdapter(
     private val chatList: List<ChatItem>,
-    private val ingredientMap: Map<Int, IngredientItem>,
+    private val ingredientMap: Map<Int, IngredientData>,
     private val onExampleClick: (Any) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -177,7 +177,7 @@ class ChatAdapter(
     class MealListViewHolder(
         private val binding: ItemChatMealListBinding,
         private val onMealClick: (ChatMeal) -> Unit,
-        private val ingredientMap: Map<Int, IngredientItem>
+        private val ingredientMap: Map<Int, IngredientData>
     ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: ChatItem.ChatMealList) {
             val adapter = ChatMealListAdapter(item.examples, ingredientMap, onMealClick)
@@ -191,7 +191,7 @@ class ChatAdapter(
     class RecipeListViewHolder(
         private val binding: ItemChatMealListBinding,
         private val onRecipeClick: (ChatRecipe) -> Unit,
-        private val ingredientMap: Map<Int, IngredientItem>
+        private val ingredientMap: Map<Int, IngredientData>
     ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: ChatItem.ChatRecipeList) {
             val adapter = ChatRecipeListAdapter(item.examples, ingredientMap, onRecipeClick)

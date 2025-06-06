@@ -4,8 +4,8 @@ import androidx.room.*
 @Dao
 interface IngredientDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(items: List<IngredientItem>)
+    suspend fun insertAll(items: List<IngredientData>)
 
     @Query("SELECT * FROM ingredients")
-    suspend fun getAll(): List<IngredientItem>
+    suspend fun getAll(): List<IngredientData>
 }

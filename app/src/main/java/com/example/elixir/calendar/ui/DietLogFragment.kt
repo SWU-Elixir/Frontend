@@ -34,7 +34,7 @@ import com.example.elixir.calendar.viewmodel.MealViewModelFactory
 import com.example.elixir.databinding.FragmentDietLogBinding
 import com.example.elixir.dialog.SaveDialog
 import com.example.elixir.ingredient.data.IngredientDao
-import com.example.elixir.ingredient.data.IngredientItem
+import com.example.elixir.ingredient.data.IngredientData
 import com.example.elixir.ingredient.network.IngredientApi
 import com.example.elixir.ingredient.network.IngredientDB
 import com.example.elixir.ingredient.network.IngredientRepository
@@ -562,7 +562,7 @@ class DietLogFragment : Fragment() {
     // 이미 선택된 식재료 태그를 미리 추가
     private fun showInitialIngredientChips(
         ingredientTags: List<Int>,
-        ingredientMap: Map<Int, IngredientItem>,
+        ingredientMap: Map<Int, IngredientData>,
         chipGroup: ChipGroup,
         findIngredientChip: Chip
     ) {

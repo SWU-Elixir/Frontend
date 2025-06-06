@@ -32,7 +32,7 @@ import com.example.elixir.RetrofitClient
 import com.example.elixir.databinding.FragmentRecipeLogBinding
 import com.example.elixir.dialog.SaveDialog
 import com.example.elixir.dialog.SelectImgDialog
-import com.example.elixir.ingredient.data.IngredientItem
+import com.example.elixir.ingredient.data.IngredientData
 import com.example.elixir.ingredient.ui.IngredientSearchFragment
 import com.example.elixir.network.AppDatabase
 import com.example.elixir.recipe.viewmodel.RecipeViewModel
@@ -822,7 +822,7 @@ class RecipeLogFragment : Fragment() {
 
     private fun showInitialIngredientChips(
         ingredientTags: List<Int>,
-        ingredientMap: Map<Int, IngredientItem>,
+        ingredientMap: Map<Int, IngredientData>,
         chipGroup: ChipGroup,
         findIngredientChip: Chip
     ) {

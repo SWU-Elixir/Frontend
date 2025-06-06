@@ -61,19 +61,6 @@ class RecipeViewModel(
             }
         }
     }
-/*
-    // 레시피 검색
-    fun searchRecipes(keyword: String, page: Int, size: Int, categoryType: String, categorySlowAging: String) {
-        viewModelScope.launch {
-            try {
-                val result =
-                    repository.searchRecipes(keyword, page, size, categoryType, categorySlowAging)
-                _recipeList.value = result
-            } catch (e: Exception) {
-                _error.value = e.message
-            }
-        }
-    }*/
 
     // 레시피 업로드
     fun uploadRecipe(entity: RecipeEntity, thumbnailFile: File?, stepImageFiles: List<File?> ) {

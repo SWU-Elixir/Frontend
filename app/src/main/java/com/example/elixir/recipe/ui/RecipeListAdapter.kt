@@ -12,13 +12,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.elixir.R
 import com.example.elixir.databinding.ItemRecipeListBinding
-import com.example.elixir.ingredient.data.IngredientItem
-import com.example.elixir.recipe.data.FlavoringData
+import com.example.elixir.ingredient.data.IngredientData
 import com.example.elixir.recipe.data.RecipeData
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
-import com.google.gson.Gson
 
 /**
  * 레시피 리스트 화면에서 사용되는 RecyclerView 어댑터
@@ -28,7 +26,7 @@ import com.google.gson.Gson
  */
 class RecipeListAdapter(
     private var recipeList: List<RecipeData>,
-    private var ingredientItems: List<IngredientItem>,
+    private var ingredientItems: List<IngredientData>,
     private val onBookmarkClick: (RecipeData) -> Unit,
     private val onHeartClick: (RecipeData) -> Unit,
     private val fragmentManager: FragmentManager
