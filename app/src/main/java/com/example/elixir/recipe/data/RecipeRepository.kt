@@ -38,16 +38,15 @@ class RecipeRepository(private val api: RecipeAPI, private val dao: RecipeDao) {
         return@withContext emptyList()
     }
 
-    // 레시피 상세 조회
     suspend fun getRecipeById(recipeId: Int): RecipeData? = withContext(Dispatchers.IO) {
         try {
             val response = api.getRecipeById(recipeId)
             if (response.isSuccessful) {
-                val recipeData = response.body()?.data
-                if (recipeData == null) {
+                val apiResponse = response.body()
+                if (apiResponse?.data == null) {
                     Log.e("RecipeRepository", "상세조회 결과가 null입니다.")
                 }
-                return@withContext recipeData
+                return@withContext apiResponse?.data
             } else {
                 Log.e("RecipeRepository", "상세조회 실패: ${response.errorBody()?.string()}")
             }

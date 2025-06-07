@@ -3,6 +3,7 @@ package com.example.elixir.recipe.data.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.example.elixir.recipe.data.FlavoringItem
 import com.example.elixir.recipe.data.RecipeData
 import com.example.elixir.recipe.data.RecipeDto
 import org.threeten.bp.LocalDateTime
@@ -19,12 +20,12 @@ data class RecipeEntity(
     @ColumnInfo(name = "timeHours") val timeHours: Int,
     @ColumnInfo(name = "timeMinutes") val timeMinutes: Int,
     @ColumnInfo(name = "ingredientTagIds") val ingredientTagIds: List<Int>,                 // 태그 목록
-    @ColumnInfo(name = "ingredients") val ingredients: Map<String, String>,                 // 재료와 양념
-    @ColumnInfo(name = "seasoning") val seasoning: Map<String, String>,
+    @ColumnInfo(name = "ingredients") val ingredients: List<FlavoringItem>,                 // 재료와 양념
+    @ColumnInfo(name = "seasonings") val seasonings: List<FlavoringItem>,
     @ColumnInfo(name = "stepDescriptions") val stepDescriptions: List<String>,              // 조리 단계 설명
     @ColumnInfo(name = "stepImageUrls") val stepImageUrls: List<String>,                    // 조리 단계 이미지 URL (nullable)
     @ColumnInfo(name = "tips") val tips: String,
-    @ColumnInfo(name = "allergies") val allergies: List<String>,                            // 알레르기 정보
+    @ColumnInfo(name = "allergies") val allergies: List<String>?,                            // 알레르기 정보
     @ColumnInfo(name = "imageUrl") val imageUrl: String,
     @ColumnInfo(name = "authorFollowByCurrentUser") val authorFollowByCurrentUser: Boolean, // 현재 사용자가 작성자를 팔로우하고 있는지 여부
     @ColumnInfo(name = "likedByCurrentUser") val likedByCurrentUser: Boolean,               // 현재 사용자가 좋아요를 눌렀는지 여부
@@ -49,7 +50,7 @@ fun RecipeEntity.toDto(): RecipeDto {
         timeMinutes = this.timeMinutes,
         ingredientTagIds = this.ingredientTagIds,
         ingredients = this.ingredients,
-        seasoning = this.seasoning,
+        seasonings = this.seasonings,
         stepDescriptions = this.stepDescriptions,
         tips = this.tips,
         allergies = this.allergies
@@ -67,7 +68,7 @@ fun RecipeEntity.toData(): RecipeData = RecipeData(
     timeMinutes = timeMinutes,
     ingredientTagIds = ingredientTagIds,
     ingredients = ingredients,
-    seasoning = seasoning,
+    seasonings = seasonings,
     stepDescriptions = stepDescriptions,
     stepImageUrls = stepImageUrls,
     tips = tips,
@@ -80,6 +81,7 @@ fun RecipeEntity.toData(): RecipeData = RecipeData(
     authorTitle = authorTitle,
     likes = likes,
     scraps = scraps,
+    comments = null,
     createdAt = createdAt,
     updatedAt = updatedAt
 )

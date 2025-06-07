@@ -54,6 +54,7 @@ class RecipeViewModel(
             try {
                 val detail = repository.getRecipeById(recipeId)
                 _recipeDetail.value = detail
+                Log.d("RecipeViewModel", "$detail")
             } catch (e: CancellationException) {
                 Log.e("RecipeViewModel", "코루틴이 취소됨!", e)
             } catch (e: Exception) {

@@ -24,7 +24,7 @@ import com.example.elixir.ingredient.viewmodel.IngredientService
 import com.example.elixir.ingredient.viewmodel.IngredientViewModel
 import com.example.elixir.network.AppDatabase
 import com.example.elixir.recipe.data.CommentData
-import com.example.elixir.recipe.data.FlavoringData
+import com.example.elixir.recipe.data.FlavoringItem
 import com.example.elixir.recipe.data.RecipeRepository
 import com.example.elixir.recipe.data.RecipeStepData
 import com.example.elixir.recipe.viewmodel.RecipeViewModel
@@ -92,7 +92,7 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
             if (recipeData != null) {
                 // recipeData에 저장된 값으로 UI 초기화
                 // 유저
-                binding.memberTitle.text = recipeData.authorTitle
+                binding.memberTitle.text = if(recipeData.authorTitle.isNullOrBlank()) "일반" else recipeData.authorTitle
                 binding.memberNickname.text = recipeData.authorNickname
 
                 // 레시피
@@ -255,7 +255,7 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                         justifyContent = JustifyContent.FLEX_START
                     }
 
-                    adapter = FlavoringAdapter(recipeData.ingredients.map { FlavoringData(it.key, it.value) })
+                    adapter = FlavoringAdapter(recipeData.ingredients.map { FlavoringItem(it.name, it.value, it.unit) })
                 }
 
                 // 양념 리스트 설정
@@ -264,7 +264,7 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                         flexDirection = FlexDirection.ROW
                         justifyContent = JustifyContent.FLEX_START
                     }
-                    adapter = FlavoringAdapter(recipeData.seasoning.map { FlavoringData(it.key, it.value) })
+                    adapter = FlavoringAdapter(recipeData.seasonings.map { FlavoringItem(it.name, it.value, it.unit) })
                 }
             } else {
                 // 에러 처리 (예: Toast 등)

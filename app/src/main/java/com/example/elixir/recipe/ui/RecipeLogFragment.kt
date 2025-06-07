@@ -35,8 +35,8 @@ import com.example.elixir.dialog.SelectImgDialog
 import com.example.elixir.ingredient.data.IngredientData
 import com.example.elixir.ingredient.ui.IngredientSearchFragment
 import com.example.elixir.network.AppDatabase
+import com.example.elixir.recipe.data.FlavoringItem
 import com.example.elixir.recipe.viewmodel.RecipeViewModel
-import com.example.elixir.recipe.data.FlavoringData
 import com.example.elixir.recipe.data.RecipeData
 import com.example.elixir.recipe.data.RecipeRepository
 import com.example.elixir.recipe.data.RecipeStepData
@@ -63,8 +63,8 @@ class RecipeLogFragment : Fragment() {
     private var difficulty = ""
     private var ingredientTags = mutableListOf<Int>()
     private var allergies = mutableListOf<String>()
-    private var ingredientList = mutableListOf<FlavoringData>()
-    private var seasoningList = mutableListOf<FlavoringData>()
+    private var ingredientList = mutableListOf<FlavoringItem>()
+    private var seasoningList = mutableListOf<FlavoringItem>()
     private var steps = mutableListOf<RecipeStepData>()
     private var tips = ""
     private var timeHours = 0
@@ -123,9 +123,9 @@ class RecipeLogFragment : Fragment() {
                 categoryType = recipeData.categoryType
                 difficulty = recipeData.difficulty
                 ingredientTags = recipeData.ingredientTagIds.toMutableList()
-                allergies = recipeData.allergies.toMutableList()
-                ingredientList = recipeData.ingredients.map { (key, value) -> FlavoringData(name = key, unit = value)}.toMutableList()
-                seasoningList = recipeData.seasoning.map { (key, value) -> FlavoringData(name = key, unit = value)}.toMutableList()
+                allergies = recipeData.allergies!!.toMutableList()
+                ingredientList = recipeData.ingredients.map { (name, value, unit) -> FlavoringItem(name = name, value = value, unit = unit)}.toMutableList()
+                seasoningList = recipeData.seasonings.map { (name, value, unit) -> FlavoringItem(name = name, value = value, unit = unit)}.toMutableList()
                 steps = recipeData.stepImageUrls.zip(recipeData.stepDescriptions) { img, desc -> RecipeStepData(stepImg = img, stepDescription = desc)}.toMutableList()
                 tips = recipeData.tips
                 timeHours = recipeData.timeHours
@@ -225,10 +225,10 @@ class RecipeLogFragment : Fragment() {
     // 데이터 초기화
     private fun initData() {
         ingredientList.clear();
-        ingredientList.add(FlavoringData("", ""))
+        ingredientList.add(FlavoringItem("", "", ""))
 
         seasoningList.clear();
-        seasoningList.add(FlavoringData("", ""))
+        seasoningList.add(FlavoringItem("", "", ""))
 
         steps.clear();
         steps.add(RecipeStepData(thumbnailUri.toString(), ""))
@@ -377,12 +377,12 @@ class RecipeLogFragment : Fragment() {
     // 추가 버튼 설정
     private fun setupAddButtons() {
         recipeBinding.btnIngredientsAdd.setOnClickListener {
-            ingredientList.add(FlavoringData("", ""))
+            ingredientList.add(FlavoringItem("", "", ""))
             ingredientsAdapter.notifyItemInserted(ingredientList.size - 1)
             updateRecyclerViewHeight(recipeBinding.frameEnterIngredients, ingredientsAdapter)
         }
         recipeBinding.btnSeasoningAdd.setOnClickListener {
-            seasoningList.add(FlavoringData("", ""))
+            seasoningList.add(FlavoringItem("", "", ""))
             seasoningAdapter.notifyItemInserted(seasoningList.size - 1)
             updateRecyclerViewHeight(recipeBinding.frameEnterSeasoning, seasoningAdapter)
         }
@@ -409,8 +409,8 @@ class RecipeLogFragment : Fragment() {
                         timeHours = timeHours,
                         timeMinutes = timeMinutes,
                         ingredientTagIds = ingredientTags,
-                        ingredients = ingredientList.associate { it.name to it.unit },
-                        seasoning = seasoningList.associate { it.name to it.unit },
+                        ingredients = ingredientList,
+                        seasonings = seasoningList,
                         stepDescriptions = steps.map { it.stepDescription },
                         stepImageUrls = steps.map { it.stepImg },
                         tips = tips,
@@ -423,6 +423,7 @@ class RecipeLogFragment : Fragment() {
                         authorTitle = "작성자 직책",
                         likes = 0,
                         scraps = 0,
+                        comments = null,
                         createdAt = LocalDateTime.now().toString(),
                         updatedAt = LocalDateTime.now().toString()
                     )
@@ -501,7 +502,7 @@ class RecipeLogFragment : Fragment() {
     }
 
     // 식재료 없애기
-    private fun removeFlavoringItem(list: MutableList<FlavoringData>, position: Int, adapter: FlavoringLogAdapter, recyclerView: RecyclerView) {
+    private fun removeFlavoringItem(list: MutableList<FlavoringItem>, position: Int, adapter: FlavoringLogAdapter, recyclerView: RecyclerView) {
         if (list.size > 1) {
             list.removeAt(position)
             adapter.notifyItemRemoved(position)
@@ -586,7 +587,7 @@ class RecipeLogFragment : Fragment() {
     }
 
     // 모든 재료가 유효한지 확인하는 함수
-    private fun flavoringValid(list: List<FlavoringData>): Boolean {
+    private fun flavoringValid(list: List<FlavoringItem>): Boolean {
         return list.all { it.name.isNotBlank() && it.unit.isNotBlank() }
     }
 
@@ -667,7 +668,9 @@ class RecipeLogFragment : Fragment() {
 
             // 알러지 칩
             allergies.clear()
-            allergies.addAll(recipeData.allergies)
+            if (recipeData.allergies != null) {
+                allergies.addAll(recipeData.allergies!!)
+            }
             setupAllergyChips(allergies)
 
             // 난이도 칩
@@ -676,13 +679,13 @@ class RecipeLogFragment : Fragment() {
 
             // 재료 리스트
             ingredientList.clear()
-            ingredientList.addAll(recipeData.ingredients.map { FlavoringData(it.key, it.value) })
+            ingredientList.addAll(recipeData.ingredients.map { FlavoringItem(it.name, it.value, it.unit) })
             ingredientsAdapter.notifyDataSetChanged()
             updateRecyclerViewHeight(frameEnterIngredients, ingredientsAdapter)
 
             // 양념 리스트
             seasoningList.clear()
-            seasoningList.addAll(recipeData.seasoning.map { FlavoringData(it.key, it.value) })
+            seasoningList.addAll(recipeData.seasonings.map { FlavoringItem(it.name, it.value, it.unit) })
             seasoningAdapter.notifyDataSetChanged()
             updateRecyclerViewHeight(frameEnterSeasoning, seasoningAdapter)
 
