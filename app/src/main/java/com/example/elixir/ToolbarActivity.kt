@@ -181,9 +181,9 @@ open class ToolbarActivity : AppCompatActivity() {
                     // 레시피 기록 프래그먼트 띄워주기
                     setFragment(fragment)
                 }
-
-                // 레시피 프레그먼트 띄워주기
-                setFragment(RecipeLogFragment())
+                else
+                    // 레시피 프레그먼트 띄워주기
+                    setFragment(RecipeLogFragment())
             }
 
             // 챗봇 모드

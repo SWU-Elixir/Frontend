@@ -40,7 +40,9 @@ class RecipeRepository(private val api: RecipeAPI, private val dao: RecipeDao) {
 
     suspend fun getRecipeById(recipeId: Int): RecipeData? = withContext(Dispatchers.IO) {
         try {
+            Log.d("RecipeRepository", "네트워크 요청 시작: recipeId=$recipeId")
             val response = api.getRecipeById(recipeId)
+            Log.d("RecipeRepository", "네트워크 요청 완료: recipeId=$recipeId")
             if (response.isSuccessful) {
                 val apiResponse = response.body()
                 if (apiResponse?.data == null) {
@@ -55,7 +57,6 @@ class RecipeRepository(private val api: RecipeAPI, private val dao: RecipeDao) {
         }
         return@withContext null
     }
-
 
     // 레시피 검색 (API → DB 저장 → DB 반환)
     suspend fun searchRecipes(

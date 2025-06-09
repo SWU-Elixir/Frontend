@@ -3,6 +3,7 @@ package com.example.elixir.recipe.ui
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -337,6 +338,8 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
         binding.backButton.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
+
+        Log.d("RecipeFragment", "onViewCreated 끝, ViewLifecycle 상태: ${viewLifecycleOwner.lifecycle.currentState}")
     }
 
     override fun onDestroyView() {

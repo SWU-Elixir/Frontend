@@ -97,6 +97,7 @@ class RecipeLogFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        Log.d("RecipeFragment", "onCreateView 호출")
         recipeLogBinding = FragmentRecipeLogBinding.inflate(inflater, container, false)
         return recipeBinding.root
     }
@@ -105,15 +106,28 @@ class RecipeLogFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.d("RecipeFragment", "onViewCreated 호출")
 
         repository = RecipeRepository(RetrofitClient.instanceRecipeApi, AppDatabase.getInstance(requireContext()).recipeDao())
         thumbnailUri = Uri.parse("android.resource://${requireContext().packageName}/${R.drawable.img_blank}")
 
-        // 데이터 초기화
-        initData()
+        // 스피너 리스트
+        val methodList = resources.getStringArray(R.array.method_list)
+        val typeList = resources.getStringArray(R.array.type_list)
+        val hourList = resources.getStringArray(R.array.cookingHours)
+        val minList = resources.getStringArray(R.array.cookingMinutes)
+
+        // 칩 리스트
+        // 난이도
+        val difficultyChips = listOf(
+            recipeBinding.levelEasy,
+            recipeBinding.levelNormal,
+            recipeBinding.levelHard
+        )
 
         // 레시피 기본 정보 설정
         recipeViewModel.recipeDetail.observe(viewLifecycleOwner) { recipeData ->
+            Log.d("RecipeFragment", "$recipeData")
             if (recipeData != null) {
                 // 저장된 데이터 값을 넣기
                 recipeTitle = recipeData.title
@@ -130,15 +144,34 @@ class RecipeLogFragment : Fragment() {
                 tips = recipeData.tips
                 timeHours = recipeData.timeHours
                 timeMinutes = recipeData.timeMinutes
+
+                // UI 업데이트 (recipeData가 null이 아닐 때만)
+
+                setRecipeDataToUI(recipeData)
+
+
+            } else {
+                // recipeData가 null이면 빈 값 또는 기본 이미지로
+                recipeBinding.enterRecipeTitle.post { recipeBinding.enterRecipeTitle.setText("") }
+                recipeBinding.enterRecipeDescription.post { recipeBinding.enterRecipeDescription.setText("") }
+                recipeBinding.enterTipCaution.post { recipeBinding.enterTipCaution.setText("") }
+                Glide.with(requireContext())
+                    .load(thumbnail)
+                    .placeholder(R.drawable.img_blank)
+                    .error(R.drawable.img_blank)
+                    .into(recipeBinding.recipeThumbnail)
             }
         }
 
         // id 값 가져오기
         val recipeId = arguments?.getInt("recipeId") ?: return
-        Log.d("RecipeLogFragment", "recipeID: ${recipeId}")
+        Log.d("RecipeLogFragment", "recipeID: $recipeId")
         recipeViewModel.getRecipeById(recipeId)
 
         Log.d("RECIPE", "Title: $recipeTitle, Description: $recipeDescription, Tips: $tips")
+
+        // 재료, 양념 데이터 초기화
+        initData()
 
         // 레시피 썸네일 사진 업로드
         pickThumbnailLauncher = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
@@ -167,6 +200,7 @@ class RecipeLogFragment : Fragment() {
             timeMinutes = if (it == "분") 0 else it.toIntOrNull() ?: 0
         }
 
+        // 텍스트 설정
         bindTextInputs()
 
         // 알러지 설정
@@ -277,7 +311,7 @@ class RecipeLogFragment : Fragment() {
             }
 
             // 칩 생성 및 추가
-            val chip = com.google.android.material.chip.Chip(
+            val chip = Chip(
                 ContextThemeWrapper(requireContext(), R.style.ChipStyle_Short)
             ).apply {
                 text = ingredientName
@@ -372,6 +406,11 @@ class RecipeLogFragment : Fragment() {
         setupRecyclerView(recipeBinding.frameEnterSeasoning, seasoningAdapter)
         setupRecyclerView(recipeBinding.frameEnterRecipeStep, stepAdapter)
         updateWriteButtonState()
+    }
+
+    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+        super.onViewStateRestored(savedInstanceState)
+        Log.d("RecipeFragment", "onViewStateRestored, ViewLifecycle 상태: ${viewLifecycleOwner.lifecycle.currentState}")
     }
 
     // 추가 버튼 설정
