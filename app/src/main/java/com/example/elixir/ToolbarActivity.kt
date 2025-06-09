@@ -43,6 +43,7 @@ import com.example.elixir.recipe.ui.RecipeLogFragment
 import com.example.elixir.signup.CreateAccountFragment
 import com.example.elixir.member.EditProfileFragment
 import com.example.elixir.member.SurveyEditFragment
+import com.example.elixir.recipe.ui.RecipeGuideFragment
 import com.example.elixir.signup.FindPasswordFragment
 import com.example.elixir.signup.SettingProfileFragment
 
@@ -122,7 +123,7 @@ open class ToolbarActivity : AppCompatActivity() {
                 // 뒤로가기 버튼을 누르면 로그인 페이지로 돌아가기
                 // 돌아가기 전 다이얼로그 띄우기
                 toolBinding.btnBack.setOnClickListener {
-                    AlertExitDialog(this).show()
+                    finish()
                 }
 
                 // 계정 생성 프래그먼트 띄워주기
@@ -457,6 +458,21 @@ open class ToolbarActivity : AppCompatActivity() {
 
                 // 계정 생성 프래그먼트 띄워주기
                 setFragment(SurveyEditFragment())
+            }
+
+            16 -> {
+                // 툴바의 제목, 더보기 버튼 안보이게, 작동 x
+                toolBinding.title.visibility = View.VISIBLE
+                toolBinding.btnMore.visibility = View.INVISIBLE
+
+                // 뒤로가기 버튼을 누르면 로그인 페이지로 돌아가기
+                // 돌아가기 전 다이얼로그 띄우기
+                toolBinding.btnBack.setOnClickListener {
+                    finish()
+                }
+
+                // 계정 생성 프래그먼트 띄워주기
+                setFragment(RecipeGuideFragment())
             }
         }
     }

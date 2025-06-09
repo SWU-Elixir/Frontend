@@ -7,5 +7,7 @@ import androidx.room.PrimaryKey
 data class IngredientItem(
     @PrimaryKey val id: Int,
     val name: String?,
+    val category: String?,
+    val categoryGroup: String?,
     val type: String?
 )
