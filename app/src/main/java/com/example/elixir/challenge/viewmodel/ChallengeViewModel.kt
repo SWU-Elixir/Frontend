@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.launch
 import android.util.Log
 import com.example.elixir.challenge.data.ChallengeEntity
+import kotlinx.coroutines.async
 
 class ChallengeViewModel(
     private val service: ChallengeService
@@ -70,17 +71,21 @@ class ChallengeViewModel(
     fun loadChallengeWithProgress(id: Int) {
         viewModelScope.launch {
             try {
-                // 1. 상세 정보 먼저 가져오기 (name 등 null 아님)
-                val detail = service.getChallengeById(id).firstOrNull()
+                _error.value = null
+                // 상세 정보와 진행도 정보를 병렬로 가져오기
+                val detailDeferred = async { service.getChallengeById(id).firstOrNull() }
+                val progressDeferred = async { service.getChallengeProgress(id) }
+
+                // 두 결과를 동시에 기다림
+                val detail = detailDeferred.await()
+                val progress = progressDeferred.await()
+
                 if (detail == null) {
                     _error.value = "상세 정보를 찾을 수 없습니다"
                     return@launch
                 }
 
-                // 2. 진행도 정보 가져오기
-                val progress = service.getChallengeProgress(id)
-
-                // 3. 상세 정보 + 진행도 합쳐서 emit (name 등은 항상 null 아님)
+                // 상세 정보 + 진행도 합쳐서 emit
                 val merged = detail.copy(
                     step1Goal1Achieved = progress.step1Goal1Achieved,
                     step1Goal2Achieved = progress.step1Goal2Achieved,
@@ -100,7 +105,12 @@ class ChallengeViewModel(
                 )
                 _selectedChallenge.value = merged
             } catch (e: Exception) {
-                _error.value = "챌린지 정보 로드 실패: ${e.message}"
+                Log.e("ChallengeViewModel", "챌린지 정보 로드 실패", e)
+                _error.value = when (e) {
+                    is java.net.UnknownHostException -> "인터넷 연결을 확인해주세요"
+                    is retrofit2.HttpException -> "서버 오류가 발생했습니다"
+                    else -> "챌린지 정보 로드 실패: ${e.message}"
+                }
             }
         }
     }
