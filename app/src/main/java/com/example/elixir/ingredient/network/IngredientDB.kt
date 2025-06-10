@@ -4,9 +4,9 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.elixir.ingredient.data.IngredientDao
-import com.example.elixir.ingredient.data.IngredientItem
+import com.example.elixir.ingredient.data.IngredientData
 
-@Database(entities = [IngredientItem::class], version = 2)
+@Database(entities = [IngredientData::class], version = 3)
 abstract class IngredientDB : RoomDatabase() {
     abstract fun ingredientDao(): IngredientDao
 

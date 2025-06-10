@@ -1,20 +1,15 @@
 package com.example.elixir.recipe.ui
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
-import androidx.core.widget.ImageViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
@@ -23,9 +18,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.elixir.R
 import com.example.elixir.RetrofitClient
 import com.example.elixir.ToolbarActivity
-import com.example.elixir.adapter.RecommendRecipeKeywordAdapter
 import com.example.elixir.databinding.FragmentRecipeBinding
-import com.example.elixir.ingredient.data.IngredientItem
+import com.example.elixir.ingredient.data.IngredientData
 import com.example.elixir.ingredient.network.IngredientDB
 import com.example.elixir.ingredient.network.IngredientRepository
 import com.example.elixir.ingredient.viewmodel.IngredientService
@@ -36,15 +30,9 @@ import com.example.elixir.recipe.data.GetRecipeData
 import com.example.elixir.recipe.viewmodel.RecipeViewModel
 import com.example.elixir.recipe.data.RecipeData
 import com.example.elixir.recipe.data.RecipeRepository
-import com.example.elixir.recipe.data.toRecipeData
 import com.example.elixir.recipe.viewmodel.RecipeViewModelFactory
-import com.google.android.flexbox.FlexDirection
-import com.google.android.flexbox.FlexboxLayoutManager
-import com.google.android.flexbox.JustifyContent
 import com.google.gson.Gson
 import kotlinx.coroutines.launch
-import org.threeten.bp.LocalDateTime
-import java.math.BigInteger
 
 /**
  * 레시피 화면을 표시하는 프래그먼트
@@ -78,7 +66,7 @@ class RecipeFragment : Fragment() {
 
     // 두 데이터가 모두 준비될 때만 어댑터 초기화
     private var latestRecipeList: List<RecipeData>? = null
-    private var latestIngredientList: List<IngredientItem>? = null
+    private var latestIngredientList: List<IngredientData>? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -119,6 +107,7 @@ class RecipeFragment : Fragment() {
         // observe: 식재료 데이터
         ingredientViewModel.ingredients.observe(viewLifecycleOwner) { ingredientList ->
             latestIngredientList = ingredientList
+            Log.d("RecipeFragment", "list: ${ingredientList.size}")
             tryInitAdapter()
         }
 
@@ -129,9 +118,6 @@ class RecipeFragment : Fragment() {
         
         // 추천 레시피 데이터 로드
         loadRecommendRecipe()
-
-        // 레시피 리스트 설정
-        //setupRecipeList()
 
         // 검색 버튼 클릭 이벤트 설정
         setupSearchButton()
@@ -153,29 +139,40 @@ class RecipeFragment : Fragment() {
     private fun tryInitAdapter() {
         val recipes = latestRecipeList
         val ingredients = latestIngredientList
+
+        // 레시피와 재료가 null이 아니고, 레시피가 비어 있지 않을 때만 어댑터 세팅
         if (recipes != null && ingredients != null) {
-            if (!::recipeListAdapter.isInitialized) {
-                recipeList = recipes.toMutableList()
-                recipeListAdapter = RecipeListAdapter(
-                    recipeList, ingredients,
-                    onBookmarkClick = { recipe ->
-                        recipe.scrappedByCurrentUser = !recipe.scrappedByCurrentUser
-                        recipeListAdapter.notifyItemChanged(recipeList.indexOf(recipe))
-                    },
-                    onHeartClick = { recipe ->
-                        recipe.likedByCurrentUser = !recipe.likedByCurrentUser
-                        recipeListAdapter.notifyItemChanged(recipeList.indexOf(recipe))
-                    },
-                    fragmentManager = parentFragmentManager
-                )
-                binding.recipeList.adapter = recipeListAdapter
+            if (recipes.isNotEmpty()) {
+                if (!::recipeListAdapter.isInitialized) {
+                    recipeList = recipes.toMutableList()
+                    recipeListAdapter = RecipeListAdapter(
+                        recipeList, ingredients,
+                        onBookmarkClick = { recipe ->
+                            recipe.scrappedByCurrentUser = !recipe.scrappedByCurrentUser
+                            recipeListAdapter.notifyItemChanged(recipeList.indexOf(recipe))
+                        },
+                        onHeartClick = { recipe ->
+                            recipe.likedByCurrentUser = !recipe.likedByCurrentUser
+                            recipeListAdapter.notifyItemChanged(recipeList.indexOf(recipe))
+                        },
+                        fragmentManager = parentFragmentManager
+                    )
+                    binding.recipeList.adapter = recipeListAdapter
+                } else {
+                    recipeList = recipes.toMutableList()
+                    recipeListAdapter.updateData(recipeList)
+                }
+                binding.recipeList.visibility = View.VISIBLE
+                binding.emptyRecipeText.visibility = View.GONE
             } else {
-                recipeList = recipes.toMutableList()
-                recipeListAdapter.updateData(recipeList)
+                // 레시피가 없을 때 EmptyView(안내 문구 등) 표시
+                binding.recipeList.visibility = View.GONE
+                binding.emptyRecipeText.visibility = View.VISIBLE
             }
-            Log.d("RecipeFragment", "recipeList size: ${recipeList.size}, ingredientList size: ${ingredients.size}")
+            Log.d("RecipeFragment", "recipeList size: ${recipes.size}, ingredientList size: ${ingredients.size}")
         }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
@@ -399,65 +396,18 @@ class RecipeFragment : Fragment() {
                     response.body()?.data?.let { recommendList ->
                         recommendRecipeList = recommendList
                         // ViewPager2 어댑터 업데이트
-                        (binding.recommendationList.adapter as? RecipeRecommendationListAdapter)?.let { adapter ->
-                            adapter.updateData(recommendList)
-                        } ?: run {
+                        (binding.recommendationList.adapter as? RecipeRecommendationListAdapter)?.updateData(recommendList)
+                            ?: run {
                             // 어댑터가 없는 경우 새로 생성
                             binding.recommendationList.adapter = RecipeRecommendationListAdapter(recommendList)
                         }
                     }
                 } else {
-                    Log.e(TAG, "추천 레시피 로드 실패: ${response.message()}")
+                    Log.e(TAG, "추천 레시피 로드 실패: ${response.code()}, ${response.message()}")
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "추천 레시피 로드 실패", e)
             }
         }
     }
-
-
-    /**
-     * 더미 레시피 데이터 생성
-     */
-//    private fun getDummyRecipeData(): List<RecipeData> {
-//        return listOf(
-//            RecipeData(
-//            title = "블루베리 항산화 스무디",
-//            description = "블루베리와 그릭요거트를 활용한 항산화 스무디 레시피입니다.",
-//            categorySlowAging = "항산화 강화",
-//            categoryType = "음료/차",
-//            difficulty = "쉬움",
-//            timeHours = 0,
-//            timeMinutes = 5,
-//            ingredientTagIds = listOf(1, 2), // 예시 태그 ID
-//            ingredients = mapOf(
-//                "블루베리" to "100g",
-//                "그릭요거트" to "150g"
-//            ),
-//            seasoning = mapOf(
-//                "얼음" to "적당량",
-//                "시나몬 파우더" to "1작은술"
-//            ),
-//            stepDescriptions = listOf(
-//                "모든 재료를 믹서에 넣는다",
-//                "곱게 갈아 컵에 담는다"
-//            ),
-//            stepImageUrls = listOf(
-//                "android.resource://com.example.elixir.recipe/${R.drawable.img_blank}",
-//                "android.resource://com.example.elixir.recipe/${R.drawable.img_blank}"
-//            ),
-//            tips = "시나몬을 추가하면 향과 항산화 성분이 강화됩니다.",
-//            allergies = listOf("우유"),
-//            imageUrl = "android.resource://com.example.elixir.recipe/${R.drawable.img_blank}",
-//            authorFollowByCurrentUser = false,
-//            likedByCurrentUser = false,
-//            scrappedByCurrentUser = false,
-//            authorNickname = "헬시마스터",
-//            authorTitle = "영양사",
-//            likes = 42234,
-//            scraps = 1234,
-//            createdAt = LocalDateTime.of(2025, 4, 22, 0, 0),
-//            updatedAt = LocalDateTime.of(2025, 4, 22, 0, 0)
-//        ))
-//    }
 }

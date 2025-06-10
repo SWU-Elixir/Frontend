@@ -4,16 +4,16 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.elixir.databinding.ItemRecipeRecommendationListIndeterminateBinding
-import com.example.elixir.recipe.data.FlavoringData
+import com.example.elixir.recipe.data.FlavoringItem
 
 // FlavoringAdapter.kt
-class FlavoringAdapter(private val flavors: List<FlavoringData>) :
+class FlavoringAdapter(private val flavors: List<FlavoringItem>) :
     RecyclerView.Adapter<FlavoringAdapter.FlavorViewHolder>() {
 
     inner class FlavorViewHolder(private val binding: ItemRecipeRecommendationListIndeterminateBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(flavor: FlavoringData) {
-            binding.indeterminateName.text = "${flavor.name} ${flavor.unit}"
+        fun bind(flavor: FlavoringItem) {
+            binding.indeterminateName.text = "${flavor.name} ${flavor.value}${flavor.unit}"
         }
     }
 

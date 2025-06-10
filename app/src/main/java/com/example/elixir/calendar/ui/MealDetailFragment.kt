@@ -16,7 +16,6 @@ import com.example.elixir.calendar.network.db.DietLogRepository
 import com.example.elixir.calendar.viewmodel.MealViewModel
 import com.example.elixir.calendar.viewmodel.MealViewModelFactory
 import com.example.elixir.databinding.FragmentMealDetailBinding
-import com.example.elixir.ingredient.data.IngredientItem
 import com.example.elixir.ingredient.network.IngredientDB
 import com.example.elixir.ingredient.network.IngredientRepository
 import com.example.elixir.member.network.MemberDB

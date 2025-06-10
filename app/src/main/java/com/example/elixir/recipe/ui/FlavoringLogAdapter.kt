@@ -6,16 +6,16 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.elixir.databinding.ItemFlavoringBinding
-import com.example.elixir.recipe.data.FlavoringData
+import com.example.elixir.recipe.data.FlavoringItem
 
 class FlavoringLogAdapter(
-    private val itemList: MutableList<FlavoringData>,
+    private val itemList: MutableList<FlavoringItem>,
     private val onDeleteClick: (Int) -> Unit,
     private val onUpdateButtonState: () -> Unit // 버튼 상태 업데이트 함수 전달
 ) : RecyclerView.Adapter<FlavoringLogAdapter.ItemViewHolder>() {
 
     inner class ItemViewHolder(val binding: ItemFlavoringBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(item: FlavoringData, position: Int) {
+        fun bind(item: FlavoringItem, position: Int) {
             with(binding) {
                 // 삭제 버튼 클릭 시 해당 아이템 삭제
                 btnDel.setOnClickListener {

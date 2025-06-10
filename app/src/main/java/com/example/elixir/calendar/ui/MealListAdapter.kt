@@ -12,7 +12,7 @@ import com.bumptech.glide.Glide
 import com.example.elixir.R
 import com.example.elixir.calendar.data.DietLogData
 import com.example.elixir.databinding.ItemMealListBinding
-import com.example.elixir.ingredient.data.IngredientItem
+import com.example.elixir.ingredient.data.IngredientData
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
@@ -21,7 +21,7 @@ class MealListAdapter(
     private val context: Context,
     private var data: MutableList<DietLogData>,
     private val listener: OnMealClickListener,
-    private var ingredientMap: Map<Int, IngredientItem> = emptyMap()
+    private var ingredientMap: Map<Int, IngredientData> = emptyMap()
 ) : BaseAdapter() {
     override fun getCount(): Int = data.size
     override fun getItem(position: Int): DietLogData = data[position]
@@ -91,7 +91,7 @@ class MealListAdapter(
     }
 
     // 식재료 세팅
-    fun setIngredientMap(map: Map<Int, IngredientItem>) {
+    fun setIngredientMap(map: Map<Int, IngredientData>) {
         this.ingredientMap = map
         notifyDataSetChanged()
     }

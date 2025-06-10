@@ -11,7 +11,7 @@ import com.example.elixir.R
 import com.example.elixir.RetrofitClient
 import com.example.elixir.ToolbarActivity
 import com.example.elixir.databinding.ActivityChatbotBinding
-import com.example.elixir.ingredient.data.IngredientItem
+import com.example.elixir.ingredient.data.IngredientData
 import kotlinx.coroutines.launch
 
 class ChatBotActivity : ToolbarActivity() {
@@ -19,7 +19,7 @@ class ChatBotActivity : ToolbarActivity() {
     private lateinit var binding: ActivityChatbotBinding
     private val chatList = mutableListOf<ChatItem>()
     private lateinit var chatAdapter: ChatAdapter
-    private var ingredientMap: Map<Int, IngredientItem> = emptyMap()
+    private var ingredientMap: Map<Int, IngredientData> = emptyMap()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

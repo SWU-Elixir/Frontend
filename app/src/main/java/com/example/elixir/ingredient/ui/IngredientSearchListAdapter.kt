@@ -4,19 +4,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.elixir.ingredient.data.IngredientItem
 import com.example.elixir.R
 import com.example.elixir.databinding.ItemIndeterminateSearchListBinding
+import com.example.elixir.ingredient.data.IngredientData
 
 class IngredientSearchListAdapter(
-    private var indeterminateList: List<IngredientItem>,
-    private val onItemClick: (IngredientItem) -> Unit
+    private var indeterminateList: List<IngredientData>,
+    private val onItemClick: (IngredientData) -> Unit
 ) : RecyclerView.Adapter<IngredientSearchListAdapter.IngredientViewHolder>() {
 
     inner class IngredientViewHolder(val binding: ItemIndeterminateSearchListBinding) : 
         RecyclerView.ViewHolder(binding.root) {
         
-        fun bind(item: IngredientItem) {
+        fun bind(item: IngredientData) {
             binding.search.text = item.name
 
 
@@ -59,10 +59,10 @@ class IngredientSearchListAdapter(
 
     override fun getItemCount(): Int = indeterminateList.size
 
-    fun updateData(newList: List<IngredientItem>) {
+    fun updateData(newList: List<IngredientData>) {
         // 챌린지 항목을 상단으로 정렬
         indeterminateList = newList.sortedWith(
-            compareByDescending<IngredientItem> { it.type == "챌린지" }
+            compareByDescending<IngredientData> { it.type == "챌린지" }
                 .thenBy { it.name }
         )
         notifyDataSetChanged()

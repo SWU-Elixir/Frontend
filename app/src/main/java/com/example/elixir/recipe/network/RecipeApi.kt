@@ -17,7 +17,7 @@ import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-interface RecipeAPI {
+interface RecipeApi {
     @GET("/api/recipe")
     suspend fun getRecipe(
         @Query("page") page: Int,
@@ -28,7 +28,7 @@ interface RecipeAPI {
 
     @GET("/api/recipe/{recipeId}")
     suspend fun getRecipeById(
-        @Path("recipeId") recipeId: Int
+        @Path("recipeId") id: Int
     ): Response<GetRecipeResponse>
 
     @GET("/api/recipe/my")

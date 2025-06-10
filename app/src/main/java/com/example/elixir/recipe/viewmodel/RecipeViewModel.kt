@@ -5,16 +5,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.elixir.recipe.data.FlavoringData
 import com.example.elixir.recipe.data.RecipeData
 import com.example.elixir.recipe.data.RecipeRepository
-import com.example.elixir.recipe.data.RecipeStepData
 import com.example.elixir.recipe.data.entity.RecipeEntity
 import com.example.elixir.recipe.data.entity.toData
 import kotlinx.coroutines.launch
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
-import org.threeten.bp.LocalDateTime
 import java.io.File
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -52,28 +49,23 @@ class RecipeViewModel(
     fun getRecipeById(recipeId: Int) {
         viewModelScope.launch {
             try {
-                val detail = repository.getRecipeById(recipeId)
-                _recipeDetail.value = detail
-            } catch (e: CancellationException) {
-                Log.e("RecipeViewModel", "코루틴이 취소됨!", e)
+                Log.d("RecipeViewModel", "코루틴 시작: recipeId=$recipeId")
+                // 데이터 요청 코드 (예시)
+                val response = repository.getRecipeById(recipeId)
+                _recipeDetail.value = response
             } catch (e: Exception) {
-                Log.e("RecipeViewModel", "에러 발생", e)
+                // 예외 발생 시 로그
+                Log.e("RecipeViewModel", "코루틴 에러: ${e.message}", e)
+                if (e is CancellationException) {
+                    Log.e("RecipeViewModel", "코루틴 취소됨: ${e.message}")
+                }
+            } finally {
+                // 코루틴이 끝날 때 로그
+                Log.d("RecipeViewModel", "코루틴 종료")
             }
         }
     }
-/*
-    // 레시피 검색
-    fun searchRecipes(keyword: String, page: Int, size: Int, categoryType: String, categorySlowAging: String) {
-        viewModelScope.launch {
-            try {
-                val result =
-                    repository.searchRecipes(keyword, page, size, categoryType, categorySlowAging)
-                _recipeList.value = result
-            } catch (e: Exception) {
-                _error.value = e.message
-            }
-        }
-    }*/
+
 
     // 레시피 업로드
     fun uploadRecipe(entity: RecipeEntity, thumbnailFile: File?, stepImageFiles: List<File?> ) {

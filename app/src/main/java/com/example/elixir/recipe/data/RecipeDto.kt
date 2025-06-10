@@ -12,11 +12,11 @@ data class RecipeDto(
     val timeHours: Int,
     val timeMinutes: Int,
     val ingredientTagIds: List<Int>,
-    val ingredients: Map<String, String>,
-    val seasoning: Map<String, String>,
+    val ingredients: List<FlavoringItem>,
+    val seasonings: List<FlavoringItem>,
     val stepDescriptions: List<String>,
     val tips: String,
-    val allergies: List<String>
+    val allergies: List<String>?
 )
 
 fun RecipeDto.toEntity(
@@ -43,7 +43,7 @@ fun RecipeDto.toEntity(
         timeMinutes = this.timeMinutes,
         ingredientTagIds = this.ingredientTagIds,
         ingredients = this.ingredients,
-        seasoning = this.seasoning,
+        seasonings = this.seasonings,
         stepDescriptions = this.stepDescriptions,
         stepImageUrls = stepImageUrls,
         tips = this.tips,

@@ -2,20 +2,20 @@ package com.example.elixir.ingredient.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.*
-import com.example.elixir.ingredient.data.IngredientItem
+import com.example.elixir.ingredient.data.IngredientData
 import kotlinx.coroutines.launch
 
 class IngredientViewModel(
     private val service: IngredientService
 ) : ViewModel() {
-    private val _ingredients = MutableLiveData<List<IngredientItem>>()
-    val ingredients: LiveData<List<IngredientItem>> = _ingredients
+    private val _ingredients = MutableLiveData<List<IngredientData>>()
+    val ingredients: LiveData<List<IngredientData>> = _ingredients
 
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> = _error
 
     fun loadIngredients() {
-        viewModelScope.launch {
+        val job = viewModelScope.launch {
             try {
                 _error.value = null
                 // API에서 데이터 가져오기 시도
@@ -34,6 +34,9 @@ class IngredientViewModel(
                     _error.value = "데이터 로드 실패: ${e.message}"
                 }
             }
+        }
+        job.invokeOnCompletion { throwable ->
+            Log.d("IngredientViewModel", "취소 이유 : ${throwable}")
         }
     }
 

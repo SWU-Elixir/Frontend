@@ -4,7 +4,7 @@ import android.util.Log
 import com.example.elixir.recipe.data.dao.RecipeDao
 import com.example.elixir.recipe.data.entity.RecipeEntity
 import com.example.elixir.recipe.data.entity.toDto
-import com.example.elixir.recipe.network.RecipeAPI
+import com.example.elixir.recipe.network.RecipeApi
 import com.google.gson.Gson
 
 import kotlinx.coroutines.Dispatchers
@@ -16,7 +16,7 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 
-class RecipeRepository(private val api: RecipeAPI, private val dao: RecipeDao) {
+class RecipeRepository(private val api: RecipeApi, private val dao: RecipeDao) {
     // 레시피 목록 가져오기 (API → DB 저장 → DB 반환)
     suspend fun getRecipes(
         page: Int,
@@ -38,16 +38,17 @@ class RecipeRepository(private val api: RecipeAPI, private val dao: RecipeDao) {
         return@withContext emptyList()
     }
 
-    // 레시피 상세 조회
     suspend fun getRecipeById(recipeId: Int): RecipeData? = withContext(Dispatchers.IO) {
         try {
+            Log.d("RecipeRepository", "네트워크 요청 시작: recipeId=$recipeId")
             val response = api.getRecipeById(recipeId)
+            Log.d("RecipeRepository", "네트워크 요청 완료: recipeId=$recipeId")
             if (response.isSuccessful) {
-                val recipeData = response.body()?.data
-                if (recipeData == null) {
+                val apiResponse = response.body()
+                if (apiResponse?.data == null) {
                     Log.e("RecipeRepository", "상세조회 결과가 null입니다.")
                 }
-                return@withContext recipeData
+                return@withContext apiResponse?.data
             } else {
                 Log.e("RecipeRepository", "상세조회 실패: ${response.errorBody()?.string()}")
             }
@@ -56,7 +57,6 @@ class RecipeRepository(private val api: RecipeAPI, private val dao: RecipeDao) {
         }
         return@withContext null
     }
-
 
     // 레시피 검색 (API → DB 저장 → DB 반환)
     suspend fun searchRecipes(

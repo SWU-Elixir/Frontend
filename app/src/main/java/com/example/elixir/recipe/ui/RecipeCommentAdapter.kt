@@ -8,29 +8,30 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.elixir.R
 import com.example.elixir.databinding.ItemRecipeListCommentBinding
 import com.example.elixir.recipe.data.CommentData
+import com.example.elixir.recipe.data.CommentItem
 
 interface CommentActionListener {
-    fun onEditComment(commentId: String, commentText: String)
-    fun onDeleteComment(commentId: String)
+    fun onEditComment(commentId: Int, commentText: String)
+    fun onDeleteComment(commentId: Int)
 }
 
 class RecipeCommentAdapter(
     private val context: Context,
-    private val comments: List<CommentData>,
+    private val comments: List<CommentItem>,
     private val commentActionListener: CommentActionListener
 ) : RecyclerView.Adapter<RecipeCommentAdapter.CommentViewHolder>() {
 
     inner class CommentViewHolder(private val binding: ItemRecipeListCommentBinding) : 
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(item: CommentData) {
+        fun bind(item: CommentItem) {
             // 댓글 작성자 정보 설정
-            binding.profileImage.setImageResource(item.profileImageResId)
-            binding.memberTitle.text = item.memberTitle
-            binding.memberNickname.text = item.memberNickname
+            //binding.profileImage.setImageResource(item.profileImageResId)
+            binding.memberTitle.text = item.title
+            binding.memberNickname.text = item.nickname
             
             // 댓글 내용과 작성일 설정
-            binding.commentText.text = item.commentText
-            binding.dateText.text = item.date
+            binding.commentText.text = item.content
+            binding.dateText.text = item.updatedDate
 
             // 메뉴 버튼 클릭 시 팝업 메뉴 표시
             binding.menuButton.setOnClickListener {
@@ -42,7 +43,7 @@ class RecipeCommentAdapter(
                 popupMenu.setOnMenuItemClickListener { menuItem ->
                     when (menuItem.itemId) {
                         R.id.menu_edit -> {
-                            commentActionListener.onEditComment(item.commentId, item.commentText)
+                            commentActionListener.onEditComment(item.commentId, item.content)
                             true
                         }
                         R.id.menu_delete -> {

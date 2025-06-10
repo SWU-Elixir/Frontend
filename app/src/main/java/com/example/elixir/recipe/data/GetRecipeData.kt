@@ -27,8 +27,8 @@ fun GetRecipeData.toEntity(): RecipeEntity = RecipeEntity(
     timeHours = this.totalTimeMinutes / 60,
     timeMinutes = this.totalTimeMinutes % 60,
     ingredientTagIds = this.ingredientTagIds,
-    ingredients = emptyMap(), // 서버 응답에 없으므로 빈 Map
-    seasoning = emptyMap(),   // 서버 응답에 없으므로 빈 Map
+    ingredients = emptyList(), // 서버 응답에 없으므로 빈 Map
+    seasonings = emptyList(),   // 서버 응답에 없으므로 빈 Map
     stepDescriptions = emptyList(), // 서버 응답에 없으므로 빈 List
     stepImageUrls = emptyList(),    // 서버 응답에 없으므로 빈 List
     tips = "",
@@ -60,8 +60,8 @@ fun GetRecipeData.toRecipeData(): RecipeData {
         timeHours = timeHours,
         timeMinutes = timeMinutes,
         ingredientTagIds = this.ingredientTagIds,
-        ingredients = emptyMap(), // 서버에서 안 오면 빈 값
-        seasoning = emptyMap(),
+        ingredients = emptyList(), // 서버에서 안 오면 빈 값
+        seasonings = emptyList(),
         stepDescriptions = emptyList(),
         stepImageUrls = emptyList(),
         tips = "",
@@ -74,6 +74,7 @@ fun GetRecipeData.toRecipeData(): RecipeData {
         authorTitle = null,
         likes = this.likes,
         scraps = 0,
+        comments = null,
         createdAt = "",
         updatedAt = ""
     )

@@ -7,7 +7,9 @@ import com.example.elixir.ingredient.network.IngredientApi
 import com.example.elixir.challenge.network.ChallengeApi
 import com.example.elixir.member.network.MemberApi
 import com.example.elixir.chatbot.ChatApi
-import com.example.elixir.recipe.network.RecipeAPI
+import com.example.elixir.recipe.network.CommentApi
+import com.example.elixir.recipe.network.RecipeApi
+import com.example.elixir.recipe.network.request.CommentRequest
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
@@ -179,12 +181,21 @@ object RetrofitClient {
             .create(DietApi::class.java)
     }
 
-    val instanceRecipeApi: RecipeAPI by lazy {
+    val instanceRecipeApi: RecipeApi by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
-            .create(RecipeAPI::class.java)
+            .create(RecipeApi::class.java)
+    }
+
+    val instanceCommentApi: CommentApi by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .build()
+            .create(CommentApi::class.java)
     }
 }

@@ -18,12 +18,12 @@ import android.content.res.ColorStateList
 import com.example.elixir.R
 import com.example.elixir.databinding.FragmentIndeterminateSearchBinding
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.elixir.ingredient.data.IngredientItem
 import com.example.elixir.ingredient.network.IngredientDB
 import com.example.elixir.ingredient.network.IngredientRepository
 import com.example.elixir.ingredient.viewmodel.IngredientService
 import com.example.elixir.ingredient.viewmodel.IngredientViewModel
 import com.example.elixir.RetrofitClient
+import com.example.elixir.ingredient.data.IngredientData
 
 class IngredientSearchFragment : Fragment() {
 
@@ -32,7 +32,7 @@ class IngredientSearchFragment : Fragment() {
 
     private lateinit var viewModel: IngredientViewModel
     private lateinit var Adapter: IngredientSearchListAdapter
-    private var allIngredients: List<IngredientItem> = emptyList()
+    private var allIngredients: List<IngredientData> = emptyList()
 
     override fun onCreateView(
         inflater: LayoutInflater,
