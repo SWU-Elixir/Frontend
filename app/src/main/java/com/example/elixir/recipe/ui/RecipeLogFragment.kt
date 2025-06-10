@@ -145,8 +145,7 @@ class RecipeLogFragment : Fragment() {
                 timeHours = recipeData.timeHours
                 timeMinutes = recipeData.timeMinutes
 
-                // UI 업데이트 (recipeData가 null이 아닐 때만)
-
+                // UI 업데이트
                 setRecipeDataToUI(recipeData)
 
 

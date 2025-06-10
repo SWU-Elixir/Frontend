@@ -13,7 +13,7 @@ class FlavoringAdapter(private val flavors: List<FlavoringItem>) :
     inner class FlavorViewHolder(private val binding: ItemRecipeRecommendationListIndeterminateBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(flavor: FlavoringItem) {
-            binding.indeterminateName.text = "${flavor.name} ${flavor.unit}"
+            binding.indeterminateName.text = "${flavor.name} ${flavor.value}${flavor.unit}"
         }
     }
 

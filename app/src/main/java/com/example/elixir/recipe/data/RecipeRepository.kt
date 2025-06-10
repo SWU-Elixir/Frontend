@@ -4,7 +4,7 @@ import android.util.Log
 import com.example.elixir.recipe.data.dao.RecipeDao
 import com.example.elixir.recipe.data.entity.RecipeEntity
 import com.example.elixir.recipe.data.entity.toDto
-import com.example.elixir.recipe.network.RecipeAPI
+import com.example.elixir.recipe.network.RecipeApi
 import com.google.gson.Gson
 
 import kotlinx.coroutines.Dispatchers
@@ -16,7 +16,7 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 
-class RecipeRepository(private val api: RecipeAPI, private val dao: RecipeDao) {
+class RecipeRepository(private val api: RecipeApi, private val dao: RecipeDao) {
     // 레시피 목록 가져오기 (API → DB 저장 → DB 반환)
     suspend fun getRecipes(
         page: Int,

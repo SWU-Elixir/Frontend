@@ -23,8 +23,11 @@ import com.example.elixir.ingredient.network.IngredientDB
 import com.example.elixir.ingredient.network.IngredientRepository
 import com.example.elixir.ingredient.viewmodel.IngredientService
 import com.example.elixir.ingredient.viewmodel.IngredientViewModel
+import com.example.elixir.member.network.MemberDB
+import com.example.elixir.member.network.MemberRepository
+import com.example.elixir.member.viewmodel.MemberViewModel
 import com.example.elixir.network.AppDatabase
-import com.example.elixir.recipe.data.CommentData
+import com.example.elixir.recipe.data.CommentItem
 import com.example.elixir.recipe.data.FlavoringItem
 import com.example.elixir.recipe.data.RecipeRepository
 import com.example.elixir.recipe.data.RecipeStepData
@@ -33,7 +36,6 @@ import com.example.elixir.recipe.viewmodel.RecipeViewModelFactory
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
-import java.text.SimpleDateFormat
 import java.util.*
 
 /**
@@ -41,17 +43,19 @@ import java.util.*
  * 레시피의 기본 정보, 재료, 조리 순서, 댓글 등을 보여주고 관리
  */
 class RecipeDetailFragment : Fragment(), CommentActionListener {
-
     // ViewBinding 관련 변수
     private var _binding: FragmentRecipeDetailBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var recipeRepository: RecipeRepository
+    private lateinit var memberRepository: MemberRepository
+
+    private val viewModel: MemberViewModel by viewModels()
 
     // 댓글 관련 변수
     private lateinit var commentAdapter: RecipeCommentAdapter
-    private val comments = mutableListOf<CommentData>()
-    private var editingCommentId: String? = null
+    private val comments = mutableListOf<CommentItem>()
+    private var editingCommentId: Int = -1
 
     private lateinit var editRecipeLauncher: ActivityResultLauncher<Intent>
 
@@ -78,6 +82,10 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
         val recipeDao = AppDatabase.getInstance(requireContext()).recipeDao()
         val recipeApi = RetrofitClient.instanceRecipeApi
         recipeRepository = RecipeRepository(recipeApi, recipeDao)
+
+        val memberDao = MemberDB.getInstance(requireContext()).memberDao()
+        val memberApi = RetrofitClient.instanceMemberApi
+        memberRepository = MemberRepository(memberApi, memberDao)
 
         // ------------------------ 데이터 적용 ------------------------
         // arguments에서 JSON 문자열 꺼내서 객체로 변환
@@ -180,6 +188,16 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                     )
                 }
 
+                viewModel.loadMemberProfile()
+
+                viewModel.profile.observe(viewLifecycleOwner) { profile ->
+                    profile?.let {
+                        // 사용자가 아니면 수정 못하게
+                        if(recipeData.authorNickname != profile.nickname)
+                            binding.menuButton.visibility = View.GONE
+                    }
+                }
+
                 // 메뉴 버튼 클릭 시 팝업 메뉴 표시
                 binding.menuButton.setOnClickListener {
                     val popupMenu = PopupMenu(context, binding.menuButton)
@@ -274,7 +292,7 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
         }
 
         // ------------------------ 더미 댓글 데이터 ------------------------
-        comments.addAll(listOf(
+        /*comments.addAll(listOf(
             CommentData(
                 commentId = "1",
                 profileImageResId = R.drawable.ic_profile,
@@ -291,7 +309,7 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                 commentText = "아보카도 좋아하는데 해봐야겠어요~",
                 date = "2025-05-01 12:13"
             )
-        ))
+        ))*/
 
         // ------------------------ 댓글 어댑터 연결 ------------------------
         binding.commentList.layoutManager = LinearLayoutManager(requireContext())
@@ -302,32 +320,16 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
         binding.commentButton.setOnClickListener {
             val commentText = binding.editComment.text.toString()
             if (commentText.isNotEmpty()) {
-                if (editingCommentId != null) {
-                    // 댓글 수정
-                    val commentIndex = comments.indexOfFirst { it.commentId == editingCommentId }
-                    if (commentIndex != -1) {
-                        val updatedComment = comments[commentIndex].copy(commentText = commentText)
-                        comments[commentIndex] = updatedComment
-                        commentAdapter.notifyItemChanged(commentIndex)
-                    }
-                    // 수정 모드 초기화
-                    editingCommentId = null
-                    binding.commentButton.text = getString(R.string.check)
-                } else {
-                    // 새 댓글 작성
-                    val currentTime = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date())
-                    val newComment = CommentData(
-                        commentId = UUID.randomUUID().toString(),
-                        profileImageResId = R.drawable.ic_profile,
-                        memberTitle = "userTitle",
-                        memberNickname = "userNickname",
-                        commentText = commentText,
-                        date = currentTime
-                    )
-                    comments.add(newComment)
-                    commentAdapter.notifyItemInserted(comments.size - 1)
-                    binding.commentList.smoothScrollToPosition(comments.size - 1)
+                // 댓글 수정
+                val commentIndex = comments.indexOfFirst { it.commentId == editingCommentId }
+                if (commentIndex != -1) {
+                    val updatedComment = comments[commentIndex].copy(content = commentText)
+                    comments[commentIndex] = updatedComment
+                    commentAdapter.notifyItemChanged(commentIndex)
                 }
+                // 수정 모드 초기화
+                editingCommentId = -1
+                binding.commentButton.text = getString(R.string.check)
                 binding.editComment.text.clear()
             } else {
                 Toast.makeText(context, getString(R.string.please_enter_comment), Toast.LENGTH_SHORT).show()
@@ -338,8 +340,6 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
         binding.backButton.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
-
-        Log.d("RecipeFragment", "onViewCreated 끝, ViewLifecycle 상태: ${viewLifecycleOwner.lifecycle.currentState}")
     }
 
     override fun onDestroyView() {
@@ -360,7 +360,7 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
         }.removeSuffix(".0") // 소수점 0 제거
     }
 
-    override fun onEditComment(commentId: String, commentText: String) {
+    override fun onEditComment(commentId: Int, commentText: String) {
         // 수정할 댓글 ID 저장
         editingCommentId = commentId
         // EditText에 기존 댓글 내용 설정
@@ -369,7 +369,7 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
         binding.commentButton.text = "수정"
     }
 
-    override fun onDeleteComment(commentId: String) {
+    override fun onDeleteComment(commentId: Int) {
         // 댓글 삭제 확인 다이얼로그 표시
         AlertDialog.Builder(requireContext())
             .setTitle("댓글 삭제")

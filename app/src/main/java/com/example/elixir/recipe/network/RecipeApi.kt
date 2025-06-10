@@ -7,7 +7,6 @@ import com.example.elixir.recipe.network.response.GetSearchResponse
 import com.example.elixir.recipe.network.response.GetRecipeRecommendResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
-import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -18,7 +17,7 @@ import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-interface RecipeAPI {
+interface RecipeApi {
     @GET("/api/recipe")
     suspend fun getRecipe(
         @Query("page") page: Int,
@@ -28,8 +27,9 @@ interface RecipeAPI {
     ) : Response<GetRecipeListResponse>
 
     @GET("/api/recipe/{recipeId}")
-    suspend fun getRecipeById(@Path("recipeId") id: Int): Response<GetRecipeResponse>
-
+    suspend fun getRecipeById(
+        @Path("recipeId") id: Int
+    ): Response<GetRecipeResponse>
 
     @GET("/api/recipe/my")
     suspend fun getRecipeMy(

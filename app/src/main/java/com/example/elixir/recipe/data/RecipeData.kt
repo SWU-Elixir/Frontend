@@ -29,7 +29,7 @@ data class RecipeData(
     var createdAt: String,
     var updatedAt: String,
     var allergies: List<String>?,
-    var comments: List<CommentData>?
+    var comments: List<CommentItem>?
 )
 
 fun RecipeData.toEntity(): RecipeEntity {
