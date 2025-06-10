@@ -24,6 +24,8 @@ import com.example.elixir.ingredient.viewmodel.IngredientService
 import com.example.elixir.ingredient.viewmodel.IngredientViewModel
 import com.example.elixir.RetrofitClient
 import com.example.elixir.ingredient.data.IngredientData
+import androidx.recyclerview.widget.RecyclerView
+import com.example.elixir.databinding.ItemRecipeListTagBinding
 
 class IngredientSearchFragment : Fragment() {
 
@@ -33,6 +35,15 @@ class IngredientSearchFragment : Fragment() {
     private lateinit var viewModel: IngredientViewModel
     private lateinit var Adapter: IngredientSearchListAdapter
     private var allIngredients: List<IngredientData> = emptyList()
+
+    private val ingredientCategories = listOf(
+        "전체", "농산물", "수산물", "육류", "난류·유제품", "과자·빵·떡",
+        "가공농산물·유지", "음료·차", "조미료·장·절임", "기타"
+    )
+    private var selectedCategory: String = ingredientCategories[0]
+
+    // 카테고리 어댑터
+    private lateinit var categoryAdapter: IngredientCategoryAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -65,6 +76,7 @@ class IngredientSearchFragment : Fragment() {
             setupRecyclerView()
             setupSearchListeners()
             setupBackButton()
+            setupCategoryRecyclerView()
             
             // 로딩 상태 표시
             binding.progressBar.visibility = View.VISIBLE
@@ -134,23 +146,20 @@ class IngredientSearchFragment : Fragment() {
             override fun afterTextChanged(s: Editable?) {
                 val input = s.toString().trim()
                 updateSearchUI(input.isNotEmpty())
+                // 실시간 검색 수행
+                filterByCategoryAndSearch()
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
 
-        // 검색 버튼 클릭
-        binding.searchButton.setOnClickListener {
-            hideKeyboard()
-            performSearch()
-        }
 
         // 키보드 검색 버튼
         binding.searchEditText.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 hideKeyboard()
-                performSearch()
+                // 이미 실시간으로 검색되므로 별도의 검색 수행 불필요
                 true
             } else {
                 false
@@ -177,15 +186,15 @@ class IngredientSearchFragment : Fragment() {
 
     private fun updateSearchUI(isSearching: Boolean) {
         val context = requireContext()
-        ImageViewCompat.setImageTintList(
-            binding.searchButton,
-            ColorStateList.valueOf(
-                ContextCompat.getColor(
-                    context,
-                    if (isSearching) R.color.elixir_orange else R.color.elixir_gray
-                )
-            )
-        )
+//        ImageViewCompat.setImageTintList(
+//            binding.searchButton,
+//            ColorStateList.valueOf(
+//                ContextCompat.getColor(
+//                    context,
+//                    if (isSearching) R.color.elixir_orange else R.color.elixir_gray
+//                )
+//            )
+//        )
         binding.clearButton.visibility = if (isSearching) View.VISIBLE else View.GONE
     }
 
@@ -194,31 +203,31 @@ class IngredientSearchFragment : Fragment() {
         imm.hideSoftInputFromWindow(binding.searchEditText.windowToken, 0)
     }
 
-    private fun performSearch() {
-        val keyword = binding.searchEditText.text.toString().trim()
-        if (keyword.isNotEmpty()) {
-            try {
-                Log.d("IngredientSearch", "Performing search for: $keyword")
-                binding.progressBar.visibility = View.VISIBLE
-                
-                val filtered = allIngredients.filter {
-                    (it.name?.contains(keyword, ignoreCase = true) == true) ||
-                            (it.type?.contains(keyword, ignoreCase = true) == true)
-                }
-                Log.d("IngredientSearch", "Found ${filtered.size} results")
-                
-                Adapter.updateData(filtered)
-                updateSearchResults(filtered.isEmpty())
-            } catch (e: Exception) {
-                Log.e("IngredientSearch", "Search error: ${e.message}", e)
-                Toast.makeText(requireContext(), "검색 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
-            } finally {
-                binding.progressBar.visibility = View.GONE
-            }
-        } else {
-            Toast.makeText(requireContext(), getString(R.string.search_put_something), Toast.LENGTH_SHORT).show()
+    private fun setupCategoryRecyclerView() {
+        categoryAdapter = IngredientCategoryAdapter(ingredientCategories) { category ->
+            selectedCategory = category
+            filterByCategoryAndSearch()
         }
+        binding.categoryRecyclerView.adapter = categoryAdapter
+        binding.categoryRecyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        // 최초 선택
+        categoryAdapter.setSelectedCategory(selectedCategory)
     }
+
+    private fun filterByCategoryAndSearch() {
+        val keyword = binding.searchEditText.text.toString().trim()
+        val filtered = allIngredients.filter {
+            (selectedCategory == "전체" || (it.categoryGroup?.trim() == selectedCategory)) &&
+            (keyword.isEmpty() || it.name?.contains(keyword, ignoreCase = true) == true || (it.type?.contains(keyword, ignoreCase = true) == true))
+        }
+        Adapter.updateData(filtered)
+        updateSearchResults(filtered.isEmpty())
+    }
+
+//    private fun performSearch() {
+//        val keyword = binding.searchEditText.text.toString().trim()
+//        filterByCategoryAndSearch()
+//    }
 
     private fun updateSearchResults(isEmpty: Boolean) {
         binding.searchList.visibility = if (isEmpty) View.GONE else View.VISIBLE
@@ -240,5 +249,48 @@ class IngredientSearchFragment : Fragment() {
         super.onDestroyView()
         hideKeyboard()
         _binding = null
+    }
+
+    // 카테고리 어댑터 클래스
+    class IngredientCategoryAdapter(
+        private val categories: List<String>,
+        private val onClick: (String) -> Unit
+    ) : RecyclerView.Adapter<IngredientCategoryAdapter.ViewHolder>() {
+        private var selectedPosition = 0
+        inner class ViewHolder(val binding: ItemRecipeListTagBinding) : RecyclerView.ViewHolder(binding.root) {
+            fun bind(category: String, isSelected: Boolean) {
+                binding.indeterminateName.text = category
+                binding.root.isSelected = isSelected
+                binding.root.setBackgroundResource(
+                    if (isSelected) R.drawable.bg_rect_filled_orange_5 else R.drawable.bg_rect_outline_gray_5
+                )
+                binding.indeterminateName.setTextColor(
+                    binding.root.context.getColor(
+                        if (isSelected) R.color.white else R.color.black
+                    )
+                )
+                binding.root.setOnClickListener {
+                    val prev = selectedPosition
+                    selectedPosition = adapterPosition
+                    notifyItemChanged(prev)
+                    notifyItemChanged(selectedPosition)
+                    onClick(category)
+                }
+            }
+        }
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
+            ViewHolder(ItemRecipeListTagBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) =
+            holder.bind(categories[position], position == selectedPosition)
+        override fun getItemCount() = categories.size
+        fun setSelectedCategory(category: String) {
+            val idx = categories.indexOf(category)
+            if (idx != -1) {
+                val prev = selectedPosition
+                selectedPosition = idx
+                notifyItemChanged(prev)
+                notifyItemChanged(selectedPosition)
+            }
+        }
     }
 }

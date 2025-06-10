@@ -17,7 +17,7 @@ import com.example.elixir.ToolbarActivity
 import kotlinx.coroutines.launch
 
 class FollowListAdapter(
-    private val items: List<FollowItem>,
+    val items: List<FollowItem>,
     private val myId: Int,
     private val onFollowChanged: (() -> Unit)? = null ,
     private val onItemClick: ((FollowItem) -> Unit)? = null,
