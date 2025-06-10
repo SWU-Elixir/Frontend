@@ -29,6 +29,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.elixir.R
 import com.example.elixir.RetrofitClient
+import com.example.elixir.ToolbarActivity
 import com.example.elixir.databinding.FragmentRecipeLogBinding
 import com.example.elixir.dialog.SaveDialog
 import com.example.elixir.dialog.SelectImgDialog
@@ -217,6 +218,14 @@ class RecipeLogFragment : Fragment() {
         // 작성 버튼
         setupWriteButton()
 
+        // 식재료 검색 버튼
+        setupIngredientChips()
+
+        // 레시피 가이드 버튼
+        setupRecipeGuideButton()
+
+
+
         // 수정 모드 진입 시
         arguments?.let {
             if (it.getBoolean("isEdit", false)) {
@@ -255,6 +264,96 @@ class RecipeLogFragment : Fragment() {
 
     }
 
+    private fun setupRecipeGuideButton() {
+        recipeBinding.btnRecipeGuide.setOnClickListener {
+            Log.d("RecipeLogFragment", "Recipe guide button clicked")
+            val intent = Intent(requireContext(), ToolbarActivity::class.java).apply {
+                putExtra("mode", 16)  // toolbar mode 16
+            }
+            startActivity(intent)
+        }
+    }
+
+    // 식재료 설정
+    private fun setupIngredientChips() {
+        Log.d("RecipeLogFragment", "Setting up ingredient chips")
+        try {
+            // SearchFragment에서 전달된 결과 수신
+            parentFragmentManager.setFragmentResultListener("ingredient_selection", viewLifecycleOwner) { _, bundle ->
+                val ingredientId = bundle.getInt("ingredientId", -1)
+                val ingredientName = bundle.getString("ingredientName") ?: return@setFragmentResultListener
+
+                if (ingredientId == -1) return@setFragmentResultListener
+                val findIngredientChip = recipeBinding.findIngredient
+
+                // 중복 방지
+                if (ingredientTags.contains(ingredientId)) {
+                    Toast.makeText(requireContext(), "이미 추가된 재료입니다.", Toast.LENGTH_SHORT).show()
+                    return@setFragmentResultListener
+                }
+
+                // 일반 태그 개수 제한
+                if (ingredientTags.size >= 5) {
+                    Toast.makeText(requireContext(), "일반 재료는 최대 5개까지만 선택할 수 있습니다.", Toast.LENGTH_SHORT).show()
+                    return@setFragmentResultListener
+                }
+
+                // 칩 생성 및 추가
+                val chip = Chip(ContextThemeWrapper(requireContext(), R.style.ChipStyle_Short)).apply {
+                    text = ingredientName
+                    isClickable = true
+                    isCheckable = false
+                    chipBackgroundColor = ColorStateList.valueOf(
+                        ContextCompat.getColor(context, R.color.elixir_orange)
+                    )
+                    setTextColor(ContextCompat.getColor(context, R.color.white))
+
+                    // 칩 클릭 리스너로 변경
+                    setOnClickListener {
+                        ingredientTags.remove(ingredientId)
+                        recipeBinding.tagsIngredient.removeView(this)
+                        updateWriteButtonState()
+                    }
+                }
+
+                // findIngredient Chip 앞에 삽입
+                val index = recipeBinding.tagsIngredient.indexOfChild(findIngredientChip)
+                recipeBinding.tagsIngredient.addView(chip, index)
+
+                // 리스트에 추가 (ID 저장)
+                ingredientTags.add(ingredientId)
+                updateWriteButtonState()
+            }
+
+            // 식재료 검색 버튼 클릭 리스너
+            recipeBinding.findIngredient.setOnClickListener {
+                // 칩 상태 토글
+                recipeBinding.findIngredient.isChecked = !recipeBinding.findIngredient.isChecked
+
+                // IngredientSearchFragment로 이동
+                val ingredientSearchFragment = IngredientSearchFragment()
+
+                // Activity의 레이아웃을 사용하여 Fragment 전환
+                requireActivity().supportFragmentManager.beginTransaction()
+                    .replace(android.R.id.content, ingredientSearchFragment)
+                    .addToBackStack(null)
+                    .commit()
+            }
+
+            // Fragment가 다시 보일 때 검색 칩 상태 초기화
+            viewLifecycleOwner.lifecycle.addObserver(object : androidx.lifecycle.DefaultLifecycleObserver {
+                override fun onResume(owner: androidx.lifecycle.LifecycleOwner) {
+                    recipeBinding.findIngredient.isChecked = false
+                }
+            })
+
+            updateWriteButtonState()
+            Log.d("RecipeLogFragment", "Ingredient chips setup completed")
+        } catch (e: Exception) {
+            Log.e("RecipeLogFragment", "Error setting up ingredient chips", e)
+        }
+    }
+
     // 데이터 초기화
     private fun initData() {
         ingredientList.clear();
@@ -287,59 +386,6 @@ class RecipeLogFragment : Fragment() {
         })
     }
 
-    // 식재료 설정
-    private fun setupIngredientChips() {
-        // SearchFragment에서 전달된 결과 수신
-        parentFragmentManager.setFragmentResultListener("ingredient_selection", viewLifecycleOwner) { _, bundle ->
-            val ingredientId = bundle.getInt("ingredientId", -1)
-            val ingredientName = bundle.getString("ingredientName") ?: return@setFragmentResultListener
-
-            if (ingredientId == -1) return@setFragmentResultListener
-            val findIngredientChip = recipeBinding.findIngredient
-
-            // 중복 방지
-            if (ingredientTags.contains(ingredientId)) {
-                Toast.makeText(requireContext(), "이미 추가된 재료입니다.", Toast.LENGTH_SHORT).show()
-                return@setFragmentResultListener
-            }
-
-            // 일반 태그 개수 제한
-            if (ingredientTags.size >= 5) {
-                Toast.makeText(requireContext(), "일반 재료는 최대 5개까지만 선택할 수 있습니다.", Toast.LENGTH_SHORT).show()
-                return@setFragmentResultListener
-            }
-
-            // 칩 생성 및 추가
-            val chip = Chip(
-                ContextThemeWrapper(requireContext(), R.style.ChipStyle_Short)
-            ).apply {
-                text = ingredientName
-                isClickable = true
-                isCheckable = false
-                chipBackgroundColor = ColorStateList.valueOf(
-                    ContextCompat.getColor(context, R.color.elixir_orange)
-                )
-                setTextColor(ContextCompat.getColor(context, R.color.white))
-
-                // 칩 클릭 리스너로 변경
-                setOnClickListener {
-                    ingredientTags.remove(ingredientId)
-                    recipeBinding.tagsIngredient.removeView(this)
-                    updateWriteButtonState()
-                }
-            }
-
-            // findIngredient Chip 앞에 삽입
-            val index = recipeBinding.tagsIngredient.indexOfChild(findIngredientChip)
-            recipeBinding.tagsIngredient.addView(chip, index)
-
-            // 리스트에 추가 (ID 저장)
-            ingredientTags.add(ingredientId)
-            //checkAllValid()
-        }
-
-        updateWriteButtonState()
-    }
     // 알러지 설정
     private fun setupAllergyChips() {
         val allergyList = listOf(
