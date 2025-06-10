@@ -13,10 +13,11 @@ data class CommentEntity(
     val id: Int,
     val recipeId: Int,
     val content: String,
-    val nickname: String? = null,
+    val nickName: String? = null,
     val title: String? = null,
-    val createdDate: String? = null,
-    val updatedDate: String? = null
+    val authorProfileUrl: String? = null,
+    val createdAt: String? = null,
+    val updatedAt: String? = null
 )
 
 // 서버 업로드 시 CommentEntity를 CommentRequest로 변환하는 확장 함수
@@ -41,9 +42,10 @@ fun GetCommentResponse.toEntity(): CommentEntity? {
         id = commentItem.commentId,
         recipeId = commentItem.recipeId,
         content = commentItem.content,
-        nickname = commentItem.nickname,
+        nickName = commentItem.nickName,
         title = commentItem.title,
-        createdDate = commentItem.createdDate,
-        updatedDate = commentItem.updatedDate
+        authorProfileUrl = commentItem.authorProfileUrl,
+        createdAt = commentItem.createdAt,
+        updatedAt = commentItem.updatedAt
     )
 }

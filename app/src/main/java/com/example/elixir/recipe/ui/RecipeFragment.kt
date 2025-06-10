@@ -173,6 +173,11 @@ class RecipeFragment : Fragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        recipeViewModel.getRecipes(0, 10, selectedCategoryType, selectedSlowAging)
+    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
