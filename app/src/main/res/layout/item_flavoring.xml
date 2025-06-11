@@ -5,82 +5,76 @@
     android:layout_width="match_parent"
     android:orientation="horizontal"
     android:layout_marginBottom="10dp">
+    <LinearLayout
+    android:layout_width="0dp" android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_weight="1"> <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <EditText
+        android:id="@+id/enterItemData"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:hint="@string/material_item_hint"
+        android:layout_marginEnd="8dp"
+        android:inputType="text"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="10dp"
+        android:background="@drawable/bg_rect_outline_orange"
+        android:textColor="@color/black"
+        android:textColorHint="@color/elixir_gray"
+        android:textSize="16sp"
+        android:fontFamily="@font/pretendard_medium" />
+
+    <EditText
+        android:id="@+id/enterItemAmount"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:hint="예)200"
+        android:inputType="text"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="10dp"
+        android:background="@drawable/bg_rect_outline_orange"
+        android:textColor="@color/black"
+        android:textColorHint="@color/elixir_gray"
+        android:textSize="16sp"
+        android:fontFamily="@font/pretendard_medium" />
+</LinearLayout>
 
     <LinearLayout
-        android:layout_width="320dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <!-- 1st row: item_data, item_amount -->
-        <LinearLayout
-            android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:layout_marginTop="5dp">
+
+        <EditText
+            android:id="@+id/enterItemUnit"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_weight="1"
+            android:hint="예) g (그램)"
+            android:inputType="text"
+            android:layout_marginEnd="8dp"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="10dp"
+            android:background="@drawable/bg_rect_outline_orange"
+            android:textColor="@color/black"
+            android:textColorHint="@color/elixir_gray"
+            android:textSize="16sp"
+            android:fontFamily="@font/pretendard_medium" />
 
-            <EditText
-                android:id="@+id/enterItemData"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="@string/material_item_hint"
-                android:layout_marginEnd="8dp"
-                android:inputType="text"
-                android:paddingHorizontal="10dp"
-                android:paddingVertical="10dp"
-                android:background="@drawable/bg_rect_outline_orange"
-                android:textColor="@color/black"
-                android:textColorHint="@color/elixir_gray"
-                android:textSize="16sp"
-                android:fontFamily="@font/pretendard_medium" />
-
-            <EditText
-                android:id="@+id/enterItemAmount"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="예)200"
-                android:inputType="text"
-                android:paddingHorizontal="10dp"
-                android:paddingVertical="10dp"
-                android:background="@drawable/bg_rect_outline_orange"
-                android:textColor="@color/black"
-                android:textColorHint="@color/elixir_gray"
-                android:textSize="16sp"
-                android:fontFamily="@font/pretendard_medium" />
-        </LinearLayout>
-
-        <!-- 2nd row: item_unit, spinner, delete button -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="5dp">
-
-            <EditText
-                android:id="@+id/enterItemUnit"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="예) g (그램)"
-                android:inputType="text"
-                android:layout_marginEnd="8dp"
-                android:paddingHorizontal="10dp"
-                android:paddingVertical="10dp"
-                android:background="@drawable/bg_rect_outline_orange"
-                android:textColor="@color/black"
-                android:textColorHint="@color/elixir_gray"
-                android:textSize="16sp"
-                android:fontFamily="@font/pretendard_medium" />
-
-            <Spinner
-                android:id="@+id/spinnerUnit"
-                android:layout_width="155dp"
-                android:layout_height="42dp"
-                android:background="@drawable/bg_spinner_recipe_category_gray"
-                android:popupBackground="@drawable/bg_spinner_dropdown" />
-
-
-        </LinearLayout>
+        <Spinner
+            android:id="@+id/spinnerUnit"
+            android:layout_width="155dp"
+            android:layout_height="42dp"
+            android:background="@drawable/bg_spinner_recipe_category_gray"
+            android:popupBackground="@drawable/bg_spinner_dropdown" />
     </LinearLayout>
+</LinearLayout>
     <ImageButton
         android:layout_gravity="center"
         android:id="@+id/btn_del"
