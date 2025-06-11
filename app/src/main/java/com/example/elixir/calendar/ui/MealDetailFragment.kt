@@ -1,5 +1,6 @@
 package com.example.elixir.calendar.ui
 
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -79,7 +80,7 @@ class MealDetailFragment : Fragment() {
         }
         Log.d("MealDetailFragment", "mealDataJson: $mealDataJson")
 
-        // 이미지 url
+        // 이미지 처리
         context?.let {
             Glide.with(it)
                 .load(dietLogData?.dietImg) // file://, content://, http:// 모두 지원
@@ -161,7 +162,7 @@ class MealDetailFragment : Fragment() {
 
             // Adapter 연결
             binding.tagList.layoutManager = FlexboxLayoutManager(requireContext())
-            binding.tagList.adapter = MealListIngredientAdapter(ingredientTags, ingredientMap)
+            binding.tagList.adapter = MealDetailIngredientAdapter(ingredientTags, ingredientMap)
         }
 
         // ------------------------ 리스트 ------------------------

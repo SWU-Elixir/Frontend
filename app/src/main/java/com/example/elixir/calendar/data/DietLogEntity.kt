@@ -19,8 +19,10 @@ data class DietLogEntity(
 )
 
 // 데이터 전송 객체(이미지 url 제외) 생성
-fun DietLogEntity.toDto(): DietLogDto {
+fun DietLogEntity.toDto(memberId: Int): DietLogDto {
     return DietLogDto(
+        id = this.id,
+        memberId = memberId,
         name = this.name,
         type = this.type,
         score = this.score,

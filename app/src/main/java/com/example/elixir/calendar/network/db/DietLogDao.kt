@@ -39,4 +39,7 @@ interface DietLogDao {
     @Delete
     suspend fun deleteDietLog(dietLogEntity: DietLogEntity)
 
+    @Query("SELECT * FROM diet_table WHERE time >= :from")
+    suspend fun getDietLogsFromDate(from: String): List<DietLogEntity>
+
 }

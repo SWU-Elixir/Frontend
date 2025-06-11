@@ -1,6 +1,6 @@
 /**
  * 캘린더 프래그먼트
- * 
+ *
  * 주요 기능:
  * 1. 식단 일정을 캘린더에 표시
  * 2. 날짜별 식단 목록 조회
@@ -89,6 +89,9 @@ class CalendarFragment : Fragment(), OnMealClickListener {
     private val today = CalendarDay.today() // 오늘 날짜
     private var isFirstLaunch = true // 첫 실행 여부
 
+    // CalendarTodayDecorator 인스턴스를 멤버 변수로 유지
+    private var calendarTodayDecorator: CalendarTodayDecorator? = null
+
     // DietLogFragment 띄우기
     private lateinit var dietLogLauncher: ActivityResultLauncher<Intent>
 
@@ -156,7 +159,7 @@ class CalendarFragment : Fragment(), OnMealClickListener {
         mealAdapter = MealListAdapter(requireContext(), mutableListOf(), this)
         binding.mealPlanList.adapter = mealAdapter
 
-        // 2. ViewModel에서 데이터 요청
+        // 2. ViewModel에서 데이터 요청 (초기 선택 날짜)
         mealViewModel.getDietLogsByDate(
             "%04d-%02d-%02d".format(selectedCalendarDay.year, selectedCalendarDay.month + 1, selectedCalendarDay.day)
         )
@@ -171,23 +174,28 @@ class CalendarFragment : Fragment(), OnMealClickListener {
         binding.calendarView.setWeekDayFormatter(CustomWeekDayFormatter(requireContext()))
         binding.calendarView.setTitleFormatter(CustomTitleFormatter(requireContext()))
 
-        // 오늘 날짜 배경 원 데코레이터
+        // 오늘 날짜 배경 원 데코레이터 (최초 1회만 추가)
         try {
             val todayDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.bg_oval_outline_orange)
             todayDrawable?.let {
-                binding.calendarView.addDecorator(CalendarTodayDecorator(requireContext(), it))
+                // CalendarTodayDecorator 인스턴스 생성 및 저장
+                calendarTodayDecorator = CalendarTodayDecorator(requireContext(), it)
+                // 데코레이터가 이미 추가되지 않았을 경우에만 추가 (초기화 방지)
+                // MaterialCalendarView는 내부적으로 addDecorator 중복을 처리하지만, 명시적으로 제어하는 것이 좋습니다.
+                binding.calendarView.addDecorator(calendarTodayDecorator!!)
             }
         }
         catch (e: Exception) {
             Log.e("CalendarFragment", "오늘 날짜 배경 설정 오류: ${e.message}")
         }
 
+
         // ----------------- FAB 및 바텀시트 ---------------------
         val behavior = BottomSheetBehavior.from(binding.bottomSheet)
         binding.fab.hide()
         var bottomSheetState = BottomSheetBehavior.STATE_COLLAPSED
 
-        // 초기 날짜 설정 및 데코레이터 적용
+        // 초기 날짜 설정
         if (isFirstLaunch) {
             selectedCalendarDay = today
             isFirstLaunch = false
@@ -201,26 +209,21 @@ class CalendarFragment : Fragment(), OnMealClickListener {
         }
 
         // 초기 상태 설정
-        val initialDateStr = "%04d-%02d-%02d".format(selectedCalendarDay.year, selectedCalendarDay.month + 1, selectedCalendarDay.day)
-        updateEventList(initialDateStr)
-        updateSelectedDateDecorator()
-        processDietLogScores(binding.calendarView)
-        binding.calendarView.setSelectedDate(selectedCalendarDay)
+        // 이 부분은 onResume에서도 호출되므로, 중복 로딩을 피하기 위해 observeDietLogs()에서 처리
+        // updateEventList(initialDateStr) // observeDietLogs에서 처리
+        // updateSelectedDateDecorator() // onResume에서 처리
+        // processDietLogScores(binding.calendarView) // observeDietLogs에서 처리
+        // binding.calendarView.setSelectedDate(selectedCalendarDay) // onResume에서 처리
+
 
         // 날짜 선택 이벤트 처리
         binding.calendarView.setOnDateChangedListener { _, date, _ ->
             selectedCalendarDay = date
             val selectedDateStr = "%04d-%02d-%02d".format(date.year, date.month + 1, date.day)
-            mealViewModel.getDietLogsByDate(selectedDateStr)
+            mealViewModel.getDietLogsByDate(selectedDateStr) // LiveData가 변경되면서 observeDietLogs 호출
 
-            // 선택된 날짜 업데이트
-            binding.calendarView.setSelectedDate(date)
-            
-            // 데코레이터 업데이트
+            // 데코레이터 업데이트 (선택 날짜 색상)
             updateSelectedDateDecorator()
-            
-            // 리스트 업데이트
-            updateEventList(selectedDateStr)
 
             binding.fab.visibility = if (selectedCalendarDay == today && bottomSheetState != BottomSheetBehavior.STATE_COLLAPSED) View.VISIBLE else View.GONE
         }
@@ -242,33 +245,11 @@ class CalendarFragment : Fragment(), OnMealClickListener {
             ActivityResultContracts.StartActivityForResult()
         ) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
-                val data = result.data?.getStringExtra("dietLogData")
-                if (data != null) {
-                    val deletedId = result.data?.getIntExtra("deletedDietLogId", -1) ?: -1
-                    if (deletedId != -1) {
-                        // eventMap에서 삭제
-                        eventMap.forEach { (_, list) ->
-                            list.removeAll { it.id == deletedId }
-                        }
-                        // UI 갱신
-                        val selectedDateStr = "%04d-%02d-%02d".format(selectedCalendarDay.year, selectedCalendarDay.month + 1, selectedCalendarDay.day)
-                        updateEventList(selectedDateStr)
-                        processDietLogScores(binding.calendarView)
-                    }
-
-                    val newDietLog = Gson().fromJson(data, DietLogData::class.java)
-                    val date = newDietLog.time.toLocalDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-                    val list = eventMap[date] ?: mutableListOf()
-                    list.add(newDietLog)
-                    eventMap[date] = list
-
-                    // 어댑터 및 캘린더 업데이트
-                    updateEventList(date)
-                    updateSelectedDateDecorator()
-                    processDietLogScores(binding.calendarView)
-                }
+                // 수정/삭제/추가 후 캘린더 데이터를 다시 로드하여 UI 갱신
+                val selectedDateStr = "%04d-%02d-%02d".format(selectedCalendarDay.year, selectedCalendarDay.month + 1, selectedCalendarDay.day)
+                mealViewModel.getDietLogsByDate(selectedDateStr) // 현재 선택된 날짜의 데이터 다시 불러오기
             } else {
-                Toast.makeText(context, "식단 작성 실패", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "식단 작업 실패", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -276,7 +257,11 @@ class CalendarFragment : Fragment(), OnMealClickListener {
         mealDetailLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) { result ->
-            // 상세 화면에서 돌아온 후 처리 (필요시)
+            if (result.resultCode == Activity.RESULT_OK) {
+                // 상세 화면(DietLogFragment)에서 돌아온 후 캘린더 데이터 다시 로드
+                val selectedDateStr = "%04d-%02d-%02d".format(selectedCalendarDay.year, selectedCalendarDay.month + 1, selectedCalendarDay.day)
+                mealViewModel.getDietLogsByDate(selectedDateStr)
+            }
         }
 
         // 바텀시트 설정
@@ -288,6 +273,7 @@ class CalendarFragment : Fragment(), OnMealClickListener {
             override fun onSlide(bottomSheet: View, slideOffset: Float) {}
         })
 
+        // LiveData 관찰 시작
         observeDietLogs()
     }
 
@@ -299,8 +285,8 @@ class CalendarFragment : Fragment(), OnMealClickListener {
         // 선택된 날짜 스타일 복원
         updateSelectedDateDecorator()
         val selectedDateStr = "%04d-%02d-%02d".format(selectedCalendarDay.year, selectedCalendarDay.month + 1, selectedCalendarDay.day)
-        updateEventList(selectedDateStr)
-        mealViewModel.getDietLogsByDate(selectedDateStr)
+        mealViewModel.getDietLogsByDate(selectedDateStr) // 데이터 다시 불러오기
+        // 캘린더 선택 날짜는 항상 유지
         binding.calendarView.setSelectedDate(selectedCalendarDay)
     }
 
@@ -310,6 +296,7 @@ class CalendarFragment : Fragment(), OnMealClickListener {
      * 선택된 날짜의 텍스트 색상 변경 데코레이터 업데이트
      */
     private fun updateSelectedDateDecorator() {
+        // 기존 선택 날짜 및 오늘 날짜 텍스트 데코레이터 제거
         selectedTextDecorator?.let { binding.calendarView.removeDecorator(it) }
         todayTextDecorator?.let { binding.calendarView.removeDecorator(it) }
 
@@ -322,6 +309,8 @@ class CalendarFragment : Fragment(), OnMealClickListener {
             todayTextDecorator = TodayTextColorDecorator(today, orangeColor)
             binding.calendarView.addDecorator(todayTextDecorator!!)
         }
+        // 데코레이터 변경 사항을 캘린더에 즉시 반영
+        binding.calendarView.invalidateDecorators()
     }
 
     /**
@@ -369,6 +358,16 @@ class CalendarFragment : Fragment(), OnMealClickListener {
      * 각 날짜의 식단 점수에 따라 다른 색상의 점을 표시
      */
     private fun processDietLogScores(calendarView: MaterialCalendarView) {
+        // 기존에 추가된 모든 데코레이터 제거 (점 데코레이터 포함)
+        calendarView.removeDecorators() // 모든 데코레이터를 제거합니다.
+
+        // 오늘 날짜 배경 데코레이터와 선택된 날짜 텍스트 색상 데코레이터를 다시 추가
+        // calendarTodayDecorator는 이미 멤버 변수로 존재한다고 가정
+        calendarTodayDecorator?.let {
+            calendarView.addDecorator(it) // 오늘 날짜 배경 데코레이터 다시 추가
+        }
+        updateSelectedDateDecorator() // 선택 날짜 텍스트 색상 데코레이터 다시 추가
+
         val dotMap = mutableMapOf<CalendarDay, MutableList<Int>>()
         eventMap.forEach { (dateStr, items) ->
             val (year, month, day) = dateStr.split("-").map { it.toInt() }
@@ -376,10 +375,15 @@ class CalendarFragment : Fragment(), OnMealClickListener {
             val colors = items.map { getColorByScore(it.score) }
             dotMap[calendarDay] = colors.toMutableList()
         }
+
         dotMap.forEach { (day, colors) ->
-            val defaultTextColor = Color.BLACK
-            calendarView.addDecorator(MultipleDotDecorator(colors, day, defaultTextColor))
+            val defaultTextColor = Color.BLACK // 이 변수는 이제 CustomDotSpan에서 사용되지 않습니다.
+            val decorator = MultipleDotDecorator(colors, day) // 텍스트 색상 매개변수 제거
+            calendarView.addDecorator(decorator)
         }
+
+        // 데코레이터 변경 사항을 캘린더에 즉시 반영
+        calendarView.invalidateDecorators()
     }
 
     /**
@@ -398,11 +402,10 @@ class CalendarFragment : Fragment(), OnMealClickListener {
     /**
      * 여러 점을 표시하는 데코레이터
      */
-    class MultipleDotDecorator(private val colors: List<Int>, private val date: CalendarDay, private val textColor: Int) : DayViewDecorator {
+    class MultipleDotDecorator(private val colors: List<Int>, private val date: CalendarDay) : DayViewDecorator { // textColor 매개변수 제거
         override fun shouldDecorate(day: CalendarDay): Boolean = day == date
         override fun decorate(view: DayViewFacade) {
             view.addSpan(CustomDotSpan(colors))
-            view.addSpan(ForegroundColorSpan(textColor))
         }
     }
 
@@ -450,7 +453,7 @@ class CalendarFragment : Fragment(), OnMealClickListener {
         } else {
             binding.mealPlanList.visibility = View.VISIBLE
             binding.emptyMealText.visibility = View.GONE
-            mealAdapter.updateData(events)  // updateData가 MealDto 리스트 받는지 확인!
+            mealAdapter.updateData(events)
             binding.mealPlanList.smoothScrollToPosition(0)
         }
     }
@@ -473,10 +476,11 @@ class CalendarFragment : Fragment(), OnMealClickListener {
         )
     }
 
-    // observeDietLogs에서 eventMap을 초기화
+    // observeDietLogs에서 eventMap을 초기화하고 데코레이터를 적용합니다.
     private fun observeDietLogs() {
         mealViewModel.dailyDietLogs.observe(viewLifecycleOwner) { mealList ->
-            eventMap.clear() // ★ 중복 방지
+            // eventMap 클리어: 항상 최신 데이터로 갱신
+            eventMap.clear()
             mealList?.forEach { mealDto ->
                 val date = mealDto.time.substring(0, 10)
                 val dietLogData = convertMealDtoToDietLogData(mealDto)
@@ -486,6 +490,8 @@ class CalendarFragment : Fragment(), OnMealClickListener {
             }
             val selectedDateStr = "%04d-%02d-%02d".format(selectedCalendarDay.year, selectedCalendarDay.month + 1, selectedCalendarDay.day)
             updateEventList(selectedDateStr)
+
+            // 데이터가 변경될 때마다 점 데코레이터를 새로 적용
             processDietLogScores(binding.calendarView)
         }
     }
@@ -494,7 +500,11 @@ class CalendarFragment : Fragment(), OnMealClickListener {
      * 뷰 제거 시 바인딩 해제
      */
     override fun onDestroyView() {
+        // 프래그먼트가 destroy될 때 데코레이터를 모두 제거
+        // _binding이 null이 되기 전에 binding 객체에 접근해야 합니다.
+        _binding?.calendarView?.removeDecorators() // 안전 호출(?.)과 함께 removeDecorators() 호출
+
         super.onDestroyView()
-        _binding = null
+        _binding = null // binding 객체를 null로 설정하여 메모리 누수 방지
     }
 }

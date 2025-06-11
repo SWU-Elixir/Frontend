@@ -15,6 +15,7 @@ data class DietLogData(
 // 식단 기록 데이터 객체화
 fun DietLogData.toEntity(): DietLogEntity {
     return DietLogEntity(
+        id = this.id,
         name = this.dietTitle,
         type = this.dietCategory,
         score = this.score,

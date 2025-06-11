@@ -1,10 +1,13 @@
 package com.example.elixir.calendar.viewmodel
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.elixir.RetrofitClient
 import com.example.elixir.calendar.data.DietLogData
 import com.example.elixir.calendar.data.MealDto
 import com.example.elixir.calendar.network.db.DietLogRepository
@@ -12,6 +15,7 @@ import com.example.elixir.calendar.network.response.GetScoreResponse
 import com.example.elixir.member.network.MemberRepository
 import kotlinx.coroutines.launch
 import com.example.elixir.calendar.data.toEntity
+import com.example.elixir.calendar.data.toMealDto
 import com.example.elixir.calendar.network.response.GetMealResponse
 import com.example.elixir.calendar.network.response.toEntity
 import com.example.elixir.ingredient.data.IngredientData
@@ -31,20 +35,19 @@ class MealViewModel(
     private val _dailyDietLogs = MutableLiveData<List<MealDto>>()
     val dailyDietLogs: LiveData<List<MealDto>> = _dailyDietLogs
 
+    private val _allDietLogs = MutableLiveData<List<MealDto>>()
+    val allDietLogs: LiveData<List<MealDto>> = _allDietLogs
+
     private val _monthlyScore = MutableLiveData<GetScoreResponse>()
     val monthlyScore: LiveData<GetScoreResponse> = _monthlyScore
 
-    private val _uploadResult = MutableLiveData<Result<Boolean>>() // 성공/실패 구분
-    val uploadResult: LiveData<Result<Boolean>> get() = _uploadResult
+    private val _uploadResult = MutableLiveData<Result<String>>() // 성공 시 이미지 URL 반환
+    val uploadResult: LiveData<Result<String>> get() = _uploadResult
 
     private val _deleteResult = MutableLiveData<Result<Boolean>>()
     val deleteResult: LiveData<Result<Boolean>> get() = _deleteResult
 
-    // ViewModel에서 전체 식재료 리스트를 불러와 LiveData로 노출
     val ingredientList = MutableLiveData<List<IngredientData>>()
-
-    private val _updateResult = MutableLiveData<Result<Boolean>>()
-    val updateResult: LiveData<Result<Boolean>> = _updateResult
 
 
     // 특정 ID의 식단 기록 가져오기
@@ -59,28 +62,43 @@ class MealViewModel(
     fun saveToLocalDB(data: DietLogData) {
         val entity = data.toEntity()
         viewModelScope.launch {
-            dietRepository.insertDietLog(entity)
-            Log.d("RoomTest", "로컬 저장됨: $entity")
+            try {
+                dietRepository.insertDietLog(entity)
+                Log.d("RoomTest", "로컬 저장됨: $entity")
+            } catch (e: Exception) {
+                Log.e("MealViewModel", "로컬 DB 저장 실패: ${e.message}", e)
+            }
         }
     }
 
     // 로컬 DB + 서버 업로드
     fun saveAndUpload(data: DietLogData, imageFile: File) {
-        val entity = data.toEntity().copy(imageUrl = "")
         viewModelScope.launch {
             try {
-                dietRepository.insertDietLog(entity)
-                val uploadResult: GetMealResponse? = dietRepository.uploadDietLog(entity, imageFile)
+                // 1. 이미지 업로드 및 서버로부터 이미지 URL 받기
+                // 이 시점의 data는 로컬 경로(android.resource:// 또는 content://)를 가지고 있을 수 있음
+                // dietRepository.uploadDietLog는 DietLogEntity와 File을 받으므로,
+                // data.toEntity()를 넘겨주면서 이미지 파일을 함께 보냄.
+                val uploadImageResponse: GetMealResponse? = dietRepository.uploadDietLog(data.toEntity(), imageFile)
+                val uploadedImageUrl: String? = uploadImageResponse?.data?.imageUrl // **여기서 명확히 선언**
 
-                val updatedEntity = uploadResult?.toEntity()
-                if (updatedEntity != null && updatedEntity.imageUrl.isNotEmpty()) {
-                    dietRepository.updateDietLog(updatedEntity)
-                    Log.d("Upload", "서버 업로드 성공, imageUrl=${updatedEntity.imageUrl}")
-                    _uploadResult.postValue(Result.success(true))
-                } else {
-                    Log.e("Upload", "서버 업로드 실패, entity=$entity, imageFile=${imageFile.path}")
-                    _uploadResult.postValue(Result.failure(Exception("서버 업로드 실패")))
+                if (uploadedImageUrl.isNullOrEmpty()) {
+                    // 이미지 URL이 없으면 실패 처리
+                    _uploadResult.postValue(Result.failure(Exception("이미지 업로드 후 URL을 받지 못했습니다.")))
+                    return@launch
                 }
+
+                // 2. 서버에서 받은 이미지 URL로 DietLogData 업데이트
+                val dietLogDataWithImageUrl = data.copy(dietImg = uploadedImageUrl)
+
+                // 3. Room DB 저장 (업데이트된 이미지 URL 포함)
+                dietRepository.insertDietLog(dietLogDataWithImageUrl.toEntity())
+                Log.d("Upload", "로컬 DB에 서버 이미지 URL로 저장 완료.")
+
+                // 4. Fragment에 성공과 최종 이미지 URL을 전달
+                Log.d("Upload", "서버 업로드 성공, imageUrl=$uploadedImageUrl")
+                _uploadResult.postValue(Result.success(uploadedImageUrl))
+
             } catch (e: CancellationException) {
                 Log.w("Upload", "코루틴 취소됨: ${e.message}")
                 _uploadResult.postValue(Result.failure(e))
@@ -140,37 +158,98 @@ class MealViewModel(
         }
     }
 
-    // 식단 기록 수정
+    // 식단 기록 수정 (이미지 포함)
     fun updateDietLog(data: DietLogData, imageFile: File?) {
-        val entity = data.toEntity()
         viewModelScope.launch {
-            val response = dietRepository.updateDietLog(entity, imageFile)
-            val updatedEntity = response?.data?.toEntity()
+            try {
+                var finalImageUrl: String = data.dietImg // 기존 이미지 URL로 초기화
 
-            if (updatedEntity != null) {
-                dietRepository.updateDietLog(updatedEntity)
-                Log.d("Update", "식단 기록 수정 성공")
-                _updateResult.postValue(Result.success(true))
-            } else {
-                Log.e("Update", "식단 기록 수정 실패")
-                _updateResult.postValue(Result.failure(Exception("식단 기록 수정 실패")))
+                // 새로운 이미지 파일이 있다면 업로드
+                if (imageFile != null) {
+                    val uploadImageResponse: GetMealResponse? = dietRepository.uploadDietLog(data.toEntity(), imageFile)
+                    val uploadedImageUrl: String? = uploadImageResponse?.data?.imageUrl // **여기서 명확히 선언**
+
+                    if (!uploadedImageUrl.isNullOrEmpty()) {
+                        finalImageUrl = uploadedImageUrl
+                        Log.d("Update", "새 이미지 업로드 완료. URL: $finalImageUrl")
+                    } else {
+                        Log.w("Update", "새 이미지 업로드 후 URL을 받지 못했습니다. 기존 URL 유지.")
+                    }
+                } else {
+                    Log.d("Update", "새 이미지 파일 없음. 기존 URL 유지: $finalImageUrl")
+                    // 만약 기존 이미지가 "android.resource://" 형태였다면,
+                    // 서버는 이 URL을 인식하지 못할 것이므로, 필요에 따라 여기서 기본 이미지 URL로 변경하거나
+                    // 서버에서 기본 이미지를 처리하도록 해야 할 수 있습니다.
+                    // 현재는 finalImageUrl에 기존 data.dietImg 값이 그대로 들어갑니다.
+                }
+
+                // 업데이트된 이미지 URL로 DietLogData 생성
+                val dietLogDataWithFinalUrl = data.copy(dietImg = finalImageUrl)
+
+                // 서버에 식단 기록 업데이트
+                // imageFile이 null이 아닌 경우 이미 위에서 업로드 했으므로, 여기서 다시 보내지 않음
+                val updateResponse = dietRepository.updateDietLog(dietLogDataWithFinalUrl.toEntity(), null)
+                val updatedMealDto = updateResponse?.data // 서버에서 반환된 최종 MealDto
+
+                if (updatedMealDto != null) {
+                    // Room DB 업데이트 (서버에서 받은 최신 정보로)
+                    dietRepository.updateDietLog(updatedMealDto.toEntity())
+                    Log.d("Update", "식단 기록 수정 성공 및 로컬 DB 업데이트 완료")
+                    // _uploadResult를 통해 성공과 최종 이미지 URL을 전달
+                    _uploadResult.postValue(Result.success(updatedMealDto.imageUrl))
+                } else {
+                    Log.e("Update", "식단 기록 수정 실패: 서버 응답 없음")
+                    _uploadResult.postValue(Result.failure(Exception("식단 기록 수정 실패: 서버 응답 없음")))
+                }
+            } catch (e: CancellationException) {
+                Log.w("Update", "코루틴 취소됨: ${e.message}")
+                _uploadResult.postValue(Result.failure(e))
+            } catch (e: Exception) {
+                Log.e("Update", "식단 기록 수정 중 예외 발생: ${e.message}", e)
+                _uploadResult.postValue(Result.failure(e))
             }
         }
     }
 
-    //
+
+    // 로컬 DB에만 업데이트
     fun updateToLocalDB(data: DietLogData) {
         val entity = data.toEntity()
         viewModelScope.launch {
-            dietRepository.updateDietLog(entity)
-            Log.d("RoomTest", "로컬 저장됨: $entity")
+            try {
+                dietRepository.updateDietLog(entity)
+                Log.d("RoomTest", "로컬 DB 업데이트됨: $entity")
+            } catch (e: Exception) {
+                Log.e("MealViewModel", "로컬 DB 업데이트 실패: ${e.message}", e)
+            }
         }
     }
 
     // 식재료 정보 불러오기
     fun loadIngredients() {
         viewModelScope.launch {
-            ingredientList.value = ingredientRepository.fetchAndSaveIngredients()
+            try {
+                ingredientList.value = ingredientRepository.fetchAndSaveIngredients()
+            } catch (e: Exception) {
+                Log.e("MealViewModel", "식재료 로드 실패: ${e.message}", e)
+                ingredientList.value = emptyList() // 실패 시 빈 리스트
+            }
+        }
+    }
+
+    // 전체 식단 기록 목록 가져오기 (최근 N일)
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun getAllDietLogs(days: Int = 30) {
+        viewModelScope.launch {
+            try {
+                val dietEntities = dietRepository.getDietLogsForLastDays(days)
+                // DietLogEntity -> MealDto 변환 (memberId는 필요시 0 또는 실제 값)
+                val mealDtos = dietEntities.map { it.toMealDto(0) } // memberId는 필요시 0으로 설정
+                _allDietLogs.value = mealDtos
+            } catch (e: Exception) {
+                Log.e("MealViewModel", "전체 식단 로그 가져오기 실패: ${e.localizedMessage}")
+                _allDietLogs.value = emptyList()
+            }
         }
     }
 }
