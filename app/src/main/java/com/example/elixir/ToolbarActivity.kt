@@ -211,7 +211,7 @@ open class ToolbarActivity : AppCompatActivity() {
                     result.onSuccess {
                         // 성공: 결과 intent 전달 후 종료
                         val resultIntent = Intent().putExtra("deletedDietLogId", dietId)
-                        setResult(Activity.RESULT_OK, resultIntent)
+                        setResult(Activity.RESULT_FIRST_USER, resultIntent)
                         Toast.makeText(this, "삭제되었습니다", Toast.LENGTH_SHORT).show()
                         finish()
                     }.onFailure { exception ->
