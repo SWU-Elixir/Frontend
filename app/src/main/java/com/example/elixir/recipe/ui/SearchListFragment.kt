@@ -13,7 +13,12 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.elixir.R
+import com.example.elixir.RetrofitClient
 import com.example.elixir.databinding.FragmentRecipeSearchListBinding
+import com.example.elixir.ingredient.network.IngredientDB
+import com.example.elixir.ingredient.network.IngredientRepository
+import com.example.elixir.ingredient.viewmodel.IngredientService
+import com.example.elixir.ingredient.viewmodel.IngredientViewModel
 import com.example.elixir.recipe.data.RecipeData
 import java.math.BigInteger
 
@@ -196,24 +201,32 @@ class SearchListFragment : Fragment() {
      * 레시피 리스트 초기화
      */
     private fun initializeRecipeList() {
-        // 더미 데이터 초기화
-        //sampleRecipes = getDummyRecipeData()
+        val ingredientRepository = IngredientRepository(
+            RetrofitClient.instanceIngredientApi,
+            IngredientDB.getInstance(requireContext()).ingredientDao())
+        val ingredientService = IngredientService(ingredientRepository)
+        val ingredientViewModel = IngredientViewModel(ingredientService)
 
         // RecyclerView 설정
         binding.recipeList.layoutManager = LinearLayoutManager(requireContext())
-        recipeListAdapter = RecipeListAdapter(
-            sampleRecipes.toMutableList(),
-            onBookmarkClick = { recipe ->
-                recipe.scrappedByCurrentUser = !recipe.scrappedByCurrentUser
-                recipeListAdapter.notifyItemChanged(sampleRecipes.indexOf(recipe))
-            },
-            onHeartClick = { recipe ->
-                recipe.likedByCurrentUser = !recipe.likedByCurrentUser
-                recipeListAdapter.notifyItemChanged(sampleRecipes.indexOf(recipe))
-            },
-            fragmentManager = parentFragmentManager
-        )
-        binding.recipeList.adapter = recipeListAdapter
+
+        // 어댑터 초기화
+        ingredientViewModel.ingredients.observe(viewLifecycleOwner) { ingredientList ->
+            recipeListAdapter = RecipeListAdapter(
+                sampleRecipes.toMutableList(),
+                ingredientList,
+                onBookmarkClick = { recipe ->
+                    recipe.scrappedByCurrentUser = !recipe.scrappedByCurrentUser
+                    recipeListAdapter.notifyItemChanged(sampleRecipes.indexOf(recipe))
+                },
+                onHeartClick = { recipe ->
+                    recipe.likedByCurrentUser = !recipe.likedByCurrentUser
+                    recipeListAdapter.notifyItemChanged(sampleRecipes.indexOf(recipe))
+                },
+                fragmentManager = parentFragmentManager
+            )
+            binding.recipeList.adapter = recipeListAdapter
+        }
 
         // 검색어가 있으면 필터 적용
         val keyword = binding.searchEditText.text.toString()
@@ -250,8 +263,9 @@ class SearchListFragment : Fragment() {
 
         val filtered = sampleRecipes.filter { recipe ->
             val keywordMatch = recipe.title.contains(keyword, ignoreCase = true)
-                    || recipe.ingredients.keys.any { it.contains(keyword, ignoreCase = true) }
-                    || recipe.ingredients.values.any { it.contains(keyword, ignoreCase = true) }
+                    || recipe.ingredients.any { it.name.contains(keyword, ignoreCase = true) }
+                    || recipe.ingredients.any { it.value.contains(keyword, ignoreCase = true) }
+                    || recipe.ingredients.any { it.unit.contains(keyword, ignoreCase = true) }
             val methodMatch = selectedMethod == "저속노화" || recipe.categorySlowAging == selectedMethod
             val typeMatch = selectedType == "종류" || recipe.categoryType == selectedType
             keywordMatch && methodMatch && typeMatch
@@ -281,132 +295,5 @@ class SearchListFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
-
-    /**
-     * 더미 레시피 데이터 생성
-     *//*
-    private fun getDummyRecipeData(): List<RecipeData> =
-        listOf(
-            RecipeData(
-                id = BigInteger.valueOf(1),
-                memberId = BigInteger.valueOf(1001),
-                title = "블루베리 항산화 스무디",
-                imageUrl = "android.resource://com.example.elixir.recipe/${R.drawable.ic_recipe_white}",
-                categorySlowAging = "항산화 강화",
-                categoryType = "음료/차",
-                difficulty = "쉬움",
-                timeHours = 0,
-                timeMinutes = 5,
-                ingredients = listOf("블루베리", "그릭요거트", "꿀"),
-                seasoning = listOf("얼음", "시나몬 파우더"),
-                recipeOrder = listOf("모든 재료를 믹서에 넣는다", "곱게 갈아 컵에 담는다"),
-                tips = "시나몬을 추가하면 향과 항산화 성분이 강화됩니다.",
-                createdAt = "2025-04-22",
-                updateAt = "2025-04-22",
-                isBookmarked = false,
-                isLiked = false,
-                likeCount = 42
-            ),
-            RecipeData(
-                id = BigInteger.valueOf(2),
-                memberId = BigInteger.valueOf(1001),
-                title = "아보카도 혈당 조절 샐러드",
-                imageUrl = "android.resource://com.example.elixir.recipe/${R.drawable.ic_recipe_white}",
-                categorySlowAging = "혈당 조절",
-                categoryType = "샐러드",
-                difficulty = "보통",
-                timeHours = 0,
-                timeMinutes = 10,
-                ingredients = listOf("아보카도", "시금치", "방울토마토"),
-                seasoning = listOf("올리브오일", "발사믹식초", "소금"),
-                recipeOrder = listOf("야채를 씻고 손질한다", "재료를 접시에 올리고 드레싱을 뿌린다"),
-                tips = "견과류를 추가하면 포만감이 높아집니다.",
-                createdAt = "2025-04-22",
-                updateAt = "2025-04-22",
-                isBookmarked = true,
-                isLiked = true,
-                likeCount = 129
-            ),
-            RecipeData(
-                id = BigInteger.valueOf(3),
-                memberId = BigInteger.valueOf(1001),
-                title = "토마토 올리브 항염 마리네이드",
-                imageUrl = "android.resource://com.example.elixir.recipe/${R.drawable.ic_recipe_white}",
-                categorySlowAging = "염증 감소",
-                categoryType = "양념/소스/잼",
-                difficulty = "쉬움",
-                timeHours = 0,
-                timeMinutes = 7,
-                ingredients = listOf("방울토마토", "올리브오일", "바질잎"),
-                seasoning = listOf("소금", "후추", "레몬즙"),
-                recipeOrder = listOf("토마토를 반으로 자르고 양념과 섞는다", "냉장 보관 후 30분 숙성"),
-                tips = "마늘을 다져 넣으면 향미가 더 풍부해져요.",
-                createdAt = "2025-04-22",
-                updateAt = "2025-04-22",
-                isBookmarked = false,
-                isLiked = false,
-                likeCount = 58
-            ),
-            RecipeData(
-                id = BigInteger.valueOf(4),
-                memberId = BigInteger.valueOf(1001),
-                title = "케일 항염 그린 스무디",
-                imageUrl = "android.resource://com.example.elixir.recipe/${R.drawable.ic_recipe_white}",
-                categorySlowAging = "염증 감소",
-                categoryType = "음료/차",
-                difficulty = "쉬움",
-                timeHours = 0,
-                timeMinutes = 3,
-                ingredients = listOf("케일", "바나나", "아몬드밀크"),
-                seasoning = listOf("얼음", "꿀"),
-                recipeOrder = listOf("모든 재료를 믹서기에 넣고 갈기", "컵에 담아 마신다"),
-                tips = "단맛이 부족하면 꿀 대신 대추즙도 좋아요.",
-                createdAt = "2025-04-22",
-                updateAt = "2025-04-22",
-                isBookmarked = false,
-                isLiked = true,
-                likeCount = 312
-            ),
-            RecipeData(
-                id = BigInteger.valueOf(5),
-                memberId = BigInteger.valueOf(1001),
-                title = "견과류 에너지볼",
-                imageUrl = "android.resource://com.example.elixir.recipe/${R.drawable.ic_recipe_white}",
-                categorySlowAging = "항산화 강화",
-                categoryType = "디저트",
-                difficulty = "보통",
-                timeHours = 0,
-                timeMinutes = 8,
-                ingredients = listOf("아몬드", "대추야자", "코코넛"),
-                seasoning = listOf("카카오닙스", "시나몬"),
-                recipeOrder = listOf("재료를 잘 섞어 공 모양으로 만든다", "냉장 보관 후 굳힌다"),
-                tips = "프로틴 파우더를 섞어도 좋아요.",
-                createdAt = "2025-04-22",
-                updateAt = "2025-04-22",
-                isBookmarked = true,
-                isLiked = true,
-                likeCount = 253
-            ),
-            RecipeData(
-                id = BigInteger.valueOf(6),
-                memberId = BigInteger.valueOf(1001),
-                title = "그릭요거트 베리볼",
-                imageUrl = "android.resource://com.example.elixir.recipe/${R.drawable.ic_recipe_white}",
-                categorySlowAging = "항산화 강화",
-                categoryType = "디저트",
-                difficulty = "쉬움",
-                timeHours = 0,
-                timeMinutes = 2,
-                ingredients = listOf("그릭요거트", "블루베리", "라즈베리"),
-                seasoning = listOf("아몬드슬라이스", "꿀"),
-                recipeOrder = listOf("재료를 그릇에 층층이 담는다", "견과류를 위에 뿌린다"),
-                tips = "생꿀 대신 메이플시럽도 잘 어울립니다.",
-                createdAt = "2025-04-22",
-                updateAt = "2025-04-22",
-                isBookmarked = false,
-                isLiked = false,
-                likeCount = 19
-            )
-        )*/
 }
 

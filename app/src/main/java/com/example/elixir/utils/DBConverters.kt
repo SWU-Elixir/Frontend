@@ -1,6 +1,7 @@
 package com.example.elixir.utils
 
 import androidx.room.TypeConverter
+import com.example.elixir.recipe.data.FlavoringItem
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.lang.reflect.Type
@@ -26,12 +27,6 @@ object DBConverters {
     }
 
     @TypeConverter
-    fun toMap(json: String): Map<String, String>? {
-        val type = object : TypeToken<Map<String, String>>() {}.type
-        return Gson().fromJson(json, type)
-    }
-
-    @TypeConverter
     fun fromList(list: List<String>?): String {
         return Gson().toJson(list)
     }
@@ -43,9 +38,23 @@ object DBConverters {
     }
 
     @TypeConverter
-    fun fromListInt(list: List<Int>): String = list.joinToString(",")
+    fun fromIntList(list: List<Int>?): String = list?.joinToString(",") ?: ""
 
     @TypeConverter
-    fun toListInt(data: String): List<Int> =
-        if (data.isBlank()) emptyList() else data.split(",").map { it.toInt() }
+    fun toIntList(data: String): List<Int> = if (data.isEmpty()) emptyList() else data.split(",").map { it.toInt() }
+
+    @TypeConverter
+    fun toStringList(data: String): List<String> = if (data.isEmpty()) emptyList() else data.split(";;")
+
+    @TypeConverter
+    fun fromFlavoringDataList(list: List<FlavoringItem>?): String {
+        return Gson().toJson(list)
+    }
+
+    @TypeConverter
+    fun toFlavoringDataList(data: String?): List<FlavoringItem> {
+        if (data.isNullOrEmpty()) return emptyList()
+        val listType = object : TypeToken<List<FlavoringItem>>() {}.type
+        return Gson().fromJson(data, listType)
+    }
 }

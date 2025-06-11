@@ -191,38 +191,6 @@
             app:layout_constraintBottom_toTopOf="@id/allergy">
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/ingredient_seasoned_cabbage"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/ChipStyle_Short"
-                android:text="@string/seasoned_cabbage"
-                android:textSize="16sp"/>
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/ingredient_strawberry"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/ChipStyle_Short"
-                android:text="@string/strawberry"
-                android:textSize="16sp" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/ingredient_spinach"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/ChipStyle_Short"
-                android:text="@string/spinach"
-                android:textSize="16sp" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/ingredient_almond"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/ChipStyle_Short"
-                android:text="@string/almond"
-                android:textSize="16sp" />
-
-            <com.google.android.material.chip.Chip
                 android:id="@+id/find_ingredient"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -536,6 +504,24 @@
             android:fontFamily="@font/pretendard_bold"
             app:layout_constraintTop_toBottomOf="@id/select_hour"
             app:layout_constraintBottom_toTopOf="@id/frame_enter_ingredients"/>
+
+        <android.widget.Button
+            android:id="@+id/btn_recipe_guide"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:layout_marginTop="10dp"
+            android:paddingHorizontal="10dp"
+            android:layout_marginBottom="20dp"
+            android:background="@drawable/bg_rect_filled_orange"
+            android:drawableStart="@drawable/ic_recipe_guide"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:text="  계량 가이드"
+            android:textColor="@color/white"
+            android:textSize="13sp"
+            android:fontFamily="@font/pretendard_medium"
+            app:layout_constraintTop_toBottomOf="@id/select_hour"
+            app:layout_constraintBottom_toTopOf="@id/frame_enter_ingredients"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
         <!-- 재료 입력 리스트 -->
         <androidx.recyclerview.widget.RecyclerView

@@ -6,52 +6,72 @@
     android:layout_height="match_parent"
     android:background="@color/white">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         android:padding="16dp"
         app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/recipeImage"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             app:shapeAppearanceOverlay="@style/ImgDefault_Rect"
             android:adjustViewBounds="true"
             app:layout_constraintDimensionRatio="1:1"
             android:background="@drawable/bg_rect_filled_white_15"
             android:src="@drawable/img_blank"
-            android:scaleType="fitCenter"
+            android:scaleType="centerCrop"
             android:clipToOutline="true"
             android:layout_marginBottom="16dp"
-            tools:ignore="ContentDescription,UnusedAttribute"/>
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <!-- 시간 표시 -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/timeLayout"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            app:layout_constraintTop_toBottomOf="@id/recipeImage"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
             <TextView
+                android:id="@+id/timeLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/time"
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_bold"
+                android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
                 android:textStyle="bold"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
             <TextView
                 android:id="@+id/timeText"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginStart="8dp"
                 android:text="@string/time"
-                android:layout_gravity="center"
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_medium"
-                android:textSize="14sp" />
-        </LinearLayout>
+                android:textSize="14sp"
+                app:layout_constraintStart_toEndOf="@id/timeLabel"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- 식사 카테고리 -->
         <TextView
-            android:layout_width="match_parent"
+            android:id="@+id/dietCategory"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/diet_category"
             android:textColor="@color/black"
@@ -59,11 +79,20 @@
             android:layout_marginBottom="5dp"
             android:layout_marginTop="16dp"
             android:textStyle="bold"
-            android:textSize="16sp" />
-        <LinearLayout
-            android:layout_width="wrap_content"
+            android:textSize="16sp"
+            app:layout_constraintTop_toBottomOf="@id/timeLayout"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <!-- 식사 시간 선택 -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/mealTimeLayout"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            app:layout_constraintTop_toBottomOf="@id/dietCategory"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
             <TextView
                 android:id="@+id/mealTimeMorning"
                 android:layout_width="45dp"
@@ -77,7 +106,10 @@
                 android:layout_marginEnd="5dp"
                 android:textColor="@color/elixir_gray"
                 android:fontFamily="@font/pretendard_medium"
-                tools:ignore="MissingConstraints" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
             <TextView
                 android:id="@+id/mealTimeLunch"
                 android:layout_width="45dp"
@@ -91,7 +123,10 @@
                 android:layout_marginEnd="5dp"
                 android:textColor="@color/elixir_gray"
                 android:fontFamily="@font/pretendard_medium"
-                tools:ignore="MissingConstraints" />
+                app:layout_constraintStart_toEndOf="@id/mealTimeMorning"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
             <TextView
                 android:id="@+id/mealTimeDinner"
                 android:layout_width="45dp"
@@ -105,7 +140,10 @@
                 android:layout_marginEnd="5dp"
                 android:textColor="@color/elixir_gray"
                 android:fontFamily="@font/pretendard_medium"
-                tools:ignore="MissingConstraints" />
+                app:layout_constraintStart_toEndOf="@id/mealTimeLunch"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
             <TextView
                 android:id="@+id/mealTimeSnack"
                 android:layout_width="45dp"
@@ -119,10 +157,15 @@
                 android:layout_marginEnd="5dp"
                 android:textColor="@color/elixir_gray"
                 android:fontFamily="@font/pretendard_medium"
-                tools:ignore="MissingConstraints" />
-        </LinearLayout>
+                app:layout_constraintStart_toEndOf="@id/mealTimeDinner"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- 대표 재료 -->
         <TextView
-            android:layout_width="match_parent"
+            android:id="@+id/representIngredient"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/represent_ingredient"
             android:textColor="@color/black"
@@ -130,18 +173,27 @@
             android:layout_marginBottom="5dp"
             android:layout_marginTop="16dp"
             android:textStyle="bold"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            app:layout_constraintTop_toBottomOf="@id/mealTimeLayout"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/tagList"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:clipToPadding="false"
             android:orientation="horizontal"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            tools:listitem="@layout/item_recipe_list_tag" />
+            tools:listitem="@layout/item_recipe_list_tag"
+            app:layout_constraintTop_toBottomOf="@id/representIngredient"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
+        <!-- 점수 -->
         <TextView
-            android:layout_width="match_parent"
+            android:id="@+id/dietScore"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/diet_score"
             android:textColor="@color/black"
@@ -149,11 +201,20 @@
             android:layout_marginBottom="5dp"
             android:layout_marginTop="16dp"
             android:textStyle="bold"
-            android:textSize="16sp" />
-        <LinearLayout
-            android:layout_width="wrap_content"
+            android:textSize="16sp"
+            app:layout_constraintTop_toBottomOf="@id/tagList"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <!-- 점수 선택 -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/scoreLayout"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            app:layout_constraintTop_toBottomOf="@id/dietScore"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
             <TextView
                 android:id="@+id/score1"
                 android:layout_width="30dp"
@@ -167,7 +228,10 @@
                 android:paddingBottom="5dp"
                 android:textColor="@color/elixir_gray"
                 android:fontFamily="@font/pretendard_medium"
-                tools:ignore="MissingConstraints" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
             <TextView
                 android:id="@+id/score2"
                 android:layout_width="30dp"
@@ -181,7 +245,10 @@
                 android:paddingBottom="5dp"
                 android:textColor="@color/elixir_gray"
                 android:fontFamily="@font/pretendard_medium"
-                tools:ignore="MissingConstraints" />
+                app:layout_constraintStart_toEndOf="@id/score1"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
             <TextView
                 android:id="@+id/score3"
                 android:layout_width="30dp"
@@ -195,7 +262,10 @@
                 android:paddingBottom="5dp"
                 android:textColor="@color/elixir_gray"
                 android:fontFamily="@font/pretendard_medium"
-                tools:ignore="MissingConstraints" />
+                app:layout_constraintStart_toEndOf="@id/score2"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
             <TextView
                 android:id="@+id/score4"
                 android:layout_width="30dp"
@@ -209,7 +279,10 @@
                 android:paddingBottom="5dp"
                 android:textColor="@color/elixir_gray"
                 android:fontFamily="@font/pretendard_medium"
-                tools:ignore="MissingConstraints" />
+                app:layout_constraintStart_toEndOf="@id/score3"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
             <TextView
                 android:id="@+id/score5"
                 android:layout_width="30dp"
@@ -223,12 +296,11 @@
                 android:paddingBottom="5dp"
                 android:textColor="@color/elixir_gray"
                 android:fontFamily="@font/pretendard_medium"
-                tools:ignore="MissingConstraints" />
-        </LinearLayout>
+                app:layout_constraintStart_toEndOf="@id/score4"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-
-
-
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

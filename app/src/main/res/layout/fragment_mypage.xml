@@ -81,7 +81,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/pretendard_medium"
-                    android:text="@string/member_title"
+                    android:text=""
                     android:textColor="@color/elixir_orange"
                     android:textSize="16sp"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -92,7 +92,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/pretendard_bold"
-                    android:text="@string/member_nickname"
+                    android:text=""
                     android:textColor="@color/black"
                     android:textSize="18sp"
                     app:layout_constraintTop_toBottomOf="@id/user_title" />
@@ -158,14 +158,14 @@
         <android.widget.Button
             android:id="@+id/btn_profile_edit"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="35dp"
             android:background="@drawable/bg_rect_filled_orange"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_marginTop="16dp"
             android:text="@string/modify_profile"
             android:textColor="@color/white"
-            android:textSize="18sp"
-            android:fontFamily="@font/pretendard_bold"
+            android:textSize="16sp"
+            android:fontFamily="@font/pretendard_medium"
             app:layout_constraintTop_toBottomOf="@id/mypage_profile"/>
 
         <!-- 뱃지 헤더 -->
@@ -209,10 +209,23 @@
             android:layout_width="match_parent"
             android:layout_height="120dp"
             android:nestedScrollingEnabled="false"
-            app:layout_constraintTop_toBottomOf="@id/mypage_badge_header"
-            tools:listitem="@layout/item_mypage_collection_badge" />
+            app:layout_constraintTop_toBottomOf="@id/mypage_badge_header" />
+
 
         <!-- 내 레시피 헤더 -->
+        <TextView
+            android:id="@+id/badgeNo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/pretendard_medium"
+            android:text="월별 챌린지에 도전해 보세요!"
+            android:layout_marginTop="50dp"
+            android:textAlignment="center"
+            android:textColor="@color/elixir_orange"
+            android:textSize="16sp"
+            android:visibility="visible"
+            app:layout_constraintTop_toBottomOf="@id/mypage_badge_header" />
+
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/mypage_recipe_header"
             android:layout_width="match_parent"
@@ -251,11 +264,23 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/mypage_recipe_grid"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="100dp"
             android:nestedScrollingEnabled="false"
             app:layout_constraintTop_toBottomOf="@id/mypage_recipe_header"
-            tools:ignore="SpeakableTextPresentCheck"
-            tools:listitem="@layout/item_mypage_collection" />
+            tools:ignore="SpeakableTextPresentCheck" />
+
+        <TextView
+            android:id="@+id/MyRecipeNo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/pretendard_medium"
+            android:text="아직 작성한 레시피가 없습니다"
+            android:layout_marginTop="40dp"
+            android:textAlignment="center"
+            android:textColor="@color/elixir_orange"
+            android:textSize="16sp"
+            android:visibility="visible"
+            app:layout_constraintTop_toBottomOf="@id/mypage_recipe_header" />
 
         <!-- 스크랩 헤더 -->
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -296,12 +321,25 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/mypage_scrap_grid"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="100dp"
             android:layout_marginBottom="16dp"
             android:nestedScrollingEnabled="false"
             app:layout_constraintTop_toBottomOf="@id/mypage_scrap_header"
             app:layout_constraintBottom_toBottomOf="parent"
-            tools:listitem="@layout/item_mypage_collection" />
+            />
+
+        <TextView
+            android:id="@+id/MyScrapNo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/pretendard_medium"
+            android:text="스크랩한 레시피가 없습니다"
+            android:layout_marginTop="40dp"
+            android:textAlignment="center"
+            android:textColor="@color/elixir_orange"
+            android:textSize="16sp"
+            android:visibility="visible"
+            app:layout_constraintTop_toBottomOf="@id/mypage_scrap_header" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </ScrollView>

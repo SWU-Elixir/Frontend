@@ -29,12 +29,21 @@
                 android:layout_height="40dp"
                 android:spinnerMode="dropdown"
                 android:background="@drawable/bg_spinner_challenge"/>
+            <TextView
+                android:id="@+id/challengeNo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="200dp"
+                android:text="진행중인 챌린지가 없습니다"
+                android:fontFamily="@font/pretendard_medium"
+                android:textColor="@color/elixir_orange"
+                android:textSize="20sp"
+                android:visibility="gone"
+                android:textAlignment="center"/>
             <ImageView
                 android:id="@+id/challengeImage"
                 android:layout_width="match_parent"
                 android:layout_height="400dp"
-                android:background="@drawable/bg_rect_filled_white_15"
-                android:src="@drawable/png_challenge_1"
                 android:scaleType="centerCrop"
                 android:backgroundTint="@color/elixir_gray"
                 android:contentDescription="@null"/>
@@ -43,7 +52,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="@string/challenge_name"
+                android:text=""
                 android:textSize="22sp"
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_bold"/>
@@ -52,7 +61,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:text="@string/challenge_period"
+                android:text=""
                 android:textSize="22sp"
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_bold"/>
@@ -62,7 +71,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
-                android:text="@string/challenge_purpose_title"
+                android:text=""
                 android:textSize="18sp"
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_bold"/>
@@ -72,16 +81,17 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
-                android:text="@string/challenge_purpose"
+                android:text=""
                 android:textSize="16sp"
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_medium"/>
             <TextView
+                android:id="@+id/challengeSub3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
-                android:text="@string/challenge_sub1"
+                android:text=""
                 android:textSize="18sp"
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_bold"/>
@@ -91,7 +101,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
-                android:text="@string/challenge_discripetion"
+                android:text=""
                 android:textSize="16sp"
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_medium"/>
@@ -101,7 +111,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
-                android:text="@string/challenge_sub2"
+                android:text=""
                 android:textSize="18sp"
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_bold"/>

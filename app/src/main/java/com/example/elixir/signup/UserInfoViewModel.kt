@@ -2,6 +2,7 @@ package com.example.elixir.signup
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.elixir.signup.SignupRequest
 
 // 사용자 정보 뷰 모델 (회원가입, 정보 수정)
 class UserInfoViewModel : ViewModel() {
@@ -11,6 +12,27 @@ class UserInfoViewModel : ViewModel() {
     private var preferredDiets: List<String> = mutableListOf<String>()
     private var preferredRecipes: List<String> = mutableListOf<String>()
     private var signupReasons: List<String> = mutableListOf<String>()
+
+    fun toSignupRequest(): SignupRequest? {
+        val account = getAccount() ?: return null
+        val profile = getProfile() ?: return null
+        val allergies = getAllergies() ?: emptyList()
+        val mealStyles = getPreferredDiets() ?: emptyList()
+        val recipeStyles = getPreferredRecipes() ?: emptyList()
+        val reasons = getSignupReason() ?: emptyList()
+
+        return SignupRequest(
+            email = account.id,
+            password = account.password,
+            nickname = profile.nickname,
+            gender = profile.gender,
+            birthYear = profile.birthYear,
+            allergies = allergies,
+            mealStyles = mealStyles,
+            recipeStyles = recipeStyles,
+            reasons = reasons
+        )
+    }
 
     // 회원가입 단계 설정 (계정 생성 제외)
     var currentStep = 0
@@ -96,4 +118,5 @@ class UserInfoViewModel : ViewModel() {
     fun getSignupReason(): List<String>? {
         return signupReasons.ifEmpty { null }
     }
+
 }

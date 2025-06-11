@@ -29,19 +29,25 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.elixir.R
+import com.example.elixir.RetrofitClient
 import com.example.elixir.calendar.data.DietLogData
+import com.example.elixir.calendar.data.MealDto
 import com.example.elixir.calendar.network.db.DietLogRepository
-import com.example.elixir.calendar.viewmodel.DietLogViewModel
-import com.example.elixir.calendar.viewmodel.DietLogViewModelFactory
+import com.example.elixir.calendar.viewmodel.MealViewModel
+import com.example.elixir.calendar.viewmodel.MealViewModelFactory
 import com.example.elixir.databinding.FragmentCalendarBinding
+import com.example.elixir.ingredient.network.IngredientDB
+import com.example.elixir.ingredient.network.IngredientRepository
+import com.example.elixir.member.network.MemberDB
+import com.example.elixir.member.network.MemberRepository
 import com.example.elixir.network.AppDatabase
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.gson.Gson
 import com.prolificinteractive.materialcalendarview.*
 import com.prolificinteractive.materialcalendarview.format.TitleFormatter
 import com.prolificinteractive.materialcalendarview.format.WeekDayFormatter
+import org.threeten.bp.LocalDateTime
 import org.threeten.bp.format.DateTimeFormatter
-import java.math.BigInteger
 
 // ----------------------------- 프래그먼트 클래스 -------------------------------------
 class CalendarFragment : Fragment(), OnMealClickListener {
@@ -53,6 +59,7 @@ class CalendarFragment : Fragment(), OnMealClickListener {
             putExtra("year", item.time.year)
             putExtra("month", item.time.monthValue)
             putExtra("day", item.time.dayOfMonth)
+            putExtra("dietLogId", item.id) // 식단 기록 ID 추가
         }
         mealDetailLauncher.launch(intent)
     }
@@ -61,10 +68,12 @@ class CalendarFragment : Fragment(), OnMealClickListener {
     private var _binding: FragmentCalendarBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var repository: DietLogRepository
+    private lateinit var dietRepository: DietLogRepository
+    private lateinit var memberRepository: MemberRepository
+    private lateinit var ingredientRepository: IngredientRepository
 
-    private val dietLogViewModel: DietLogViewModel by viewModels {
-        DietLogViewModelFactory(repository)
+    private val mealViewModel: MealViewModel by viewModels {
+        MealViewModelFactory(dietRepository, memberRepository, ingredientRepository)
     }
 
     // 상세 화면 런처 등록
@@ -82,7 +91,6 @@ class CalendarFragment : Fragment(), OnMealClickListener {
 
     // DietLogFragment 띄우기
     private lateinit var dietLogLauncher: ActivityResultLauncher<Intent>
-
 
     // ------------------------ 생명주기 메서드 ---------------------------
 
@@ -130,14 +138,34 @@ class CalendarFragment : Fragment(), OnMealClickListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val dao = AppDatabase.getInstance(requireContext()).dietLogDao()
-        repository = DietLogRepository(dao)
+        // -------------- 레포지토리 및 뷰모델 초기화 --------------
+        val dietDao = AppDatabase.getInstance(requireContext()).dietLogDao()
+        val dietApi = RetrofitClient.instanceDietApi
+        dietRepository = DietLogRepository(dietDao, dietApi)
+
+        val memberDao = MemberDB.getInstance(requireContext()).memberDao()
+        val memberApi = RetrofitClient.instanceMemberApi
+        memberRepository = MemberRepository(memberApi, memberDao)
+
+        val ingredientDao = IngredientDB.getInstance(requireContext()).ingredientDao()
+        val ingredientApi = RetrofitClient.instanceIngredientApi
+        ingredientRepository = IngredientRepository(ingredientApi, ingredientDao)
 
         // -------------------- 리스트뷰 설정 --------------------
+        // 1. 어댑터를 빈 리스트로 먼저 생성
         mealAdapter = MealListAdapter(requireContext(), mutableListOf(), this)
         binding.mealPlanList.adapter = mealAdapter
-        addDummyEvents() // 더미 데이터 세팅
 
+        // 2. ViewModel에서 데이터 요청
+        mealViewModel.getDietLogsByDate(
+            "%04d-%02d-%02d".format(selectedCalendarDay.year, selectedCalendarDay.month + 1, selectedCalendarDay.day)
+        )
+
+        // 3. LiveData observe로 데이터가 오면 어댑터에 전달
+        mealViewModel.dailyDietLogs.observe(viewLifecycleOwner) { mealList ->
+            val dietLogList = mealList?.map { convertMealDtoToDietLogData(it) } ?: emptyList()
+            mealAdapter.updateData(dietLogList)
+        }
 
         // -------------------- 캘린더 설정 ----------------------
         binding.calendarView.setWeekDayFormatter(CustomWeekDayFormatter(requireContext()))
@@ -164,7 +192,14 @@ class CalendarFragment : Fragment(), OnMealClickListener {
             selectedCalendarDay = today
             isFirstLaunch = false
         }
-        
+
+        // 식재료 불러오기
+        mealViewModel.loadIngredients()
+        mealViewModel.ingredientList.observe(viewLifecycleOwner) { ingredientList ->
+            val ingredientMap = ingredientList.associateBy { it.id }
+            mealAdapter.setIngredientMap(ingredientMap)
+        }
+
         // 초기 상태 설정
         val initialDateStr = "%04d-%02d-%02d".format(selectedCalendarDay.year, selectedCalendarDay.month + 1, selectedCalendarDay.day)
         updateEventList(initialDateStr)
@@ -176,7 +211,8 @@ class CalendarFragment : Fragment(), OnMealClickListener {
         binding.calendarView.setOnDateChangedListener { _, date, _ ->
             selectedCalendarDay = date
             val selectedDateStr = "%04d-%02d-%02d".format(date.year, date.month + 1, date.day)
-            
+            mealViewModel.getDietLogsByDate(selectedDateStr)
+
             // 선택된 날짜 업데이트
             binding.calendarView.setSelectedDate(date)
             
@@ -208,14 +244,26 @@ class CalendarFragment : Fragment(), OnMealClickListener {
             if (result.resultCode == Activity.RESULT_OK) {
                 val data = result.data?.getStringExtra("dietLogData")
                 if (data != null) {
+                    val deletedId = result.data?.getIntExtra("deletedDietLogId", -1) ?: -1
+                    if (deletedId != -1) {
+                        // eventMap에서 삭제
+                        eventMap.forEach { (_, list) ->
+                            list.removeAll { it.id == deletedId }
+                        }
+                        // UI 갱신
+                        val selectedDateStr = "%04d-%02d-%02d".format(selectedCalendarDay.year, selectedCalendarDay.month + 1, selectedCalendarDay.day)
+                        updateEventList(selectedDateStr)
+                        processDietLogScores(binding.calendarView)
+                    }
+
                     val newDietLog = Gson().fromJson(data, DietLogData::class.java)
-                    // 리스트에 추가
-                    val date = newDietLog.time.toLocalDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) // 날짜 필드명에 맞게 수정
+                    val date = newDietLog.time.toLocalDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
                     val list = eventMap[date] ?: mutableListOf()
                     list.add(newDietLog)
                     eventMap[date] = list
-                    // 어댑터 갱신
-                    mealAdapter.updateData(list)
+
+                    // 어댑터 및 캘린더 업데이트
+                    updateEventList(date)
                     updateSelectedDateDecorator()
                     processDietLogScores(binding.calendarView)
                 }
@@ -239,6 +287,8 @@ class CalendarFragment : Fragment(), OnMealClickListener {
             }
             override fun onSlide(bottomSheet: View, slideOffset: Float) {}
         })
+
+        observeDietLogs()
     }
 
     /**
@@ -250,6 +300,7 @@ class CalendarFragment : Fragment(), OnMealClickListener {
         updateSelectedDateDecorator()
         val selectedDateStr = "%04d-%02d-%02d".format(selectedCalendarDay.year, selectedCalendarDay.month + 1, selectedCalendarDay.day)
         updateEventList(selectedDateStr)
+        mealViewModel.getDietLogsByDate(selectedDateStr)
         binding.calendarView.setSelectedDate(selectedCalendarDay)
     }
 
@@ -399,84 +450,44 @@ class CalendarFragment : Fragment(), OnMealClickListener {
         } else {
             binding.mealPlanList.visibility = View.VISIBLE
             binding.emptyMealText.visibility = View.GONE
-            //mealAdapter.updateData(events)
+            mealAdapter.updateData(events)  // updateData가 MealDto 리스트 받는지 확인!
             binding.mealPlanList.smoothScrollToPosition(0)
         }
     }
 
-    // ------------------------ 더미 데이터 ---------------------------
-
+    // ------------------------ 데이터 변환 메서드 ---------------------------
     /**
-     * 샘플 식단 데이터 추가
-     * 개발 및 테스트를 위한 더미 데이터
+     * DietLogData를 MealDto로 변환
+     * @param dietLogData 변환할 DietLogData 객체
+     * @return 변환된 MealDto 객체
      */
-    private fun addDummyEvents() {
-        /*
-        eventMap["2025-03-29"] = mutableListOf(
-            MealPlanData(
-                id = BigInteger("1001"),
-                memberId = BigInteger("1"),
-                name = "연어 아보카도 샐러드",
-                imageUrl = Uri.parse("android.resource://${context?.packageName}/${R.drawable.png_recipe_sample}").toString(),
-                createdAt = "2025-03-29",
-                mealtimes = "아침",
-                score = 5,
-                mealPlanIngredients = listOf("연어", "아보카도", "올리브유", "잣")
-            ),
-            MealPlanData(
-                id = BigInteger("1002"),
-                memberId = BigInteger("1"),
-                name = "렌틸콩 채소 수프",
-                imageUrl = Uri.parse("android.resource://${context?.packageName}/${R.drawable.png_recipe_sample}").toString(),
-                createdAt = "2025-03-29",
-                mealtimes = "점심",
-                score = 4,
-                mealPlanIngredients = listOf("렌틸콩", "당근", "셀러리", "양파")
-            ),
-            MealPlanData(
-                id = BigInteger("1003"),
-                memberId = BigInteger("1"),
-                name = "두부 채소 볶음",
-                imageUrl = Uri.parse("android.resource://${context?.packageName}/${R.drawable.png_recipe_sample}").toString(),
-                createdAt = "2025-03-29",
-                mealtimes = "저녁",
-                score = 3,
-                mealPlanIngredients = listOf("두부", "브로콜리", "마늘", "참기름")
-            )
+    private fun convertMealDtoToDietLogData(mealDto: MealDto): DietLogData {
+        return DietLogData(
+            id = mealDto.id,  // MealDto의 id를 DietLogData의 id로 사용
+            dietImg = mealDto.imageUrl,
+            time = LocalDateTime.parse(mealDto.time),  // String → LocalDateTime 변환
+            dietTitle = mealDto.name,
+            dietCategory = mealDto.type,
+            ingredientTags = mealDto.ingredientTagId,
+            score = mealDto.score
         )
+    }
 
-        eventMap["2025-03-30"] = mutableListOf(
-            MealPlanData(
-                id = BigInteger("1004"),
-                memberId = BigInteger("1"),
-                name = "귀리 베리볼",
-                imageUrl = Uri.parse("android.resource://${context?.packageName}/${R.drawable.png_recipe_sample}").toString(),
-                createdAt = "2025-03-30",
-                mealtimes = "아침",
-                score = 5,
-                mealPlanIngredients = listOf("귀리", "블루베리", "요거트", "아몬드")
-            ),
-            MealPlanData(
-                id = BigInteger("1005"),
-                memberId = BigInteger("1"),
-                name = "퀴노아 보울",
-                imageUrl = Uri.parse("android.resource://${context?.packageName}/${R.drawable.png_recipe_sample}").toString(),
-                createdAt = "2025-03-30",
-                mealtimes = "점심",
-                score = 4,
-                mealPlanIngredients = listOf("퀴노아", "아보카도", "병아리콩", "시금치")
-            ),
-            MealPlanData(
-                id = BigInteger("1006"),
-                memberId = BigInteger("1"),
-                name = "베리 스무디",
-                imageUrl = Uri.parse("android.resource://${context?.packageName}/${R.drawable.png_recipe_sample}").toString(),
-                createdAt = "2025-03-30",
-                mealtimes = "간식",
-                score = 5,
-                mealPlanIngredients = listOf("딸기", "블루베리", "바나나", "아몬드밀크")
-            )
-        )*/
+    // observeDietLogs에서 eventMap을 초기화
+    private fun observeDietLogs() {
+        mealViewModel.dailyDietLogs.observe(viewLifecycleOwner) { mealList ->
+            eventMap.clear() // ★ 중복 방지
+            mealList?.forEach { mealDto ->
+                val date = mealDto.time.substring(0, 10)
+                val dietLogData = convertMealDtoToDietLogData(mealDto)
+                val list = eventMap[date] ?: mutableListOf()
+                list.add(dietLogData)
+                eventMap[date] = list
+            }
+            val selectedDateStr = "%04d-%02d-%02d".format(selectedCalendarDay.year, selectedCalendarDay.month + 1, selectedCalendarDay.day)
+            updateEventList(selectedDateStr)
+            processDietLogScores(binding.calendarView)
+        }
     }
 
     /**

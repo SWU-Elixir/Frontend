@@ -1,8 +1,19 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.ksp)
+}
+
+// local.properties 파일에서 API 키 로드
+val properties = Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        load(FileInputStream(localPropertiesFile))
+    }
 }
 
 android {
@@ -25,6 +36,9 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        // API 키 설정
+        buildConfigField("String", "CHATGPT_API_KEY", "\"${properties.getProperty("CHATGPT_API_KEY", "")}\"")
     }
 
     buildTypes {
@@ -46,6 +60,7 @@ android {
     buildFeatures {
         compose = true
         viewBinding = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -82,7 +97,7 @@ dependencies {
     implementation (libs.logging.interceptor)
     implementation (libs.androidx.core.splashscreen)
     implementation(libs.kotlin.stdlib)
-    
+
     // Material Components 라이브러리 추가
     implementation (libs.material)
     // calendarview 라이브러리 추가
@@ -97,10 +112,15 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
 
+
+    // OkHttp
+    implementation (libs.okhttp)
+
     // API 23 이하에서 LocalDateTime 타입 변환을 위한 라이브러리 추가
     implementation (libs.threetenabp)
 
     // Glide 라이브러리 추가
     implementation(libs.glide)
     ksp(libs.glide.compiler)
+
 }
