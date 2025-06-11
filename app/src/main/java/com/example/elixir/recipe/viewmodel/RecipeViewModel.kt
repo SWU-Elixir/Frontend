@@ -37,6 +37,9 @@ class RecipeViewModel(
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> = _error
 
+    private val _errorMessage = MutableLiveData<String>()
+    val errorMessage: LiveData<String> = _errorMessage
+
     // 레시피 목록 불러오기
     fun getRecipes(page: Int, size: Int, categoryType: String, categorySlowAging: String) {
         viewModelScope.launch {
@@ -102,6 +105,54 @@ class RecipeViewModel(
             } catch (e: Exception) {
                 _deleteResult.value = Result.failure(e)
             }
+        }
+    }
+
+    // 좋아요 추가
+    fun addLike(recipeId: Int) = viewModelScope.launch {
+        try {
+            val success = repository.addLike(recipeId)
+            if (!success) {
+                _errorMessage.value = "좋아요 처리에 실패했습니다."
+            }
+        } catch (e: Exception) {
+            _errorMessage.value = "네트워크 오류: ${e.message}"
+        }
+    }
+
+    // 좋아요 취소
+    fun deleteLike(recipeId: Int) = viewModelScope.launch {
+        try {
+            val success = repository.deleteLike(recipeId)
+            if (!success) {
+                _errorMessage.value = "좋아요 취소에 실패했습니다."
+            }
+        } catch (e: Exception) {
+            _errorMessage.value = "네트워크 오류: ${e.message}"
+        }
+    }
+
+    // 스크랩 추가
+    fun addScrap(recipeId: Int) = viewModelScope.launch {
+        try {
+            val success = repository.addScrap(recipeId)
+            if (!success) {
+                _errorMessage.value = "스크랩 처리에 실패했습니다."
+            }
+        } catch (e: Exception) {
+            _errorMessage.value = "네트워크 오류: ${e.message}"
+        }
+    }
+
+    // 스크랩 취소
+    fun deleteScrap(recipeId: Int) = viewModelScope.launch {
+        try {
+            val success = repository.deleteScrap(recipeId)
+            if (!success) {
+                _errorMessage.value = "스크랩 취소에 실패했습니다."
+            }
+        } catch (e: Exception) {
+            _errorMessage.value = "네트워크 오류: ${e.message}"
         }
     }
 }

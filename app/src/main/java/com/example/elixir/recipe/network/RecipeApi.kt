@@ -1,6 +1,7 @@
 package com.example.elixir.recipe.network
 
 import com.example.elixir.chatbot.RecipeListResponse
+import com.example.elixir.network.GetStringResponse
 import com.example.elixir.recipe.network.response.GetRecipeListResponse
 import com.example.elixir.recipe.network.response.GetRecipeResponse
 import com.example.elixir.recipe.network.response.GetSearchResponse
@@ -77,4 +78,25 @@ interface RecipeApi {
     suspend fun deleteRecipe(
         @Path("recipeId") recipeId: Int
     ): Response<GetRecipeResponse>
+
+    // 좋아요, 스크랩
+    @POST("/api/recipe/{recipeId}/like")
+    suspend fun addLike(
+        @Path("recipeId") recipeId: Int
+    ): Response<GetStringResponse>
+
+    @POST("/api/recipe/{recipeId}/scrap")
+    suspend fun addScrap(
+        @Path("recipeId") recipeId: Int
+    ): Response<GetStringResponse>
+
+    @DELETE("/api/recipe/{recipeId}/like")
+    suspend fun deleteLike(
+        @Path("recipeId") recipeId: Int
+    ): Response<GetStringResponse>
+
+    @DELETE("/api/recipe/{recipeId}/scrap")
+    suspend fun deleteScrap(
+        @Path("recipeId") recipeId: Int
+    ): Response<GetStringResponse>
 }

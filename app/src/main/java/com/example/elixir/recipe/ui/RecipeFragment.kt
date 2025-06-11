@@ -149,10 +149,24 @@ class RecipeFragment : Fragment() {
                         recipeList, ingredients,
                         onBookmarkClick = { recipe ->
                             recipe.scrappedByCurrentUser = !recipe.scrappedByCurrentUser
+                            if (recipe.scrappedByCurrentUser) {
+                                recipe.likes++
+                                recipeViewModel.addScrap(recipe.id)
+                            } else {
+                                recipe.likes--
+                                recipeViewModel.deleteScrap(recipe.id)
+                            }
                             recipeListAdapter.notifyItemChanged(recipeList.indexOf(recipe))
                         },
                         onHeartClick = { recipe ->
                             recipe.likedByCurrentUser = !recipe.likedByCurrentUser
+                            if (recipe.likedByCurrentUser) {
+                                recipe.likes++
+                                recipeViewModel.addLike(recipe.id)
+                            } else {
+                                recipe.likes--
+                                recipeViewModel.deleteLike(recipe.id)
+                            }
                             recipeListAdapter.notifyItemChanged(recipeList.indexOf(recipe))
                         },
                         fragmentManager = parentFragmentManager
@@ -177,7 +191,6 @@ class RecipeFragment : Fragment() {
         super.onResume()
         recipeViewModel.getRecipes(0, 10, selectedCategoryType, selectedSlowAging)
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()

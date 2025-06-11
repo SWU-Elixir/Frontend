@@ -93,12 +93,10 @@ class RecipeListAdapter(
 
         // 좋아요 버튼 클릭
         holder.binding.heartButton.setOnClickListener {
-            item.likedByCurrentUser = !item.likedByCurrentUser
             holder.binding.heartButton.setBackgroundResource(
                 if (item.likedByCurrentUser) R.drawable.ic_recipe_heart_selected
                 else R.drawable.ic_recipe_heart_normal
             )
-            if (item.likedByCurrentUser) item.likes++ else item.likes--
             holder.binding.heartCount.text = formatCount(item.likes)
             onHeartClick(item)
         }

@@ -125,6 +125,7 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
         recipeViewModel.recipeDetail.observe(viewLifecycleOwner) { recipeData ->
             if (recipeData != null) {
                 // recipeData에 저장된 값으로 UI 초기화
+                Log.d("RecipeDetailFragment", "$recipeData")
                 // 유저
                 binding.memberTitle.text = if(recipeData.authorTitle.isNullOrBlank()) "일반" else recipeData.authorTitle
                 binding.memberNickname.text = recipeData.authorNickname
@@ -184,8 +185,10 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                     // 좋아요 상태에 따라 카운트 증가/감소
                     if (recipeData.likedByCurrentUser) {
                         recipeData.likes++
+                        recipeViewModel.addLike(recipeId)
                     } else {
                         recipeData.likes--
+                        recipeViewModel.deleteLike(recipeId)
                     }
                     // 버튼 이미지와 카운트 업데이트
                     binding.heartButton.setBackgroundResource(

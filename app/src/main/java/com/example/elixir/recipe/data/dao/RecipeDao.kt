@@ -38,4 +38,12 @@ interface RecipeDao {
 
     @Query("SELECT COUNT(*) FROM recipe_table")
     suspend fun countRecipes(): Int
+
+    // 좋아요 상태 업데이트
+    @Query("UPDATE recipe_table SET likedByCurrentUser = :liked, likes = :likes WHERE id = :recipeId")
+    suspend fun updateLikeStatus(recipeId: Int, liked: Boolean, likes: Int)
+
+    // 스크랩 상태 업데이트
+    @Query("UPDATE recipe_table SET scrappedByCurrentUser = :scrapped, scraps = :scraps WHERE id = :recipeId")
+    suspend fun updateScrapStatus(recipeId: Int, scrapped: Boolean, scraps: Int)
 }

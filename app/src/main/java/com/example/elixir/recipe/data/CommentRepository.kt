@@ -5,7 +5,7 @@ import com.example.elixir.recipe.data.entity.CommentEntity
 import com.example.elixir.recipe.data.entity.toEntity
 import com.example.elixir.recipe.data.entity.toRequest
 import com.example.elixir.recipe.network.CommentApi
-import com.example.elixir.recipe.network.response.GetCommentDeleteResponse
+import com.example.elixir.network.GetStringResponse
 import com.example.elixir.recipe.network.response.GetCommentResponse
 
 class CommentRepository(private val commentApi: CommentApi, private val commentDao: CommentDao) {
@@ -48,7 +48,7 @@ class CommentRepository(private val commentApi: CommentApi, private val commentD
     }
 
     // 댓글 삭제 (Room 삭제 후 서버로 전송)
-    suspend fun deleteComment(recipeId: Int, commentId: Int): Result<GetCommentDeleteResponse> {
+    suspend fun deleteComment(recipeId: Int, commentId: Int): Result<GetStringResponse> {
         return try {
             val response = commentApi.deleteComment(recipeId, commentId)
             if (response.isSuccessful) {
