@@ -1,6 +1,6 @@
-package com.example.elixir.recipe.network.response
+package com.example.elixir.network
 
-data class GetCommentDeleteResponse(
+data class GetStringResponse(
     val status: Int,
     val code: String,
     val message: String,

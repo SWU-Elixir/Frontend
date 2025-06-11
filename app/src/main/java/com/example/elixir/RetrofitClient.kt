@@ -9,7 +9,6 @@ import com.example.elixir.member.network.MemberApi
 import com.example.elixir.chatbot.ChatApi
 import com.example.elixir.recipe.network.CommentApi
 import com.example.elixir.recipe.network.RecipeApi
-import com.example.elixir.recipe.network.request.CommentRequest
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response

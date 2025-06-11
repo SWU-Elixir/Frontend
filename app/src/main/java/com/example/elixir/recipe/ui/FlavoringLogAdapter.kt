@@ -3,6 +3,7 @@ package com.example.elixir.recipe.ui
 import android.R
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -104,6 +105,7 @@ class FlavoringLogAdapter(
     }
 
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
+        Log.d("FlavoringLogAdapter", "onBindViewHolder: ${itemList[position].name}, ${itemList[position].unit}")
         holder.bind(itemList[position], position)
     }
 

@@ -1,7 +1,7 @@
 package com.example.elixir.recipe.network
 
 import com.example.elixir.recipe.network.request.CommentRequest
-import com.example.elixir.recipe.network.response.GetCommentDeleteResponse
+import com.example.elixir.network.GetStringResponse
 import com.example.elixir.recipe.network.response.GetCommentResponse
 import retrofit2.Response
 import retrofit2.http.Body
@@ -28,5 +28,5 @@ interface CommentApi {
     suspend fun deleteComment(
         @Path("recipeId") recipeId: Int,
         @Path("commentId") commentId: Int
-    ): Response<GetCommentDeleteResponse>
+    ): Response<GetStringResponse>
 }

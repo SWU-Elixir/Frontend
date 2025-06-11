@@ -1,10 +1,12 @@
 package com.example.elixir.recipe.ui
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.elixir.R
 import com.example.elixir.databinding.ItemRecipeListCommentBinding
 import com.example.elixir.recipe.data.CommentData
@@ -12,12 +14,12 @@ import com.example.elixir.recipe.data.CommentItem
 
 interface CommentActionListener {
     fun onEditComment(commentId: Int, commentText: String)
-    fun onDeleteComment(commentId: Int)
+    fun onDeleteComment(recipeId:Int, commentId: Int)
 }
 
 class RecipeCommentAdapter(
     private val context: Context,
-    private val comments: List<CommentItem>,
+    private val comments: MutableList<CommentItem>,
     private val commentActionListener: CommentActionListener
 ) : RecyclerView.Adapter<RecipeCommentAdapter.CommentViewHolder>() {
 
@@ -25,13 +27,20 @@ class RecipeCommentAdapter(
         RecyclerView.ViewHolder(binding.root) {
         fun bind(item: CommentItem) {
             // 댓글 작성자 정보 설정
-            //binding.profileImage.setImageResource(item.profileImageResId)
-            binding.memberTitle.text = item.title
-            binding.memberNickname.text = item.nickname
+            Glide.with(context)
+                .load(item.authorProfileUrl)
+                .placeholder(R.drawable.ic_profile)
+                .error(R.drawable.ic_profile)
+                .into(binding.profileImage)
+
+            Log.d("RecipeCommentAdapter", "${item.title}, ${item.nickName}, ${item.content}, ${item.updatedAt}")
+
+            binding.memberTitle.text = if(item.title.isNullOrBlank()) "일반" else item.title
+            binding.memberNickname.text = item.nickName
             
             // 댓글 내용과 작성일 설정
             binding.commentText.text = item.content
-            binding.dateText.text = item.updatedDate
+            binding.dateText.text = item.updatedAt
 
             // 메뉴 버튼 클릭 시 팝업 메뉴 표시
             binding.menuButton.setOnClickListener {
@@ -47,7 +56,7 @@ class RecipeCommentAdapter(
                             true
                         }
                         R.id.menu_delete -> {
-                            commentActionListener.onDeleteComment(item.commentId)
+                            commentActionListener.onDeleteComment(item.recipeId, item.commentId)
                             true
                         }
                         else -> false
@@ -71,5 +80,9 @@ class RecipeCommentAdapter(
         holder.bind(comments[position])
     }
 
-    override fun getItemCount(): Int = comments.size
+    override fun getItemCount(): Int {
+        Log.d("RecipeCommentAdapter", "${comments.size}")
+        return comments.size
+    }
+
 }

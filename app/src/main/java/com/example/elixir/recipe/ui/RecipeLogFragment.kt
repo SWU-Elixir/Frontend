@@ -36,7 +36,6 @@ import com.example.elixir.dialog.SelectImgDialog
 import com.example.elixir.ingredient.data.IngredientData
 import com.example.elixir.ingredient.ui.IngredientSearchFragment
 import com.example.elixir.network.AppDatabase
-import com.example.elixir.recipe.data.FlavoringData
 import com.example.elixir.recipe.data.FlavoringItem
 import com.example.elixir.recipe.viewmodel.RecipeViewModel
 import com.example.elixir.recipe.data.RecipeData
@@ -109,20 +108,82 @@ class RecipeLogFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.d("RecipeLogFragment", "onViewCreated called")
+        chipMap = emptyMap()
 
         try {
-            // 바인딩 초기화 확인
-            if (recipeBinding.root == null) {
-                Log.e("RecipeLogFragment", "Binding is null")
-                return
-            }
-
             repository = RecipeRepository(RetrofitClient.instanceRecipeApi, AppDatabase.getInstance(requireContext()).recipeDao())
             thumbnailUri = Uri.parse("android.resource://${requireContext().packageName}/${R.drawable.img_blank}")
 
+            // id 값 가져오기
+            val recipeId = arguments?.getInt("recipeId") ?: return
+            Log.d("RecipeLogFragment", "recipeID: ${recipeId}")
+            recipeViewModel.getRecipeById(recipeId)
+
+            recipeViewModel.recipeDetail.observe(viewLifecycleOwner) { recipeData ->
+                if (recipeData != null) {
+                    Log.d("RecipeLogFragment", "Received recipe data: ${recipeData.title}")
+                    recipeTitle = recipeData.title
+                    thumbnail = recipeData.imageUrl
+                    recipeDescription = recipeData.description
+                    categorySlowAging = recipeData.categorySlowAging
+                    categoryType = recipeData.categoryType
+                    difficulty = recipeData.difficulty
+                    ingredientTags = recipeData.ingredientTagIds.toMutableList()
+                    allergies = recipeData.allergies!!.toMutableList()
+                    ingredientList = recipeData.ingredients.map { (name, value, unit) -> FlavoringItem(name = name, value = value, unit = unit)}.toMutableList()
+                    seasoningList = recipeData.seasonings.map { (name, value, unit) -> FlavoringItem(name = name, value = value, unit = unit)}.toMutableList()
+                    steps = recipeData.stepImageUrls.zip(recipeData.stepDescriptions) { img, desc -> RecipeStepData(stepImg = img, stepDescription = desc)}.toMutableList()
+                    tips = recipeData.tips
+                    timeHours = recipeData.timeHours
+                    timeMinutes = recipeData.timeMinutes
+
+                    // UI에 반영하는 코드도 여기서 실행
+                    recipeBinding.enterRecipeTitle.setText(recipeTitle)
+                    recipeBinding.enterRecipeDescription.setText(recipeDescription)
+                    Glide.with(requireContext())
+                        .load(thumbnail)
+                        .placeholder(R.drawable.img_blank)
+                        .error(R.drawable.img_blank)
+                        .into(recipeBinding.recipeThumbnail)
+
+                    // 스피너, 칩 등도 여기서 초기화
+                    setSpinnerSelection(recipeBinding.selectLowAging, recipeData.categorySlowAging)
+                    setSpinnerSelection(recipeBinding.selectType, recipeData.categoryType)
+                    setTimeSpinners(recipeData.timeHours, recipeData.timeMinutes)
+                    setIngredientChips(recipeData.ingredientTagIds)
+                    setDifficultyChipFromData(recipeData.difficulty)
+                    setupAllergyChips(recipeData.allergies!!.toMutableList())
+
+                    Log.d("RecipeLogFragment", "ingredients: ${recipeData.ingredients}")
+                    Log.d("RecipeLogFragment", "seasonings: ${recipeData.seasonings}")
+                    Log.d("RecipeLogFragment", "stepDescriptions: ${recipeData.stepDescriptions}")
+                    Log.d("RecipeLogFragment", "stepImageUrls: ${recipeData.stepImageUrls}")
+
+                    // 리사이클러뷰도 여기서 초기화
+                    ingredientList.clear()
+                    ingredientList.addAll(recipeData.ingredients.map { FlavoringItem(it.name, it.value, it.unit) })
+                    ingredientsAdapter.notifyDataSetChanged()
+
+                    seasoningList.clear()
+                    seasoningList.addAll(recipeData.seasonings.map { FlavoringItem(it.name, it.value, it.unit) })
+                    seasoningAdapter.notifyDataSetChanged()
+
+                    steps.clear()
+                    val stepCount = maxOf(recipeData.stepDescriptions.size, recipeData.stepImageUrls.size)
+                    for (i in 0 until stepCount) {
+                        val desc = recipeData.stepDescriptions.getOrNull(i) ?: ""
+                        val img = recipeData.stepImageUrls.getOrNull(i) ?: ""
+                        steps.add(RecipeStepData(img, desc))
+                    }
+                    stepAdapter.notifyDataSetChanged()
+
+                    // 팁
+                    recipeBinding.enterTipCaution.setText(tips)
+                }
+            }
+
             // 데이터 초기화
             initData()
-
             // UI 요소 초기화
             setupUI()
 
@@ -135,11 +196,6 @@ class RecipeLogFragment : Fragment() {
                 }
             }
 
-            // id 값 가져오기
-            val recipeId = arguments?.getInt("recipeId") ?: return
-            Log.d("RecipeLogFragment", "recipeID: ${recipeId}")
-            recipeViewModel.getRecipeById(recipeId)
-
         } catch (e: Exception) {
             Log.e("RecipeLogFragment", "Error in onViewCreated", e)
         }
@@ -148,8 +204,6 @@ class RecipeLogFragment : Fragment() {
     private fun setupUI() {
         Log.d("RecipeLogFragment", "Setting up UI elements")
         try {
-            // 레시피 기본 정보 설정
-            setupRecipeInfo()
 
             // 레시피 썸네일 설정
             setupThumbnail()
@@ -184,28 +238,6 @@ class RecipeLogFragment : Fragment() {
             Log.d("RecipeLogFragment", "UI setup completed")
         } catch (e: Exception) {
             Log.e("RecipeLogFragment", "Error setting up UI", e)
-        }
-    }
-
-    private fun setupRecipeInfo() {
-        recipeViewModel.recipeDetail.observe(viewLifecycleOwner) { recipeData ->
-            if (recipeData != null) {
-                Log.d("RecipeLogFragment", "Received recipe data: ${recipeData.title}")
-                recipeTitle = recipeData.title
-                thumbnail = recipeData.imageUrl
-                recipeDescription = recipeData.description
-                categorySlowAging = recipeData.categorySlowAging
-                categoryType = recipeData.categoryType
-                difficulty = recipeData.difficulty
-                ingredientTags = recipeData.ingredientTagIds.toMutableList()
-                allergies = recipeData.allergies!!.toMutableList()
-                ingredientList = recipeData.ingredients.map { (name, value, unit) -> FlavoringItem(name = name, value = value, unit = unit)}.toMutableList()
-                seasoningList = recipeData.seasonings.map { (name, value, unit) -> FlavoringItem(name = name, value = value, unit = unit)}.toMutableList()
-                steps = recipeData.stepImageUrls.zip(recipeData.stepDescriptions) { img, desc -> RecipeStepData(stepImg = img, stepDescription = desc)}.toMutableList()
-                tips = recipeData.tips
-                timeHours = recipeData.timeHours
-                timeMinutes = recipeData.timeMinutes
-            }
         }
     }
 

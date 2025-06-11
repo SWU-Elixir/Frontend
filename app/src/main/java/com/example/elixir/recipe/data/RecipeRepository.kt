@@ -15,6 +15,7 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
+import kotlin.math.max
 
 class RecipeRepository(private val api: RecipeApi, private val dao: RecipeDao) {
     // 레시피 목록 가져오기 (API → DB 저장 → DB 반환)
@@ -140,5 +141,88 @@ class RecipeRepository(private val api: RecipeApi, private val dao: RecipeDao) {
     // 로컬 DB에서만 전체 레시피 조회
     suspend fun getAllLocalRecipes(): List<RecipeEntity> = withContext(Dispatchers.IO) {
         dao.getAllRecipes()
+    }
+
+    // 좋아요
+    // 좋아요 추가
+    suspend fun addLike(recipeId: Int): Boolean {
+        return try {
+            val response = api.addLike(recipeId)
+            if (response.isSuccessful) {
+                // 로컬 DB 업데이트
+                val recipe = dao.getRecipeById(recipeId)
+                recipe?.let {
+                    dao.updateLikeStatus(
+                        recipeId,
+                        liked = true,
+                        likes = it.likes + 1
+                    )
+                }
+                true
+            } else false
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    // 좋아요 취소
+    suspend fun deleteLike(recipeId: Int): Boolean {
+        return try {
+            val response = api.deleteLike(recipeId)
+            if (response.isSuccessful) {
+                val recipe = dao.getRecipeById(recipeId)
+                recipe?.let {
+                    dao.updateLikeStatus(
+                        recipeId,
+                        liked = false,
+                        likes = max(0, it.likes - 1)
+                    )
+                }
+                true
+            } else false
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    // 스크랩
+    // 스크랩 추가
+    suspend fun addScrap(recipeId: Int): Boolean {
+        return try {
+            val response = api.addScrap(recipeId)
+            if (response.isSuccessful) {
+                val recipe = dao.getRecipeById(recipeId)
+                recipe?.let {
+                    dao.updateScrapStatus(
+                        recipeId,
+                        scrapped = true,
+                        scraps = it.scraps + 1
+                    )
+                }
+                true
+            } else false
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    // 스크랩 취소
+    suspend fun deleteScrap(recipeId: Int): Boolean {
+        return try {
+            val response = api.deleteScrap(recipeId)
+            if (response.isSuccessful) {
+                val recipe = dao.getRecipeById(recipeId)
+                recipe?.let {
+                    dao.updateScrapStatus(
+                        recipeId,
+                        scrapped = false,
+                        scraps = max(0, it.scraps - 1)
+                    )
+                }
+                true
+            } else false
+        } catch (e: Exception) {
+            false
+        }
     }
 }

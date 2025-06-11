@@ -1,5 +1,6 @@
 package com.example.elixir.recipe.ui
 
+import android.R.attr.fragment
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
@@ -7,11 +8,13 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.PopupMenu
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
@@ -25,18 +28,24 @@ import com.example.elixir.ingredient.viewmodel.IngredientService
 import com.example.elixir.ingredient.viewmodel.IngredientViewModel
 import com.example.elixir.member.network.MemberDB
 import com.example.elixir.member.network.MemberRepository
+import com.example.elixir.member.viewmodel.MemberService
 import com.example.elixir.member.viewmodel.MemberViewModel
+import com.example.elixir.member.viewmodel.MemberViewModelFactory
 import com.example.elixir.network.AppDatabase
 import com.example.elixir.recipe.data.CommentItem
+import com.example.elixir.recipe.data.CommentRepository
 import com.example.elixir.recipe.data.FlavoringItem
 import com.example.elixir.recipe.data.RecipeRepository
 import com.example.elixir.recipe.data.RecipeStepData
+import com.example.elixir.recipe.viewmodel.CommentViewModel
+import com.example.elixir.recipe.viewmodel.CommentViewModelFactory
 import com.example.elixir.recipe.viewmodel.RecipeViewModel
 import com.example.elixir.recipe.viewmodel.RecipeViewModelFactory
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
-import java.util.*
+import java.util.Locale
+
 
 /**
  * 레시피 상세 정보를 표시하는 프래그먼트
@@ -49,13 +58,18 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
 
     private lateinit var recipeRepository: RecipeRepository
     private lateinit var memberRepository: MemberRepository
-
-    private val viewModel: MemberViewModel by viewModels()
+    private lateinit var commentRepository: CommentRepository
 
     // 댓글 관련 변수
     private lateinit var commentAdapter: RecipeCommentAdapter
-    private val comments = mutableListOf<CommentItem>()
+    private var comments = mutableListOf<CommentItem>()
     private var editingCommentId: Int = -1
+    private var userNickname: String? = null
+
+
+    private val commentViewModel: CommentViewModel by viewModels {
+        CommentViewModelFactory(commentRepository)
+    }
 
     private lateinit var editRecipeLauncher: ActivityResultLauncher<Intent>
 
@@ -87,6 +101,17 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
         val memberApi = RetrofitClient.instanceMemberApi
         memberRepository = MemberRepository(memberApi, memberDao)
 
+        val memberService = MemberService(memberRepository) // 필요 파라미터 전달
+
+        val memberViewModel: MemberViewModel by viewModels {
+            MemberViewModelFactory(memberService)
+        }
+
+        // 댓글 api, dao
+        val commentDao = AppDatabase.getInstance(requireContext()).commentDao()
+        val commentApi = RetrofitClient.instanceCommentApi
+        commentRepository = CommentRepository(commentApi, commentDao)
+
         // ------------------------ 데이터 적용 ------------------------
         // arguments에서 JSON 문자열 꺼내서 객체로 변환
         val recipeId = arguments?.getInt("recipeId") ?: return
@@ -100,6 +125,7 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
         recipeViewModel.recipeDetail.observe(viewLifecycleOwner) { recipeData ->
             if (recipeData != null) {
                 // recipeData에 저장된 값으로 UI 초기화
+                Log.d("RecipeDetailFragment", "$recipeData")
                 // 유저
                 binding.memberTitle.text = if(recipeData.authorTitle.isNullOrBlank()) "일반" else recipeData.authorTitle
                 binding.memberNickname.text = recipeData.authorNickname
@@ -159,8 +185,10 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                     // 좋아요 상태에 따라 카운트 증가/감소
                     if (recipeData.likedByCurrentUser) {
                         recipeData.likes++
+                        recipeViewModel.addLike(recipeId)
                     } else {
                         recipeData.likes--
+                        recipeViewModel.deleteLike(recipeId)
                     }
                     // 버튼 이미지와 카운트 업데이트
                     binding.heartButton.setBackgroundResource(
@@ -188,13 +216,16 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                     )
                 }
 
-                viewModel.loadMemberProfile()
+                memberViewModel.loadMemberProfile()
 
-                viewModel.profile.observe(viewLifecycleOwner) { profile ->
+                memberViewModel.profile.observe(viewLifecycleOwner) { profile ->
                     profile?.let {
+                        userNickname = profile.nickname
                         // 사용자가 아니면 수정 못하게
                         if(recipeData.authorNickname != profile.nickname)
                             binding.menuButton.visibility = View.GONE
+
+                        binding.commentNickname.text = profile.nickname
                     }
                 }
 
@@ -285,47 +316,45 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                     }
                     adapter = FlavoringAdapter(recipeData.seasonings.map { FlavoringItem(it.name, it.value, it.unit) })
                 }
+
+                // 댓글 리스트 설정
+                comments = recipeData.comments!!.toMutableList()
+                Log.d("RecipeDetailFragment", "$comments")
+
+                binding.commentList.layoutManager = LinearLayoutManager(requireContext())
+                commentAdapter = RecipeCommentAdapter(requireContext(), comments, this)
+                binding.commentList.adapter = commentAdapter
+
+                // ------------------------ 댓글 어댑터 연결 ------------------------
+                commentViewModel.comments.observe(viewLifecycleOwner) { newComments ->
+                    comments.clear()
+                    comments.addAll(newComments)
+                    commentAdapter.notifyDataSetChanged()
+                    Log.d("RecipeDetailFragment", "리스트: $newComments")
+                }
+
             } else {
                 // 에러 처리 (예: Toast 등)
                 Toast.makeText(requireContext(), "레시피 정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
             }
         }
 
-        // ------------------------ 더미 댓글 데이터 ------------------------
-        /*comments.addAll(listOf(
-            CommentData(
-                commentId = "1",
-                profileImageResId = R.drawable.ic_profile,
-                memberTitle = "건강지기",
-                memberNickname = "wellness_lover",
-                commentText = "이 레시피 정말 맛있고 건강해요!",
-                date = "2025-05-01 12:13"
-            ),
-            CommentData(
-                commentId = "2",
-                profileImageResId = R.drawable.ic_profile,
-                memberTitle = "슬로우에이징러",
-                memberNickname = "슬로우",
-                commentText = "아보카도 좋아하는데 해봐야겠어요~",
-                date = "2025-05-01 12:13"
-            )
-        ))*/
-
-        // ------------------------ 댓글 어댑터 연결 ------------------------
-        binding.commentList.layoutManager = LinearLayoutManager(requireContext())
-        commentAdapter = RecipeCommentAdapter(requireContext(), comments, this)
-        binding.commentList.adapter = commentAdapter
-
         // 댓글 작성/수정 버튼 클릭 이벤트 처리
         binding.commentButton.setOnClickListener {
+            // 입력된 텍스트 가져오기
             val commentText = binding.editComment.text.toString()
+            // 입력창이 비어있지 않을 때 실행
             if (commentText.isNotEmpty()) {
-                // 댓글 수정
                 val commentIndex = comments.indexOfFirst { it.commentId == editingCommentId }
+                // 댓글 수정
                 if (commentIndex != -1) {
-                    val updatedComment = comments[commentIndex].copy(content = commentText)
-                    comments[commentIndex] = updatedComment
-                    commentAdapter.notifyItemChanged(commentIndex)
+                    // 뷰모델에 수정 요청
+                    commentViewModel.updateComment(recipeId, editingCommentId, commentText)
+                    Toast.makeText(context, "댓글이 수정되었습니다.", Toast.LENGTH_SHORT).show()
+                } else {
+                    // 댓글 등록
+                    commentViewModel.uploadComment(recipeId, commentText)
+                    Toast.makeText(context, "댓글이 등록되었습니다.", Toast.LENGTH_SHORT).show()
                 }
                 // 수정 모드 초기화
                 editingCommentId = -1
@@ -369,18 +398,14 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
         binding.commentButton.text = "수정"
     }
 
-    override fun onDeleteComment(commentId: Int) {
-        // 댓글 삭제 확인 다이얼로그 표시
+    override fun onDeleteComment(recipeId: Int, commentId: Int) {
         AlertDialog.Builder(requireContext())
             .setTitle("댓글 삭제")
             .setMessage("댓글을 삭제하시겠습니까?")
             .setPositiveButton("삭제") { _, _ ->
-                // 댓글 삭제
-                val commentIndex = comments.indexOfFirst { it.commentId == commentId }
-                if (commentIndex != -1) {
-                    comments.removeAt(commentIndex)
-                    commentAdapter.notifyItemRemoved(commentIndex)
-                }
+                // 뷰모델에 삭제 요청
+                commentViewModel.deleteComment(recipeId, commentId)
+                Toast.makeText(context, "댓글이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("취소", null)
             .show()
