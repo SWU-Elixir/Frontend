@@ -84,6 +84,7 @@ class ChallengeFragment : Fragment() {
 
     private fun setupBottomSheet() {
         BottomSheetBehavior.from(binding.bottomSheet).apply {
+            peekHeight = 130
             addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
                 override fun onStateChanged(bottomSheet: View, newState: Int) {}
                 override fun onSlide(bottomSheet: View, slideOffset: Float) {}
