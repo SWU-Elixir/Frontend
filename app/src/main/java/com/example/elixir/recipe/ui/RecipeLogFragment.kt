@@ -40,11 +40,14 @@ import com.example.elixir.ingredient.ui.IngredientSearchFragment
 import com.example.elixir.ingredient.viewmodel.IngredientService
 import com.example.elixir.ingredient.viewmodel.IngredientViewModel
 import com.example.elixir.network.AppDatabase
+import com.example.elixir.recipe.data.CommentItem
 import com.example.elixir.recipe.data.FlavoringItem
 import com.example.elixir.recipe.viewmodel.RecipeViewModel
 import com.example.elixir.recipe.data.RecipeData
+import com.example.elixir.recipe.data.RecipeDto
 import com.example.elixir.recipe.data.RecipeRepository
 import com.example.elixir.recipe.data.RecipeStepData
+import com.example.elixir.recipe.data.toDto
 import com.example.elixir.recipe.data.toEntity
 import com.example.elixir.recipe.viewmodel.RecipeViewModelFactory
 import com.google.android.material.chip.Chip
@@ -58,7 +61,11 @@ class RecipeLogFragment : Fragment() {
     private var recipeLogBinding: FragmentRecipeLogBinding? = null
     private val recipeBinding get() = recipeLogBinding!!
 
+    // 수정 모드
+    private var isEdit = false
+
     // 레시피 데이터 변수
+    private var recipeId = -1
     private var recipeTitle = ""
     private var thumbnail = ""
     private var recipeDescription = ""
@@ -73,6 +80,16 @@ class RecipeLogFragment : Fragment() {
     private var tips = ""
     private var timeHours = 0
     private var timeMinutes = 0
+
+    private var authorFollowByCurrentUser = false
+    private var likedByCurrentUser = false
+    private var scrappedByCurrentUser = false
+    private var authorNickname: String? = null
+    private var authorTitle: String? = null
+    private var likes = 0
+    private var comments: List<CommentItem>? = null
+    private lateinit var createdAt: String
+    private lateinit var updatedAt: String
 
     // 어댑터
     private lateinit var ingredientsAdapter: FlavoringLogAdapter
@@ -120,11 +137,14 @@ class RecipeLogFragment : Fragment() {
             // 레시피 기본 정보 설정
             recipeViewModel.recipeDetail.observe(viewLifecycleOwner) { recipeData ->
                 Log.d("RecipeFragment", "$recipeData")
+                // 수정 모드
                 if (recipeData != null) {
+                    isEdit = true
                     // UI 업데이트
                     setRecipeDataToUI(recipeData)
 
                 } else {
+                    isEdit = false
                     // recipeData가 null이면 빈 값 또는 기본 이미지로
                     recipeBinding.enterRecipeTitle.post { recipeBinding.enterRecipeTitle.setText("") }
                     recipeBinding.enterRecipeDescription.post { recipeBinding.enterRecipeDescription.setText("") }
@@ -144,9 +164,12 @@ class RecipeLogFragment : Fragment() {
             setupUI()
 
             // id 값 가져오기
-            val recipeId = arguments?.getInt("recipeId") ?: return
-            Log.d("RecipeLogFragment", "recipeID: ${recipeId}")
-            recipeViewModel.getRecipeById(recipeId)
+            recipeId = arguments?.getInt("recipeId") ?: return
+            Log.d("RecipeLogFragment", "recipeID: $recipeId")
+
+            // 만약 수정 모드라면 레시피 값이 -1이 아닐 것
+            if(recipeId != -1)
+                recipeViewModel.getRecipeById(recipeId)
 
         } catch (e: Exception) {
             Log.e("RecipeLogFragment", "Error in onViewCreated", e)
@@ -503,7 +526,7 @@ class RecipeLogFragment : Fragment() {
             if (isAllFieldsValid()) {
                 SaveDialog(requireActivity()) {
                     val recipeData = RecipeData(
-                        id = 0,
+                        id = if(recipeId == -1) 0 else recipeId,
                         title = recipeTitle,
                         description = recipeDescription,
                         categorySlowAging = categorySlowAging,
@@ -519,29 +542,40 @@ class RecipeLogFragment : Fragment() {
                         tips = tips,
                         allergies = allergies,
                         imageUrl = thumbnail,
-                        authorFollowByCurrentUser = false,
-                        likedByCurrentUser = false,
-                        scrappedByCurrentUser = false,
-                        authorNickname = "작성자 닉네임",
-                        authorTitle = "작성자 직책",
-                        likes = 0,
+                        authorFollowByCurrentUser = authorFollowByCurrentUser,
+                        likedByCurrentUser = likedByCurrentUser,
+                        scrappedByCurrentUser = scrappedByCurrentUser,
+                        authorNickname = authorNickname,
+                        authorTitle = authorTitle,
+                        likes = likes,
                         scraps = 0,
-                        comments = null,
-                        createdAt = LocalDateTime.now().toString(),
+                        comments = comments,
+                        createdAt = createdAt,
                         updatedAt = LocalDateTime.now().toString()
                     )
 
                     val recipeEntity = recipeData.toEntity()
-
                     val thumbnailFile = parseImagePathToFile(requireContext(), thumbnail)
                     val stepImageFiles = parseStepImagesToFiles(requireContext(), recipeData.stepImageUrls)
 
-                    recipeViewModel.uploadRecipe(recipeEntity, thumbnailFile, stepImageFiles)
+                    Log.d("RecipeLogFragment", "레시피 ID: $recipeId")
+                    Log.d("RecipeLogFragment", "레시피 수정모드: $isEdit")
+
+                    // 수정 모드
+                    if(isEdit) {
+                        // 이미지 정의
+                        recipeViewModel.updateRecipe(recipeId, recipeEntity, thumbnailFile, stepImageFiles)
+                    }
+                    // 등록 모드
+                    else {
+                        recipeViewModel.uploadRecipe(recipeEntity, thumbnailFile, stepImageFiles)
+                    }
 
                     val intent = Intent().apply {
                         putExtra("mode", if (arguments?.getBoolean("isEdit") == true) 9 else 0)
-                        putExtra("recipeData", Gson().toJson(recipeData))
+                        putExtra("recipeId", Gson().toJson(recipeId))
                     }
+
                     // 3. 업로드 결과 관찰 (observe)
                     recipeViewModel.uploadResult.observe(viewLifecycleOwner) { result ->
                         result.onSuccess { data ->
@@ -553,6 +587,19 @@ class RecipeLogFragment : Fragment() {
                         result.onFailure { e ->
                             Log.e("RecipeUpload", "업로드 실패", e)
                             Toast.makeText(requireContext(), "업로드 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+
+                    recipeViewModel.updateResult.observe(viewLifecycleOwner) { result ->
+                        result.onSuccess { data ->
+                            Toast.makeText(requireContext(), "레시피가 수정되었습니다.", Toast.LENGTH_SHORT).show()
+                            // 업로드 성공 시 결과 처리 (예: 화면 종료)
+                            requireActivity().setResult(Activity.RESULT_OK, intent)
+                            requireActivity().finish()
+                        }
+                        result.onFailure { e ->
+                            Log.e("RecipeUpload", "수정 실패", e)
+                            Toast.makeText(requireContext(), "수정 실패: ${e.message}", Toast.LENGTH_SHORT).show()
                         }
                     }
                 }.show()
@@ -754,6 +801,16 @@ class RecipeLogFragment : Fragment() {
         tips = recipeData.tips
         timeHours = recipeData.timeHours
         timeMinutes = recipeData.timeMinutes
+
+        authorFollowByCurrentUser = recipeData.authorFollowByCurrentUser
+        likedByCurrentUser = recipeData.likedByCurrentUser
+        scrappedByCurrentUser = recipeData.scrappedByCurrentUser
+        authorTitle = recipeData.authorTitle
+        authorNickname = recipeData.authorNickname
+        likes = recipeData.likes
+        comments = recipeData.comments
+        createdAt = recipeData.createdAt
+
         isBindingData = true
 
         // 텍스트 필드
@@ -779,6 +836,8 @@ class RecipeLogFragment : Fragment() {
 
         // 식재료 태그 칩
         Log.d("RecipeLogFragment", ingredientTags.toString())
+        ingredientTags.clear()
+        ingredientTags.addAll(recipeData.ingredientTagIds)
         setIngredientChips(ingredientTags)
 
         // 알러지 칩: 존재하면 칩 누르기, 존재하지 않으면 해당 없음에 클릭

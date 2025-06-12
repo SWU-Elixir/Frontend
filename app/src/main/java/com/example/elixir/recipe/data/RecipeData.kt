@@ -62,4 +62,20 @@ fun RecipeData.toEntity(): RecipeEntity {
     )
 }
 
-fun List<RecipeData>.toEntities(): List<RecipeEntity> = this.map { it.toEntity() }
+fun RecipeData.toDto(): RecipeDto {
+    return RecipeDto(
+        title = title,
+        description = description,
+        categorySlowAging = categorySlowAging,
+        categoryType = categoryType,
+        difficulty = difficulty,
+        timeHours = timeHours,
+        timeMinutes = timeMinutes,
+        ingredientTagIds = ingredientTagIds,
+        ingredients = ingredients,
+        seasonings = seasonings,
+        stepDescriptions = stepDescriptions,
+        tips = tips,
+        allergies = allergies
+    )
+}
