@@ -125,10 +125,20 @@ class MealListAdapter(
         return view
     }
 
-    //어댑터의 데이터를 새로운 데이터로 업데이트
+    //어댑터의 데이터를 새로운 데이터로 업데이트하고, 식사 카테고리별로 정렬
     fun updateData(newData: List<DietLogData>) {
+        val sortedData = newData.sortedWith(compareBy {
+            when (it.dietCategory) {
+                "아침" -> 1
+                "점심" -> 2
+                "저녁" -> 3
+                "간식" -> 4
+                else -> 5 // 그 외의 카테고리는 마지막에 정렬
+            }
+        }).toMutableList() // 정렬된 리스트를 변경 가능한 리스트로 변환
+
         data.clear()
-        data.addAll(newData)
+        data.addAll(sortedData)
         notifyDataSetChanged()
     }
 

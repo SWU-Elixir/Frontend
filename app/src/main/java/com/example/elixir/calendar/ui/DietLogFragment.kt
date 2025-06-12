@@ -138,8 +138,8 @@ class DietLogFragment : Fragment() {
             // 이미지 처리
             Glide.with(requireContext())
                 .load(mealData.dietImg)
-                .placeholder(R.drawable.ic_meal_lunch)
-                .error(R.drawable.ic_meal_lunch)
+                .placeholder(R.drawable.img_blank)
+                .error(R.drawable.img_blank)
                 .into(dietLogBinding.dietImg)
 
             // 시간 처리
@@ -188,7 +188,7 @@ class DietLogFragment : Fragment() {
             // 기본 이미지로 설정
             val defaultUri = Uri.parse("android.resource://${requireContext().packageName}/${R.drawable.img_blank}")
             dietLogBinding.dietImg.setImageURI(defaultUri)
-            dietImg = defaultUri.toString()
+            //dietImg = defaultUri.toString()
 
             // 현재 시간으로 초기화
             selectedTime = LocalTime.now()

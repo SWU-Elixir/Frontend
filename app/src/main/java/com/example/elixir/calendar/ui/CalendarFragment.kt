@@ -194,6 +194,7 @@ class CalendarFragment : Fragment(), OnMealClickListener {
         val behavior = BottomSheetBehavior.from(binding.bottomSheet)
         binding.fab.hide()
         var bottomSheetState = BottomSheetBehavior.STATE_COLLAPSED
+        behavior.peekHeight = 130
 
         // 초기 날짜 설정
         if (isFirstLaunch) {
