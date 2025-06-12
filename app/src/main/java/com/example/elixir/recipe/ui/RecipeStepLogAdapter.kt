@@ -4,6 +4,8 @@ import android.net.Uri
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.example.elixir.R
 import com.example.elixir.databinding.ItemRecipeStepBinding
 import com.example.elixir.recipe.data.RecipeStepData
 
@@ -15,12 +17,16 @@ class RecipeStepLogAdapter(
 ) : RecyclerView.Adapter<RecipeStepLogAdapter.StepViewHolder>() {
 
     inner class StepViewHolder(val binding: ItemRecipeStepBinding) : RecyclerView.ViewHolder(binding.root) {
-        var textWatcher: android.text.TextWatcher? = null
+        private var textWatcher: android.text.TextWatcher? = null
 
         fun bind(step: RecipeStepData, position: Int) = with(binding) {
             btnDel.setOnClickListener { onDeleteClick(position) }
             stepImg.setOnClickListener { onImageClick(position) }
-            stepImg.setImageURI(Uri.parse(step.stepImg))
+            Glide.with(stepImg.context)
+                .load(step.stepImg)
+                .placeholder(R.drawable.img_blank)
+                .error(R.drawable.img_blank)
+                .into(stepImg)
 
             textWatcher?.let { stepDescription.removeTextChangedListener(it) }
             stepDescription.setText(step.stepDescription)
