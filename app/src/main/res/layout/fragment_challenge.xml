@@ -115,6 +115,19 @@
                 android:textSize="18sp"
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_bold"/>
+
+            <TextView
+                android:id="@+id/challengeWarning"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="☛ 식단 기록 미션의 카운트 기준\n  ‘하루 세 끼 식단 기록’과 같은 미션의 경우, 미션을 받기 전에 작성한 식단은 인정되지 않습니다.
+                \n  반드시 미션을 받은 이후부터 작성한 식단만 카운트되므로 유의해 주세요.
+                \n\n☛ 동일 식단으로 여러 미션 동시 클리어 가능 \n  하나의 식단 기록으로 같은 단계 내 여러 미션을 동시에 완료할 수 있습니다.
+                \n  예) 아침 식단 기록 미션과 딸기 챌린지 미션이 동일 단계에 있을 경우, 딸기를 포함한 아침 식단을 기록하면 두 미션이 동시에 완료됩니다."
+                android:textSize="15sp"
+                android:textColor="@color/elixir_gray"
+                android:fontFamily="@font/pretendard_medium"/>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
