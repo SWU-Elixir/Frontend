@@ -71,7 +71,8 @@ interface RecipeApi {
     suspend fun updateRecipe(
         @Path("recipeId") recipeId: Int,
         @Part("dto") dto: RequestBody,
-        @Part image: MultipartBody.Part
+        @Part image: MultipartBody.Part?,
+        @Part recipeStepImages: List<MultipartBody.Part>?
     ): Response<GetRecipeResponse>
 
     @DELETE("/api/recipe/{recipeId}")

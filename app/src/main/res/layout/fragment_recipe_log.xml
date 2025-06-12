@@ -60,12 +60,10 @@
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/recipe_thumbnail"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
             android:layout_marginTop="5dp"
             style="@style/ImgDefault_Rect"
-            android:maxWidth="200dp"
-            android:maxHeight="200dp"
             android:scaleType="centerCrop"
             android:src="@drawable/img_blank"
             android:adjustViewBounds="true"

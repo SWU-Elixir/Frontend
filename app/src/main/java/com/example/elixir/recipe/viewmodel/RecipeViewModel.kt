@@ -69,7 +69,6 @@ class RecipeViewModel(
         }
     }
 
-
     // 레시피 업로드
     fun uploadRecipe(entity: RecipeEntity, thumbnailFile: File?, stepImageFiles: List<File?> ) {
         viewModelScope.launch {
@@ -85,16 +84,19 @@ class RecipeViewModel(
     }
 
     // 레시피 수정
-    fun updateRecipe(recipeId: Int, dto: RequestBody, image: MultipartBody.Part) {
+    fun updateRecipe(recipeId: Int, recipeEntity: RecipeEntity,
+                     thumbnailFile: File?, stepImageFiles: List<File?>) {
         viewModelScope.launch {
             try {
-                val updated = repository.updateRecipe(recipeId, dto, image)
-                _updateResult.value = Result.success(updated)
+                val entityResult = repository.updateRecipe(recipeId, recipeEntity, thumbnailFile, stepImageFiles)
+                Log.d("RecipeViewModel", "updateRecipe 결과: $entityResult")
+                _updateResult.value = Result.success(entityResult)
             } catch (e: Exception) {
                 _updateResult.value = Result.failure(e)
             }
         }
     }
+
 
     // 레시피 삭제
     fun deleteRecipe(recipeId: Int) {

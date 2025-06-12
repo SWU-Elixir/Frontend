@@ -16,14 +16,15 @@
         tools:ignore="UselessParent">
 
         <!-- 레시피 이미지 -->
-        <ImageView
+        <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/recipePicture"
             android:layout_width="135dp"
             android:layout_height="135dp"
-            android:background="@drawable/bg_rect_filled_white_15"
-            android:src="@color/elixir_gray"
+            android:src="@drawable/img_blank"
             android:scaleType="centerCrop"
             android:clipToOutline="true"
+            app:layout_constraintDimensionRatio="1:1"
+            app:shapeAppearanceOverlay="@style/ImgDefault_Rect"
             tools:ignore="ContentDescription,UnusedAttribute" />
 
         <!-- 텍스트 및 아이콘 정보 영역 -->

@@ -117,16 +117,44 @@ class RecipeRepository(private val api: RecipeApi, private val dao: RecipeDao) {
 
 
     // 레시피 수정 (API → 성공 시 DB 갱신)
-    suspend fun updateRecipe(recipeId: Int, dto: RequestBody, image: MultipartBody.Part): RecipeEntity? = withContext(Dispatchers.IO) {
-        val response = api.updateRecipe(recipeId, dto, image)
+    suspend fun updateRecipe(recipeId: Int, entity: RecipeEntity, thumbnailFile: File?,
+        stepImageFiles: List<File?>): RecipeEntity? = withContext(Dispatchers.IO) {
+        // 1. Entity → Dto 변환
+        val dto = entity.toDto()
+
+        // 2. Dto를 JSON으로 변환 후 RequestBody로
+        val dtoJson = Gson().toJson(dto)
+        val dtoRequestBody = dtoJson.toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
+        Log.d("RecipeDto", "전송 JSON: $dtoJson")
+        Log.d("RecipeDto", "전송 Request: $dtoRequestBody")
+
+        // 3. 썸네일 이미지 파일을 MultipartBody.Part로 변환
+        val thumbRequestBody = thumbnailFile?.asRequestBody("image/*".toMediaTypeOrNull())
+        val thumbPart = thumbnailFile?.let { file ->
+            MultipartBody.Part.createFormData("image", file.name, thumbRequestBody!!)
+        }
+
+        Log.d("RecipeDto", "전송 썸네일: $dtoJson")
+
+        // 4. 조리 단계 이미지 파일 리스트를 MultipartBody.Part 리스트로 변환
+        val stepImageParts = stepImageFiles.mapNotNull { file ->
+            file?.let {
+                val reqBody = it.asRequestBody("image/*".toMediaTypeOrNull())
+                MultipartBody.Part.createFormData("recipeStepImages", it.name, reqBody)
+            }
+        }
+
+        // 5. API 호출
+        val response = api.updateRecipe(recipeId, dtoRequestBody, thumbPart, stepImageParts)
         if (response.isSuccessful) {
             response.body()?.data?.toEntity()?.let {
-                dao.updateRecipe(it)
+                dao.updateRecipe(it) // DB 업데이트
                 return@withContext it
             }
         }
         return@withContext null
     }
+
 
     // 레시피 삭제 (API → 성공 시 DB 삭제)
     suspend fun deleteRecipe(recipeId: Int): Boolean = withContext(Dispatchers.IO) {
