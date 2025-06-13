@@ -468,7 +468,7 @@ class CalendarFragment : Fragment(), OnMealClickListener {
     private fun convertMealDtoToDietLogData(mealDto: MealDto): DietLogData {
         return DietLogData(
             id = mealDto.id,  // MealDto의 id를 DietLogData의 id로 사용
-            dietImg = mealDto.imageUrl,
+            dietImg = mealDto.imageUrl ?: "",
             time = LocalDateTime.parse(mealDto.time),  // String → LocalDateTime 변환
             dietTitle = mealDto.name,
             dietCategory = mealDto.type,
