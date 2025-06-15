@@ -35,7 +35,7 @@ interface DietApi {
     @GET("/api/diet-log/recent")
     suspend fun getDietLogRecent(
         @Query("days") days: Int
-    ): Response<DietLogListResponse>
+    ): Response<GetMealListResponse>
 
     @GET("/api/diet-log/{dietLogId}")
     suspend fun getDietLogById(

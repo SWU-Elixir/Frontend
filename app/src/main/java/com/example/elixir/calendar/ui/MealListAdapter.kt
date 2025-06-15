@@ -44,6 +44,9 @@ class MealListAdapter(
 
         val item = getItem(position)
 
+        Log.d("MealListAdapter", "Loading image for item: ${item.dietTitle}, URI: ${item.dietImg}")
+
+
         // --- 이미지 처리: Glide를 사용하여 간결하게 처리합니다 ---
         Glide.with(context)
             .load(item.dietImg)

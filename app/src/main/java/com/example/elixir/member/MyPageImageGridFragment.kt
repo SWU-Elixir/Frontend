@@ -5,7 +5,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
@@ -15,6 +14,7 @@ import com.bumptech.glide.request.RequestOptions
 import com.example.elixir.R
 import com.example.elixir.databinding.FragmentMypageImageGridBinding
 import com.example.elixir.RetrofitClient
+import com.example.elixir.recipe.ui.RecipeDetailFragment
 import kotlinx.coroutines.launch
 
 class MyPageImageGridFragment : Fragment() {
@@ -91,7 +91,7 @@ class MyPageImageGridFragment : Fragment() {
                     api.getMyRecipes()
                 }
                 val recipeList = response.data
-                
+
                 if (recipeList.isNullOrEmpty()) {
                     Log.d(TAG, "레시피 목록이 비어있습니다")
                     binding.imageRecyclerView.adapter = BadgeGridAdapter(emptyList())
@@ -101,16 +101,16 @@ class MyPageImageGridFragment : Fragment() {
                 val adapter = object : androidx.recyclerview.widget.RecyclerView.Adapter<BadgeViewHolder>() {
                     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BadgeViewHolder {
                         val binding = com.example.elixir.databinding.ItemMypageBadgeGridBinding.inflate(
-                            LayoutInflater.from(parent.context), 
-                            parent, 
+                            LayoutInflater.from(parent.context),
+                            parent,
                             false
                         )
                         return BadgeViewHolder(binding)
                     }
 
                     override fun onBindViewHolder(holder: BadgeViewHolder, position: Int) {
-                        val (item, imageUrl) = recipeList[position]
-                        
+                        val (recipeId, imageUrl) = recipeList[position]
+
                         // Glide 옵션 설정
                         val requestOptions = RequestOptions()
                             .diskCacheStrategy(DiskCacheStrategy.ALL)
@@ -131,11 +131,28 @@ class MyPageImageGridFragment : Fragment() {
 
                         holder.binding.badgeTitle.visibility = View.GONE
                         holder.binding.badgeSubtitle.visibility = View.GONE
+
+                        // 전체 아이템 클릭 이벤트 추가
+                        holder.binding.root.setOnClickListener {
+                            Log.d("RecipeAdapter", "아이템 클릭됨: $recipeId")
+                            val detailFragment = RecipeDetailFragment().apply {
+                                arguments = Bundle().apply {
+                                    putInt("recipeId", recipeId)
+                                }
+                            }
+                            // fragment_overlay를 visible로!
+                            activity?.findViewById<View>(R.id.fragment_overlay)?.visibility = View.VISIBLE
+
+                            parentFragmentManager.beginTransaction()
+                                .add(R.id.fragment_overlay, detailFragment)
+                                .addToBackStack(null)
+                                .commit()
+                        }
                     }
 
                     override fun getItemCount() = recipeList.size
                 }
-                
+
                 binding.imageRecyclerView.adapter = adapter
                 Log.d(TAG, "레시피 목록 로드 완료: ${recipeList.size}개")
             } catch (e: Exception) {
@@ -153,7 +170,7 @@ class MyPageImageGridFragment : Fragment() {
                 // 스크랩은 항상 현재 사용자의 것만 가져옴
                 val response = api.getScrapRecipes()
                 val recipeList = response.data
-                
+
                 if (recipeList.isNullOrEmpty()) {
                     Log.d(TAG, "스크랩 목록이 비어있습니다")
                     binding.imageRecyclerView.adapter = BadgeGridAdapter(emptyList())
@@ -163,16 +180,16 @@ class MyPageImageGridFragment : Fragment() {
                 val adapter = object : androidx.recyclerview.widget.RecyclerView.Adapter<BadgeViewHolder>() {
                     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BadgeViewHolder {
                         val binding = com.example.elixir.databinding.ItemMypageBadgeGridBinding.inflate(
-                            LayoutInflater.from(parent.context), 
-                            parent, 
+                            LayoutInflater.from(parent.context),
+                            parent,
                             false
                         )
                         return BadgeViewHolder(binding)
                     }
 
                     override fun onBindViewHolder(holder: BadgeViewHolder, position: Int) {
-                        val (item, imageUrl) = recipeList[position]
-                        
+                        val (recipeId, imageUrl) = recipeList[position]
+
                         // Glide 옵션 설정
                         val requestOptions = RequestOptions()
                             .diskCacheStrategy(DiskCacheStrategy.ALL)
@@ -193,11 +210,28 @@ class MyPageImageGridFragment : Fragment() {
 
                         holder.binding.badgeTitle.visibility = View.GONE
                         holder.binding.badgeSubtitle.visibility = View.GONE
+
+                        // 전체 아이템 클릭 이벤트 추가
+                        holder.binding.root.setOnClickListener {
+                            Log.d("RecipeAdapter", "아이템 클릭됨: $recipeId")
+                            val detailFragment = RecipeDetailFragment().apply {
+                                arguments = Bundle().apply {
+                                    putInt("recipeId", recipeId)
+                                }
+                            }
+                            // fragment_overlay를 visible로!
+                            activity?.findViewById<View>(R.id.fragment_overlay)?.visibility = View.VISIBLE
+
+                            parentFragmentManager.beginTransaction()
+                                .add(R.id.fragment_overlay, detailFragment)
+                                .addToBackStack(null)
+                                .commit()
+                        }
                     }
 
                     override fun getItemCount() = recipeList.size
                 }
-                
+
                 binding.imageRecyclerView.adapter = adapter
                 Log.d(TAG, "스크랩 목록 로드 완료: ${recipeList.size}개")
             } catch (e: Exception) {

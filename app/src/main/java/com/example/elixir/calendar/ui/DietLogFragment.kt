@@ -100,6 +100,9 @@ class DietLogFragment : Fragment() {
     private var mealDataJson: String? = null
     private var dietId: Int = -1
 
+    private var isUserSelectedImage: Boolean = false // 사용자가 갤러리에서 직접 선택했는지 추적
+
+
     private val dietLogViewModel: MealViewModel by viewModels {
         MealViewModelFactory(dietRepository, memberRepository, ingredientRepository)
     }
@@ -146,6 +149,8 @@ class DietLogFragment : Fragment() {
             dietImg = mealData.dietImg // 기존 이미지 URI 설정
             dietCategory = mealData.dietCategory
             score = mealData.score
+
+            isUserSelectedImage = false
 
             // 이미지 처리: Glide는 다양한 URI 형식을 자동으로 처리합니다.
             Glide.with(requireContext())
@@ -211,6 +216,9 @@ class DietLogFragment : Fragment() {
 
             formattedTime = DateTimeFormatter.ofPattern("a h:mm", Locale.ENGLISH).format(selectedTime)
             dietLogBinding.time12h.text = formattedTime
+
+            isUserSelectedImage = false
+
             checkAllValid()
         }
 
@@ -270,7 +278,7 @@ class DietLogFragment : Fragment() {
 
         // 라디오 버튼 : 식단 유형 선택
         dietLogBinding.selectDiet.setOnCheckedChangeListener { _, checkedId ->
-            val oldDietCategory = dietCategory // 이전 카테고리 저장
+            val oldDietCategory = dietCategory
             when(checkedId) {
                 dietLogBinding.btnBreakfast.id -> {
                     dietCategory = getString(R.string.breakfast)
@@ -285,21 +293,35 @@ class DietLogFragment : Fragment() {
                     dietCategory = getString(R.string.snack)
                 }
             }
-            // 이전에 설정된 이미지가 'android.resource://'로 시작하는 경우에만 기본 이미지 업데이트
-            // 즉, 사용자가 직접 이미지를 선택하지 않은 경우에만 카테고리에 따른 기본 이미지로 변경
-            if ((dietImg.startsWith("android.resource://") || dietImg.isBlank()) &&
-                !(isEditMode && (dietImg.startsWith("http://") || dietImg.startsWith("https://")))) {
+
+            // 사용자가 갤러리에서 직접 선택하지 않은 경우에만 이미지 변경
+            if (!isUserSelectedImage) {
                 val defaultImageResId = when (dietCategory) {
                     getString(R.string.breakfast) -> R.drawable.ic_meal_morning
                     getString(R.string.lunch) -> R.drawable.ic_meal_lunch
                     getString(R.string.dinner) -> R.drawable.ic_meal_dinner
                     getString(R.string.snack) -> R.drawable.ic_meal_snack
-                    else -> R.drawable.img_blank // 기본 카테고리가 아닌 경우
+                    else -> R.drawable.img_blank
                 }
-                val uri = Uri.parse("android.resource://${requireContext().packageName}/$defaultImageResId")
-                dietLogBinding.dietImg.setImageURI(uri)
-                dietImg = uri.toString() // dietImg 변수도 업데이트
+
+                // SVG를 파일로 변환
+                val imageFile = copyResourceToFile(requireContext(), defaultImageResId)
+                if (imageFile != null) {
+                    val fileUri = Uri.fromFile(imageFile)
+                    dietLogBinding.dietImg.setImageURI(fileUri)
+                    dietImg = fileUri.toString()
+                    Log.d("DietLogFragment", "Diet category changed, image updated: $dietImg")
+                } else {
+                    // 변환 실패 시 리소스 URI 사용
+                    val uri = Uri.parse("android.resource://${requireContext().packageName}/$defaultImageResId")
+                    dietLogBinding.dietImg.setImageURI(uri)
+                    dietImg = uri.toString()
+                    Log.w("DietLogFragment", "Failed to convert SVG, using resource URI: $dietImg")
+                }
+            } else {
+                Log.d("DietLogFragment", "User selected image preserved")
             }
+
             checkAllValid()
         }
 
@@ -411,7 +433,7 @@ class DietLogFragment : Fragment() {
                     requireActivity().finish()
                 }
             } else {
-                Toast.makeText(requireContext(), "서버 업로드에 실패했습니다. 로컬에 저장되었습니다.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "오늘은 이미 해당 식사 유형을 기록하셨습니다.", Toast.LENGTH_SHORT).show()
                 // 실패 시에도 finish()를 호출하여 이전 화면으로 돌아가도록 처리
                 requireActivity().setResult(Activity.RESULT_CANCELED)
                 requireActivity().finish()
@@ -512,6 +534,9 @@ class DietLogFragment : Fragment() {
     private fun setupImageSelectionListeners() {
         val imgSelector = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
             uri?.let {
+                // 사용자가 갤러리에서 이미지를 선택했음을 표시
+                isUserSelectedImage = true
+
                 // 1. 내부 캐시에 복사. 반환된 URI는 file:// URI 형태일 것.
                 val copiedFileUri = copyUriToInternal(requireContext(), uri)
                 if (copiedFileUri != null) {
@@ -554,7 +579,9 @@ class DietLogFragment : Fragment() {
         dietLogBinding.dietImg.setOnClickListener {
             SelectImgDialog(requireContext(),
                 {
-                    // 기본 이미지 설정
+                    // 기본 이미지 설정 - 이 경우는 사용자가 직접 선택한 것이 아님
+                    isUserSelectedImage = false
+
                     val defaultImageResId = when (dietCategory) {
                         getString(R.string.breakfast) -> R.drawable.ic_meal_morning
                         getString(R.string.lunch) -> R.drawable.ic_meal_lunch
@@ -562,20 +589,33 @@ class DietLogFragment : Fragment() {
                         getString(R.string.snack) -> R.drawable.ic_meal_snack
                         else -> R.drawable.img_blank
                     }
-                    val uri = Uri.parse("android.resource://${requireContext().packageName}/$defaultImageResId")
-                    dietLogBinding.dietImg.setImageURI(uri)
-                    dietImg = uri.toString() // dietImg 변수에도 리소스 URI 저장
-                    Log.d("DietLogFragment", "Default resource image set: $dietImg")
+
+                    // SVG를 파일로 변환
+                    val imageFile = copyResourceToFile(requireContext(), defaultImageResId)
+                    if (imageFile != null) {
+                        val fileUri = Uri.fromFile(imageFile)
+                        dietLogBinding.dietImg.setImageURI(fileUri)
+                        dietImg = fileUri.toString() // file:// URI로 저장
+                        Log.d("DietLogFragment", "Default resource image converted and set: $dietImg")
+                    } else {
+                        // 변환 실패 시 기본 처리
+                        val uri = Uri.parse("android.resource://${requireContext().packageName}/$defaultImageResId")
+                        dietLogBinding.dietImg.setImageURI(uri)
+                        dietImg = uri.toString()
+                        Log.w("DietLogFragment", "Failed to convert SVG, using resource URI: $dietImg")
+                    }
                     checkAllValid()
                 },
                 {
+                    // 갤러리 선택 - 이후에 imgSelector에서 isUserSelectedImage = true로 설정됨
                     imgSelector.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                 }
             ).show()
         }
 
-        // 초기 이미지 설정 (edit mode가 아닐 때만)
+        // 초기 이미지 설정 시에도 플래그 설정
         if (!isEditMode && dietImg.isBlank()) {
+            isUserSelectedImage = false // 초기 기본 이미지는 사용자 선택이 아님
             val defaultImageResId = when (dietCategory) {
                 getString(R.string.breakfast) -> R.drawable.ic_meal_morning
                 getString(R.string.lunch) -> R.drawable.ic_meal_lunch
@@ -583,10 +623,21 @@ class DietLogFragment : Fragment() {
                 getString(R.string.snack) -> R.drawable.ic_meal_snack
                 else -> R.drawable.img_blank
             }
-            val uri = Uri.parse("android.resource://${requireContext().packageName}/$defaultImageResId")
-            dietLogBinding.dietImg.setImageURI(uri)
-            dietImg = uri.toString()
-            Log.d("DietLogFragment", "Initial blank state default image set: $dietImg")
+
+            // SVG를 파일로 변환
+            val imageFile = copyResourceToFile(requireContext(), defaultImageResId)
+            if (imageFile != null) {
+                val fileUri = Uri.fromFile(imageFile)
+                dietLogBinding.dietImg.setImageURI(fileUri)
+                dietImg = fileUri.toString() // file:// URI로 저장
+                Log.d("DietLogFragment", "Initial SVG image converted and set: $dietImg")
+            } else {
+                // 변환 실패 시 리소스 URI 사용
+                val uri = Uri.parse("android.resource://${requireContext().packageName}/$defaultImageResId")
+                dietLogBinding.dietImg.setImageURI(uri)
+                dietImg = uri.toString()
+                Log.d("DietLogFragment", "Initial image set as resource URI: $dietImg")
+            }
         }
     }
 
@@ -647,8 +698,8 @@ class DietLogFragment : Fragment() {
     private fun copyUriToInternal(context: Context, uri: Uri): Uri? {
         return try {
             context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                // 캐시 디렉토리에 임시 파일 생성
-                val file = File(context.cacheDir, "temp_image_${System.currentTimeMillis()}.jpg")
+                // 캐시 디렉토리에 임시 파일 생성 (갤러리 선택 이미지임을 구분하기 위해 파일명 변경)
+                val file = File(context.cacheDir, "user_selected_image_${System.currentTimeMillis()}.jpg")
                 FileOutputStream(file).use { outputStream ->
                     inputStream.copyTo(outputStream)
                 }
@@ -663,25 +714,41 @@ class DietLogFragment : Fragment() {
 
     private fun copyResourceToFile(context: Context, resId: Int): File? {
         return try {
-            // InputStream을 사용하여 리소스 읽기
-            val inputStream = context.resources.openRawResource(resId)
-            inputStream.use {
-                val file = File(context.cacheDir, "temp_resource_image_${System.currentTimeMillis()}.jpg")
-                FileOutputStream(file).use { outputStream ->
-                    inputStream.copyTo(outputStream)
-                }
+            // SVG 리소스를 비트맵으로 변환
+            val drawable = ContextCompat.getDrawable(context, resId)
+            if (drawable == null) {
+                Log.e("DietLogFragment", "Failed to load drawable resource: $resId")
+                return null
+            }
 
-                // 파일 생성 확인
-                if (file.exists() && file.length() > 0) {
-                    Log.d("DietLogFragment", "Resource file created successfully: ${file.absolutePath}, size: ${file.length()}")
-                    file
-                } else {
-                    Log.e("DietLogFragment", "Resource file creation failed or empty")
-                    null
-                }
+            // 비트맵 생성 (SVG를 래스터화)
+            val bitmap = Bitmap.createBitmap(
+                drawable.intrinsicWidth.takeIf { it > 0 } ?: 512,
+                drawable.intrinsicHeight.takeIf { it > 0 } ?: 512,
+                Bitmap.Config.ARGB_8888
+            )
+            val canvas = android.graphics.Canvas(bitmap)
+            drawable.setBounds(0, 0, canvas.width, canvas.height)
+            drawable.draw(canvas)
+
+            // 파일로 저장 (기본 이미지임을 구분하기 위해 파일명 변경)
+            val file = File(context.cacheDir, "default_resource_image_${System.currentTimeMillis()}.jpg")
+            FileOutputStream(file).use { outputStream ->
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream)
+            }
+
+            // 비트맵 메모리 해제
+            bitmap.recycle()
+
+            if (file.exists() && file.length() > 0) {
+                Log.d("DietLogFragment", "Resource file created successfully: ${file.absolutePath}, size: ${file.length()}")
+                file
+            } else {
+                Log.e("DietLogFragment", "Resource file creation failed or empty")
+                null
             }
         } catch (e: Exception) {
-            Log.e("DietLogFragment", "리소스 이미지 복사 실패", e)
+            Log.e("DietLogFragment", "리소스 이미지 변환 실패", e)
             null
         }
     }

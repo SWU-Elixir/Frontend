@@ -1,21 +1,17 @@
 package com.example.elixir.calendar.network.db
 
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import com.example.elixir.calendar.data.DietLogEntity
 import com.example.elixir.calendar.data.MealDto
 import com.example.elixir.calendar.data.ScoreData
 import com.example.elixir.calendar.data.toDto
 import com.example.elixir.calendar.network.DietApi
 import com.example.elixir.calendar.network.response.GetMealResponse
-import com.example.elixir.chatbot.DietLogListResponse
 import com.google.gson.Gson
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
-import retrofit2.Response
 import java.io.File
 
 class DietLogRepository (private val dietLogDao: DietLogDao, private val dietApi: DietApi) {
@@ -146,16 +142,15 @@ class DietLogRepository (private val dietLogDao: DietLogDao, private val dietApi
     }
 
     // 최근 N일간의 식단 기록 가져오기
-    suspend fun getDietLogsForLastDays(days: Int): List<DietLogEntity> {
+    suspend fun getDietLogsForLastDays(days: Int): List<MealDto>? {
         return try {
-            val sdf = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault())
-            val nowDate = java.util.Date()
-            val fromDate = java.util.Date(nowDate.time - days * 24 * 60 * 60 * 1000L)
-            val from = sdf.format(fromDate)
-            dietLogDao.getDietLogsFromDate(from)
+            val response = dietApi.getDietLogRecent(days)
+            if (response.isSuccessful) response.body()?.data else null
         } catch (e: Exception) {
-            Log.e("DietRepo", "getDietLogsForLastDays 오류: ${e.message}")
-            emptyList()
+            Log.e("DietRepo", "getDietLogsByDate 오류: ${e.message}")
+            null
         }
     }
+
+
 }

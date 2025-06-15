@@ -98,21 +98,24 @@ class MyPageFragment : Fragment() {
     }
 
     private fun loadTop3Achievements() {
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val api = RetrofitClient.instanceMemberApi
                 val response = api.getTop3Achievements()
-                if (response.status == 200) {
-                    val achievements = response.data
-                    val badgeList = if (achievements.isNotEmpty()) {
-                        achievements.map {
-                            Uri.parse(it.achievementImageUrl ?: "")
+                myPageBinding?.let { binding ->
+                    if (response.status == 200) {
+                        val achievements = response.data
+                        val badgeList = if (achievements.isNotEmpty()) {
+                            achievements.map {
+                                Uri.parse(it.achievementImageUrl ?: "")
+                            }
+                        } else {
+                            emptyList()
                         }
-                    } else {
-                        emptyList()
+                        binding.badgeNo.visibility =
+                            if (badgeList.isEmpty()) View.VISIBLE else View.GONE
+                        binding.mypageBadgeGrid.adapter = MyPageCollectionAdapter(badgeList, true)
                     }
-                    binding.badgeNo.visibility = if (badgeList.isEmpty()) View.VISIBLE else View.GONE
-                    binding.mypageBadgeGrid.adapter = MyPageCollectionAdapter(badgeList, true)
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "뱃지 목록 로드 실패", e)
@@ -122,21 +125,23 @@ class MyPageFragment : Fragment() {
     }
 
     private fun loadTop3Recipes() {
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val api = RetrofitClient.instanceMemberApi
                 val response = api.getMyRecipes()
-                if (response.status == 200) {
-                    val recipes = response.data.take(3)
-                    val recipeList = if (recipes.isNotEmpty()) {
-                        recipes.map {
-                            Uri.parse(it.imageUrl ?: "")
+                myPageBinding?.let { binding ->
+                    if (response.status == 200) {
+                        val recipes = response.data.take(3)
+                        val recipeList = if (recipes.isNotEmpty()) {
+                            recipes.map {
+                                Uri.parse(it.imageUrl ?: "")
+                            }
+                        } else {
+                            emptyList()
                         }
-                    } else {
-                        emptyList()
+                        binding.MyRecipeNo.visibility = if (recipeList.isEmpty()) View.VISIBLE else View.GONE
+                        binding.mypageRecipeGrid.adapter = MyPageCollectionAdapter(recipeList, false)
                     }
-                    binding.MyRecipeNo.visibility = if (recipeList.isEmpty()) View.VISIBLE else View.GONE
-                    binding.mypageRecipeGrid.adapter = MyPageCollectionAdapter(recipeList, false)
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "레시피 목록 로드 실패", e)
@@ -146,19 +151,22 @@ class MyPageFragment : Fragment() {
     }
 
     private fun loadTop3Scraps() {
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val api = RetrofitClient.instanceMemberApi
                 val response = api.getScrapRecipes()
-                if (response.status == 200) {
-                    val scraps = response.data.take(3)
-                    val scrapList = if (scraps.isNotEmpty()) {
-                        scraps.map { Uri.parse(it.imageUrl ?: "") }
-                    } else {
-                        emptyList()
+                myPageBinding?.let { binding ->
+                    if (response.status == 200) {
+                        val scraps = response.data.take(3)
+                        val scrapList = if (scraps.isNotEmpty()) {
+                            scraps.map { Uri.parse(it.imageUrl ?: "") }
+                        } else {
+                            emptyList()
+                        }
+                        binding.MyScrapNo.visibility =
+                            if (scrapList.isEmpty()) View.VISIBLE else View.GONE
+                        binding.mypageScrapGrid.adapter = MyPageCollectionAdapter(scrapList, false)
                     }
-                    binding.MyScrapNo.visibility = if (scrapList.isEmpty()) View.VISIBLE else View.GONE
-                    binding.mypageScrapGrid.adapter = MyPageCollectionAdapter(scrapList, false)
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "스크랩 목록 로드 실패", e)

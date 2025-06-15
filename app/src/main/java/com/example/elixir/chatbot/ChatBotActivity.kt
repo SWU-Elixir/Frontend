@@ -179,7 +179,7 @@ class ChatBotActivity : ToolbarActivity() {
                                 title = meal.name,
                                 subtitle = "",
                                 badgeNumber = meal.score,
-                                ingredientTags = meal.ingredientTagIds
+                                ingredientTags = meal.ingredientTagId
                             )
                         } ?: emptyList()
                         chatList.add(ChatItem.ChatMealList(meals, requestDto))

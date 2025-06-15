@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.elixir.RetrofitClient
 import com.example.elixir.calendar.data.DietLogData
+import com.example.elixir.calendar.data.DietLogEntity
 import com.example.elixir.calendar.data.MealDto
 import com.example.elixir.calendar.network.db.DietLogRepository
 import com.example.elixir.calendar.network.response.GetScoreResponse
@@ -220,18 +221,12 @@ class MealViewModel(
     }
 
     // 전체 식단 기록 목록 가져오기 (최근 N일)
-    @RequiresApi(Build.VERSION_CODES.O)
     fun getAllDietLogs(days: Int = 30) {
         viewModelScope.launch {
-            try {
-                val dietEntities = dietRepository.getDietLogsForLastDays(days)
-                // DietLogEntity -> MealDto 변환 (memberId는 필요시 0 또는 실제 값)
-                val mealDtos = dietEntities.map { it.toMealDto(0) } // memberId는 필요시 0으로 설정
-                _allDietLogs.value = mealDtos
-            } catch (e: Exception) {
-                Log.e("MealViewModel", "전체 식단 로그 가져오기 실패: ${e.localizedMessage}")
-                _allDietLogs.value = emptyList()
-            }
+            val result = dietRepository.getDietLogsForLastDays(days)
+            _dailyDietLogs.value = result ?: emptyList()
         }
     }
+
+
 }
