@@ -11,6 +11,8 @@ import com.example.elixir.R
 import com.example.elixir.databinding.ItemRecipeListCommentBinding
 import com.example.elixir.recipe.data.CommentData
 import com.example.elixir.recipe.data.CommentItem
+import org.threeten.bp.LocalDateTime
+import org.threeten.bp.format.DateTimeFormatter
 
 interface CommentActionListener {
     fun onEditComment(commentId: Int, commentText: String)
@@ -35,12 +37,16 @@ class RecipeCommentAdapter(
 
             Log.d("RecipeCommentAdapter", "${item.title}, ${item.nickName}, ${item.content}, ${item.updatedAt}")
 
+            // 회원 칭호와 닉네임: 칭호의 경우, 없으면 일반으로 표시
             binding.memberTitle.text = if(item.title.isNullOrBlank()) "일반" else item.title
             binding.memberNickname.text = item.nickName
             
-            // 댓글 내용과 작성일 설정
+            // 댓글 내용
             binding.commentText.text = item.content
-            binding.dateText.text = item.updatedAt
+
+            // 날짜 포맷 변경 후 화면에 띄워주기
+            val date = stringToLocalDateTime(item.updatedAt)
+            binding.dateText.text = localDateTimeToString(date)
 
             // 메뉴 버튼 클릭 시 팝업 메뉴 표시
             binding.menuButton.setOnClickListener {
@@ -85,4 +91,10 @@ class RecipeCommentAdapter(
         return comments.size
     }
 
+    // 날짜 변환 함수
+    private fun stringToLocalDateTime(date: String): LocalDateTime
+            = LocalDateTime.parse(date, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+
+    private fun localDateTimeToString(date: LocalDateTime): String
+            = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
 }

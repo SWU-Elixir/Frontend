@@ -8,14 +8,17 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import com.example.elixir.R
 
-class DeleteDialog(private val act: Activity) {
+class DeleteDialog(
+    private val act: Activity,
+    private val onConfirm: () -> Unit // 확인 버튼 콜백 추가
+    ) {
     @SuppressLint("InflateParams")
-    val dialogView = LayoutInflater.from(act).inflate(R.layout.dialog_exit_confirm, null, false)!!
+    val dialogView = LayoutInflater.from(act).inflate(R.layout.dialog_delete_confirm, null, false)!!
     fun show(){
         val dialog = AlertDialog.Builder(act)
             .setView(dialogView)
             .setPositiveButton("확인") { _, _ ->
-                act.finish()
+                onConfirm() // 확인 버튼 클릭 시 콜백 호출
             }
             .setNegativeButton("취소") { dialog, _ ->
                 dialog.dismiss()

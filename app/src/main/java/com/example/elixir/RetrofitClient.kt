@@ -7,8 +7,8 @@ import com.example.elixir.ingredient.network.IngredientApi
 import com.example.elixir.challenge.network.ChallengeApi
 import com.example.elixir.member.network.MemberApi
 import com.example.elixir.chatbot.ChatApi
-import com.example.elixir.recipe.network.CommentApi
-import com.example.elixir.recipe.network.RecipeApi
+import com.example.elixir.recipe.network.api.CommentApi
+import com.example.elixir.recipe.network.api.RecipeApi
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
@@ -25,7 +25,7 @@ import org.threeten.bp.LocalDateTime
 
 object RetrofitClient {
     // 서버 주소
-    private const val BASE_URL = "https://port-0-elixir-backend-g0424l70py8py.gksl2.cloudtype.app/"
+    private const val BASE_URL = "https://sean-test.shop/"
     private var authToken: String? = "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJBQGV4YW1wbGUuY29tIiwiYXV0aCI6IlVTRVIiLCJleHAiOjE3NDk3MzA1Mzh9.ZMDAQ0mWW0R5_FQR3nrCRyc6CFp81JA7Dic8jhvqrtlQvUJm8Vn6cfMfMd29PC-u" // Bearer 토큰을 저장할 변수
     private var isRefreshing = false // 토큰 갱신 중인지 여부를 추적하는 플래그
 

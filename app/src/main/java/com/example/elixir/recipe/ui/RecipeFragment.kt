@@ -197,9 +197,7 @@ class RecipeFragment : Fragment() {
         _binding = null
     }
 
-    /**
-     * FAB 클릭 이벤트 설정
-     */
+    // 등록 설정
     private fun setupFabClickListener() {
         binding.fab.setOnClickListener {
             val intent = Intent(requireContext(), ToolbarActivity::class.java).apply {

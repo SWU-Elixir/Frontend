@@ -4,14 +4,13 @@ import android.util.Log
 import com.example.elixir.recipe.data.dao.RecipeDao
 import com.example.elixir.recipe.data.entity.RecipeEntity
 import com.example.elixir.recipe.data.entity.toDto
-import com.example.elixir.recipe.network.RecipeApi
+import com.example.elixir.recipe.network.api.RecipeApi
 import com.google.gson.Gson
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
-import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
