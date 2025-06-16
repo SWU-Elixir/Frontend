@@ -54,6 +54,12 @@ class RecipeListAdapter(
             .error(R.drawable.img_blank)
             .into(holder.binding.recipePicture)
 
+        if(item.categoryType == "양념_소스_잼")
+            item.categoryType = "양념/소스/잼"
+
+        else if (item.categoryType == "음료_차")
+            item.categoryType = "음료/차"
+
         // 텍스트 정보 설정
         holder.binding.recipeNameText.text = item.title
         holder.binding.categorySlowAging.text = item.categorySlowAging
@@ -81,6 +87,7 @@ class RecipeListAdapter(
             if (item.scrappedByCurrentUser) R.drawable.ic_recipe_bookmark_selected
             else R.drawable.ic_recipe_bookmark_normal
         )
+
         holder.binding.heartButton.setBackgroundResource(
             if (item.likedByCurrentUser) R.drawable.ic_recipe_heart_selected
             else R.drawable.ic_recipe_heart_normal
