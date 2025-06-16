@@ -20,7 +20,10 @@ class RecipeStepLogAdapter(
         private var textWatcher: android.text.TextWatcher? = null
 
         fun bind(step: RecipeStepData, position: Int) = with(binding) {
+            // 삭제
             btnDel.setOnClickListener { onDeleteClick(position) }
+
+            // 이미지 클릭
             stepImg.setOnClickListener { onImageClick(position) }
             Glide.with(stepImg.context)
                 .load(step.stepImg)
