@@ -104,6 +104,10 @@ class FindPasswordFragment :Fragment() {
             if (isEmailValid(email)) {
                 memberViewModel.requestEmailVerification(email)
                 binding.checkEmail.isEnabled = false // 중복 클릭 방지
+                binding.textVerify.visibility = View.VISIBLE
+                binding.verify.visibility = View.VISIBLE
+                binding.checkVerify.visibility = View.VISIBLE
+            } else {
             }
         }
 
@@ -116,9 +120,10 @@ class FindPasswordFragment :Fragment() {
                     // 인증번호 입력란, 확인 버튼 활성화
                     binding.verify.isEnabled = true
                     binding.checkVerify.isEnabled = true
-                    binding.textVerify.visibility = View.GONE
-                    binding.verify.visibility = View.GONE
-                    binding.checkVerify.visibility = View.GONE
+                    // 이메일 인증 성공 시 인증번호 입력 UI가 보여야 하므로 아래 줄들은 제거하거나 VISIBLE로 변경
+                    binding.textVerify.visibility = View.VISIBLE // GONE -> VISIBLE로 변경
+                    binding.verify.visibility = View.VISIBLE     // GONE -> VISIBLE로 변경
+                    binding.checkVerify.visibility = View.VISIBLE// GONE -> VISIBLE로 변경
 
                     // 이메일 입력 고정 (수정 불가)
                     binding.registEmail.isEnabled = false
