@@ -126,7 +126,7 @@
                 \n\n☛ 동일 식단으로 여러 미션 동시 클리어 가능 \n  하나의 식단 기록으로 같은 단계 내 여러 미션을 동시에 완료할 수 있습니다.
                 \n  예) 아침 식단 기록 미션과 딸기 챌린지 미션이 동일 단계에 있을 경우, 딸기를 포함한 아침 식단을 기록하면 두 미션이 동시에 완료됩니다."
                 android:textSize="15sp"
-                android:textColor="@color/elixir_gray"
+                android:textColor="@color/elixir_darkgray"
                 android:fontFamily="@font/pretendard_medium"/>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

@@ -13,8 +13,10 @@
         android:layout_weight="1"
         android:adjustViewBounds="true"
         android:clipToOutline="true"
-        android:minHeight="100dp"
-        android:minWidth="100dp"
+        android:minHeight="140dp"
+        android:maxHeight="140dp"
+        android:minWidth="140dp"
+        android:maxWidth="140dp"
         android:layout_marginBottom="8dp"/>
 
     <TextView
