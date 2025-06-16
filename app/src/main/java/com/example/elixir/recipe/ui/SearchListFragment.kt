@@ -11,6 +11,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.AdapterView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.elixir.R
 import com.example.elixir.RetrofitClient
@@ -19,7 +20,12 @@ import com.example.elixir.ingredient.network.IngredientDB
 import com.example.elixir.ingredient.network.IngredientRepository
 import com.example.elixir.ingredient.viewmodel.IngredientService
 import com.example.elixir.ingredient.viewmodel.IngredientViewModel
+import com.example.elixir.ingredient.viewmodel.IngredientViewModelFactory
+import com.example.elixir.network.AppDatabase
 import com.example.elixir.recipe.data.RecipeData
+import com.example.elixir.recipe.data.RecipeRepository
+import com.example.elixir.recipe.viewmodel.RecipeViewModel
+import com.example.elixir.recipe.viewmodel.RecipeViewModelFactory
 import java.math.BigInteger
 
 /**
@@ -37,16 +43,55 @@ class SearchListFragment : Fragment() {
     private lateinit var sampleRecipes: List<RecipeData>
     private var hasNavigatedToSearch = false // 중복 이동 방지 플래그
 
+    private lateinit var recipeRepository: RecipeRepository
+    private val recipeViewModel: RecipeViewModel by viewModels {
+        RecipeViewModelFactory(recipeRepository)
+    }
+
+    private lateinit var ingredientRepository: IngredientRepository
+    private lateinit var ingredientService: IngredientService
+
+    private val ingredientViewModel: IngredientViewModel by viewModels {
+        IngredientViewModelFactory(ingredientService)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentRecipeSearchListBinding.inflate(inflater, container, false)
+        ingredientRepository = IngredientRepository(
+            RetrofitClient.instanceIngredientApi,
+            IngredientDB.getInstance(requireContext()).ingredientDao()
+        )
+        ingredientService = IngredientService(ingredientRepository)
+
+        recipeRepository = RecipeRepository(
+            RetrofitClient.instanceRecipeApi,
+            AppDatabase.getInstance(requireContext()).recipeDao()
+        )
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        // 어댑터 초기화
+        ingredientViewModel.ingredients.observe(viewLifecycleOwner) { ingredientList ->
+            recipeListAdapter = RecipeListAdapter(
+                sampleRecipes.toMutableList(),
+                ingredientList,
+                onBookmarkClick = { recipe ->
+                    recipe.scrappedByCurrentUser = !recipe.scrappedByCurrentUser
+                    recipeListAdapter.notifyItemChanged(sampleRecipes.indexOf(recipe))
+                },
+                onHeartClick = { recipe ->
+                    recipe.likedByCurrentUser = !recipe.likedByCurrentUser
+                    recipeListAdapter.notifyItemChanged(sampleRecipes.indexOf(recipe))
+                },
+                fragmentManager = parentFragmentManager
+            )
+            binding.recipeList.adapter = recipeListAdapter
+        }
 
         // 1. 검색어 초기화 및 설정
         initializeSearchKeyword()
@@ -70,6 +115,7 @@ class SearchListFragment : Fragment() {
     private fun initializeSearchKeyword() {
         val keyword = arguments?.getString("search_keyword")?.trim()
         binding.searchEditText.setText(keyword)
+        recipeViewModel.searchRecipes(keyword!!, 0, 10, null, null)
     }
 
     /**
@@ -201,32 +247,8 @@ class SearchListFragment : Fragment() {
      * 레시피 리스트 초기화
      */
     private fun initializeRecipeList() {
-        val ingredientRepository = IngredientRepository(
-            RetrofitClient.instanceIngredientApi,
-            IngredientDB.getInstance(requireContext()).ingredientDao())
-        val ingredientService = IngredientService(ingredientRepository)
-        val ingredientViewModel = IngredientViewModel(ingredientService)
-
         // RecyclerView 설정
         binding.recipeList.layoutManager = LinearLayoutManager(requireContext())
-
-        // 어댑터 초기화
-        ingredientViewModel.ingredients.observe(viewLifecycleOwner) { ingredientList ->
-            recipeListAdapter = RecipeListAdapter(
-                sampleRecipes.toMutableList(),
-                ingredientList,
-                onBookmarkClick = { recipe ->
-                    recipe.scrappedByCurrentUser = !recipe.scrappedByCurrentUser
-                    recipeListAdapter.notifyItemChanged(sampleRecipes.indexOf(recipe))
-                },
-                onHeartClick = { recipe ->
-                    recipe.likedByCurrentUser = !recipe.likedByCurrentUser
-                    recipeListAdapter.notifyItemChanged(sampleRecipes.indexOf(recipe))
-                },
-                fragmentManager = parentFragmentManager
-            )
-            binding.recipeList.adapter = recipeListAdapter
-        }
 
         // 검색어가 있으면 필터 적용
         val keyword = binding.searchEditText.text.toString()

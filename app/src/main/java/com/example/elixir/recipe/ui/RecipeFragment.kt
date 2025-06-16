@@ -73,6 +73,11 @@ class RecipeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentRecipeBinding.inflate(inflater, container, false)
+
+        parentFragmentManager.setFragmentResultListener("refresh_recipes", this) { _, _ ->
+            Log.d("RecipeFragment", "recipeViewModel.getRecipes 갱신")
+            recipeViewModel.getRecipes(0, 10, selectedCategoryType, selectedSlowAging)
+        }
         return binding.root
     }
 
@@ -130,6 +135,9 @@ class RecipeFragment : Fragment() {
                     val newRecipe = Gson().fromJson(data, RecipeData::class.java)
                     recipeList.add(newRecipe)
                     recipeListAdapter.updateData(recipeList)
+
+                    // 데이터 갱신
+                    recipeViewModel.getRecipes(0, 0, selectedCategoryType, selectedSlowAging)
                 }
             }
         }
@@ -197,22 +205,19 @@ class RecipeFragment : Fragment() {
         _binding = null
     }
 
-    /**
-     * FAB 클릭 이벤트 설정
-     */
+    // 등록 설정
     private fun setupFabClickListener() {
         binding.fab.setOnClickListener {
             val intent = Intent(requireContext(), ToolbarActivity::class.java).apply {
                 putExtra("mode", 9) // 레시피 등록 모드
             }
             recipeRegisterLauncher.launch(intent)
+            // 데이터 갱신
+            recipeViewModel.getRecipes(0, 0, selectedCategoryType, selectedSlowAging)
         }
     }
 
-    /**
-     * 리셋 버튼 표시 여부 업데이트
-     * spinner 2개 중 하나라도 선택되어 있을 시 리셋 버튼 표시
-     */
+    // 검색 스피너 리셋 버튼 활성화
     private fun updateResetButtonVisibility() {
         val isMethodSelected = binding.spinnerDifficulty.selectedItemPosition != 0
         val isTypeSelected = binding.spinnerType.selectedItemPosition != 0
@@ -220,9 +225,7 @@ class RecipeFragment : Fragment() {
             if (isMethodSelected || isTypeSelected) View.VISIBLE else View.GONE
     }
 
-    /**
-     * 스피너 설정 및 이벤트 처리
-     */
+    // 스피너 설정 및 이벤트 처리
     private fun setupSpinners() {
         // 저속노화 방법 스피너 설정
         setupMethodSpinner()
@@ -234,9 +237,7 @@ class RecipeFragment : Fragment() {
         setupResetButton()
     }
 
-    /**
-     * 저속노화 방법 스피너 설정
-     */
+    // 저속노화 스피너
     private fun setupMethodSpinner() {
         val methodItems = resources.getStringArray(R.array.method_list).toList()
         val methodAdapter = RecipeListSpinnerAdapter(requireContext(), methodItems)
@@ -275,9 +276,7 @@ class RecipeFragment : Fragment() {
     }
 
 
-    /**
-     * 레시피 종류 스피너 설정
-     */
+    // 레시피 종류 스피너
     private fun setupTypeSpinner() {
         val typeItems = resources.getStringArray(R.array.type_list).toList()
         val typeAdapter = RecipeListSpinnerAdapter(requireContext(), typeItems)
@@ -296,6 +295,10 @@ class RecipeFragment : Fragment() {
                     return
                 }
                 selectedCategoryType = parent.getItemAtPosition(position).toString()
+                if(selectedCategoryType == "음료/차")
+                    selectedCategoryType = "음료_차"
+                else if(selectedCategoryType == "양념/소스/잼")
+                    selectedCategoryType = "양념_소스_잼"
 
                 // ViewModel 함수 호출
                 recipeViewModel.getRecipes(
@@ -313,9 +316,7 @@ class RecipeFragment : Fragment() {
         }
     }
 
-    /**
-     * 리셋 버튼 클릭 이벤트 설정
-     */
+    // 리셋 버튼 클릭 이벤트
     private fun setupResetButton() {
         binding.resetButton.setOnClickListener {
             resetSpinners()

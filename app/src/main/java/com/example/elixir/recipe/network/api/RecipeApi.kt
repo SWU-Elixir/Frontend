@@ -1,4 +1,4 @@
-package com.example.elixir.recipe.network
+package com.example.elixir.recipe.network.api
 
 import com.example.elixir.chatbot.RecipeListResponse
 import com.example.elixir.network.GetStringResponse
@@ -42,8 +42,8 @@ interface RecipeApi {
         @Query("keyword") keyword: String,
         @Query("page") page: Int,
         @Query("size") size: Int,
-        @Query("categoryType") categoryType: String,
-        @Query("categorySlowAging") categorySlowAging: String
+        @Query("categoryType") categoryType: String?,
+        @Query("categorySlowAging") categorySlowAging: String?
     ): Response<GetRecipeListResponse>
 
     @GET("/api/recipe/search/keyword")

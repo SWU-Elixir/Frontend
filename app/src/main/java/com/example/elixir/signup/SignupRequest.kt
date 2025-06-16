@@ -9,5 +9,5 @@ data class SignupRequest(
     val allergies: List<String>,
     val mealStyles: List<String>,
     val recipeStyles: List<String>,
-    val reasons: List<String>
+    val reasons: List<String>?
 )

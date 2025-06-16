@@ -4,14 +4,13 @@ import android.util.Log
 import com.example.elixir.recipe.data.dao.RecipeDao
 import com.example.elixir.recipe.data.entity.RecipeEntity
 import com.example.elixir.recipe.data.entity.toDto
-import com.example.elixir.recipe.network.RecipeApi
+import com.example.elixir.recipe.network.api.RecipeApi
 import com.google.gson.Gson
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
-import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
@@ -64,15 +63,23 @@ class RecipeRepository(private val api: RecipeApi, private val dao: RecipeDao) {
         keyword: String,
         page: Int,
         size: Int,
-        categoryType: String,
-        categorySlowAging: String
-    ): List<RecipeEntity> = withContext(Dispatchers.IO) {
-        val response = api.searchRecipe(keyword, page, size, categoryType, categorySlowAging)
-        if (response.isSuccessful) {
-            // data가 List<RecipeData>인 경우
-            //response.body()?.data?.toEntities()?.let { dao.insertRecipes(it) }
+        categoryType: String?,
+        categorySlowAging: String?
+    ): List<RecipeData> = withContext(Dispatchers.IO) {
+        try {
+            val response = api.searchRecipe(keyword, page, size, categoryType, categorySlowAging)
+            if (response.isSuccessful) {
+                val body = response.body()
+                val recipes = body?.data?.content?.map { it.toRecipeData() } ?: emptyList()
+                recipes.map { it.toEntity() }
+                return@withContext recipes
+            } else {
+                Log.e("RecipeRepository", "검색 실패: ${response.errorBody()?.string()}")
+            }
+        }catch (e: Exception) {
+            Log.e("RecipeRepository", "검색 예외 발생", e)
         }
-        return@withContext dao.searchRecipes(keyword, page, size, categoryType, categorySlowAging)
+        return@withContext emptyList()
     }
 
 

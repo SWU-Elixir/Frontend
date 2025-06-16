@@ -1,4 +1,4 @@
-package com.example.elixir.recipe.network
+package com.example.elixir.recipe.network.api
 
 import com.example.elixir.recipe.network.request.CommentRequest
 import com.example.elixir.network.GetStringResponse

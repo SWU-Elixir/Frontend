@@ -7,8 +7,8 @@ import com.example.elixir.ingredient.network.IngredientApi
 import com.example.elixir.challenge.network.ChallengeApi
 import com.example.elixir.member.network.MemberApi
 import com.example.elixir.chatbot.ChatApi
-import com.example.elixir.recipe.network.CommentApi
-import com.example.elixir.recipe.network.RecipeApi
+import com.example.elixir.recipe.network.api.CommentApi
+import com.example.elixir.recipe.network.api.RecipeApi
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response

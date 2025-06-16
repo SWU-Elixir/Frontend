@@ -4,7 +4,7 @@ import com.example.elixir.recipe.data.dao.CommentDao
 import com.example.elixir.recipe.data.entity.CommentEntity
 import com.example.elixir.recipe.data.entity.toEntity
 import com.example.elixir.recipe.data.entity.toRequest
-import com.example.elixir.recipe.network.CommentApi
+import com.example.elixir.recipe.network.api.CommentApi
 import com.example.elixir.network.GetStringResponse
 import com.example.elixir.recipe.network.response.GetCommentResponse
 

@@ -1,6 +1,5 @@
 package com.example.elixir.recipe.ui
 
-import android.R.attr.fragment
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
@@ -12,9 +11,7 @@ import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
@@ -22,6 +19,7 @@ import com.example.elixir.R
 import com.example.elixir.RetrofitClient
 import com.example.elixir.ToolbarActivity
 import com.example.elixir.databinding.FragmentRecipeDetailBinding
+import com.example.elixir.dialog.DeleteDialog
 import com.example.elixir.ingredient.network.IngredientDB
 import com.example.elixir.ingredient.network.IngredientRepository
 import com.example.elixir.ingredient.viewmodel.IngredientService
@@ -56,9 +54,14 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
     private var _binding: FragmentRecipeDetailBinding? = null
     private val binding get() = _binding!!
 
+    // Repository
     private lateinit var recipeRepository: RecipeRepository
     private lateinit var memberRepository: MemberRepository
     private lateinit var commentRepository: CommentRepository
+
+    private val recipeViewModel: RecipeViewModel by viewModels {
+        RecipeViewModelFactory(recipeRepository)
+    }
 
     // 댓글 관련 변수
     private lateinit var commentAdapter: RecipeCommentAdapter
@@ -66,24 +69,34 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
     private var editingCommentId: Int = -1
     private var userNickname: String? = null
 
-
+    // 댓글 뷰모델
     private val commentViewModel: CommentViewModel by viewModels {
         CommentViewModelFactory(commentRepository)
     }
 
+    // 멤버 뷰모델
+    private val memberViewModel: MemberViewModel by viewModels {
+        MemberViewModelFactory(MemberService(memberRepository))
+    }
+
+    // 수정할 시 launcher 띄움
     private lateinit var editRecipeLauncher: ActivityResultLauncher<Intent>
+    private var recipeId = -1
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        // 바인딩에 프래그먼트 할당
         _binding = FragmentRecipeDetailBinding.inflate(inflater, container, false)
-        // 수정 런처 설정
+        // 수정 페이지 런처 설정 -> 레시피 등록 페이지에서 수정 후 돌아올 때
         editRecipeLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
-                Toast.makeText(requireContext(), "수정 완료", Toast.LENGTH_SHORT).show()
+                // 수정한 레시피로 상세 페이지 정보 불러오기
+                recipeId = result.data?.getIntExtra("recipeId", -1) ?: -1
+                recipeViewModel.getRecipeById(recipeId)
             }
         }
         return binding.root
@@ -91,34 +104,22 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        // --------------------- Repository 초기화 ---------------------
+        // 레시피
+        recipeRepository = RecipeRepository(RetrofitClient.instanceRecipeApi,
+            AppDatabase.getInstance(requireContext()).recipeDao())
 
-        // DB, API 초기화
-        val recipeDao = AppDatabase.getInstance(requireContext()).recipeDao()
-        val recipeApi = RetrofitClient.instanceRecipeApi
-        recipeRepository = RecipeRepository(recipeApi, recipeDao)
+        // 회원
+        memberRepository = MemberRepository(RetrofitClient.instanceMemberApi,
+            MemberDB.getInstance(requireContext()).memberDao())
 
-        val memberDao = MemberDB.getInstance(requireContext()).memberDao()
-        val memberApi = RetrofitClient.instanceMemberApi
-        memberRepository = MemberRepository(memberApi, memberDao)
-
-        val memberService = MemberService(memberRepository) // 필요 파라미터 전달
-
-        val memberViewModel: MemberViewModel by viewModels {
-            MemberViewModelFactory(memberService)
-        }
-
-        // 댓글 api, dao
-        val commentDao = AppDatabase.getInstance(requireContext()).commentDao()
-        val commentApi = RetrofitClient.instanceCommentApi
-        commentRepository = CommentRepository(commentApi, commentDao)
+        // 댓글
+        commentRepository = CommentRepository(RetrofitClient.instanceCommentApi,
+            AppDatabase.getInstance(requireContext()).commentDao())
 
         // ------------------------ 데이터 적용 ------------------------
-        // arguments에서 JSON 문자열 꺼내서 객체로 변환
-        val recipeId = arguments?.getInt("recipeId") ?: return
-        val recipeViewModel: RecipeViewModel by viewModels {
-            RecipeViewModelFactory(recipeRepository)
-        }
-
+        // arguments에서 레시피 아이디 꺼내서 서버로부터 레시피 불러오기
+        recipeId = arguments?.getInt("recipeId") ?: return
         recipeViewModel.getRecipeById(recipeId)
 
         // 레시피 기본 정보 설정
@@ -170,9 +171,10 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                     else R.drawable.ic_recipe_heart_normal
                 )
 
-                // 북마크 버튼 클릭 이벤트 처리
+                // 스크랩 버튼 클릭 이벤트 처리
                 binding.bookmarkButton.setOnClickListener{
                     recipeData.scrappedByCurrentUser = !recipeData.scrappedByCurrentUser
+                    // 스크랩 상태에 따라 카운트 증가/감소
                     binding.bookmarkButton.setBackgroundResource(
                         if(recipeData.scrappedByCurrentUser) R.drawable.ic_recipe_bookmark_selected
                         else R.drawable.ic_recipe_bookmark_normal
@@ -216,8 +218,8 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                     )
                 }
 
+                // 회원 정보 불러오기
                 memberViewModel.loadMemberProfile()
-
                 memberViewModel.profile.observe(viewLifecycleOwner) { profile ->
                     profile?.let {
                         userNickname = profile.nickname
@@ -237,8 +239,8 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                     // 메뉴 아이템 클릭 이벤트 처리
                     popupMenu.setOnMenuItemClickListener { menuItem ->
                         when (menuItem.itemId) {
+                            // 레시피 수정 시 레시피 아이디랑 실행 모드 전달
                             R.id.menu_edit -> {
-                                // 레시피 아이디랑 실행 모드 전달
                                 val intent = Intent(requireContext(), ToolbarActivity::class.java).apply {
                                     putExtra("mode", 9)
                                     putExtra("recipeId", recipeId)
@@ -246,16 +248,11 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                                 editRecipeLauncher.launch(intent)
                                 true
                             }
+                            // 레시피 삭제
                             R.id.menu_delete -> {
-                                AlertDialog.Builder(requireContext())
-                                    .setTitle("레시피 삭제")
-                                    .setMessage("레시피를 삭제하시겠습니까?")
-                                    .setPositiveButton("삭제") { _, _ ->
-                                        // 1. ViewModel의 삭제 함수 호출
-                                        recipeViewModel.deleteRecipe(recipeId)
-                                    }
-                                    .setNegativeButton("취소", null)
-                                    .show()
+                                DeleteDialog(requireActivity()) {
+                                    recipeViewModel.deleteRecipe(recipeId)
+                                }
                                 true
                             }
                             else -> false
@@ -275,8 +272,7 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                     val ingredientRepository = IngredientRepository(
                         RetrofitClient.instanceIngredientApi,
                         IngredientDB.getInstance(requireContext()).ingredientDao())
-                    val ingredientService = IngredientService(ingredientRepository)
-                    val ingredientViewModel = IngredientViewModel(ingredientService)
+                    val ingredientViewModel = IngredientViewModel(IngredientService(ingredientRepository))
 
                     ingredientViewModel.ingredients.observe(viewLifecycleOwner) { ingredientList ->
                         adapter = IngredientTagChipAdapter(recipeData.ingredientTagIds, ingredientList)
@@ -288,8 +284,9 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                         if (deleted) {
                             Toast.makeText(context, "레시피가 삭제되었습니다", Toast.LENGTH_SHORT).show()
                             parentFragmentManager.popBackStack()
+
                         } else {
-                            Toast.makeText(context, "삭제에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "레시피를 삭제하지 못했습니다.", Toast.LENGTH_SHORT).show()
                         }
                     }
                     result.onFailure {
@@ -297,14 +294,12 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                     }
                 }
 
-
                 // 재료 리스트 설정
                 binding.ingredientsList.apply {
                     layoutManager = FlexboxLayoutManager(context).apply {
                         flexDirection = FlexDirection.ROW
                         justifyContent = JustifyContent.FLEX_START
                     }
-
                     adapter = FlavoringAdapter(recipeData.ingredients.map { FlavoringItem(it.name, it.value, it.unit) })
                 }
 
@@ -317,10 +312,11 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                     adapter = FlavoringAdapter(recipeData.seasonings.map { FlavoringItem(it.name, it.value, it.unit) })
                 }
 
-                // 댓글 리스트 설정
+                // 댓글 받아오기
                 comments = recipeData.comments!!.toMutableList()
                 Log.d("RecipeDetailFragment", "$comments")
 
+                // 댓글 리스트 설정
                 binding.commentList.layoutManager = LinearLayoutManager(requireContext())
                 commentAdapter = RecipeCommentAdapter(requireContext(), comments, this)
                 binding.commentList.adapter = commentAdapter
@@ -356,6 +352,9 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                     commentViewModel.uploadComment(recipeId, commentText)
                     Toast.makeText(context, "댓글이 등록되었습니다.", Toast.LENGTH_SHORT).show()
                 }
+                // 업데이트
+                recipeViewModel.getRecipeById(recipeId)
+
                 // 수정 모드 초기화
                 editingCommentId = -1
                 binding.commentButton.text = getString(R.string.check)
@@ -367,6 +366,7 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
 
         // ------------------------ 4. 뒤로 가기 버튼 ------------------------
         binding.backButton.setOnClickListener {
+            parentFragmentManager.setFragmentResult("refresh_recipes", Bundle()) // 결과 전달
             parentFragmentManager.popBackStack()
         }
     }
@@ -398,16 +398,15 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
         binding.commentButton.text = "수정"
     }
 
+    // 댓글 삭제
     override fun onDeleteComment(recipeId: Int, commentId: Int) {
-        AlertDialog.Builder(requireContext())
-            .setTitle("댓글 삭제")
-            .setMessage("댓글을 삭제하시겠습니까?")
-            .setPositiveButton("삭제") { _, _ ->
-                // 뷰모델에 삭제 요청
-                commentViewModel.deleteComment(recipeId, commentId)
-                Toast.makeText(context, "댓글이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
-            }
-            .setNegativeButton("취소", null)
-            .show()
+        DeleteDialog(requireActivity()) {
+            // 뷰모델에 삭제 요청
+            Log.d("DeleteComment", "recipeId: $recipeId, commentId: $commentId")
+            commentViewModel.deleteComment(recipeId, commentId)
+            Toast.makeText(context, "댓글이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+            // 정보 업데이트
+            recipeViewModel.getRecipeById(recipeId)
+        }.show()
     }
 }

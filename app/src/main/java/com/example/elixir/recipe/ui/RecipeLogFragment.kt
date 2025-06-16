@@ -17,6 +17,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.PickVisualMediaRequest
@@ -88,8 +89,7 @@ class RecipeLogFragment : Fragment() {
     private var authorTitle: String? = null
     private var likes = 0
     private var comments: List<CommentItem>? = null
-    private lateinit var createdAt: String
-    private lateinit var updatedAt: String
+    private var createdAt = LocalDateTime.now().toString()
 
     // 어댑터
     private lateinit var ingredientsAdapter: FlavoringLogAdapter
@@ -128,6 +128,7 @@ class RecipeLogFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.d("RecipeLogFragment", "onViewCreated called")
+        Log.d("RecipeLogFragment", "recipeThumbnail: ${recipeBinding.recipeThumbnail}")
         chipMap = emptyMap()
 
         try {
@@ -142,18 +143,10 @@ class RecipeLogFragment : Fragment() {
                     isEdit = true
                     // UI 업데이트
                     setRecipeDataToUI(recipeData)
+                    ingredientsAdapter.notifyItemChanged(ingredientList.size - 1)
 
                 } else {
                     isEdit = false
-                    // recipeData가 null이면 빈 값 또는 기본 이미지로
-                    recipeBinding.enterRecipeTitle.post { recipeBinding.enterRecipeTitle.setText("") }
-                    recipeBinding.enterRecipeDescription.post { recipeBinding.enterRecipeDescription.setText("") }
-                    recipeBinding.enterTipCaution.post { recipeBinding.enterTipCaution.setText("") }
-                    Glide.with(requireContext())
-                        .load(thumbnail)
-                        .placeholder(R.drawable.img_blank)
-                        .error(R.drawable.img_blank)
-                        .into(recipeBinding.recipeThumbnail)
                 }
             }
 
@@ -240,7 +233,13 @@ class RecipeLogFragment : Fragment() {
         }
     }
 
+    // 썸네일 이미지 세팅
     private fun setupThumbnail() {
+        Log.d("RecipeLogFragment", "setupThumbnail called")
+        Log.d("RecipeLogFragment", "recipeThumbnail: ${recipeBinding.recipeThumbnail}")
+        // 처음엔 기본 이미지로
+        setImgview(thumbnail)
+
         // 레시피 썸네일 사진 업로드
         pickThumbnailLauncher = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
             uri?.let {
@@ -248,8 +247,8 @@ class RecipeLogFragment : Fragment() {
                 requireContext().contentResolver.openInputStream(it)?.use { input ->
                     FileOutputStream(file).use { output -> input.copyTo(output) }
                 }
-                recipeBinding.recipeThumbnail.setImageURI(Uri.fromFile(file))
                 thumbnail = file.absolutePath
+                setImgview(thumbnail)
             }
         }
 
@@ -257,6 +256,15 @@ class RecipeLogFragment : Fragment() {
         recipeBinding.recipeThumbnail.setOnClickListener {
             showThumbnailDialog()
         }
+    }
+
+    // 이미지 세팅
+    private fun setImgview(path: String){
+        Glide.with(requireContext())
+            .load(path)
+            .placeholder(R.drawable.img_blank)
+            .error(R.drawable.img_blank)
+            .into(recipeBinding.recipeThumbnail)
     }
 
     private fun setupSpinners() {
@@ -391,7 +399,6 @@ class RecipeLogFragment : Fragment() {
         }
     }
 
-
     // 데이터 초기화
     private fun initData() {
         ingredientList.clear();
@@ -402,13 +409,6 @@ class RecipeLogFragment : Fragment() {
 
         steps.clear();
         steps.add(RecipeStepData(thumbnail, ""))
-
-        Glide.with(requireContext())
-            .load(thumbnail)
-            .placeholder(R.drawable.img_blank)
-            .error(R.drawable.img_blank)
-            .into(recipeBinding.recipeThumbnail)
-
     }
 
     // 텍스트 설정
@@ -419,12 +419,15 @@ class RecipeLogFragment : Fragment() {
 
         recipeBinding.enterRecipeTitle.addTextChangedListener(simpleTextWatcher {
             recipeTitle = it
+            updateWriteButtonState()
         })
         recipeBinding.enterRecipeDescription.addTextChangedListener(simpleTextWatcher {
             recipeDescription = it
+            updateWriteButtonState()
         })
         recipeBinding.enterTipCaution.addTextChangedListener(simpleTextWatcher {
             tips = it
+            updateWriteButtonState()
         })
     }
 
@@ -492,6 +495,15 @@ class RecipeLogFragment : Fragment() {
         setupRecyclerView(recipeBinding.frameEnterIngredients, ingredientsAdapter)
         setupRecyclerView(recipeBinding.frameEnterSeasoning, seasoningAdapter)
         setupRecyclerView(recipeBinding.frameEnterRecipeStep, stepAdapter)
+
+        // 수정 모드 진입 시 높이 갱신
+        ingredientsAdapter.notifyDataSetChanged()
+        seasoningAdapter.notifyDataSetChanged()
+        stepAdapter.notifyDataSetChanged()
+
+        setupAddButtons()
+
+        updateAddButtonState()
         updateWriteButtonState()
     }
 
@@ -504,18 +516,19 @@ class RecipeLogFragment : Fragment() {
     private fun setupAddButtons() {
         recipeBinding.btnIngredientsAdd.setOnClickListener {
             ingredientList.add(FlavoringItem("", "", ""))
-            ingredientsAdapter.notifyItemInserted(ingredientList.size - 1)
-            updateRecyclerViewHeight(recipeBinding.frameEnterIngredients, ingredientsAdapter)
+            ingredientsAdapter.notifyItemInserted(ingredientList.size - 1) // 변경!
+            Log.d("ingredientList", "ingredientList size: ${ingredientList.size}")
+            updateAddButtonState()
         }
         recipeBinding.btnSeasoningAdd.setOnClickListener {
             seasoningList.add(FlavoringItem("", "", ""))
-            seasoningAdapter.notifyItemInserted(seasoningList.size - 1)
-            updateRecyclerViewHeight(recipeBinding.frameEnterSeasoning, seasoningAdapter)
+            seasoningAdapter.notifyItemInserted(seasoningList.size - 1) // 변경!
+            updateAddButtonState()
         }
         recipeBinding.btnRecipeStepAdd.setOnClickListener {
             steps.add(RecipeStepData("android.resource://${requireContext().packageName}/${R.drawable.img_blank}", ""))
-            stepAdapter.notifyItemInserted(steps.size - 1)
-            updateRecyclerViewHeight(recipeBinding.frameEnterRecipeStep, stepAdapter)
+            stepAdapter.notifyItemInserted(steps.size - 1) // 변경!
+            updateAddButtonState()
         }
         updateWriteButtonState()
     }
@@ -554,6 +567,8 @@ class RecipeLogFragment : Fragment() {
                         updatedAt = LocalDateTime.now().toString()
                     )
 
+                    Log.d("RecipeLogFragment", recipeData.toString())
+
                     val recipeEntity = recipeData.toEntity()
                     val thumbnailFile = parseImagePathToFile(requireContext(), thumbnail)
                     val stepImageFiles = parseStepImagesToFiles(requireContext(), recipeData.stepImageUrls)
@@ -561,45 +576,46 @@ class RecipeLogFragment : Fragment() {
                     Log.d("RecipeLogFragment", "레시피 ID: $recipeId")
                     Log.d("RecipeLogFragment", "레시피 수정모드: $isEdit")
 
-                    // 수정 모드
+                    // 수정 모드 -> PATCH 실행
                     if(isEdit) {
-                        // 이미지 정의
                         recipeViewModel.updateRecipe(recipeId, recipeEntity, thumbnailFile, stepImageFiles)
                     }
-                    // 등록 모드
+                    // 등록 모드 -> POST 실행
                     else {
                         recipeViewModel.uploadRecipe(recipeEntity, thumbnailFile, stepImageFiles)
                     }
 
+                    // 값 넣기(모드(등록/수정), 레시피 아이디)
                     val intent = Intent().apply {
                         putExtra("mode", if (arguments?.getBoolean("isEdit") == true) 9 else 0)
-                        putExtra("recipeId", Gson().toJson(recipeId))
+                        putExtra("recipeId", recipeId)
                     }
 
-                    // 3. 업로드 결과 관찰 (observe)
+                    // 레시피 등록 관찰
                     recipeViewModel.uploadResult.observe(viewLifecycleOwner) { result ->
-                        result.onSuccess { data ->
-                            Toast.makeText(requireContext(), "레시피가 업로드되었습니다.", Toast.LENGTH_SHORT).show()
-                            // 업로드 성공 시 결과 처리 (예: 화면 종료)
+                        result.onSuccess {
+                            Toast.makeText(requireContext(), "레시피가 등록되었습니다.", Toast.LENGTH_SHORT).show()
+                            // 성공 메세지와 함께 값을 넘기고 화면 종료
                             requireActivity().setResult(Activity.RESULT_OK, intent)
                             requireActivity().finish()
                         }
                         result.onFailure { e ->
                             Log.e("RecipeUpload", "업로드 실패", e)
-                            Toast.makeText(requireContext(), "업로드 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), "레시피를 등록하지 못했습니다.", Toast.LENGTH_SHORT).show()
                         }
                     }
 
+                    // 레시피 수정 관찰
                     recipeViewModel.updateResult.observe(viewLifecycleOwner) { result ->
-                        result.onSuccess { data ->
+                        result.onSuccess {
                             Toast.makeText(requireContext(), "레시피가 수정되었습니다.", Toast.LENGTH_SHORT).show()
-                            // 업로드 성공 시 결과 처리 (예: 화면 종료)
+                            // 성공 메세지와 함께 값을 넘기고 화면 종료
                             requireActivity().setResult(Activity.RESULT_OK, intent)
                             requireActivity().finish()
                         }
                         result.onFailure { e ->
                             Log.e("RecipeUpload", "수정 실패", e)
-                            Toast.makeText(requireContext(), "수정 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), "레시피를 수정하지 못하였습니다.", Toast.LENGTH_SHORT).show()
                         }
                     }
                 }.show()
@@ -637,19 +653,10 @@ class RecipeLogFragment : Fragment() {
         recyclerView.apply {
             this.adapter = adapter
             layoutManager = LinearLayoutManager(requireContext())
-            setHasFixedSize(true)
+            setHasFixedSize(false)
         }
     }
 
-    // RecyclerView 높이 업데이트
-    private fun updateRecyclerViewHeight(recyclerView: RecyclerView, adapter: RecyclerView.Adapter<*>) {
-        recyclerView.post {
-            val itemCount = adapter.itemCount
-            val itemHeight = recyclerView.getChildAt(0)?.measuredHeight ?: 0
-            val totalHeight = itemHeight * itemCount * 1.2
-            recyclerView.layoutParams = recyclerView.layoutParams.apply { height = totalHeight.toInt() }
-        }
-    }
 
     // 식재료 없애기
     private fun removeFlavoringItem(list: MutableList<FlavoringItem>, position: Int, adapter: FlavoringLogAdapter, recyclerView: RecyclerView) {
@@ -657,7 +664,7 @@ class RecipeLogFragment : Fragment() {
             list.removeAt(position)
             adapter.notifyItemRemoved(position)
             adapter.notifyItemRangeChanged(position, list.size)
-            updateRecyclerViewHeight(recyclerView, adapter)
+            updateAddButtonState()
             updateWriteButtonState()
         } else
             Toast.makeText(requireContext(), "최소 하나의 항목은 필요합니다.", Toast.LENGTH_SHORT).show()
@@ -668,11 +675,10 @@ class RecipeLogFragment : Fragment() {
             steps.removeAt(position)
             stepAdapter.notifyItemRemoved(position)
             stepAdapter.notifyItemRangeChanged(position, steps.size)
-            updateRecyclerViewHeight(recipeBinding.frameEnterRecipeStep, stepAdapter)
+            updateAddButtonState()
             updateWriteButtonState()
         } else
             Toast.makeText(requireContext(), "최소 하나의 항목은 필요합니다.", Toast.LENGTH_SHORT).show()
-        updateAddButtonState()
     }
 
     private fun showSelectImgDialog(position: Int) {
@@ -680,30 +686,29 @@ class RecipeLogFragment : Fragment() {
             Toast.makeText(activity, "Fragment가 연결되지 않았습니다.", Toast.LENGTH_SHORT).show()
             return
         }
-        AlertDialog.Builder(requireContext())
-            .setTitle("이미지 선택")
-            .setItems(arrayOf("기본 이미지 선택", "갤러리에서 선택")) { _, which ->
-                when (which) {
-                    0 -> {
-                        steps[position].stepImg = "android.resource://com.example.elixir/drawable/img_blank"
-                        stepAdapter.notifyItemChanged(position)
-                    }
-                    1 -> {
-                        selectedPosition = position
-                        pickImageLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                    }
-                }
-            }.show()
-        updateWriteButtonState()
+        // 이미지 선택 메뉴
+        SelectImgDialog(requireContext(),
+            // 기본 이미지 선택
+            {
+                steps[position].stepImg = "android.resource://${requireContext().packageName}/${R.drawable.img_blank}"
+                stepAdapter.notifyItemChanged(position)
+            },
+            // 갤러리 선택
+            {
+                selectedPosition = position
+                pickImageLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            }
+        ).show()
     }
 
     private fun showThumbnailDialog() {
         SelectImgDialog(requireContext(),
+            // 기본 이미지
             {
-                val uri = Uri.parse("android.resource://${requireContext().packageName}/${R.drawable.img_blank}")
-                recipeBinding.recipeThumbnail.setImageURI(uri)
-                thumbnail = uri.toString()
+                thumbnail = "android.resource://${requireContext().packageName}/${R.drawable.img_blank}"
+                setImgview(thumbnail)
             },
+            // 갤러리 선택
             {
                 pickThumbnailLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
             }
@@ -724,21 +729,6 @@ class RecipeLogFragment : Fragment() {
         button.backgroundTintList = resources.getColorStateList(
             if (isEnabled) R.color.elixir_orange else R.color.elixir_gray, null
         )
-    }
-
-    // 모든 단계가 유효한지 확인하는 함수
-    private fun stepsValid(stepList: List<RecipeStepData>): Boolean {
-        for (item in stepList) {
-            if (item.stepDescription.isBlank() || item.stepImg.isBlank()) {
-                return false
-            }
-        }
-        return true
-    }
-
-    // 모든 재료가 유효한지 확인하는 함수
-    private fun flavoringValid(list: List<FlavoringItem>): Boolean {
-        return list.all { it.name.isNotBlank() && it.unit.isNotBlank() }
     }
 
     // 모든 필드가 유효한지 확인하는 함수
@@ -795,9 +785,13 @@ class RecipeLogFragment : Fragment() {
         difficulty = recipeData.difficulty
         ingredientTags = recipeData.ingredientTagIds.toMutableList()
         allergies = recipeData.allergies!!.toMutableList()
-        ingredientList = recipeData.ingredients.map { (name, value, unit) -> FlavoringItem(name = name, value = value, unit = unit)}.toMutableList()
-        seasoningList = recipeData.seasonings.map { (name, value, unit) -> FlavoringItem(name = name, value = value, unit = unit)}.toMutableList()
-        steps = recipeData.stepImageUrls.zip(recipeData.stepDescriptions) { img, desc -> RecipeStepData(stepImg = img, stepDescription = desc)}.toMutableList()
+        ingredientList = recipeData.ingredients.map { (name, value, unit) ->
+            FlavoringItem(name = name, value = value, unit = unit)}.toMutableList()
+        Log.d("ingredientList", "${ingredientList.size}")
+        seasoningList = recipeData.seasonings.map { (name, value, unit) ->
+            FlavoringItem(name = name, value = value, unit = unit)}.toMutableList()
+        steps = recipeData.stepImageUrls.zip(recipeData.stepDescriptions) { img, desc ->
+            RecipeStepData(stepImg = img, stepDescription = desc)}.toMutableList()
         tips = recipeData.tips
         timeHours = recipeData.timeHours
         timeMinutes = recipeData.timeMinutes
@@ -820,11 +814,7 @@ class RecipeLogFragment : Fragment() {
 
         // 썸네일 이미지
         thumbnail = recipeData.imageUrl
-        Glide.with(requireContext())
-            .load(thumbnail)
-            .placeholder(R.drawable.img_blank)
-            .error(R.drawable.img_blank)
-            .into(recipeBinding.recipeThumbnail)
+        setImgview(thumbnail)
 
         // 카테고리 스피너
         setSpinnerSelection(recipeBinding.selectLowAging, categorySlowAging)
@@ -852,7 +842,32 @@ class RecipeLogFragment : Fragment() {
 
         // 재료, 양념, 요리 순서 리스트 초기화
         Log.d("RecipeLogFragment", "요리 순서 데이터: $steps")
-        setupRecyclerViews()
+
+        // 어댑터에 데이터를 전달 (재생성 또는 리스트 교체)
+        ingredientsAdapter = FlavoringLogAdapter(ingredientList,
+            { removeFlavoringItem(ingredientList, it, ingredientsAdapter, recipeBinding.frameEnterIngredients) },
+            { updateAddButtonState() }
+        )
+        seasoningAdapter = FlavoringLogAdapter(seasoningList,
+            { removeFlavoringItem(seasoningList, it, seasoningAdapter, recipeBinding.frameEnterSeasoning) },
+            { updateAddButtonState() }
+        )
+        stepAdapter = RecipeStepLogAdapter(steps,
+            { removeStepItem(it) }, { showSelectImgDialog(it) }, { updateAddButtonState() }
+        )
+        setupRecyclerView(recipeBinding.frameEnterIngredients, ingredientsAdapter)
+        setupRecyclerView(recipeBinding.frameEnterSeasoning, seasoningAdapter)
+        setupRecyclerView(recipeBinding.frameEnterRecipeStep, stepAdapter)
+
+        // 수정 모드 진입 시 높이 갱신
+        ingredientsAdapter.notifyDataSetChanged()
+        seasoningAdapter.notifyDataSetChanged()
+        stepAdapter.notifyDataSetChanged()
+
+        setupAddButtons()
+
+        updateAddButtonState()
+        updateWriteButtonState()
 
         isBindingData = false
         updateWriteButtonState()
