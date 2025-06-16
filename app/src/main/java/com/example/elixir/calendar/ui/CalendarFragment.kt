@@ -350,7 +350,7 @@ class CalendarFragment : Fragment(), OnMealClickListener {
     // ------------------------ 점 표시 데코레이터 ---------------------------
     /**
      * 점수 기반 색상 점 데코레이터 적용
-     * 점 데코레이터만 선별적으로 갱신
+     * 점 데코레이터만 선별적으로 갱신하고 텍스트 색상 보존
      */
     private fun processDietLogScores(calendarView: MaterialCalendarView) {
         // 기존 dot 데코레이터만 캘린더에서 제거
@@ -377,6 +377,9 @@ class CalendarFragment : Fragment(), OnMealClickListener {
             calendarView.addDecorator(decorator)
         }
 
+        // 텍스트 색상 데코레이터를 점 데코레이터 이후에 다시 적용하여 우선순위 보장
+        updateSelectedDateDecorator()
+
         calendarView.invalidateDecorators()
     }
 
@@ -399,16 +402,18 @@ class CalendarFragment : Fragment(), OnMealClickListener {
     class MultipleDotDecorator(private val colors: List<Int>, private val date: CalendarDay) : DayViewDecorator {
         override fun shouldDecorate(day: CalendarDay): Boolean = day == date
         override fun decorate(view: DayViewFacade) {
-            view.addSpan(CustomDotSpan(colors))
+            view.addSpan(NonInterferingDotSpan(colors))
         }
     }
 
     /**
-     * 점을 그리는 커스텀 span 클래스
+     * 텍스트 색상에 간섭하지 않는 점 그리기 커스텀 span 클래스
+     * ReplacementSpan 대신 LineBackgroundSpan을 사용하되 텍스트 렌더링에 간섭하지 않음
      */
-    class CustomDotSpan(private val colors: List<Int>) : LineBackgroundSpan {
+    class NonInterferingDotSpan(private val colors: List<Int>) : LineBackgroundSpan {
         private val radius = 5f
         private val verticalSpacing = 12f
+
         override fun drawBackground(
             canvas: Canvas,
             paint: Paint,
@@ -422,14 +427,29 @@ class CalendarFragment : Fragment(), OnMealClickListener {
             end: Int,
             lineNumber: Int
         ) {
+            // 원래 paint 설정 백업
+            val originalColor = paint.color
+            val originalStyle = paint.style
+            val originalAntiAlias = paint.isAntiAlias
+
+            // 점 그리기를 위한 paint 설정
+            paint.isAntiAlias = true
+            paint.style = Paint.Style.FILL
+
             val totalWidth = (colors.size * radius * 2) + ((colors.size - 1) * 8f)
             var offsetX = (left + right) / 2 - (totalWidth / 2) + radius
             val offsetY = baseline + radius + verticalSpacing
+
             colors.forEach { color ->
                 paint.color = color
                 canvas.drawCircle(offsetX, offsetY, radius, paint)
                 offsetX += radius * 2 + 8f
             }
+
+            // 원래 paint 설정 복원 (텍스트 렌더링에 영향주지 않도록)
+            paint.color = originalColor
+            paint.style = originalStyle
+            paint.isAntiAlias = originalAntiAlias
         }
     }
 
