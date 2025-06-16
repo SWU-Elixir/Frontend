@@ -21,8 +21,8 @@ class RecipeRepository(private val api: RecipeApi, private val dao: RecipeDao) {
     suspend fun getRecipes(
         page: Int,
         size: Int,
-        categoryType: String,
-        categorySlowAging: String
+        categoryType: String?,
+        categorySlowAging: String?
     ): List<RecipeData> = withContext(Dispatchers.IO) {
         try {
             val response = api.getRecipe(page, size, categoryType, categorySlowAging)

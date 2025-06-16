@@ -23,8 +23,8 @@ interface RecipeApi {
     suspend fun getRecipe(
         @Query("page") page: Int,
         @Query("size") size: Int,
-        @Query("categoryType") categoryType: String,
-        @Query("categorySlowAging") categorySlowAging: String
+        @Query("categoryType") categoryType: String?,
+        @Query("categorySlowAging") categorySlowAging: String?
     ) : Response<GetRecipeListResponse>
 
     @GET("/api/recipe/{recipeId}")
