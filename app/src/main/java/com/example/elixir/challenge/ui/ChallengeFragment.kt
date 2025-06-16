@@ -12,6 +12,8 @@ import com.example.elixir.databinding.FragmentChallengeBinding
 import com.example.elixir.databinding.DialogChallengeCompletedBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import android.widget.Toast
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.elixir.challenge.viewmodel.ChallengeService
 import com.example.elixir.challenge.viewmodel.ChallengeViewModel
 import com.example.elixir.challenge.data.ChallengeEntity
@@ -58,7 +60,7 @@ class ChallengeFragment : Fragment() {
             val repository = ChallengeRepository(api, db.challengeDao())
             val service = ChallengeService(repository)
             viewModel = ChallengeViewModel(service)
-            
+
             if (isInitialLoad) {
                 loadInitialData()
                 isInitialLoad = false
@@ -73,7 +75,7 @@ class ChallengeFragment : Fragment() {
         try {
             val currentYear = Calendar.getInstance().get(Calendar.YEAR)
             Log.d("ChallengeFragment", "현재 연도($currentYear)의 챌린지 목록 로드 시작")
-            
+
             // 데이터 로딩 순서 보장
             viewModel.loadChallengesByYear(currentYear)
         } catch (e: Exception) {
@@ -109,7 +111,9 @@ class ChallengeFragment : Fragment() {
         // 선택된 챌린지 상세 정보 관찰
         viewModel.selectedChallenge.observe(viewLifecycleOwner) { challenge ->
             challenge?.let {
-                if (it.id != lastSelectedChallengeId) {  // 중복 로드 방지
+                // lastSelectedChallengeId를 업데이트하기 전에 currentStage 계산
+                val currentStageForCheck = calculateCurrentStage(it)
+                if (it.id != lastSelectedChallengeId || currentStageForCheck == 5) { // 중복 로드 방지 & 스테이지 5일 때도 업데이트
                     Log.d("ChallengeFragment", "선택된 챌린지 상세 정보 업데이트: ${it.name} (id: ${it.id})")
                     updateChallengeUI(it)
                     lastSelectedChallengeId = it.id
@@ -210,15 +214,24 @@ class ChallengeFragment : Fragment() {
             challengeSub2.text = getString(R.string.challenge_sub2_format, challenge.name, challenge.achievementName ?: "")
         }
 
-        val currentMonth = Calendar.getInstance().get(Calendar.MONTH)
-        // 모든 스테이지 완료 시 다이얼로그 표시 (팝업에서만 completion API 사용)
-        if (challenge.month == currentMonth && challenge.challengeCompleted) {
+        // --- 변경된 부분 시작 ---
+        // `currentStage`가 5일 때만 다이얼로그를 띄우기 위해 월(month) 일치 여부 조건을 제거합니다.
+        // `challengeCompleted`는 서버에서 최종 완료 여부를 직접 알려주므로, 이 값을 따르는 것이 더 정확합니다.
+        if (currentStage == 5) {
+            Log.d("ChallengeFragment", "모든 스테이지 클리어! 최종 완료 여부 API 호출 시작...")
             viewModel.loadChallengeCompletionForPopup { completed, achievementName, achievementImageUrl ->
                 if (completed) {
+                    Log.d("ChallengeFragment", "API 응답: 챌린지 최종 완료! 다이얼로그 표시: ${achievementName}")
                     showCompletionDialog(challenge, achievementName, achievementImageUrl)
+                } else {
+                    Log.d("ChallengeFragment", "API 응답: 챌린지 최종 완료 아님. 다이얼로그 미표시.")
                 }
             }
+        } else {
+            Log.d("ChallengeFragment", "챌린지 완료 다이얼로그 미표시. 조건 불만족: currentStage != 5")
+            Log.d("ChallengeFragment", " - currentStage: $currentStage")
         }
+        // --- 변경된 부분 끝 ---
     }
 
     // 클리어된 단계 수에 따라 현재 스테이지 계산
@@ -245,48 +258,48 @@ class ChallengeFragment : Fragment() {
         // Stage 1
         stageGoals.add(
             StageItem(
-            id = BigInteger.valueOf(1),
-            challengeId = BigInteger.valueOf(challenge.id.toLong()),
-            stepNumber = 1,
-            stepName = challenge.step1Goal1Desc,
-            progressDate = "",
-            isComplete = challenge.step1Goal1Achieved
-        )
+                id = BigInteger.valueOf(1),
+                challengeId = BigInteger.valueOf(challenge.id.toLong()),
+                stepNumber = 1,
+                stepName = challenge.step1Goal1Desc,
+                progressDate = "",
+                isComplete = challenge.step1Goal1Achieved
+            )
         )
         stageGoals.add(
             StageItem(
-            id = BigInteger.valueOf(2),
-            challengeId = BigInteger.valueOf(challenge.id.toLong()),
-            stepNumber = 1,
-            stepName = challenge.step1Goal2Desc ?: "",
-            progressDate = "",
-            isComplete = challenge.step1Goal2Achieved
-        )
+                id = BigInteger.valueOf(2),
+                challengeId = BigInteger.valueOf(challenge.id.toLong()),
+                stepNumber = 1,
+                stepName = challenge.step1Goal2Desc ?: "",
+                progressDate = "",
+                isComplete = challenge.step1Goal2Achieved
+            )
         )
 
         // Stage 2
         if (challenge.step2Goal1Active) {
             stageGoals.add(
                 StageItem(
-                id = BigInteger.valueOf(3),
-                challengeId = BigInteger.valueOf(challenge.id.toLong()),
-                stepNumber = 2,
-                stepName = challenge.step2Goal1Desc ?: "",
-                progressDate = "",
-                isComplete = challenge.step2Goal1Achieved
-            )
+                    id = BigInteger.valueOf(3),
+                    challengeId = BigInteger.valueOf(challenge.id.toLong()),
+                    stepNumber = 2,
+                    stepName = challenge.step2Goal1Desc ?: "",
+                    progressDate = "",
+                    isComplete = challenge.step2Goal1Achieved
+                )
             )
         }
         if (challenge.step2Goal2Active) {
             stageGoals.add(
                 StageItem(
-                id = BigInteger.valueOf(4),
-                challengeId = BigInteger.valueOf(challenge.id.toLong()),
-                stepNumber = 2,
-                stepName = challenge.step2Goal2Desc ?: "",
-                progressDate = "",
-                isComplete = challenge.step2Goal2Achieved
-            )
+                    id = BigInteger.valueOf(4),
+                    challengeId = BigInteger.valueOf(challenge.id.toLong()),
+                    stepNumber = 2,
+                    stepName = challenge.step2Goal2Desc ?: "",
+                    progressDate = "",
+                    isComplete = challenge.step2Goal2Achieved
+                )
             )
         }
 
@@ -294,25 +307,25 @@ class ChallengeFragment : Fragment() {
         if (challenge.step3Goal1Active) {
             stageGoals.add(
                 StageItem(
-                id = BigInteger.valueOf(5),
-                challengeId = BigInteger.valueOf(challenge.id.toLong()),
-                stepNumber = 3,
-                stepName = challenge.step3Goal1Desc ?: "",
-                progressDate = "",
-                isComplete = challenge.step3Goal1Achieved
-            )
+                    id = BigInteger.valueOf(5),
+                    challengeId = BigInteger.valueOf(challenge.id.toLong()),
+                    stepNumber = 3,
+                    stepName = challenge.step3Goal1Desc ?: "",
+                    progressDate = "",
+                    isComplete = challenge.step3Goal1Achieved
+                )
             )
         }
         if (challenge.step3Goal2Active) {
             stageGoals.add(
                 StageItem(
-                id = BigInteger.valueOf(6),
-                challengeId = BigInteger.valueOf(challenge.id.toLong()),
-                stepNumber = 3,
-                stepName = challenge.step3Goal2Desc ?: "",
-                progressDate = "",
-                isComplete = challenge.step3Goal2Achieved
-            )
+                    id = BigInteger.valueOf(6),
+                    challengeId = BigInteger.valueOf(challenge.id.toLong()),
+                    stepNumber = 3,
+                    stepName = challenge.step3Goal2Desc ?: "",
+                    progressDate = "",
+                    isComplete = challenge.step3Goal2Achieved
+                )
             )
         }
 
@@ -320,25 +333,25 @@ class ChallengeFragment : Fragment() {
         if (challenge.step4Goal1Active) {
             stageGoals.add(
                 StageItem(
-                id = BigInteger.valueOf(7),
-                challengeId = BigInteger.valueOf(challenge.id.toLong()),
-                stepNumber = 4,
-                stepName = challenge.step4Goal1Desc ?: "",
-                progressDate = "",
-                isComplete = challenge.step4Goal1Achieved
-            )
+                    id = BigInteger.valueOf(7),
+                    challengeId = BigInteger.valueOf(challenge.id.toLong()),
+                    stepNumber = 4,
+                    stepName = challenge.step4Goal1Desc ?: "",
+                    progressDate = "",
+                    isComplete = challenge.step4Goal1Achieved
+                )
             )
         }
         if (challenge.step4Goal2Active) {
             stageGoals.add(
                 StageItem(
-                id = BigInteger.valueOf(8),
-                challengeId = BigInteger.valueOf(challenge.id.toLong()),
-                stepNumber = 4,
-                stepName = challenge.step4Goal2Desc ?: "",
-                progressDate = "",
-                isComplete = challenge.step4Goal2Achieved
-            )
+                    id = BigInteger.valueOf(8),
+                    challengeId = BigInteger.valueOf(challenge.id.toLong()),
+                    stepNumber = 4,
+                    stepName = challenge.step4Goal2Desc ?: "",
+                    progressDate = "",
+                    isComplete = challenge.step4Goal2Achieved
+                )
             )
         }
 
@@ -354,10 +367,20 @@ class ChallengeFragment : Fragment() {
         dialogBinding.dialogMessage.text = getString(R.string.challenge_completion_message, challenge.name)
         if (!achievementImageUrl.isNullOrEmpty()) {
             try {
-                dialogBinding.dialogImage.setImageURI(Uri.parse(achievementImageUrl))
+                // Glide를 사용하여 이미지 로드 (badgeImage 로드 로직과 유사하게)
+                Glide.with(dialogBinding.root)
+                    .load(achievementImageUrl)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .placeholder(R.drawable.ic_recipe_white) // 기본 이미지 (필요시 뱃지 관련 이미지로 변경)
+                    .error(R.drawable.ic_recipe_white) // 에러 이미지 (필요시 뱃지 관련 이미지로 변경)
+                    .fitCenter() // 다이얼로그 이미지에도 fitCenter 적용
+                    .into(dialogBinding.dialogImage)
             } catch (e: Exception) {
                 Log.e("ChallengeFragment", "이미지 URI 로딩 실패", e)
+                dialogBinding.dialogImage.setImageResource(R.drawable.ic_recipe_white) // 실패 시 기본 이미지
             }
+        } else {
+            dialogBinding.dialogImage.setImageResource(R.drawable.ic_recipe_white) // URL이 없으면 기본 이미지
         }
 
         val alertDialog = com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
@@ -376,4 +399,3 @@ class ChallengeFragment : Fragment() {
         _binding = null
     }
 }
-

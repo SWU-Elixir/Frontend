@@ -50,3 +50,4 @@ data class ChallengeCompletionRawData(
     val achievementName: String? = null,
     val achievementImageUrl: String? = null
 )
+
