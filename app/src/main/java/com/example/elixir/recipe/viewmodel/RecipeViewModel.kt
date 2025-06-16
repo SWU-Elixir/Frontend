@@ -43,12 +43,23 @@ class RecipeViewModel(
     val errorMessage: LiveData<String> = _errorMessage
 
     // 레시피 목록 불러오기
-    fun getRecipes(page: Int, size: Int, categoryType: String, categorySlowAging: String) {
+    private var currentCategoryType: String? = null
+    private var currentSlowAging: String? = null
+
+    fun getRecipes(page: Int, size: Int, categoryType: String?, slowAging: String?) {
         viewModelScope.launch {
-            val recipes = repository.getRecipes(page, size, categoryType, categorySlowAging)
-            _recipeList.value = recipes
+            // 필터가 바뀌면 기존 데이터 초기화
+            if (categoryType != currentCategoryType || slowAging != currentSlowAging) {
+                _recipeList.value = emptyList()
+                currentCategoryType = categoryType
+                currentSlowAging = slowAging
+            }
+            val newRecipes = repository.getRecipes(page, size, categoryType, slowAging)
+            val current = _recipeList.value ?: emptyList()
+            _recipeList.value = current + newRecipes // 누적
         }
     }
+
 
     fun searchRecipes(
         keyword: String,
