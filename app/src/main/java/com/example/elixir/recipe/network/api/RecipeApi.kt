@@ -42,8 +42,8 @@ interface RecipeApi {
         @Query("keyword") keyword: String,
         @Query("page") page: Int,
         @Query("size") size: Int,
-        @Query("categoryType") categoryType: String,
-        @Query("categorySlowAging") categorySlowAging: String
+        @Query("categoryType") categoryType: String?,
+        @Query("categorySlowAging") categorySlowAging: String?
     ): Response<GetRecipeListResponse>
 
     @GET("/api/recipe/search/keyword")

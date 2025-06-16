@@ -63,15 +63,23 @@ class RecipeRepository(private val api: RecipeApi, private val dao: RecipeDao) {
         keyword: String,
         page: Int,
         size: Int,
-        categoryType: String,
-        categorySlowAging: String
-    ): List<RecipeEntity> = withContext(Dispatchers.IO) {
-        val response = api.searchRecipe(keyword, page, size, categoryType, categorySlowAging)
-        if (response.isSuccessful) {
-            // data가 List<RecipeData>인 경우
-            //response.body()?.data?.toEntities()?.let { dao.insertRecipes(it) }
+        categoryType: String?,
+        categorySlowAging: String?
+    ): List<RecipeData> = withContext(Dispatchers.IO) {
+        try {
+            val response = api.searchRecipe(keyword, page, size, categoryType, categorySlowAging)
+            if (response.isSuccessful) {
+                val body = response.body()
+                val recipes = body?.data?.content?.map { it.toRecipeData() } ?: emptyList()
+                recipes.map { it.toEntity() }
+                return@withContext recipes
+            } else {
+                Log.e("RecipeRepository", "검색 실패: ${response.errorBody()?.string()}")
+            }
+        }catch (e: Exception) {
+            Log.e("RecipeRepository", "검색 예외 발생", e)
         }
-        return@withContext dao.searchRecipes(keyword, page, size, categoryType, categorySlowAging)
+        return@withContext emptyList()
     }
 
 

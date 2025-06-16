@@ -50,6 +50,19 @@ class RecipeViewModel(
         }
     }
 
+    fun searchRecipes(
+        keyword: String,
+        page: Int,
+        size: Int,
+        categoryType: String?,
+        categorySlowAging: String?
+    ) {
+        viewModelScope.launch {
+            val recipes = repository.searchRecipes(keyword, page, size, categoryType, categorySlowAging)
+            _recipeList.value = recipes
+        }
+    }
+
     // 레시피 상세 불러오기
     fun getRecipeById(recipeId: Int) {
         viewModelScope.launch {

@@ -1,6 +1,5 @@
 package com.example.elixir.recipe.ui
 
-import android.R.attr.fragment
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
@@ -12,9 +11,7 @@ import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
@@ -369,6 +366,7 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
 
         // ------------------------ 4. 뒤로 가기 버튼 ------------------------
         binding.backButton.setOnClickListener {
+            parentFragmentManager.setFragmentResult("refresh_recipes", Bundle()) // 결과 전달
             parentFragmentManager.popBackStack()
         }
     }
