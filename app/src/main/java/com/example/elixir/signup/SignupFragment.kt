@@ -194,7 +194,7 @@ class SignupFragment : Fragment() {
 
             1 -> Survey1Fragment().apply {
                 listener = object : OnChipCompletedListener {
-                    override fun onChipSelected(chips: List<String>) {
+                    override fun onChipSelected(chips: List<String>?) {
                         handleChipSelection(1, true) { userModel.setAllergies(chips) }
                     }
 
@@ -206,7 +206,7 @@ class SignupFragment : Fragment() {
 
             2 -> Survey2Fragment().apply {
                 listener = object : OnChipCompletedListener {
-                    override fun onChipSelected(chips: List<String>) {
+                    override fun onChipSelected(chips: List<String>?) {
                         handleChipSelection(2, true) { userModel.setPreferredDiets(chips) }
                     }
 
@@ -218,7 +218,7 @@ class SignupFragment : Fragment() {
 
             3 -> Survey3Fragment().apply {
                 listener = object : OnChipCompletedListener {
-                    override fun onChipSelected(chips: List<String>) {
+                    override fun onChipSelected(chips: List<String>?) {
                         handleChipSelection(3, true) { userModel.setPreferredRecipes(chips) }
                     }
 
@@ -230,7 +230,7 @@ class SignupFragment : Fragment() {
 
             4 -> Survey4Fragment().apply {
                 listener = object : OnChipCompletedListener {
-                    override fun onChipSelected(chips: List<String>) {
+                    override fun onChipSelected(chips: List<String>?) {
                         handleChipSelection(4, true) { userModel.setSignupReason(chips) }
                     }
 
