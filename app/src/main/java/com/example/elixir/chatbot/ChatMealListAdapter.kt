@@ -38,7 +38,8 @@ class ChatMealListAdapter(
             } else {
                 binding.icon.setImageResource(R.drawable.ic_recipe_white)
             }
-            binding.date.text = item.date
+            val onlyDate = item.date.substring(0, 10)
+            binding.date.text = onlyDate
             binding.title.text = item.title
             
             val ingredientNames = item.ingredientTags.mapNotNull { ingredientMap[it]?.name }

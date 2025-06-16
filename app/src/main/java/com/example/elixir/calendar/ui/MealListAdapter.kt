@@ -28,9 +28,6 @@ class MealListAdapter(
     override fun getItem(position: Int): DietLogData = data[position]
     override fun getItemId(position: Int): Long = position.toLong()
 
-    // MealDetailFragment 띄우기 (이 변수가 현재 코드에서 사용되지 않는다면 제거를 고려해 보세요)
-    private lateinit var mealDetailLauncher: ActivityResultLauncher<Intent>
-
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val binding: ItemMealListBinding
         val view: View
@@ -47,51 +44,16 @@ class MealListAdapter(
 
         val item = getItem(position)
 
-        // 이미지 처리 분기
-        val dietImg = item.dietImg
-        when {
-            // "android.resource://"로 시작하는 경우 (앱 내장 기본 이미지)
-            dietImg.startsWith("android.resource://") -> {
-                try {
-                    val resId = dietImg.substringAfterLast("/").toIntOrNull()
-                    if (resId != null) {
-                        binding.dietPicture.setImageResource(resId)
-                    } else {
-                        binding.dietPicture.setImageResource(R.drawable.img_blank)
-                    }
-                } catch (e: Exception) {
-                    Log.e("MealListAdapter", "리소스 이미지 로드 실패: ${e.message}")
-                    binding.dietPicture.setImageResource(R.drawable.img_blank)
-                }
-            }
-            // "http://" 또는 "https://"로 시작하는 경우 (서버에서 가져온 이미지)
-            dietImg.startsWith("http://") || dietImg.startsWith("https://") -> {
-                Glide.with(context)
-                    .load(dietImg)
-                    .placeholder(R.drawable.img_blank)
-                    .error(R.drawable.img_blank)
-                    .into(binding.dietPicture)
-            }
-            // "content://" 또는 "file://"로 시작하는 경우 (로컬 파일)
-            dietImg.startsWith("content://") || dietImg.startsWith("file://") -> {
-                try {
-                    val uri = Uri.parse(dietImg)
-                    Glide.with(context)
-                        .load(uri)
-                        .placeholder(R.drawable.img_blank)
-                        .error(R.drawable.img_blank)
-                        .into(binding.dietPicture)
-                } catch (e: Exception) {
-                    Log.e("MealListAdapter", "로컬 이미지 로드 실패: ${e.message}")
-                    binding.dietPicture.setImageResource(R.drawable.img_blank)
-                }
-            }
-            else -> {
-                // 그 외의 경우 (예: 이미지 경로가 유효하지 않거나 비어있는 경우)
-                binding.dietPicture.setImageResource(R.drawable.img_blank)
-                Log.w("MealListAdapter", "알 수 없는 이미지 형식 또는 경로: $dietImg. 기본 이미지로 대체합니다.")
-            }
-        }
+        Log.d("MealListAdapter", "Loading image for item: ${item.dietTitle}, URI: ${item.dietImg}")
+
+
+        // --- 이미지 처리: Glide를 사용하여 간결하게 처리합니다 ---
+        Glide.with(context)
+            .load(item.dietImg)
+            .placeholder(R.drawable.img_blank)
+            .error(R.drawable.img_blank)
+            .into(binding.dietPicture)
+        // --- 이미지 처리 끝 ---
 
         binding.dietNameText.text = item.dietTitle
 
@@ -106,14 +68,28 @@ class MealListAdapter(
         }
         binding.dietScore.setImageResource(iconRes)
 
-        // 재료 목록을 FlexboxLayoutManager를 사용하여 표시
-        binding.dietIngredientList.layoutManager = FlexboxLayoutManager(context)
-        binding.dietIngredientList.adapter = MealListIngredientAdapter(item.ingredientTags, ingredientMap)
+        // --- 재료 목록을 FlexboxLayoutManager를 사용하여 표시 (방어 코드 추가) ---
+        // ingredientTags가 비어있을 경우 RecyclerView를 숨기거나, 빈 어댑터를 설정하여 오류 방지
+        if (item.ingredientTags.isNullOrEmpty()) {
+            // 재료 태그가 없으면 RecyclerView를 숨깁니다.
+            binding.dietIngredientList.visibility = View.GONE
+            Log.d("MealListAdapter", "No ingredient tags for item: ${item.dietTitle}, hiding RecyclerView.")
+        } else {
+            // 재료 태그가 있으면 RecyclerView를 보여주고 어댑터를 설정합니다.
+            binding.dietIngredientList.visibility = View.VISIBLE
 
-        // Flexbox 레이아웃 매니저 설정 (이미 위에서 binding.dietIngredientList.layoutManager로 설정했으므로 중복 제거)
-        // val layoutManager = FlexboxLayoutManager(context)
-        // layoutManager.flexDirection = FlexDirection.COLUMN
-        // layoutManager.justifyContent = JustifyContent.FLEX_END
+            // FlexboxLayoutManager는 convertView가 처음 생성될 때만 설정하는 것이 효율적입니다.
+            if (binding.dietIngredientList.layoutManager == null) {
+                val flexboxLayoutManager = FlexboxLayoutManager(context)
+                flexboxLayoutManager.flexDirection = FlexDirection.ROW // 가로 배치
+                flexboxLayoutManager.justifyContent = JustifyContent.FLEX_START // 시작 지점에서 정렬
+                binding.dietIngredientList.layoutManager = flexboxLayoutManager
+                Log.d("MealListAdapter", "FlexboxLayoutManager set for dietIngredientList.")
+            }
+            binding.dietIngredientList.adapter = MealListIngredientAdapter(item.ingredientTags, ingredientMap)
+        }
+        // --- 재료 목록 처리 끝 ---
+
 
         view.setOnClickListener {
             listener.onMealClick(item)
@@ -125,26 +101,26 @@ class MealListAdapter(
         return view
     }
 
-    //어댑터의 데이터를 새로운 데이터로 업데이트하고, 식사 카테고리별로 정렬
     fun updateData(newData: List<DietLogData>) {
         val sortedData = newData.sortedWith(compareBy {
             when (it.dietCategory) {
-                "아침" -> 1
-                "점심" -> 2
-                "저녁" -> 3
-                "간식" -> 4
+                context.getString(R.string.breakfast) -> 1 // string resource 사용 권장
+                context.getString(R.string.lunch) -> 2
+                context.getString(R.string.dinner) -> 3
+                context.getString(R.string.snack) -> 4
                 else -> 5 // 그 외의 카테고리는 마지막에 정렬
             }
-        }).toMutableList() // 정렬된 리스트를 변경 가능한 리스트로 변환
+        }).toMutableList()
 
         data.clear()
         data.addAll(sortedData)
         notifyDataSetChanged()
+        Log.d("MealListAdapter", "Data updated. Total items: ${data.size}")
     }
 
-    // 식재료 세팅
     fun setIngredientMap(map: Map<Int, IngredientData>) {
         this.ingredientMap = map
         notifyDataSetChanged()
+        Log.d("MealListAdapter", "Ingredient map updated. Map size: ${ingredientMap.size}")
     }
 }

@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.elixir.RetrofitClient
 import com.example.elixir.calendar.data.DietLogData
+import com.example.elixir.calendar.data.DietLogEntity
 import com.example.elixir.calendar.data.MealDto
 import com.example.elixir.calendar.network.db.DietLogRepository
 import com.example.elixir.calendar.network.response.GetScoreResponse
@@ -162,41 +163,23 @@ class MealViewModel(
     fun updateDietLog(data: DietLogData, imageFile: File?) {
         viewModelScope.launch {
             try {
-                var finalImageUrl: String = data.dietImg // 기존 이미지 URL로 초기화
-
-                // 새로운 이미지 파일이 있다면 업로드
-                if (imageFile != null) {
-                    val uploadImageResponse: GetMealResponse? = dietRepository.uploadDietLog(data.toEntity(), imageFile)
-                    val uploadedImageUrl: String? = uploadImageResponse?.data?.imageUrl // **여기서 명확히 선언**
-
-                    if (!uploadedImageUrl.isNullOrEmpty()) {
-                        finalImageUrl = uploadedImageUrl
-                        Log.d("Update", "새 이미지 업로드 완료. URL: $finalImageUrl")
-                    } else {
-                        Log.w("Update", "새 이미지 업로드 후 URL을 받지 못했습니다. 기존 URL 유지.")
-                    }
-                } else {
-                    Log.d("Update", "새 이미지 파일 없음. 기존 URL 유지: $finalImageUrl")
-                    // 만약 기존 이미지가 "android.resource://" 형태였다면,
-                    // 서버는 이 URL을 인식하지 못할 것이므로, 필요에 따라 여기서 기본 이미지 URL로 변경하거나
-                    // 서버에서 기본 이미지를 처리하도록 해야 할 수 있습니다.
-                    // 현재는 finalImageUrl에 기존 data.dietImg 값이 그대로 들어갑니다.
-                }
-
-                // 업데이트된 이미지 URL로 DietLogData 생성
-                val dietLogDataWithFinalUrl = data.copy(dietImg = finalImageUrl)
-
-                // 서버에 식단 기록 업데이트
-                // imageFile이 null이 아닌 경우 이미 위에서 업로드 했으므로, 여기서 다시 보내지 않음
-                val updateResponse = dietRepository.updateDietLog(dietLogDataWithFinalUrl.toEntity(), null)
+                // 수정 API를 직접 호출 (등록 API 호출하지 않음)
+                val updateResponse = dietRepository.updateDietLog(data.toEntity(), imageFile)
                 val updatedMealDto = updateResponse?.data // 서버에서 반환된 최종 MealDto
 
                 if (updatedMealDto != null) {
                     // Room DB 업데이트 (서버에서 받은 최신 정보로)
                     dietRepository.updateDietLog(updatedMealDto.toEntity())
                     Log.d("Update", "식단 기록 수정 성공 및 로컬 DB 업데이트 완료")
-                    // _uploadResult를 통해 성공과 최종 이미지 URL을 전달
+
+                    // 성공과 최종 이미지 URL을 전달
                     _uploadResult.postValue(Result.success(updatedMealDto.imageUrl))
+
+                    if (imageFile != null) {
+                        Log.d("Update", "새 이미지와 함께 수정 완료. URL: ${updatedMealDto.imageUrl}")
+                    } else {
+                        Log.d("Update", "기존 이미지로 수정 완료. URL: ${updatedMealDto.imageUrl}")
+                    }
                 } else {
                     Log.e("Update", "식단 기록 수정 실패: 서버 응답 없음")
                     _uploadResult.postValue(Result.failure(Exception("식단 기록 수정 실패: 서버 응답 없음")))
@@ -238,18 +221,12 @@ class MealViewModel(
     }
 
     // 전체 식단 기록 목록 가져오기 (최근 N일)
-    @RequiresApi(Build.VERSION_CODES.O)
     fun getAllDietLogs(days: Int = 30) {
         viewModelScope.launch {
-            try {
-                val dietEntities = dietRepository.getDietLogsForLastDays(days)
-                // DietLogEntity -> MealDto 변환 (memberId는 필요시 0 또는 실제 값)
-                val mealDtos = dietEntities.map { it.toMealDto(0) } // memberId는 필요시 0으로 설정
-                _allDietLogs.value = mealDtos
-            } catch (e: Exception) {
-                Log.e("MealViewModel", "전체 식단 로그 가져오기 실패: ${e.localizedMessage}")
-                _allDietLogs.value = emptyList()
-            }
+            val result = dietRepository.getDietLogsForLastDays(days)
+            _dailyDietLogs.value = result ?: emptyList()
         }
     }
+
+
 }

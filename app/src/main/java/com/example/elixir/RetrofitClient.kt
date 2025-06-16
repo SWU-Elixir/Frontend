@@ -26,7 +26,7 @@ import org.threeten.bp.LocalDateTime
 object RetrofitClient {
     // 서버 주소
     private const val BASE_URL = "https://sean-test.shop/"
-    private var authToken: String? = "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJBQGV4YW1wbGUuY29tIiwiYXV0aCI6IlVTRVIiLCJleHAiOjE3NDk3MzA1Mzh9.ZMDAQ0mWW0R5_FQR3nrCRyc6CFp81JA7Dic8jhvqrtlQvUJm8Vn6cfMfMd29PC-u" // Bearer 토큰을 저장할 변수
+    private var authToken: String? = "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJBQGV4YW1wbGUuY29tIiwiYXV0aCI6IlVTRVIiLCJleHAiOjE3NDk5NzQzODZ9.b2MqQnCE_n_sBNH2MsuaOthJ6hMiB1EWRah5y50JaG_J5XImMb2YgJ1pvYO-LNOf" // Bearer 토큰을 저장할 변수
     private var isRefreshing = false // 토큰 갱신 중인지 여부를 추적하는 플래그
 
     fun setAuthToken(token: String?) {
@@ -89,15 +89,15 @@ object RetrofitClient {
 
     private val client: OkHttpClient by lazy {
         OkHttpClient.Builder()
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(60, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .writeTimeout(60, TimeUnit.SECONDS)
             .addInterceptor(authInterceptor)
             .addInterceptor(refreshInterceptor)
             .addInterceptor(HttpLoggingInterceptor().apply {
                 level = HttpLoggingInterceptor.Level.BODY
             })
-            .retryOnConnectionFailure(false) // 연결 실패 시 재시도하지 않음
+            .retryOnConnectionFailure(true)
             .build()
     }
 

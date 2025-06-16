@@ -1,8 +1,10 @@
 package com.example.elixir.recipe.ui
 
+import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -10,9 +12,12 @@ import com.example.elixir.R
 import com.example.elixir.databinding.ItemRecipeRecommendationListBinding
 import com.example.elixir.recipe.data.GetRecipeData
 import com.example.elixir.recipe.data.RecipeData
+import com.example.elixir.recipe.viewmodel.RecipeViewModel
 
 class RecipeRecommendationListAdapter(
-    private var recipeList: List<GetRecipeData>
+    private var recipeList: List<GetRecipeData>,
+    private val fragmentManager: FragmentManager,
+    private val recipeViewModel: RecipeViewModel
 ) : RecyclerView.Adapter<RecipeRecommendationListAdapter.RecipeViewHolder>() {
 
     fun updateData(newRecipeList: List<GetRecipeData>) {
@@ -60,17 +65,34 @@ class RecipeRecommendationListAdapter(
         holder.binding.categorySlowAging.text = recipe.categorySlowAging
         holder.binding.categoryType.text = recipe.categoryType
 
-        // 북마크 버튼 클릭 이벤트 처리
         holder.binding.bookmarkButton.setOnClickListener {
+            // 현재 북마크 상태 반전
             recipe.scrappedByCurrentUser = !recipe.scrappedByCurrentUser
+
+            // API 호출
+            if (recipe.scrappedByCurrentUser) {
+                recipeViewModel.addScrap(recipe.id)
+            } else {
+                recipeViewModel.deleteScrap(recipe.id)
+            }
+
             notifyItemChanged(position) // 변경된 항목 갱신
             Log.d("RecipeRecommendationListAdapter", "북마크 상태 변경: ${recipe.title} -> ${recipe.scrappedByCurrentUser}")
         }
 
         holder.itemView.setOnClickListener {
             Log.d("RecipeAdapter", "아이템 클릭됨: ${recipe.title}")
-            // 필요시 클릭 시 동작 추가 가능
+            val detailFragment = RecipeDetailFragment().apply {
+                arguments = Bundle().apply {
+                    putInt("recipeId", recipe.id)
+                }
+            }
+            fragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, detailFragment)
+                .addToBackStack(null)
+                .commit()
         }
+
     }
 
     override fun getItemCount(): Int = recipeList.size

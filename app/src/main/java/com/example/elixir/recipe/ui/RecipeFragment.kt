@@ -328,7 +328,7 @@ class RecipeFragment : Fragment() {
      * 추천 레시피 ViewPager 설정
      */
     private fun setupRecommendationViewPager() {
-        val recommendationAdapter = RecipeRecommendationListAdapter(recommendRecipeList)
+        val recommendationAdapter = RecipeRecommendationListAdapter(recommendRecipeList, fragmentManager = parentFragmentManager, recipeViewModel)
         binding.recommendationList.adapter = recommendationAdapter
 
         // 페이지 전환 애니메이션 설정
@@ -418,7 +418,7 @@ class RecipeFragment : Fragment() {
                         (binding.recommendationList.adapter as? RecipeRecommendationListAdapter)?.updateData(recommendList)
                             ?: run {
                             // 어댑터가 없는 경우 새로 생성
-                            binding.recommendationList.adapter = RecipeRecommendationListAdapter(recommendList)
+                            binding.recommendationList.adapter = RecipeRecommendationListAdapter(recommendList, fragmentManager = parentFragmentManager, recipeViewModel)
                         }
                     }
                 } else {

@@ -3,6 +3,10 @@
     android:height="160dp"
     android:viewportWidth="160"
     android:viewportHeight="160">
+  <!-- 흰색 배경 추가 -->
+  <path
+      android:fillColor="#FFFFFF"
+      android:pathData="M0,0h160v160h-160z" />
   <path
       android:pathData="M109.31,106.79C109.79,104.65 110.05,102.42 110.05,100.14C110.05,83.62 96.66,70.23 80.14,70.23C63.62,70.23 50.23,83.62 50.23,100.14C50.23,102.42 50.49,104.65 50.97,106.79H109.31Z"
       android:fillColor="#FDA150"

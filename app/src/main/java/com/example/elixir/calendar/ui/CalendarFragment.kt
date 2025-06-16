@@ -1,12 +1,3 @@
-/**
- * 캘린더 프래그먼트
- *
- * 주요 기능:
- * 1. 식단 일정을 캘린더에 표시
- * 2. 날짜별 식단 목록 조회
- * 3. 식단 점수에 따른 시각화 (점 표시)
- * 4. 바텀시트를 통한 식단 상세 정보 표시
- */
 package com.example.elixir.calendar.ui
 
 import android.app.Activity
@@ -79,7 +70,6 @@ class CalendarFragment : Fragment(), OnMealClickListener {
     // 상세 화면 런처 등록
     private lateinit var mealDetailLauncher: ActivityResultLauncher<Intent>
 
-
     // 어댑터 및 데이터 변수
     private lateinit var mealAdapter: MealListAdapter
     private val eventMap = mutableMapOf<String, MutableList<DietLogData>>() // 날짜별 식단 데이터 저장
@@ -91,6 +81,9 @@ class CalendarFragment : Fragment(), OnMealClickListener {
 
     // CalendarTodayDecorator 인스턴스를 멤버 변수로 유지
     private var calendarTodayDecorator: CalendarTodayDecorator? = null
+
+    // Dot 데코레이터들을 저장할 리스트 추가
+    private val dotDecorators = mutableListOf<MultipleDotDecorator>()
 
     // DietLogFragment 띄우기
     private lateinit var dietLogLauncher: ActivityResultLauncher<Intent>
@@ -174,18 +167,16 @@ class CalendarFragment : Fragment(), OnMealClickListener {
         binding.calendarView.setWeekDayFormatter(CustomWeekDayFormatter(requireContext()))
         binding.calendarView.setTitleFormatter(CustomTitleFormatter(requireContext()))
 
+        mealViewModel.getAllDietLogs(30)
+
         // 오늘 날짜 배경 원 데코레이터 (최초 1회만 추가)
         try {
             val todayDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.bg_oval_outline_orange)
             todayDrawable?.let {
-                // CalendarTodayDecorator 인스턴스 생성 및 저장
                 calendarTodayDecorator = CalendarTodayDecorator(requireContext(), it)
-                // 데코레이터가 이미 추가되지 않았을 경우에만 추가 (초기화 방지)
-                // MaterialCalendarView는 내부적으로 addDecorator 중복을 처리하지만, 명시적으로 제어하는 것이 좋습니다.
                 binding.calendarView.addDecorator(calendarTodayDecorator!!)
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             Log.e("CalendarFragment", "오늘 날짜 배경 설정 오류: ${e.message}")
         }
 
@@ -209,21 +200,13 @@ class CalendarFragment : Fragment(), OnMealClickListener {
             mealAdapter.setIngredientMap(ingredientMap)
         }
 
-        // 초기 상태 설정
-        // 이 부분은 onResume에서도 호출되므로, 중복 로딩을 피하기 위해 observeDietLogs()에서 처리
-        // updateEventList(initialDateStr) // observeDietLogs에서 처리
-        // updateSelectedDateDecorator() // onResume에서 처리
-        // processDietLogScores(binding.calendarView) // observeDietLogs에서 처리
-        // binding.calendarView.setSelectedDate(selectedCalendarDay) // onResume에서 처리
-
-
         // 날짜 선택 이벤트 처리
         binding.calendarView.setOnDateChangedListener { _, date, _ ->
             selectedCalendarDay = date
             val selectedDateStr = "%04d-%02d-%02d".format(date.year, date.month + 1, date.day)
-            mealViewModel.getDietLogsByDate(selectedDateStr) // LiveData가 변경되면서 observeDietLogs 호출
+            mealViewModel.getDietLogsByDate(selectedDateStr)
+            mealViewModel.getAllDietLogs(30)
 
-            // 데코레이터 업데이트 (선택 날짜 색상)
             updateSelectedDateDecorator()
 
             binding.fab.visibility = if (selectedCalendarDay == today && bottomSheetState != BottomSheetBehavior.STATE_COLLAPSED) View.VISIBLE else View.GONE
@@ -285,6 +268,7 @@ class CalendarFragment : Fragment(), OnMealClickListener {
         super.onResume()
         // 선택된 날짜 스타일 복원
         updateSelectedDateDecorator()
+        mealViewModel.getAllDietLogs(30)
         val selectedDateStr = "%04d-%02d-%02d".format(selectedCalendarDay.year, selectedCalendarDay.month + 1, selectedCalendarDay.day)
         mealViewModel.getDietLogsByDate(selectedDateStr) // 데이터 다시 불러오기
         // 캘린더 선택 날짜는 항상 유지
@@ -295,22 +279,33 @@ class CalendarFragment : Fragment(), OnMealClickListener {
 
     /**
      * 선택된 날짜의 텍스트 색상 변경 데코레이터 업데이트
+     * 점 데코레이터는 유지하면서 선택/오늘 날짜 데코레이터만 갱신
      */
     private fun updateSelectedDateDecorator() {
-        // 기존 선택 날짜 및 오늘 날짜 텍스트 데코레이터 제거
-        selectedTextDecorator?.let { binding.calendarView.removeDecorator(it) }
-        todayTextDecorator?.let { binding.calendarView.removeDecorator(it) }
+        // 기존 선택 날짜 데코레이터만 제거
+        selectedTextDecorator?.let {
+            binding.calendarView.removeDecorator(it)
+            selectedTextDecorator = null
+        }
 
+        todayTextDecorator?.let {
+            binding.calendarView.removeDecorator(it)
+            todayTextDecorator = null
+        }
+
+        // 새로운 선택 날짜 데코레이터 추가
         val textColor = ContextCompat.getColor(requireContext(), R.color.white)
         selectedTextDecorator = SelectedDateTextColorDecorator(selectedCalendarDay, textColor)
         binding.calendarView.addDecorator(selectedTextDecorator!!)
 
+        // 오늘 날짜가 선택된 날짜와 다를 경우만 오늘 날짜 데코레이터 추가
         if (selectedCalendarDay != today) {
             val orangeColor = ContextCompat.getColor(requireContext(), R.color.elixir_orange)
             todayTextDecorator = TodayTextColorDecorator(today, orangeColor)
             binding.calendarView.addDecorator(todayTextDecorator!!)
         }
-        // 데코레이터 변경 사항을 캘린더에 즉시 반영
+
+        // 변경사항 즉시 반영 (점 데코레이터는 유지됨)
         binding.calendarView.invalidateDecorators()
     }
 
@@ -353,21 +348,16 @@ class CalendarFragment : Fragment(), OnMealClickListener {
     }
 
     // ------------------------ 점 표시 데코레이터 ---------------------------
-
     /**
      * 점수 기반 색상 점 데코레이터 적용
-     * 각 날짜의 식단 점수에 따라 다른 색상의 점을 표시
+     * 점 데코레이터만 선별적으로 갱신하고 텍스트 색상 보존
      */
     private fun processDietLogScores(calendarView: MaterialCalendarView) {
-        // 기존에 추가된 모든 데코레이터 제거 (점 데코레이터 포함)
-        calendarView.removeDecorators() // 모든 데코레이터를 제거합니다.
-
-        // 오늘 날짜 배경 데코레이터와 선택된 날짜 텍스트 색상 데코레이터를 다시 추가
-        // calendarTodayDecorator는 이미 멤버 변수로 존재한다고 가정
-        calendarTodayDecorator?.let {
-            calendarView.addDecorator(it) // 오늘 날짜 배경 데코레이터 다시 추가
+        // 기존 dot 데코레이터만 캘린더에서 제거
+        dotDecorators.forEach { decorator ->
+            calendarView.removeDecorator(decorator)
         }
-        updateSelectedDateDecorator() // 선택 날짜 텍스트 색상 데코레이터 다시 추가
+        dotDecorators.clear()
 
         val dotMap = mutableMapOf<CalendarDay, MutableList<Int>>()
         eventMap.forEach { (dateStr, items) ->
@@ -378,12 +368,18 @@ class CalendarFragment : Fragment(), OnMealClickListener {
         }
 
         dotMap.forEach { (day, colors) ->
-            val defaultTextColor = Color.BLACK // 이 변수는 이제 CustomDotSpan에서 사용되지 않습니다.
-            val decorator = MultipleDotDecorator(colors, day) // 텍스트 색상 매개변수 제거
+            val decorator = MultipleDotDecorator(colors, day)
+            dotDecorators.add(decorator)
+        }
+
+        // 새로 생성된 점 데코레이터들을 캘린더에 추가
+        dotDecorators.forEach { decorator ->
             calendarView.addDecorator(decorator)
         }
 
-        // 데코레이터 변경 사항을 캘린더에 즉시 반영
+        // 텍스트 색상 데코레이터를 점 데코레이터 이후에 다시 적용하여 우선순위 보장
+        updateSelectedDateDecorator()
+
         calendarView.invalidateDecorators()
     }
 
@@ -403,19 +399,21 @@ class CalendarFragment : Fragment(), OnMealClickListener {
     /**
      * 여러 점을 표시하는 데코레이터
      */
-    class MultipleDotDecorator(private val colors: List<Int>, private val date: CalendarDay) : DayViewDecorator { // textColor 매개변수 제거
+    class MultipleDotDecorator(private val colors: List<Int>, private val date: CalendarDay) : DayViewDecorator {
         override fun shouldDecorate(day: CalendarDay): Boolean = day == date
         override fun decorate(view: DayViewFacade) {
-            view.addSpan(CustomDotSpan(colors))
+            view.addSpan(NonInterferingDotSpan(colors))
         }
     }
 
     /**
-     * 점을 그리는 커스텀 span 클래스
+     * 텍스트 색상에 간섭하지 않는 점 그리기 커스텀 span 클래스
+     * ReplacementSpan 대신 LineBackgroundSpan을 사용하되 텍스트 렌더링에 간섭하지 않음
      */
-    class CustomDotSpan(private val colors: List<Int>) : LineBackgroundSpan {
+    class NonInterferingDotSpan(private val colors: List<Int>) : LineBackgroundSpan {
         private val radius = 5f
         private val verticalSpacing = 12f
+
         override fun drawBackground(
             canvas: Canvas,
             paint: Paint,
@@ -429,14 +427,29 @@ class CalendarFragment : Fragment(), OnMealClickListener {
             end: Int,
             lineNumber: Int
         ) {
+            // 원래 paint 설정 백업
+            val originalColor = paint.color
+            val originalStyle = paint.style
+            val originalAntiAlias = paint.isAntiAlias
+
+            // 점 그리기를 위한 paint 설정
+            paint.isAntiAlias = true
+            paint.style = Paint.Style.FILL
+
             val totalWidth = (colors.size * radius * 2) + ((colors.size - 1) * 8f)
             var offsetX = (left + right) / 2 - (totalWidth / 2) + radius
             val offsetY = baseline + radius + verticalSpacing
+
             colors.forEach { color ->
                 paint.color = color
                 canvas.drawCircle(offsetX, offsetY, radius, paint)
                 offsetX += radius * 2 + 8f
             }
+
+            // 원래 paint 설정 복원 (텍스트 렌더링에 영향주지 않도록)
+            paint.color = originalColor
+            paint.style = originalStyle
+            paint.isAntiAlias = originalAntiAlias
         }
     }
 
@@ -468,7 +481,7 @@ class CalendarFragment : Fragment(), OnMealClickListener {
     private fun convertMealDtoToDietLogData(mealDto: MealDto): DietLogData {
         return DietLogData(
             id = mealDto.id,  // MealDto의 id를 DietLogData의 id로 사용
-            dietImg = mealDto.imageUrl,
+            dietImg = mealDto.imageUrl ?: "",
             time = LocalDateTime.parse(mealDto.time),  // String → LocalDateTime 변환
             dietTitle = mealDto.name,
             dietCategory = mealDto.type,
@@ -502,8 +515,8 @@ class CalendarFragment : Fragment(), OnMealClickListener {
      */
     override fun onDestroyView() {
         // 프래그먼트가 destroy될 때 데코레이터를 모두 제거
-        // _binding이 null이 되기 전에 binding 객체에 접근해야 합니다.
-        _binding?.calendarView?.removeDecorators() // 안전 호출(?.)과 함께 removeDecorators() 호출
+        _binding?.calendarView?.removeDecorators()
+        dotDecorators.clear() // dot 데코레이터 리스트도 클리어
 
         super.onDestroyView()
         _binding = null // binding 객체를 null로 설정하여 메모리 누수 방지
