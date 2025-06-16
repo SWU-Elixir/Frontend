@@ -26,7 +26,15 @@ class Survey2Fragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+
         with(survey2Binding) {
+            // 칩 묶기
+            val chipToTextMap = mapOf(
+                dietMeat to "고기위주",
+                dietVegetable to "채소위주",
+                dietMeatVegetable to "혼합식"
+            )
+
             // 일반 칩 리스트
             val chipList = listOf(dietMeat, dietVegetable, dietMeatVegetable)
 
