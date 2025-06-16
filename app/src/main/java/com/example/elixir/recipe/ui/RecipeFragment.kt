@@ -53,6 +53,7 @@ class RecipeFragment : Fragment() {
     private lateinit var recipeListAdapter: RecipeListAdapter
 
     private lateinit var recipeRepository: RecipeRepository
+    private lateinit var ingredientViewModel: IngredientViewModel
 
     private var selectedCategoryType = "종류"
     private var selectedSlowAging = "저속노화"
@@ -64,9 +65,10 @@ class RecipeFragment : Fragment() {
 
     private lateinit var recipeRegisterLauncher: ActivityResultLauncher<Intent>
 
-    // 두 데이터가 모두 준비될 때만 어댑터 초기화
+    // 데이터 상태 관리
     private var latestRecipeList: List<RecipeData>? = null
-    private var latestIngredientList: List<IngredientData>? = null
+    private var ingredientDataMap: Map<Int, IngredientData>? = null
+    private var isDataInitialized = false // 데이터 초기화 상태 추가
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -83,49 +85,93 @@ class RecipeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // 항상 초기화 진행 (중복 초기화 방지는 내부에서 처리)
+        initializeData()
+        setupUI()
+    }
+
+    private fun initializeData() {
+        // 이미 초기화된 경우에도 Observer는 다시 설정
+        if (isDataInitialized) {
+            setupObservers()
+            // 기존 데이터가 있다면 바로 어댑터 업데이트
+            if (latestRecipeList != null) {
+                tryInitAdapter()
+            }
+            return
+        }
+
         // db 초기화
         val recipeDao = AppDatabase.getInstance(requireContext()).recipeDao()
         val recipeApi = RetrofitClient.instanceRecipeApi
         recipeRepository = RecipeRepository(recipeApi, recipeDao)
 
-        // 식재료 불러오기
+        // 식재료 ViewModel 초기화
         val ingredientRepository = IngredientRepository(
             RetrofitClient.instanceIngredientApi,
             IngredientDB.getInstance(requireContext()).ingredientDao()
         )
         val ingredientService = IngredientService(ingredientRepository)
-        val ingredientViewModel = ViewModelProvider(this,
+        ingredientViewModel = ViewModelProvider(this,
             IngredientViewModelFactory(ingredientService))[IngredientViewModel::class.java]
 
-        // 레이아웃 매니저 설정
-        binding.recipeList.layoutManager = LinearLayoutManager(requireContext())
+        // Observer 설정 (항상 실행)
+        setupObservers()
 
-        // 레시피 & 식재료 데이터 불러오기
-        recipeViewModel.getRecipes(0, 10, selectedCategoryType, selectedSlowAging)
+        // 데이터 로딩
+        Log.d("RecipeFragment", "Loading ingredient data...")
         ingredientViewModel.loadIngredients()
+        Log.d("RecipeFragment", "Loading recipe data...")
+        recipeViewModel.getRecipes(0, 10, selectedCategoryType, selectedSlowAging)
 
+        isDataInitialized = true
+    }
+
+    private fun setupObservers() {
         // observe: 레시피 데이터
         recipeViewModel.recipeList.observe(viewLifecycleOwner) { recipes ->
+            Log.d("RecipeFragment", "Recipe data received: ${recipes?.size ?: 0} items")
             latestRecipeList = recipes
             tryInitAdapter()
         }
-        // observe: 식재료 데이터
-        ingredientViewModel.ingredients.observe(viewLifecycleOwner) { ingredientList ->
-            latestIngredientList = ingredientList
-            Log.d("RecipeFragment", "list: ${ingredientList.size}")
-            tryInitAdapter()
-        }
 
-        // FAB, 스피너, 검색 등 기존 코드 동일...
+        // observe: 식재료 데이터 (항상 업데이트)
+        ingredientViewModel.ingredients.observe(viewLifecycleOwner) { ingredientList ->
+            Log.d("RecipeFragment", "Ingredient data received: ${ingredientList?.size ?: 0} items")
+            if (ingredientList != null && ingredientList.isNotEmpty()) {
+                ingredientDataMap = ingredientList.associateBy { it.id }
+                Log.d("RecipeFragment", "Ingredient map created with ${ingredientDataMap?.size} items")
+                // 샘플 로그 추가
+                ingredientList.take(3).forEach { ingredient ->
+                    Log.d("RecipeFragment", "Sample ingredient: ${ingredient.name} (ID: ${ingredient.id})")
+                }
+                tryInitAdapter()
+            } else {
+                Log.d("RecipeFragment", "Ingredient list is null or empty")
+            }
+        }
+    }
+
+    private fun setupUI() {
+        // 레이아웃 매니저 설정
+        binding.recipeList.layoutManager = LinearLayoutManager(requireContext())
+
+        // FAB, 스피너, 검색 등 UI 설정
         setupFabClickListener()
         setupSpinners()
         setupRecommendationViewPager()
-        
-        // 추천 레시피 데이터 로드
-        loadRecommendRecipe()
-
-        // 검색 버튼 클릭 이벤트 설정
         setupSearchButton()
+
+        // 추천 레시피 데이터 로드 (한 번만)
+        if (recommendRecipeList.isEmpty()) {
+            loadRecommendRecipe()
+        }
+
+        setupRecipeRegisterLauncher()
+    }
+
+    private fun setupRecipeRegisterLauncher() {
         recipeRegisterLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) { result ->
@@ -146,58 +192,96 @@ class RecipeFragment : Fragment() {
     // 두 데이터가 모두 준비됐을 때만 어댑터 초기화
     private fun tryInitAdapter() {
         val recipes = latestRecipeList
-        val ingredients = latestIngredientList
+        val ingredientMap = ingredientDataMap
 
-        // 레시피와 재료가 null이 아니고, 레시피가 비어 있지 않을 때만 어댑터 세팅
-        if (recipes != null && ingredients != null) {
+        Log.d("RecipeFragment", "tryInitAdapter called - recipes: ${recipes?.size}, ingredients: ${ingredientMap?.size}")
+
+        // 레시피 데이터만 있어도 일단 어댑터 초기화 (식재료는 나중에 업데이트)
+        if (recipes != null) {
+            // 식재료 맵이 없으면 빈 맵으로 초기화
+            val safeIngredientMap = ingredientMap ?: emptyMap()
+
+            Log.d("RecipeFragment", "Using ingredient map size: ${safeIngredientMap.size}")
+
             if (recipes.isNotEmpty()) {
                 if (!::recipeListAdapter.isInitialized) {
-                    recipeList = recipes.toMutableList()
+                    // 처음 초기화할 때만 어댑터 생성
+                    Log.d("RecipeFragment", "Creating new adapter with ${recipes.size} recipes")
                     recipeListAdapter = RecipeListAdapter(
-                        recipeList, ingredients,
+                        recipes,
+                        safeIngredientMap,
                         onBookmarkClick = { recipe ->
-                            recipe.scrappedByCurrentUser = !recipe.scrappedByCurrentUser
                             if (recipe.scrappedByCurrentUser) {
-                                recipe.likes++
-                                recipeViewModel.addScrap(recipe.id)
-                            } else {
-                                recipe.likes--
                                 recipeViewModel.deleteScrap(recipe.id)
+                            } else {
+                                recipeViewModel.addScrap(recipe.id)
                             }
-                            recipeListAdapter.notifyItemChanged(recipeList.indexOf(recipe))
                         },
                         onHeartClick = { recipe ->
-                            recipe.likedByCurrentUser = !recipe.likedByCurrentUser
                             if (recipe.likedByCurrentUser) {
-                                recipe.likes++
-                                recipeViewModel.addLike(recipe.id)
-                            } else {
-                                recipe.likes--
                                 recipeViewModel.deleteLike(recipe.id)
+                            } else {
+                                recipeViewModel.addLike(recipe.id)
                             }
-                            recipeListAdapter.notifyItemChanged(recipeList.indexOf(recipe))
                         },
                         fragmentManager = parentFragmentManager
                     )
                     binding.recipeList.adapter = recipeListAdapter
                 } else {
-                    recipeList = recipes.toMutableList()
-                    recipeListAdapter.updateData(recipeList)
+                    // 이미 초기화된 어댑터라면 데이터 업데이트
+                    Log.d("RecipeFragment", "Updating existing adapter with ${recipes.size} recipes and ${safeIngredientMap.size} ingredients")
+                    recipeListAdapter.updateData(recipes)
+
+                    // 식재료 데이터가 있다면 어댑터에 업데이트
+                    if (safeIngredientMap.isNotEmpty()) {
+                        // RecipeListAdapter에 updateIngredientMap 메서드가 있는지 확인 필요
+                        try {
+                            val updateMethod = recipeListAdapter.javaClass.getMethod("updateIngredientMap", Map::class.java)
+                            updateMethod.invoke(recipeListAdapter, safeIngredientMap)
+                            Log.d("RecipeFragment", "Successfully updated ingredient map in adapter")
+                        } catch (e: Exception) {
+                            Log.w("RecipeFragment", "updateIngredientMap method not found, calling notifyDataSetChanged()")
+                            // 리플렉션이 실패하면 전체 데이터를 다시 설정
+                            recipeListAdapter = RecipeListAdapter(
+                                recipes,
+                                safeIngredientMap,
+                                onBookmarkClick = { recipe ->
+                                    if (recipe.scrappedByCurrentUser) {
+                                        recipeViewModel.deleteScrap(recipe.id)
+                                    } else {
+                                        recipeViewModel.addScrap(recipe.id)
+                                    }
+                                },
+                                onHeartClick = { recipe ->
+                                    if (recipe.likedByCurrentUser) {
+                                        recipeViewModel.deleteLike(recipe.id)
+                                    } else {
+                                        recipeViewModel.addLike(recipe.id)
+                                    }
+                                },
+                                fragmentManager = parentFragmentManager
+                            )
+                            binding.recipeList.adapter = recipeListAdapter
+                        }
+                    }
                 }
                 binding.recipeList.visibility = View.VISIBLE
                 binding.emptyRecipeText.visibility = View.GONE
+                Log.d("RecipeFragment", "RecipeList is now VISIBLE")
             } else {
-                // 레시피가 없을 때 EmptyView(안내 문구 등) 표시
                 binding.recipeList.visibility = View.GONE
                 binding.emptyRecipeText.visibility = View.VISIBLE
+                Log.d("RecipeFragment", "No recipes - showing empty text")
             }
-            Log.d("RecipeFragment", "recipeList size: ${recipes.size}, ingredientList size: ${ingredients.size}")
+        } else {
+            Log.d("RecipeFragment", "Recipes data is null - waiting for data")
         }
     }
 
     override fun onResume() {
         super.onResume()
-        recipeViewModel.getRecipes(0, 10, selectedCategoryType, selectedSlowAging)
+        // onResume에서는 데이터 재로딩하지 않음
+        // 필요한 경우에만 특정 조건에서 새로고침
     }
 
     override fun onDestroyView() {
@@ -260,21 +344,13 @@ class RecipeFragment : Fragment() {
                     selectedSlowAging = parent.getItemAtPosition(position).toString()
 
                     // ViewModel 함수 호출
-                    recipeViewModel.getRecipes(
-                        page = 0,
-                        size = 20,
-                        categoryType = selectedCategoryType,
-                        categorySlowAging = selectedSlowAging
-                    )
-
                     recipeViewModel.getRecipes(0, 10, selectedCategoryType, selectedSlowAging)
-                    Log.d("RecipeFragment", "recipeList size: ${recipeList.size}")
+                    Log.d("RecipeFragment", "Method selected: $selectedSlowAging")
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>) {}
             }
     }
-
 
     // 레시피 종류 스피너
     private fun setupTypeSpinner() {
@@ -301,15 +377,8 @@ class RecipeFragment : Fragment() {
                     selectedCategoryType = "양념_소스_잼"
 
                 // ViewModel 함수 호출
-                recipeViewModel.getRecipes(
-                    page = 0,
-                    size = 20,
-                    categoryType = selectedCategoryType,
-                    categorySlowAging = selectedSlowAging
-                )
-
                 recipeViewModel.getRecipes(0, 10, selectedCategoryType, selectedSlowAging)
-                Log.d("RecipeFragment", "recipeList size: ${recipeList.size}")
+                Log.d("RecipeFragment", "Type selected: $selectedCategoryType")
             }
 
             override fun onNothingSelected(parent: AdapterView<*>) {}
@@ -417,9 +486,9 @@ class RecipeFragment : Fragment() {
                         // ViewPager2 어댑터 업데이트
                         (binding.recommendationList.adapter as? RecipeRecommendationListAdapter)?.updateData(recommendList)
                             ?: run {
-                            // 어댑터가 없는 경우 새로 생성
-                            binding.recommendationList.adapter = RecipeRecommendationListAdapter(recommendList, fragmentManager = parentFragmentManager, recipeViewModel)
-                        }
+                                // 어댑터가 없는 경우 새로 생성
+                                binding.recommendationList.adapter = RecipeRecommendationListAdapter(recommendList, fragmentManager = parentFragmentManager, recipeViewModel)
+                            }
                     }
                 } else {
                     Log.e(TAG, "추천 레시피 로드 실패: ${response.code()}, ${response.message()}")
