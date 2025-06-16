@@ -86,7 +86,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="20dp"
-            android:text="@string/find_pw"
+            android:text="비밀번호 재설정"
             android:textSize="12sp"
             android:textColor="@color/elixir_darkgray"
             android:fontFamily="@font/pretendard_light"
