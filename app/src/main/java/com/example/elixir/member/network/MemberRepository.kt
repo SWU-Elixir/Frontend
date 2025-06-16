@@ -14,14 +14,13 @@ import okhttp3.RequestBody
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
 import com.google.gson.Gson
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 
 class MemberRepository (
     private val api: MemberApi,
     private val dao: MemberDao
 ) {
-
-
     suspend fun follow(targetMemberId: Int): Boolean {
         return try {
             val response = api.follow(targetMemberId)
@@ -368,7 +367,7 @@ class MemberRepository (
         return try {
             val gson = Gson()
             val dtoJson = gson.toJson(signupRequest)
-            val dtoBody = RequestBody.create("application/json; charset=utf-8".toMediaTypeOrNull(), dtoJson)
+            val dtoBody = dtoJson.toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
             val imagePart = profileImageFile?.let {
                 val reqFile = it.asRequestBody("image/*".toMediaTypeOrNull())
                 MultipartBody.Part.createFormData("profileImage", it.name, reqFile)

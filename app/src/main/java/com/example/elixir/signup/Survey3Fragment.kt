@@ -27,71 +27,81 @@ class Survey3Fragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         with(survey3Binding) {
             // 일반 칩 리스트
-            val chipList = listOf(dietKorean, dietChinese, dietJapanese, dietWestern, dietDessert, dietBeverage, dietSauce)
-
+            val chipList = listOf(
+                dietKorean, dietChinese, dietJapanese, dietWestern, dietDessert, dietBeverage, dietSauce
+            )
+            // 칩별 매핑 맵
+            val chipToTextMap = mapOf(
+                dietKorean to "한식",
+                dietChinese to "중식",
+                dietJapanese to "일식",
+                dietWestern to "양식",
+                dietDessert to "디저트",
+                dietBeverage to "음료_차",
+                dietSauce to "양념_소스_잼"
+            )
             // 특별히 없음 칩
             val chipNone = dietNA
 
-            // 뷰 모델에 저장된 값이 잆다면(Null이 아니라면) 불러와 선택 상태 복원
-            userModel.getPreferredRecipes()?.let { savedRecipes ->
-                // 쓰레기 값 우려로 리스트를 아예 비워주고 뷰 모델에서 불러오기
-                preferredRecipes.clear()
-                preferredRecipes.addAll(savedRecipes)
+            // 최초에 chipNone을 선택된 상태로
+            chipNone.isChecked = true
 
-                // 일반 칩 체크 상태 복원
-                chipList.forEach { chip ->
-                    chip.isChecked = preferredRecipes.contains(chip.text.toString())
+            // 뷰 모델에 저장된 값이 있다면(Null이 아니라면) 불러와 선택 상태 복원
+            userModel.getPreferredRecipes()?.let { savedRecipes ->
+                preferredRecipes.clear()
+                savedRecipes.forEach { item ->
+                    if (item != chipNone.text.toString()) { // chipNone이 아닌 것만 추가
+                        preferredRecipes.add(item)
+                    }
                 }
-                // 특별히 없음 칩 체크 상태 복원
-                chipNone.isChecked = preferredRecipes.contains(chipNone.text.toString())
+                chipList.forEach { chip ->
+                    val chipText = chipToTextMap[chip]!!
+                    chip.isChecked = preferredRecipes.contains(chipText)
+                }
+                chipNone.isChecked = savedRecipes.contains(chipNone.text.toString())
+                updateSelection()
             }
 
             // 일반 칩 선택 시
             chipList.forEach { chip ->
                 chip.setOnCheckedChangeListener { _, isChecked ->
-                    // 일반 칩을 선택했다면 특별히 없음 칩을 리스트에서 제거
+                    val chipText = chipToTextMap[chip]!!
                     if (isChecked) {
                         chipNone.isChecked = false
-                        preferredRecipes.remove(chipNone.text.toString())
-
-                        // 중복 저장 방지
-                        if (!preferredRecipes.contains(chip.text.toString()))
-                            preferredRecipes.add(chip.text.toString())
+                        if (!preferredRecipes.contains(chipText))
+                            preferredRecipes.add(chipText)
+                    } else {
+                        preferredRecipes.remove(chipText)
+                        // 모든 칩이 해제되면 chipNone을 선택
+                        if (preferredRecipes.isEmpty()) {
+                            chipNone.isChecked = true
+                            userModel.setPreferredRecipes(null)
+                        }
                     }
-                    // 두번 클릭 시 리스트에서 제거
-                    else preferredRecipes.remove(chip.text.toString())
-
-                    // 상태 갱신
+                    userModel.setPreferredRecipes(preferredRecipes)
                     updateSelection()
                 }
             }
 
-            // 특별히 없음 선택 시
+            // chipNone 선택 시
             chipNone.setOnCheckedChangeListener { _, isChecked ->
-                // 일반 칩 모두 선택 해제, 리스트에서 제거하고 특별히 없음을 저장
                 if (isChecked) {
                     chipList.forEach { it.isChecked = false }
                     preferredRecipes.clear()
-                    preferredRecipes.add(chipNone.text.toString())
+                    userModel.setPreferredRecipes(null)
                 }
-                // 두 번 클릭 시 리스트에서 제거
-                else preferredRecipes.remove(chipNone.text.toString())
-
-                // 상태 갱신
                 updateSelection()
             }
         }
     }
 
-    // 작업 상태 갱신 & 값 저장 함수
     private fun updateSelection() {
-        // 리스트에 정보가 저장되어 있는 상태라면 선택한 레시피들을 뷰 모델에 저장
-        // 공백이 아니라면 칩이 선택된 상태 -> 다음 버튼 활성화
-        if (preferredRecipes.isNotEmpty()) {
-            userModel.setPreferredRecipes(preferredRecipes)
-            listener?.onChipSelected(preferredRecipes)
+        // userModel.getPreferredRecipes()가 null이면 chipNone이 선택된 상태
+        if (userModel.getPreferredRecipes() == null) {
+            listener?.onChipSelected(null)
+        } else {
+            listener?.onChipSelected(userModel.getPreferredRecipes())
         }
-        // 저장되어 있지 않다면 칩이 선택되지 않은 상태 -> 버튼 비활성화
-        else listener?.onChipSelectedNot()
     }
+
 }

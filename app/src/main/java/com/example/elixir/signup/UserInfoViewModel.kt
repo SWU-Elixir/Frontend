@@ -8,10 +8,10 @@ import com.example.elixir.signup.SignupRequest
 class UserInfoViewModel : ViewModel() {
     private var accountData: AccountData = AccountData("", "")
     private var profileData: ProfileData = ProfileData("", "", "", 0)
-    private var allergies: List<String> = mutableListOf<String>()
-    private var preferredDiets: List<String> = mutableListOf<String>()
-    private var preferredRecipes: List<String> = mutableListOf<String>()
-    private var signupReasons: List<String> = mutableListOf<String>()
+    private var allergies: List<String>? = mutableListOf()
+    private var preferredDiets: List<String>? = mutableListOf()
+    private var preferredRecipes: List<String>? = mutableListOf()
+    private var signupReasons: List<String>? = mutableListOf()
 
     fun toSignupRequest(): SignupRequest? {
         val account = getAccount() ?: return null
@@ -80,43 +80,43 @@ class UserInfoViewModel : ViewModel() {
     }
 
     // 설문조사 - 알러지 정보 설정
-    fun setAllergies(algs: List<String>) {
+    fun setAllergies(algs: List<String>?) {
         allergies = algs
     }
 
     // 설문조사 - 알러지 정보 가져오기
     fun getAllergies(): List<String>? {
-        return allergies.ifEmpty { null }
+        return allergies?.ifEmpty { null }
     }
 
     // 설문조사 - 선호 식단 설정
-    fun setPreferredDiets(diets: List<String>) {
+    fun setPreferredDiets(diets: List<String>?) {
         preferredDiets = diets
     }
 
     // 설문조사 - 선호 식단 가져오기
     fun getPreferredDiets(): List<String>? {
-        return preferredDiets.ifEmpty { null }
+        return preferredDiets?.ifEmpty { null }
     }
 
     // 설문조사 - 선호 레시피 설정
-    fun setPreferredRecipes(recipes: List<String>) {
+    fun setPreferredRecipes(recipes: List<String>?) {
         preferredRecipes = recipes
     }
 
     // 설문조사 - 선호 레시피 가져오기
     fun getPreferredRecipes(): List<String>? {
-        return preferredRecipes.ifEmpty { null }
+        return preferredRecipes?.ifEmpty { null }
     }
 
     // 설문조사 - 저속노화 이유 설정
-    fun setSignupReason(reason: List<String>) {
+    fun setSignupReason(reason: List<String>?) {
         signupReasons = reason
     }
 
     // 설문조사 - 저속노화 이유 가져오기
     fun getSignupReason(): List<String>? {
-        return signupReasons.ifEmpty { null }
+        return signupReasons?.ifEmpty { null }
     }
 
 }

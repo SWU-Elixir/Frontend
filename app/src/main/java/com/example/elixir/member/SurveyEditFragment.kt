@@ -134,7 +134,7 @@ class SurveyEditFragment : Fragment() {
         val fragment = when (step) {
             1 -> Survey1Fragment().apply {
                 listener = object : OnChipCompletedListener {
-                    override fun onChipSelected(chips: List<String>) {
+                    override fun onChipSelected(chips: List<String>?) {
                         userModel.setAllergies(chips)
                         setButtonState(true)
                     }
@@ -146,7 +146,7 @@ class SurveyEditFragment : Fragment() {
             }
             2 -> Survey2Fragment().apply {
                 listener = object : OnChipCompletedListener {
-                    override fun onChipSelected(chips: List<String>) {
+                    override fun onChipSelected(chips: List<String>?) {
                         userModel.setPreferredDiets(chips)
                         setButtonState(true)
                     }
@@ -158,7 +158,7 @@ class SurveyEditFragment : Fragment() {
             }
             3 -> Survey3Fragment().apply {
                 listener = object : OnChipCompletedListener {
-                    override fun onChipSelected(chips: List<String>) {
+                    override fun onChipSelected(chips: List<String>?) {
                         userModel.setPreferredRecipes(chips)
                         setButtonState(true)
                     }
@@ -170,7 +170,7 @@ class SurveyEditFragment : Fragment() {
             }
             4 -> Survey4Fragment().apply {
                 listener = object : OnChipCompletedListener {
-                    override fun onChipSelected(chips: List<String>) {
+                    override fun onChipSelected(chips: List<String>?) {
                         userModel.setSignupReason(chips)
                         setButtonState(true)
                     }
