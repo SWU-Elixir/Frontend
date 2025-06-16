@@ -26,7 +26,7 @@ import com.google.android.flexbox.JustifyContent
  */
 class RecipeListAdapter(
     private var recipeList: List<RecipeData>,
-    private var ingredientItems: List<IngredientData>,
+    private val ingredientMap: Map<Int, IngredientData>,
     private val onBookmarkClick: (RecipeData) -> Unit,
     private val onHeartClick: (RecipeData) -> Unit,
     private val fragmentManager: FragmentManager
@@ -72,7 +72,7 @@ class RecipeListAdapter(
                 justifyContent = JustifyContent.FLEX_START
             }
             // ingredientMap이 필요하다면 FlavoringAdapter에 전달
-            adapter = IngredientTagChipAdapter(item.ingredientTagIds, ingredientItems)
+            adapter = IngredientTagChipMapAdapter(item.ingredientTagIds, ingredientMap)
             visibility = View.VISIBLE
         }
 
