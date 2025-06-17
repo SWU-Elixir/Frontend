@@ -262,11 +262,16 @@ class ChatBotActivity : ToolbarActivity() {
     }
 
     private fun sendMessage(message: String) {
-        // 바로 이전 챗봇 메시지를 확인하여 연결된 DTO가 있는지 찾습니다.
+        // 1. 사용자 메시지를 채팅 리스트에 추가
+        chatList.add(ChatItem.TextMessage(message, isFromUser = true))
+        chatAdapter.notifyItemInserted(chatList.size - 1)
+        binding.chatRecyclerView.scrollToPosition(chatList.size - 1)
+
+        // 2. 바로 이전 챗봇 메시지를 확인하여 연결된 DTO가 있는지 확인
         val lastBotMessage = chatList.findLast { it is ChatItem.TextMessage && !it.isFromUser } as? ChatItem.TextMessage
         val prevDto = lastBotMessage?.requestDto
 
-        // FREETALK이면 message 필드에, 그 외에는 additionalConditions에 값 할당
+        // 3. FREETALK이면 message 필드에, 그 외에는 additionalConditions에 값 할당
         val finalRequest = if (prevDto?.type == ChatRequestDto.TYPE_FREETALK) {
             prevDto.copy(message = message)
         } else if (prevDto != null) {
@@ -275,14 +280,14 @@ class ChatBotActivity : ToolbarActivity() {
             ChatRequestDto(type = ChatRequestDto.TYPE_FREETALK, message = message)
         }
 
-        // 로딩 메시지 추가
+        // 4. 로딩 메시지 추가
         val loadingMessage = "답변을 생성중입니다..."
         chatList.add(ChatItem.TextMessage(loadingMessage, isFromUser = false))
         val loadingPosition = chatList.size - 1
         chatAdapter.notifyItemInserted(loadingPosition)
         binding.chatRecyclerView.scrollToPosition(loadingPosition)
 
-        // 서버 API 호출
+        // 5. 서버 API 호출
         lifecycleScope.launch {
             try {
                 val responseDto = chatGptService.sendChatRequest(finalRequest)
