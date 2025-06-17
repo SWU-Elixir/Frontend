@@ -130,6 +130,11 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                 // 유저
                 binding.memberTitle.text = if(recipeData.authorTitle.isNullOrBlank()) "일반" else recipeData.authorTitle
                 binding.memberNickname.text = recipeData.authorNickname
+                Glide.with(requireContext())
+                    .load(recipeData.imageUrl)
+                    .placeholder(R.drawable.img_blank)
+                    .error(R.drawable.img_blank)
+                    .into(binding.profileImage)
 
                 // 레시피
                 binding.recipeNameText.text = recipeData.title
@@ -149,7 +154,8 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                 }
 
                 // 조리순서 RecyclerView에 어댑터 연결
-                binding.stepList.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+                binding.stepList.layoutManager = LinearLayoutManager(requireContext(),
+                    LinearLayoutManager.VERTICAL, false)
                 binding.stepList.adapter = RecipeStepAdapter(stepList)
 
                 // 조리 시간 설정 (시간이 있는 경우에만 표시)
@@ -252,7 +258,7 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                             R.id.menu_delete -> {
                                 DeleteDialog(requireActivity()) {
                                     recipeViewModel.deleteRecipe(recipeId)
-                                }
+                                }.show()
                                 true
                             }
                             else -> false

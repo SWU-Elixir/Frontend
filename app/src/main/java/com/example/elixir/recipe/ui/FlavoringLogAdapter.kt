@@ -1,6 +1,5 @@
 package com.example.elixir.recipe.ui
 
-import android.R
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log

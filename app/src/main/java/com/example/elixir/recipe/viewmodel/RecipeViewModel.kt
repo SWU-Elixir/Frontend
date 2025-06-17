@@ -60,7 +60,6 @@ class RecipeViewModel(
         }
     }
 
-
     fun searchRecipes(
         keyword: String,
         page: Int,

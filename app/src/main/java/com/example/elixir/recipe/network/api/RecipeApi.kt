@@ -78,7 +78,7 @@ interface RecipeApi {
     @DELETE("/api/recipe/{recipeId}")
     suspend fun deleteRecipe(
         @Path("recipeId") recipeId: Int
-    ): Response<GetRecipeResponse>
+    ): Response<GetStringResponse>
 
     // 좋아요, 스크랩
     @POST("/api/recipe/{recipeId}/like")

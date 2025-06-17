@@ -143,7 +143,7 @@ class SearchListFragment : Fragment() {
             if (!::recipeListAdapter.isInitialized) {
                 Log.d("SearchListFragment", "Creating new adapter with ${recipes.size} recipes")
                 recipeListAdapter = RecipeListAdapter(
-                    recipes,
+                    recipes.toMutableList(),
                     ingredientMap,
                     onBookmarkClick = { recipe -> // RecipeData 객체 전체를 전달
                         if (recipe.scrappedByCurrentUser) {
@@ -165,7 +165,7 @@ class SearchListFragment : Fragment() {
             } else {
                 // 이미 초기화되었다면 데이터만 업데이트
                 Log.d("SearchListFragment", "Updating existing adapter with ${recipes.size} recipes and ${ingredientMap.size} ingredients")
-                recipeListAdapter.updateData(recipes)
+                recipeListAdapter.updateData(recipes.toMutableList())
 
                 // 식재료 데이터가 있다면 어댑터에 업데이트 (RecipeListAdapter에 updateIngredientMap 메서드가 있다고 가정)
                 try {
@@ -181,7 +181,7 @@ class SearchListFragment : Fragment() {
                     // 데이터 업데이트 후 `notifyDataSetChanged()`를 호출하거나,
                     // 새로운 어댑터를 생성하여 할당하는 방식으로 구현해야 합니다.
                     recipeListAdapter = RecipeListAdapter(
-                        recipes,
+                        recipes.toMutableList(),
                         ingredientMap,
                         onBookmarkClick = { recipe -> // RecipeData 객체 전체를 전달
                             if (recipe.scrappedByCurrentUser) {
