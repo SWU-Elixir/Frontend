@@ -20,6 +20,7 @@ import com.example.elixir.RetrofitClient
 import com.example.elixir.ToolbarActivity
 import com.example.elixir.databinding.FragmentRecipeDetailBinding
 import com.example.elixir.dialog.DeleteDialog
+import com.example.elixir.ingredient.data.IngredientData
 import com.example.elixir.ingredient.network.IngredientDB
 import com.example.elixir.ingredient.network.IngredientRepository
 import com.example.elixir.ingredient.viewmodel.IngredientService
@@ -82,6 +83,7 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
     // 수정할 시 launcher 띄움
     private lateinit var editRecipeLauncher: ActivityResultLauncher<Intent>
     private var recipeId = -1
+    private var ingredientDataMap: Map<Int, IngredientData>? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -130,10 +132,11 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                 // 유저
                 binding.memberTitle.text = if(recipeData.authorTitle.isNullOrBlank()) "일반" else recipeData.authorTitle
                 binding.memberNickname.text = recipeData.authorNickname
+                val profileImg = if(recipeData.authorProfileUrl.isNullOrBlank()) R.drawable.ic_profile else recipeData.authorProfileUrl
                 Glide.with(requireContext())
-                    .load(recipeData.imageUrl)
-                    .placeholder(R.drawable.img_blank)
-                    .error(R.drawable.img_blank)
+                    .load(profileImg)
+                    .placeholder(R.drawable.ic_profile)
+                    .error(R.drawable.ic_profile)
                     .into(binding.profileImage)
 
                 // 레시피
@@ -146,6 +149,7 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                     .placeholder(R.drawable.img_blank)
                     .error(R.drawable.img_blank)
                     .into(binding.recipeImage)
+
 
                 // 순서
                 // 조리순서 데이터 변환
@@ -281,7 +285,9 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                     val ingredientViewModel = IngredientViewModel(IngredientService(ingredientRepository))
 
                     ingredientViewModel.ingredients.observe(viewLifecycleOwner) { ingredientList ->
-                        adapter = IngredientTagChipAdapter(recipeData.ingredientTagIds, ingredientList)
+                        ingredientDataMap = ingredientList.associateBy { it.id }
+                        adapter = IngredientTagChipMapAdapter(recipeData.ingredientTagIds, ingredientDataMap!!)
+                        visibility = View.VISIBLE
                     }
                 }
 

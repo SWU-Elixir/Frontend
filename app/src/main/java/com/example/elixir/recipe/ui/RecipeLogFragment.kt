@@ -84,6 +84,7 @@ class RecipeLogFragment : Fragment() {
     private var scrappedByCurrentUser = false
     private var authorNickname: String? = null
     private var authorTitle: String? = null
+    private var authorProfileUrl: String? = null
     private var likes = 0
     private var comments: List<CommentItem>? = null
     private var createdAt = LocalDateTime.now().toString()
@@ -509,20 +510,18 @@ class RecipeLogFragment : Fragment() {
         recipeBinding.btnIngredientsAdd.setOnClickListener {
             ingredientList.add(FlavoringItem("", "", ""))
             ingredientsAdapter.notifyItemInserted(ingredientList.size - 1)
-            ingredientsAdapter.notifyDataSetChanged()
+            Log.d("ingredientList", "itemList: ${ingredientList.map { it.hashCode() }}")
             Log.d("ingredientList", "ingredientList size: ${ingredientList.size}")
             updateAddButtonState()
         }
         recipeBinding.btnSeasoningAdd.setOnClickListener {
             seasoningList.add(FlavoringItem("", "", ""))
             seasoningAdapter.notifyItemInserted(seasoningList.size - 1)
-            seasoningAdapter.notifyDataSetChanged()
             updateAddButtonState()
         }
         recipeBinding.btnRecipeStepAdd.setOnClickListener {
             steps.add(RecipeStepData("android.resource://${requireContext().packageName}/${R.drawable.img_blank}", ""))
             stepAdapter.notifyItemInserted(steps.size - 1) // 변경!
-            stepAdapter.notifyDataSetChanged()
             updateAddButtonState()
         }
         updateWriteButtonState()
@@ -555,6 +554,7 @@ class RecipeLogFragment : Fragment() {
                         scrappedByCurrentUser = scrappedByCurrentUser,
                         authorNickname = authorNickname,
                         authorTitle = authorTitle,
+                        authorProfileUrl = authorProfileUrl,
                         likes = likes,
                         scraps = 0,
                         comments = comments,
@@ -787,6 +787,7 @@ class RecipeLogFragment : Fragment() {
         likedByCurrentUser = recipeData.likedByCurrentUser
         scrappedByCurrentUser = recipeData.scrappedByCurrentUser
         authorTitle = recipeData.authorTitle
+
         authorNickname = recipeData.authorNickname
         likes = recipeData.likes
         comments = recipeData.comments

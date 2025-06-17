@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
@@ -139,6 +140,10 @@ class RecipeFragment : Fragment() {
             Log.d("RecipeFragment", "Recipe data received: ${recipes?.size ?: 0} items")
             latestRecipeList = recipes
             tryInitAdapter()
+        }
+
+        recipeViewModel.deleteResult.observe(viewLifecycleOwner) { result ->
+            recipeViewModel.getRecipes(0, pageSize, selectedCategoryType, selectedSlowAging)
         }
 
         // observe: 식재료 데이터 (항상 업데이트)

@@ -32,6 +32,7 @@ data class RecipeEntity(
     @ColumnInfo(name = "scrappedByCurrentUser") val scrappedByCurrentUser: Boolean,         // 현재 사용자가 스크랩을 눌렀는지 여부
     @ColumnInfo(name = "authorNickname") val authorNickname: String?,                        // 작성자 닉네임
     @ColumnInfo(name = "authorTitle") val authorTitle: String?,                              // 작성자 직책
+    @ColumnInfo(name = "authorProfileUrl") val authorProfileUrl: String?,
     @ColumnInfo(name = "likes") val likes: Int = 0,                                         // 좋아요 수
     @ColumnInfo(name = "scraps") val scraps: Int = 0,                                       // 스크랩 수
     @ColumnInfo(name = "createdAt") val createdAt: String,
@@ -79,6 +80,7 @@ fun RecipeEntity.toData(): RecipeData = RecipeData(
     scrappedByCurrentUser = scrappedByCurrentUser,
     authorNickname = authorNickname,
     authorTitle = authorTitle,
+    authorProfileUrl = authorProfileUrl,
     likes = likes,
     scraps = scraps,
     comments = null,

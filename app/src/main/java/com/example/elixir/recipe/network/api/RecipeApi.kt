@@ -3,6 +3,7 @@ package com.example.elixir.recipe.network.api
 import com.example.elixir.chatbot.RecipeListResponse
 import com.example.elixir.network.GetStringResponse
 import com.example.elixir.recipe.network.response.GetRecipeListResponse
+import com.example.elixir.recipe.network.response.GetRecipePostResponse
 import com.example.elixir.recipe.network.response.GetRecipeResponse
 import com.example.elixir.recipe.network.response.GetSearchResponse
 import com.example.elixir.recipe.network.response.GetRecipeRecommendResponse
@@ -64,7 +65,7 @@ interface RecipeApi {
         @Part("dto") dto: RequestBody,
         @Part image: MultipartBody.Part,
         @Part recipeStepImages: List<MultipartBody.Part>
-    ): Response<GetRecipeResponse>
+    ): Response<GetRecipePostResponse>
 
     @Multipart
     @PATCH("/api/recipe/{recipeId}")
@@ -73,7 +74,7 @@ interface RecipeApi {
         @Part("dto") dto: RequestBody,
         @Part image: MultipartBody.Part?,
         @Part recipeStepImages: List<MultipartBody.Part>?
-    ): Response<GetRecipeResponse>
+    ): Response<GetRecipePostResponse>
 
     @DELETE("/api/recipe/{recipeId}")
     suspend fun deleteRecipe(

@@ -39,6 +39,7 @@ fun GetRecipeData.toEntity(): RecipeEntity = RecipeEntity(
     scrappedByCurrentUser = this.scrappedByCurrentUser,
     authorNickname = "",
     authorTitle = "",
+    authorProfileUrl = "",
     likes = this.likes,
     scraps = 0,
     createdAt = LocalDateTime.now().toString(),   // 서버 응답에 없으므로 현재 시각
@@ -72,6 +73,7 @@ fun GetRecipeData.toRecipeData(): RecipeData {
         scrappedByCurrentUser = this.scrappedByCurrentUser,
         authorNickname = null,
         authorTitle = null,
+        authorProfileUrl = null,
         likes = this.likes,
         scraps = 0,
         comments = null,
