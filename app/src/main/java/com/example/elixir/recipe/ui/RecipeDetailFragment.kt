@@ -139,6 +139,7 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                     .error(R.drawable.ic_profile)
                     .into(binding.profileImage)
 
+
                 // 레시피
                 binding.recipeNameText.text = recipeData.title
                 binding.categorySlowAging.text = recipeData.categorySlowAging
@@ -184,6 +185,11 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                 // 스크랩 버튼 클릭 이벤트 처리
                 binding.bookmarkButton.setOnClickListener{
                     recipeData.scrappedByCurrentUser = !recipeData.scrappedByCurrentUser
+                    if (recipeData.scrappedByCurrentUser) {
+                        recipeViewModel.addScrap(recipeId)
+                    } else {
+                        recipeViewModel.deleteScrap(recipeId)
+                    }
                     // 스크랩 상태에 따라 카운트 증가/감소
                     binding.bookmarkButton.setBackgroundResource(
                         if(recipeData.scrappedByCurrentUser) R.drawable.ic_recipe_bookmark_selected
@@ -210,9 +216,13 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                     binding.heartCount.text = formatCount(recipeData.likes)
                 }
 
+
+                val api = com.example.elixir.RetrofitClient.instanceMemberApi
+
                 // 팔로우 버튼 클릭 이벤트 처리
                 binding.followButton.setOnClickListener {
                     val isFollowing = binding.followButton.text == getString(R.string.following)
+
                     // 팔로우 상태 토글 및 UI 업데이트
                     binding.followButton.text = if (isFollowing) getString(R.string.follow) else getString(R.string.following)
                     binding.followButton.setBackgroundResource(
@@ -233,6 +243,11 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                 memberViewModel.profile.observe(viewLifecycleOwner) { profile ->
                     profile?.let {
                         userNickname = profile.nickname
+                        if(recipeData.authorNickname == userNickname)
+                            binding.followButton.visibility = View.GONE
+                        else
+                            binding.followButton.visibility = View.VISIBLE
+
                         // 사용자가 아니면 수정 못하게
                         if(recipeData.authorNickname != profile.nickname)
                             binding.menuButton.visibility = View.GONE
