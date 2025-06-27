@@ -20,6 +20,7 @@ import com.example.elixir.RetrofitClient
 import com.example.elixir.ToolbarActivity
 import com.example.elixir.databinding.FragmentRecipeDetailBinding
 import com.example.elixir.dialog.DeleteDialog
+import com.example.elixir.ingredient.data.IngredientData
 import com.example.elixir.ingredient.network.IngredientDB
 import com.example.elixir.ingredient.network.IngredientRepository
 import com.example.elixir.ingredient.viewmodel.IngredientService
@@ -82,6 +83,7 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
     // 수정할 시 launcher 띄움
     private lateinit var editRecipeLauncher: ActivityResultLauncher<Intent>
     private var recipeId = -1
+    private var ingredientDataMap: Map<Int, IngredientData>? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -130,6 +132,13 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                 // 유저
                 binding.memberTitle.text = if(recipeData.authorTitle.isNullOrBlank()) "일반" else recipeData.authorTitle
                 binding.memberNickname.text = recipeData.authorNickname
+                val profileImg = if(recipeData.authorProfileUrl.isNullOrBlank()) R.drawable.ic_profile else recipeData.authorProfileUrl
+                Glide.with(requireContext())
+                    .load(profileImg)
+                    .placeholder(R.drawable.ic_profile)
+                    .error(R.drawable.ic_profile)
+                    .into(binding.profileImage)
+
 
                 // 레시피
                 binding.recipeNameText.text = recipeData.title
@@ -142,6 +151,7 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                     .error(R.drawable.img_blank)
                     .into(binding.recipeImage)
 
+
                 // 순서
                 // 조리순서 데이터 변환
                 val stepList = recipeData.stepDescriptions.zip(recipeData.stepImageUrls) { desc, imgUrl ->
@@ -149,7 +159,8 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                 }
 
                 // 조리순서 RecyclerView에 어댑터 연결
-                binding.stepList.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+                binding.stepList.layoutManager = LinearLayoutManager(requireContext(),
+                    LinearLayoutManager.VERTICAL, false)
                 binding.stepList.adapter = RecipeStepAdapter(stepList)
 
                 // 조리 시간 설정 (시간이 있는 경우에만 표시)
@@ -174,6 +185,11 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                 // 스크랩 버튼 클릭 이벤트 처리
                 binding.bookmarkButton.setOnClickListener{
                     recipeData.scrappedByCurrentUser = !recipeData.scrappedByCurrentUser
+                    if (recipeData.scrappedByCurrentUser) {
+                        recipeViewModel.addScrap(recipeId)
+                    } else {
+                        recipeViewModel.deleteScrap(recipeId)
+                    }
                     // 스크랩 상태에 따라 카운트 증가/감소
                     binding.bookmarkButton.setBackgroundResource(
                         if(recipeData.scrappedByCurrentUser) R.drawable.ic_recipe_bookmark_selected
@@ -200,9 +216,13 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                     binding.heartCount.text = formatCount(recipeData.likes)
                 }
 
+
+                val api = com.example.elixir.RetrofitClient.instanceMemberApi
+
                 // 팔로우 버튼 클릭 이벤트 처리
                 binding.followButton.setOnClickListener {
                     val isFollowing = binding.followButton.text == getString(R.string.following)
+
                     // 팔로우 상태 토글 및 UI 업데이트
                     binding.followButton.text = if (isFollowing) getString(R.string.follow) else getString(R.string.following)
                     binding.followButton.setBackgroundResource(
@@ -223,6 +243,11 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                 memberViewModel.profile.observe(viewLifecycleOwner) { profile ->
                     profile?.let {
                         userNickname = profile.nickname
+                        if(recipeData.authorNickname == userNickname)
+                            binding.followButton.visibility = View.GONE
+                        else
+                            binding.followButton.visibility = View.VISIBLE
+
                         // 사용자가 아니면 수정 못하게
                         if(recipeData.authorNickname != profile.nickname)
                             binding.menuButton.visibility = View.GONE
@@ -252,7 +277,7 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                             R.id.menu_delete -> {
                                 DeleteDialog(requireActivity()) {
                                     recipeViewModel.deleteRecipe(recipeId)
-                                }
+                                }.show()
                                 true
                             }
                             else -> false
@@ -275,7 +300,9 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                     val ingredientViewModel = IngredientViewModel(IngredientService(ingredientRepository))
 
                     ingredientViewModel.ingredients.observe(viewLifecycleOwner) { ingredientList ->
-                        adapter = IngredientTagChipAdapter(recipeData.ingredientTagIds, ingredientList)
+                        ingredientDataMap = ingredientList.associateBy { it.id }
+                        adapter = IngredientTagChipMapAdapter(recipeData.ingredientTagIds, ingredientDataMap!!)
+                        visibility = View.VISIBLE
                     }
                 }
 

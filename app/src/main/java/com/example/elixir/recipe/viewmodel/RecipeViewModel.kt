@@ -60,7 +60,6 @@ class RecipeViewModel(
         }
     }
 
-
     fun searchRecipes(
         keyword: String,
         page: Int,
@@ -82,6 +81,7 @@ class RecipeViewModel(
                 // 데이터 요청 코드 (예시)
                 val response = repository.getRecipeById(recipeId)
                 _recipeDetail.value = response
+                Log.d("RecipeViewModel", "recipeDetail 값: $recipeDetail")
             } catch (e: Exception) {
                 // 예외 발생 시 로그
                 Log.e("RecipeViewModel", "코루틴 에러: ${e.message}", e)
@@ -122,7 +122,6 @@ class RecipeViewModel(
             }
         }
     }
-
 
     // 레시피 삭제
     fun deleteRecipe(recipeId: Int) {

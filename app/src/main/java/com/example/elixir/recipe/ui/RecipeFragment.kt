@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
@@ -141,6 +142,10 @@ class RecipeFragment : Fragment() {
             tryInitAdapter()
         }
 
+        recipeViewModel.deleteResult.observe(viewLifecycleOwner) { result ->
+            recipeViewModel.getRecipes(0, pageSize, selectedCategoryType, selectedSlowAging)
+        }
+
         // observe: 식재료 데이터 (항상 업데이트)
         ingredientViewModel.ingredients.observe(viewLifecycleOwner) { ingredientList ->
             Log.d("RecipeFragment", "Ingredient data received: ${ingredientList?.size ?: 0} items")
@@ -158,6 +163,12 @@ class RecipeFragment : Fragment() {
         }
     }
 
+    private fun loadMore() {
+        Log.d("RecipeFragment", "loadMore called")
+        currentPage++
+        recipeViewModel.getRecipes(currentPage, pageSize, selectedCategoryType, selectedSlowAging)
+    }
+
     private fun setupUI() {
         // 레이아웃 매니저 설정
         binding.recipeList.layoutManager = LinearLayoutManager(requireContext())
@@ -172,6 +183,7 @@ class RecipeFragment : Fragment() {
         if (recommendRecipeList.isEmpty()) {
             loadRecommendRecipe()
         }
+
 
         setupRecipeRegisterLauncher()
     }
@@ -216,10 +228,8 @@ class RecipeFragment : Fragment() {
                         onBookmarkClick = { recipe ->
                             recipe.scrappedByCurrentUser = !recipe.scrappedByCurrentUser
                             if (recipe.scrappedByCurrentUser) {
-                                recipe.likes++
                                 recipeViewModel.addScrap(recipe.id)
                             } else {
-                                recipe.likes--
                                 recipeViewModel.deleteScrap(recipe.id)
                             }
                             recipeListAdapter.notifyItemChanged(recipeList.indexOf(recipe))
@@ -237,6 +247,7 @@ class RecipeFragment : Fragment() {
                         },
                         fragmentManager = parentFragmentManager
                     )
+
                     binding.recipeList.adapter = recipeListAdapter
                 } else {
                     // 이미 초기화된 어댑터라면 데이터 업데이트
@@ -293,12 +304,10 @@ class RecipeFragment : Fragment() {
         } else {
             Log.d("RecipeFragment", "Recipes data is null - waiting for data")
         }
-    }
 
-    override fun onResume() {
-        super.onResume()
-        // onResume에서는 데이터 재로딩하지 않음
-        // 필요한 경우에만 특정 조건에서 새로고침
+        recipeListAdapter.setOnMoreClickListener {
+            loadMore() // 다음 페이지 데이터 불러오기
+        }
     }
 
     override fun onDestroyView() {
