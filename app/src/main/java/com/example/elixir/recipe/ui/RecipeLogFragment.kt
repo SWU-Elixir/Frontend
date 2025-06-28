@@ -132,34 +132,35 @@ class RecipeLogFragment : Fragment() {
         chipMap = emptyMap()
 
         try {
-            // 레시피 썸네일
             recipeRepository = RecipeRepository(RetrofitClient.instanceRecipeApi, AppDatabase.getInstance(requireContext()).recipeDao())
 
-            // 레시피 기본 정보 설정
-            recipeViewModel.recipeDetail.observe(viewLifecycleOwner) { recipeData ->
-                Log.d("RecipeFragment", "recipeData: $recipeData")
-                // 수정 모드
-                if (recipeData != null) {
-                    isEdit = true
-                    // UI 업데이트
-                    setRecipeDataToUI(recipeData)
-                }
-            }
-
-            // 데이터 초기화
-            if(!isEdit)
-                initData()
-
-            // UI 요소 초기화
-            setupUI()
-
-            // id 값 가져오기
-            recipeId = arguments?.getInt("recipeId") ?: return
+            // id 값 먼저 가져오기
+            recipeId = arguments?.getInt("recipeId") ?: -1
             Log.d("RecipeLogFragment", "recipeID: $recipeId")
 
-            // 만약 수정 모드라면 레시피 값이 -1이 아닐 것
-            if(recipeId != -1)
+            // 수정 모드 판단
+            isEdit = recipeId != -1
+
+            if (!isEdit) {
+                // 등록 모드: 데이터 초기화 후 UI 설정
+                initData()
+                setupUI()
+            } else {
+                // 수정 모드: UI 먼저 설정하고 데이터 관찰
+                setupUI()
+
+                // 레시피 데이터 관찰
+                recipeViewModel.recipeDetail.observe(viewLifecycleOwner) { recipeData ->
+                    Log.d("RecipeFragment", "recipeData: $recipeData")
+                    if (recipeData != null && !isDataSet) {
+                        isDataSet = true
+                        setRecipeDataToUI(recipeData)
+                    }
+                }
+
+                // 데이터 요청
                 recipeViewModel.getRecipeById(recipeId)
+            }
 
         } catch (e: Exception) {
             Log.e("RecipeLogFragment", "Error in onViewCreated", e)
@@ -170,7 +171,7 @@ class RecipeLogFragment : Fragment() {
         Log.d("RecipeLogFragment", "Setting up UI elements")
         try {
             // 레시피 기본 정보 설정
-            setupRecipeInfo()
+            // setupRecipeInfo()
 
             // 레시피 썸네일 설정
             setupThumbnail()
@@ -521,7 +522,7 @@ class RecipeLogFragment : Fragment() {
 
     // RecyclerView 설정
     private fun setupRecyclerViews() {
-        // 어댑터가 이미 초기화되었다면 재사용
+        // 어댑터 초기화 (한 번만)
         if (!::ingredientsAdapter.isInitialized) {
             ingredientsAdapter = FlavoringLogAdapter(ingredientList,
                 { removeFlavoringItem(ingredientList, it, ingredientsAdapter, recipeBinding.frameEnterIngredients) },
@@ -544,12 +545,19 @@ class RecipeLogFragment : Fragment() {
             )
         }
 
-        // RecyclerView 설정을 post로 지연 실행
+        // RecyclerView 설정
         view?.post {
             try {
-                setupRecyclerView(recipeBinding.frameEnterIngredients, ingredientsAdapter)
-                setupRecyclerView(recipeBinding.frameEnterSeasoning, seasoningAdapter)
-                setupRecyclerView(recipeBinding.frameEnterRecipeStep, stepAdapter)
+                // 어댑터가 아직 설정되지 않았을 때만 설정
+                if (recipeBinding.frameEnterIngredients.adapter == null) {
+                    setupRecyclerView(recipeBinding.frameEnterIngredients, ingredientsAdapter)
+                }
+                if (recipeBinding.frameEnterSeasoning.adapter == null) {
+                    setupRecyclerView(recipeBinding.frameEnterSeasoning, seasoningAdapter)
+                }
+                if (recipeBinding.frameEnterRecipeStep.adapter == null) {
+                    setupRecyclerView(recipeBinding.frameEnterRecipeStep, stepAdapter)
+                }
 
                 updateAddButtonState()
                 updateWriteButtonState()
@@ -950,6 +958,14 @@ class RecipeLogFragment : Fragment() {
         // UI 업데이트를 post로 지연 실행하여 안전하게 처리
         view?.post {
             try {
+                // 어댑터가 초기화되었는지 확인
+                if (!::ingredientsAdapter.isInitialized ||
+                    !::seasoningAdapter.isInitialized ||
+                    !::stepAdapter.isInitialized) {
+                    Log.d("RecipeLogFragment", "Adapters not initialized, re-setting up RecyclerViews")
+                    setupRecyclerViews()
+                }
+
                 // 텍스트 필드 업데이트
                 recipeBinding.enterRecipeTitle.setText(recipeTitle)
                 recipeBinding.enterRecipeDescription.setText(recipeDescription)
