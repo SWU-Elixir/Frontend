@@ -217,7 +217,7 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                 }
 
 
-                val api = com.example.elixir.RetrofitClient.instanceMemberApi
+                val memberApi = RetrofitClient.instanceMemberApi
 
                 // 팔로우 버튼 클릭 이벤트 처리
                 binding.followButton.setOnClickListener {

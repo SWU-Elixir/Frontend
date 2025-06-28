@@ -11,7 +11,6 @@ import android.view.inputmethod.EditorInfo
 import android.widget.AdapterView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.elixir.R
 import com.example.elixir.RetrofitClient
@@ -145,19 +144,25 @@ class SearchListFragment : Fragment() {
                 recipeListAdapter = RecipeListAdapter(
                     recipes.toMutableList(),
                     ingredientMap,
-                    onBookmarkClick = { recipe -> // RecipeData 객체 전체를 전달
+                    onBookmarkClick = { recipe ->
+                        recipe.scrappedByCurrentUser = !recipe.scrappedByCurrentUser
                         if (recipe.scrappedByCurrentUser) {
-                            recipeViewModel.deleteScrap(recipe.id)
-                        } else {
                             recipeViewModel.addScrap(recipe.id)
-                        }
-                    },
-                    onHeartClick = { recipe -> // RecipeData 객체 전체를 전달
-                        if (recipe.likedByCurrentUser) {
-                            recipeViewModel.deleteLike(recipe.id)
                         } else {
-                            recipeViewModel.addLike(recipe.id)
+                            recipeViewModel.deleteScrap(recipe.id)
                         }
+                        recipeListAdapter.notifyItemChanged(recipes.indexOf(recipe))
+                    },
+                    onHeartClick = { recipe ->
+                        recipe.likedByCurrentUser = !recipe.likedByCurrentUser
+                        if (recipe.likedByCurrentUser) {
+                            recipe.likes++
+                            recipeViewModel.addLike(recipe.id)
+                        } else {
+                            recipe.likes--
+                            recipeViewModel.deleteLike(recipe.id)
+                        }
+                        recipeListAdapter.notifyItemChanged(recipes.indexOf(recipe))
                     },
                     fragmentManager = parentFragmentManager
                 )
@@ -183,19 +188,25 @@ class SearchListFragment : Fragment() {
                     recipeListAdapter = RecipeListAdapter(
                         recipes.toMutableList(),
                         ingredientMap,
-                        onBookmarkClick = { recipe -> // RecipeData 객체 전체를 전달
+                        onBookmarkClick = { recipe ->
+                            recipe.scrappedByCurrentUser = !recipe.scrappedByCurrentUser
                             if (recipe.scrappedByCurrentUser) {
-                                recipeViewModel.deleteScrap(recipe.id)
-                            } else {
                                 recipeViewModel.addScrap(recipe.id)
-                            }
-                        },
-                        onHeartClick = { recipe -> // RecipeData 객체 전체를 전달
-                            if (recipe.likedByCurrentUser) {
-                                recipeViewModel.deleteLike(recipe.id)
                             } else {
-                                recipeViewModel.addLike(recipe.id)
+                                recipeViewModel.deleteScrap(recipe.id)
                             }
+                            recipeListAdapter.notifyItemChanged(recipes.indexOf(recipe))
+                        },
+                        onHeartClick = { recipe ->
+                            recipe.likedByCurrentUser = !recipe.likedByCurrentUser
+                            if (recipe.likedByCurrentUser) {
+                                recipe.likes++
+                                recipeViewModel.addLike(recipe.id)
+                            } else {
+                                recipe.likes--
+                                recipeViewModel.deleteLike(recipe.id)
+                            }
+                            recipeListAdapter.notifyItemChanged(recipes.indexOf(recipe))
                         },
                         fragmentManager = parentFragmentManager
                     )

@@ -25,7 +25,7 @@ import org.threeten.bp.LocalDateTime
 
 object RetrofitClient {
     // 서버 주소
-    private const val BASE_URL = "https://sean-test.shop/"
+    private const val BASE_URL = "https://port-0-elixir-backend-g0424l70py8py.gksl2.cloudtype.app/"
     private var authToken: String? = "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJBQGV4YW1wbGUuY29tIiwiYXV0aCI6IlVTRVIiLCJleHAiOjE3NTAwNTU3OTB9.DB4pG36fMldRRo1K4Y5lgcEei4tGKrM_wkjSlKFxnPfCT9ha4R_G1_OXenUT_9xp" // Bearer 토큰을 저장할 변수
     private var isRefreshing = false // 토큰 갱신 중인지 여부를 추적하는 플래그
 
