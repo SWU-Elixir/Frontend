@@ -66,7 +66,7 @@ class MealListAdapter(
             5 -> R.drawable.ic_meal_number5
             else -> R.drawable.ic_meal_number1 // 기본 아이콘
         }
-        binding.dietScore.setImageResource(iconRes)
+        binding.tvScoreLabel.setImageResource(iconRes)
 
         // --- 재료 목록을 FlexboxLayoutManager를 사용하여 표시 (방어 코드 추가) ---
         // ingredientTags가 비어있을 경우 RecyclerView를 숨기거나, 빈 어댑터를 설정하여 오류 방지

@@ -1,4 +1,4 @@
-package com.example.elixir.member
+package com.example.elixir.member.ui
 
 import android.os.Bundle
 import android.util.Log
@@ -14,6 +14,7 @@ import com.bumptech.glide.request.RequestOptions
 import com.example.elixir.R
 import com.example.elixir.databinding.FragmentMypageImageGridBinding
 import com.example.elixir.RetrofitClient
+import com.example.elixir.member.data.BadgeItem
 import com.example.elixir.recipe.ui.RecipeDetailFragment
 import kotlinx.coroutines.launch
 
@@ -64,7 +65,7 @@ class MyPageImageGridFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        binding.imageRecyclerView.layoutManager = GridLayoutManager(context, 3)
+        binding.rvImage.layoutManager = GridLayoutManager(context, 3)
         when (contentType) {
             TYPE_RECIPE -> {
                 loadMyRecipesAsync()
@@ -94,7 +95,7 @@ class MyPageImageGridFragment : Fragment() {
 
                 if (recipeList.isNullOrEmpty()) {
                     Log.d(TAG, "레시피 목록이 비어있습니다")
-                    binding.imageRecyclerView.adapter = BadgeGridAdapter(emptyList())
+                    binding.rvImage.adapter = BadgeGridAdapter(emptyList())
                     return@launch
                 }
 
@@ -123,14 +124,14 @@ class MyPageImageGridFragment : Fragment() {
                                 .load(imageUrl)
                                 .centerCrop()
                                 .apply(requestOptions)
-                                .into(holder.binding.badgeImage)
+                                .into(holder.binding.imgBadge)
                         } else {
                             // 이미지 URL이 null이거나 비어있는 경우 기본 이미지 표시
-                            holder.binding.badgeImage.setImageResource(R.drawable.ic_recipe_white)
+                            holder.binding.imgBadge.setImageResource(R.drawable.ic_recipe_white)
                         }
 
-                        holder.binding.badgeTitle.visibility = View.GONE
-                        holder.binding.badgeSubtitle.visibility = View.GONE
+                        holder.binding.tvBadge.visibility = View.GONE
+                        holder.binding.tvBadgeSubTitle.visibility = View.GONE
 
                         // 전체 아이템 클릭 이벤트 추가
                         holder.binding.root.setOnClickListener {
@@ -153,11 +154,11 @@ class MyPageImageGridFragment : Fragment() {
                     override fun getItemCount() = recipeList.size
                 }
 
-                binding.imageRecyclerView.adapter = adapter
+                binding.rvImage.adapter = adapter
                 Log.d(TAG, "레시피 목록 로드 완료: ${recipeList.size}개")
             } catch (e: Exception) {
                 Log.e(TAG, "레시피 목록 로드 실패", e)
-                binding.imageRecyclerView.adapter = BadgeGridAdapter(emptyList())
+                binding.rvImage.adapter = BadgeGridAdapter(emptyList())
             }
         }
     }
@@ -173,7 +174,7 @@ class MyPageImageGridFragment : Fragment() {
 
                 if (recipeList.isNullOrEmpty()) {
                     Log.d(TAG, "스크랩 목록이 비어있습니다")
-                    binding.imageRecyclerView.adapter = BadgeGridAdapter(emptyList())
+                    binding.rvImage.adapter = BadgeGridAdapter(emptyList())
                     return@launch
                 }
 
@@ -202,14 +203,14 @@ class MyPageImageGridFragment : Fragment() {
                                 .load(imageUrl)
                                 .centerCrop()
                                 .apply(requestOptions)
-                                .into(holder.binding.badgeImage)
+                                .into(holder.binding.imgBadge)
                         } else {
                             // 이미지 URL이 null이거나 비어있는 경우 기본 이미지 표시
-                            holder.binding.badgeImage.setImageResource(R.drawable.ic_recipe_white)
+                            holder.binding.imgBadge.setImageResource(R.drawable.ic_recipe_white)
                         }
 
-                        holder.binding.badgeTitle.visibility = View.GONE
-                        holder.binding.badgeSubtitle.visibility = View.GONE
+                        holder.binding.tvBadge.visibility = View.GONE
+                        holder.binding.tvBadgeSubTitle.visibility = View.GONE
 
                         // 전체 아이템 클릭 이벤트 추가
                         holder.binding.root.setOnClickListener {
@@ -232,11 +233,11 @@ class MyPageImageGridFragment : Fragment() {
                     override fun getItemCount() = recipeList.size
                 }
 
-                binding.imageRecyclerView.adapter = adapter
+                binding.rvImage.adapter = adapter
                 Log.d(TAG, "스크랩 목록 로드 완료: ${recipeList.size}개")
             } catch (e: Exception) {
                 Log.e(TAG, "스크랩 목록 로드 실패", e)
-                binding.imageRecyclerView.adapter = BadgeGridAdapter(emptyList())
+                binding.rvImage.adapter = BadgeGridAdapter(emptyList())
             }
         }
     }
@@ -268,16 +269,16 @@ class MyPageImageGridFragment : Fragment() {
                     }
                     override fun onBindViewHolder(holder: BadgeViewHolder, position: Int) {
                         val (item, imageUrl) = badgeList[position]
-                        Glide.with(holder.binding.root).load(imageUrl).into(holder.binding.badgeImage)
-                        holder.binding.badgeTitle.text = item.title
-                        holder.binding.badgeSubtitle.text = "${item.year}년 ${item.month}월 챌린지"
+                        Glide.with(holder.binding.root).load(imageUrl).into(holder.binding.imgBadge)
+                        holder.binding.tvBadge.text = item.title
+                        holder.binding.tvBadgeSubTitle.text = "${item.year}년 ${item.month}월 챌린지"
                     }
                     override fun getItemCount() = badgeList.size
                 }
-                binding.imageRecyclerView.adapter = adapter
+                binding.rvImage.adapter = adapter
             } catch (e: Exception) {
                 e.printStackTrace()
-                binding.imageRecyclerView.adapter = BadgeGridAdapter(emptyList())
+                binding.rvImage.adapter = BadgeGridAdapter(emptyList())
             }
         }
     }

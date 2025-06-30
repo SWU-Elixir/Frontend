@@ -5,24 +5,35 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.fragment.app.FragmentManager
-import androidx.recyclerview.widget.LinearLayoutManager
+import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.elixir.R
 import com.example.elixir.databinding.ItemRecipeRecommendationListBinding
+import com.example.elixir.ingredient.data.IngredientData // IngredientData import 추가
 import com.example.elixir.recipe.data.GetRecipeData
-import com.example.elixir.recipe.data.RecipeData
 import com.example.elixir.recipe.viewmodel.RecipeViewModel
+import com.google.android.flexbox.FlexDirection // FlexboxLayoutManager를 위한 import 추가
+import com.google.android.flexbox.FlexboxLayoutManager
+import com.google.android.flexbox.JustifyContent
 
 class RecipeRecommendationListAdapter(
     private var recipeList: List<GetRecipeData>,
     private val fragmentManager: FragmentManager,
-    private val recipeViewModel: RecipeViewModel
+    private val recipeViewModel: RecipeViewModel,
+    // ingredientDataMap을 var로 선언하여 외부에서 업데이트 가능하게 함
+    private var ingredientDataMap: Map<Int, IngredientData>?
 ) : RecyclerView.Adapter<RecipeRecommendationListAdapter.RecipeViewHolder>() {
 
     fun updateData(newRecipeList: List<GetRecipeData>) {
         recipeList = newRecipeList
         notifyDataSetChanged()
+    }
+
+    // ingredientDataMap을 업데이트하는 메서드 추가
+    fun updateIngredientMap(newIngredientMap: Map<Int, IngredientData>) {
+        this.ingredientDataMap = newIngredientMap
+        notifyDataSetChanged() // 데이터가 업데이트되었으므로 어댑터 갱신
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecipeViewHolder {
@@ -45,14 +56,25 @@ class RecipeRecommendationListAdapter(
             .load(recipe.imageUrl)
             .placeholder(R.drawable.ic_recipe_white)
             .error(R.drawable.ic_recipe_white)
-            .into(holder.binding.recipeImage)
+            .into(holder.binding.imgRecipe)
 
-        // 재료 태그 RecyclerView 설정 (LayoutManager를 apply로 한 번만 설정)
+        // 재료 태그 RecyclerView 설정 (FlexboxLayoutManager 사용)
         holder.binding.ingredientList.apply {
             if (layoutManager == null) {
-                layoutManager = LinearLayoutManager(holder.itemView.context, LinearLayoutManager.HORIZONTAL, false)
+                // FlexboxLayoutManager를 사용하여 태그가 유연하게 배치되도록 설정
+                layoutManager = FlexboxLayoutManager(context).apply {
+                    flexDirection = FlexDirection.ROW
+                    justifyContent = JustifyContent.FLEX_START
+                }
             }
-            //adapter = FlavoringAdapter(recipe.ingredientTagIds.map { FlavoringData(it.key, it.value) })
+            // ingredientDataMap이 null이 아니고, ingredientTagIds가 있을 경우에만 어댑터 설정
+            if (ingredientDataMap != null && !recipe.ingredientTagIds.isNullOrEmpty()) {
+                // IngredientTagChipMapAdapter에 ingredientDataMap과 ingredientTagIds 전달
+                adapter = IngredientTagChipMapAdapter(recipe.ingredientTagIds, ingredientDataMap!!)
+                visibility = View.VISIBLE // 태그가 있으면 보이게
+            } else {
+                visibility = View.GONE // 태그가 없으면 숨김
+            }
         }
 
         // 북마크 상태에 따라 버튼 이미지 설정
@@ -88,11 +110,10 @@ class RecipeRecommendationListAdapter(
                 }
             }
             fragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainer, detailFragment)
+                .replace(R.id.flContainer, detailFragment)
                 .addToBackStack(null)
                 .commit()
         }
-
     }
 
     override fun getItemCount(): Int = recipeList.size

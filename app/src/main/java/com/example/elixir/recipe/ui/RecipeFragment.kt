@@ -23,7 +23,6 @@ import com.example.elixir.databinding.FragmentRecipeBinding
 import com.example.elixir.ingredient.data.IngredientData
 import com.example.elixir.ingredient.network.IngredientDB
 import com.example.elixir.ingredient.network.IngredientRepository
-import com.example.elixir.ingredient.viewmodel.IngredientService
 import com.example.elixir.ingredient.viewmodel.IngredientViewModel
 import com.example.elixir.ingredient.viewmodel.IngredientViewModelFactory
 import com.example.elixir.network.AppDatabase
@@ -118,9 +117,8 @@ class RecipeFragment : Fragment() {
             RetrofitClient.instanceIngredientApi,
             IngredientDB.getInstance(requireContext()).ingredientDao()
         )
-        val ingredientService = IngredientService(ingredientRepository)
         ingredientViewModel = ViewModelProvider(this,
-            IngredientViewModelFactory(ingredientService))[IngredientViewModel::class.java]
+            IngredientViewModelFactory(ingredientRepository))[IngredientViewModel::class.java]
 
         // Observer 설정 (항상 실행)
         setupObservers()
@@ -294,11 +292,11 @@ class RecipeFragment : Fragment() {
                     }
                 }
                 binding.recipeList.visibility = View.VISIBLE
-                binding.emptyRecipeText.visibility = View.GONE
+                binding.tvNoRecipe.visibility = View.GONE
                 Log.d("RecipeFragment", "RecipeList is now VISIBLE")
             } else {
                 binding.recipeList.visibility = View.GONE
-                binding.emptyRecipeText.visibility = View.VISIBLE
+                binding.tvNoRecipe.visibility = View.VISIBLE
                 Log.d("RecipeFragment", "No recipes - showing empty text")
             }
         } else {
@@ -307,6 +305,19 @@ class RecipeFragment : Fragment() {
 
         recipeListAdapter.setOnMoreClickListener {
             loadMore() // 다음 페이지 데이터 불러오기
+        }
+
+        // 추천 어댑터의 ingredientDataMap도 업데이트
+        (binding.recommendationList.adapter as? RecipeRecommendationListAdapter)?.let { adapter ->
+            if (ingredientDataMap != null) {
+                // RecipeRecommendationListAdapter에 updateIngredientMap 메서드가 있다면 호출
+                try {
+                    val updateMethod = adapter.javaClass.getMethod("updateIngredientMap", Map::class.java)
+                    updateMethod.invoke(adapter, ingredientDataMap)
+                } catch (e: Exception) {
+                    Log.w("RecipeFragment", "RecipeRecommendationListAdapter updateIngredientMap method not found")
+                }
+            }
         }
     }
 
@@ -362,19 +373,23 @@ class RecipeFragment : Fragment() {
                     position: Int,
                     id: Long
                 ) {
-                    if (position == 0 && parent.count > 1) {
-                        // 첫 번째 항목 선택 시 두 번째로 이동
+                    if (position == 0) { // 첫 번째 항목 "선택" 시 (자동 이동 제외)
                         selectedSlowAging = null
-                        return
+                    } else {
+                        selectedSlowAging = parent.getItemAtPosition(position).toString()
                     }
-                    selectedSlowAging = parent.getItemAtPosition(position).toString()
 
                     // ViewModel 함수 호출
                     recipeViewModel.getRecipes(currentPage, pageSize, selectedCategoryType, selectedSlowAging)
                     Log.d("RecipeFragment", "Method selected: $selectedSlowAging")
+
+                    updateResetButtonVisibility()
                 }
 
-                override fun onNothingSelected(parent: AdapterView<*>) {}
+                override fun onNothingSelected(parent: AdapterView<*>) {
+                    // 아무것도 선택되지 않았을 때도 가시성 업데이트 (필요하다면)
+                    updateResetButtonVisibility()
+                }
             }
     }
 
@@ -391,24 +406,33 @@ class RecipeFragment : Fragment() {
                 position: Int,
                 id: Long
             ) {
-                if (position == 0 && parent.count > 1) {
-                    // 첫 번째 항목 선택 시 두 번째로 자동 이동
+                if (position == 0) { // 첫 번째 항목 "선택" 시 (자동 이동 제외)
                     selectedCategoryType = null
-                    return
+                } else {
+                    selectedCategoryType = parent.getItemAtPosition(position).toString()
+                    if (selectedCategoryType == "음료/차")
+                        selectedCategoryType = "음료_차"
+                    else if (selectedCategoryType == "양념/소스/잼")
+                        selectedCategoryType = "양념_소스_잼"
                 }
 
-                selectedCategoryType = parent.getItemAtPosition(position).toString()
-                if(selectedCategoryType == "음료/차")
-                    selectedCategoryType = "음료_차"
-                else if(selectedCategoryType == "양념/소스/잼")
-                    selectedCategoryType = "양념_소스_잼"
-
                 // ViewModel 함수 호출
-                recipeViewModel.getRecipes(currentPage, pageSize, selectedCategoryType, selectedSlowAging)
+                recipeViewModel.getRecipes(
+                    currentPage,
+                    pageSize,
+                    selectedCategoryType,
+                    selectedSlowAging
+                )
                 Log.d("RecipeFragment", "Type selected: $selectedCategoryType")
+
+                // !!! 중요: 스피너 선택 시 리셋 버튼 가시성 업데이트 호출 !!!
+                updateResetButtonVisibility()
             }
 
-            override fun onNothingSelected(parent: AdapterView<*>) {}
+            override fun onNothingSelected(parent: AdapterView<*>) {
+                // 아무것도 선택되지 않았을 때도 가시성 업데이트 (필요하다면)
+                updateResetButtonVisibility()
+            }
         }
     }
 
@@ -424,7 +448,12 @@ class RecipeFragment : Fragment() {
      * 추천 레시피 ViewPager 설정
      */
     private fun setupRecommendationViewPager() {
-        val recommendationAdapter = RecipeRecommendationListAdapter(recommendRecipeList, fragmentManager = parentFragmentManager, recipeViewModel)
+        val recommendationAdapter = RecipeRecommendationListAdapter(
+            recommendRecipeList,
+            fragmentManager = parentFragmentManager,
+            recipeViewModel,
+            ingredientDataMap // 추가
+        )
         binding.recommendationList.adapter = recommendationAdapter
 
         // 페이지 전환 애니메이션 설정
@@ -453,48 +482,6 @@ class RecipeFragment : Fragment() {
     }
 
     /**
-     * 필터 조건에 따라 레시피 리스트 필터링
-     * 선택된 저속노화 방법과 레시피 종류에 따라 레시피 목록을 필터링하고 UI를 업데이트
-     */
-    private fun filterRecipes() {
-        // 스피너에서 선택된 저속노화 방법과 레시피 종류 가져오기
-        val selectedMethod = binding.spinnerDifficulty.selectedItem?.toString()
-        val selectedType = binding.spinnerType.selectedItem?.toString()
-
-        // 선택된 조건에 따라 레시피 필터링
-        val filtered = recipeList.filter { recipe ->
-            // 저속노화 방법 필터링 조건
-            // "저속노화"가 선택된 경우 모든 레시피 포함, 그 외에는 선택된 방법과 일치하는 레시피만 포함
-            val methodMatch = selectedMethod == "저속노화" || recipe.categorySlowAging == selectedMethod
-            // 레시피 종류 필터링 조건
-            // "종류"가 선택된 경우 모든 레시피 포함, 그 외에는 선택된 종류와 일치하는 레시피만 포함
-            val typeMatch = selectedType == "종류" || recipe.categoryType == selectedType
-            // 두 조건이 모두 만족하는 레시피만 필터링
-            methodMatch && typeMatch
-        }
-
-        // 필터링된 레시피 목록으로 어댑터 데이터 업데이트
-        (binding.recipeList.adapter as RecipeListAdapter).updateData(filtered)
-
-        // 필터링 결과에 따른 UI 업데이트
-        // 결과가 없는 경우 빈 화면 표시, 있는 경우 레시피 목록 표시
-        updateFilteredUI(filtered)
-    }
-
-    /**
-     * 필터링 결과에 따른 UI 업데이트
-     */
-    private fun updateFilteredUI(filtered: List<RecipeData>) {
-        if (filtered.isEmpty()) {
-            binding.recipeList.visibility = View.GONE
-            binding.emptyRecipeText.visibility = View.VISIBLE
-        } else {
-            binding.recipeList.visibility = View.VISIBLE
-            binding.emptyRecipeText.visibility = View.GONE
-        }
-    }
-
-    /**
      * 스피너 초기화
      */
     private fun resetSpinners() {
@@ -514,7 +501,12 @@ class RecipeFragment : Fragment() {
                         (binding.recommendationList.adapter as? RecipeRecommendationListAdapter)?.updateData(recommendList)
                             ?: run {
                                 // 어댑터가 없는 경우 새로 생성
-                                binding.recommendationList.adapter = RecipeRecommendationListAdapter(recommendList, fragmentManager = parentFragmentManager, recipeViewModel)
+                                binding.recommendationList.adapter = RecipeRecommendationListAdapter(
+                                    recommendList,
+                                    fragmentManager = parentFragmentManager,
+                                    recipeViewModel,
+                                    ingredientDataMap // 추가
+                                )
                             }
                     }
                 } else {

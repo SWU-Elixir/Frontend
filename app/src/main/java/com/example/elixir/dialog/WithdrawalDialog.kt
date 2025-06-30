@@ -3,7 +3,6 @@ package com.example.elixir.dialog
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
@@ -12,15 +11,11 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import com.example.elixir.R
 import com.example.elixir.RetrofitClient
-import com.example.elixir.login.LogoutResponse
-import com.example.elixir.login.LoginActivity
+import com.example.elixir.login.ui.LoginActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 class WithdrawalDialog(private val act: Activity) {
     @SuppressLint("InflateParams")

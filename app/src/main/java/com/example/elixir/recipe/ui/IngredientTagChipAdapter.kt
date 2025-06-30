@@ -26,7 +26,7 @@ class IngredientTagChipAdapter(
         val ingredient = ingredientItems.find {
             Log.d("IngredientChip", "id: ${tagId}, id-: ${it.id}")
             it.id == tagId }
-        holder.binding.indeterminateName.text = ingredient?.name ?: "Unknown"
+        holder.binding.tvIndeterminateName.text = ingredient?.name ?: "Unknown"
     }
 
     override fun getItemCount(): Int = tagList.size

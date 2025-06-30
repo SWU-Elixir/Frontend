@@ -1,5 +1,6 @@
-package com.example.elixir.chatbot
+package com.example.elixir.chatbot.network
 
+import com.example.elixir.chatbot.data.ChatResponseDto
 import org.threeten.bp.LocalDateTime
 import com.google.gson.annotations.SerializedName
 

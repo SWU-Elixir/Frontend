@@ -132,7 +132,7 @@
                 android:layout_marginBottom="16dp" />
 
             <TextView
-                android:id="@+id/emptyRecipeText"
+                android:id="@+id/tvNoRecipe"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="@string/recipe_nothing_text"

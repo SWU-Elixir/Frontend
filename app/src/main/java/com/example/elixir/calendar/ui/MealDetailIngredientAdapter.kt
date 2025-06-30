@@ -16,7 +16,7 @@ class MealDetailIngredientAdapter(
         fun bind(ingredientId: Int) {
             // ingredientMap에서 이름 찾기
             val ingredientName = ingredientMap[ingredientId]?.name ?: "알 수 없음"
-            binding.indeterminateName.text = ingredientName
+            binding.tvIndeterminateName.text = ingredientName
         }
     }
 

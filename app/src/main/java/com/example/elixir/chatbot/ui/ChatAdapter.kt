@@ -1,10 +1,13 @@
-package com.example.elixir.chatbot
+package com.example.elixir.chatbot.ui
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.elixir.R
+import com.example.elixir.chatbot.data.ChatItem
+import com.example.elixir.chatbot.data.ChatMeal
+import com.example.elixir.chatbot.data.ChatRecipe
 import com.example.elixir.databinding.ItemChatExampleListBinding
 import com.example.elixir.databinding.ItemChatTextMessageBinding
 import com.example.elixir.databinding.ItemChatTextMessageUserBinding
@@ -98,14 +101,14 @@ class ChatAdapter(
     // 챗봇 답변 메시지 ViewHolder
     class TextMessageViewHolder(private val binding: ItemChatTextMessageBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: ChatItem.TextMessage) {
-            binding.chatMessage.text = item.message
+            binding.tvChatMessage.text = item.message
         }
     }
 
     // 사용자 입력 메시지 ViewHolder
     class TextMessageUserViewHolder(private val binding: ItemChatTextMessageUserBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: ChatItem.TextMessage) {
-            binding.chatMessage.text = item.message
+            binding.tvChatMessage.text = item.message
         }
     }
 
@@ -117,10 +120,10 @@ class ChatAdapter(
         private var selectedIndex: Int = -1
 
         fun bind(item: ChatItem.ExampleList) {
-            binding.buttonContainer.removeAllViews()
+            binding.flexboxContainer.removeAllViews()
 
             // FlexboxLayout 속성 설정
-            (binding.buttonContainer as FlexboxLayout).apply {
+            (binding.flexboxContainer as FlexboxLayout).apply {
                 flexDirection = FlexDirection.ROW
                 flexWrap = FlexWrap.WRAP // 자동 줄바꿈
                 justifyContent = JustifyContent.FLEX_START
@@ -155,8 +158,8 @@ class ChatAdapter(
 
                     setOnClickListener {
                         selectedIndex = index
-                        for (i in 0 until binding.buttonContainer.childCount) {
-                            val btn = binding.buttonContainer.getChildAt(i) as androidx.appcompat.widget.AppCompatButton
+                        for (i in 0 until binding.flexboxContainer.childCount) {
+                            val btn = binding.flexboxContainer.getChildAt(i) as androidx.appcompat.widget.AppCompatButton
                             btn.isSelected = (i == index)
                             btn.setTextColor(
                                 if (i == index)
@@ -168,7 +171,7 @@ class ChatAdapter(
                         onExampleClick(example)
                     }
                 }
-                binding.buttonContainer.addView(button)
+                binding.flexboxContainer.addView(button)
             }
         }
     }
@@ -181,9 +184,9 @@ class ChatAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: ChatItem.ChatMealList) {
             val adapter = ChatMealListAdapter(item.examples, ingredientMap, onMealClick)
-            binding.mealRecyclerView.layoutManager =
+            binding.rvMeal.layoutManager =
                 GridLayoutManager(binding.root.context, 2, GridLayoutManager.HORIZONTAL, false)
-            binding.mealRecyclerView.adapter = adapter
+            binding.rvMeal.adapter = adapter
         }
     }
 
@@ -195,9 +198,9 @@ class ChatAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: ChatItem.ChatRecipeList) {
             val adapter = ChatRecipeListAdapter(item.examples, ingredientMap, onRecipeClick)
-            binding.mealRecyclerView.layoutManager =
+            binding.rvMeal.layoutManager =
                 GridLayoutManager(binding.root.context, 2, GridLayoutManager.HORIZONTAL, false)
-            binding.mealRecyclerView.adapter = adapter
+            binding.rvMeal.adapter = adapter
         }
     }
 }

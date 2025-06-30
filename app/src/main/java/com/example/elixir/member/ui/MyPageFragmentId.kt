@@ -1,4 +1,4 @@
-package com.example.elixir.member
+package com.example.elixir.member.ui
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -9,17 +9,13 @@ import android.util.TypedValue
 import android.view.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.example.elixir.R
 import com.example.elixir.RetrofitClient
 import com.example.elixir.ToolbarActivity
-import com.example.elixir.databinding.FragmentMypageBinding
 import com.example.elixir.databinding.FragmentMypageIdBinding
-import com.example.elixir.dialog.LogoutDialog
-import com.example.elixir.member.data.MemberEntity
 import com.example.elixir.member.data.ProfileEntity
 import kotlinx.coroutines.launch
 
@@ -80,14 +76,14 @@ class MyPageFragmentId : Fragment() {
         setupClickListeners()
 
         // 팔로우 버튼 클릭 이벤트
-        binding.followButton.setOnClickListener {
+        binding.btnFollow.setOnClickListener {
             if (myId == -1) {
                 Toast.makeText(requireContext(), "로그인이 필요합니다.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             if (myId == memberId) {
-                binding.followButton.visibility = View.GONE
+                binding.btnFollow.visibility = View.GONE
                 return@setOnClickListener
             }
 
@@ -124,7 +120,7 @@ class MyPageFragmentId : Fragment() {
                     myId = response.data.id
                     // 내 ID와 현재 프로필 ID가 같으면 팔로우 버튼 숨기기
                     if (myId == memberId) {
-                        binding.followButton.visibility = View.GONE
+                        binding.btnFollow.visibility = View.GONE
                     }
                 }
             } catch (e: Exception) {
@@ -149,7 +145,7 @@ class MyPageFragmentId : Fragment() {
     }
 
     private fun updateFollowButtonUI() {
-        binding.followButton.apply {
+        binding.btnFollow.apply {
             text = if (isFollowing) getString(R.string.following) else getString(R.string.follow)
             setBackgroundResource(
                 if (isFollowing) R.drawable.bg_rect_outline_gray

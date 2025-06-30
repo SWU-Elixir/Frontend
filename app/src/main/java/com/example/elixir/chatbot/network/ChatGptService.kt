@@ -1,19 +1,12 @@
-package com.example.elixir.chatbot
+package com.example.elixir.chatbot.network
 
-import android.content.Context
-import android.util.Log
-import com.example.elixir.BuildConfig
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import okhttp3.*
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.RequestBody.Companion.toRequestBody
-import org.json.JSONArray
-import org.json.JSONObject
-import java.io.IOException
 import java.util.concurrent.TimeUnit
 import com.example.elixir.RetrofitClient
+import com.example.elixir.chatbot.data.ChatRequestDto
+import com.example.elixir.chatbot.data.ChatResponseDto
 import retrofit2.HttpException
 
 

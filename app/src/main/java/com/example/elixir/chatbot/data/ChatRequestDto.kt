@@ -1,4 +1,4 @@
-package com.example.elixir.chatbot
+package com.example.elixir.chatbot.data
 
 data class ChatRequestDto(
     val chatSessionId: String? = null,

@@ -18,7 +18,7 @@
             android:name=".ToolbarActivity"
             android:exported="false" />
         <activity
-            android:name=".login.LoginActivity"
+            android:name=".login.ui.LoginActivity"
             android:exported="true"
             android:theme="@style/Theme.Elixir.Splash" >
             <intent-filter>
@@ -36,7 +36,7 @@
             android:theme="@style/Theme.Elixir">
         </activity>
         <activity
-            android:name=".chatbot.ChatBotActivity"
+            android:name=".chatbot.ui.ChatBotActivity"
             android:exported="true"
             android:theme="@style/Theme.Elixir.Splash">
         </activity>

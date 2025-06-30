@@ -1,6 +1,6 @@
 package com.example.elixir.recipe.network.api
 
-import com.example.elixir.chatbot.RecipeListResponse
+import com.example.elixir.chatbot.network.RecipeListResponse
 import com.example.elixir.network.GetStringResponse
 import com.example.elixir.recipe.network.response.GetRecipeListResponse
 import com.example.elixir.recipe.network.response.GetRecipePostResponse

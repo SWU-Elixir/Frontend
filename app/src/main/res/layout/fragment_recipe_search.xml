@@ -19,7 +19,7 @@
             android:layout_marginTop="15dp">
             <!-- 뒤로가기 아이콘 -->
             <ImageButton
-                android:id="@+id/backButton"
+                android:id="@+id/btnBack"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_back_arrow"
@@ -43,7 +43,7 @@
 
                 <!-- 검색창 -->
                 <EditText
-                    android:id="@+id/searchEditText"
+                    android:id="@+id/etSearch"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
@@ -57,7 +57,7 @@
                     tools:ignore="RtlSymmetry" />
 
                 <ImageButton
-                    android:id="@+id/clearButton"
+                    android:id="@+id/btnClear"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:src="@drawable/ic_delete"

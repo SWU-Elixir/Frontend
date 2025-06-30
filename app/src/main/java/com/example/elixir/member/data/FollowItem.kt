@@ -1,4 +1,4 @@
-package com.example.elixir.member
+package com.example.elixir.member.data
 
 
 data class FollowItem(
@@ -6,6 +6,6 @@ data class FollowItem(
     val targetMemberId: Int,
     val profileImageRes: String?,
     val memberTitle: String? = null,
-    val memberNickname: String,
+    val memberNickname: String?,
     val isFollowing: Boolean = false
 )

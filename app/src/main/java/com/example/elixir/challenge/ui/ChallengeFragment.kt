@@ -14,7 +14,6 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.example.elixir.challenge.viewmodel.ChallengeService
 import com.example.elixir.challenge.viewmodel.ChallengeViewModel
 import com.example.elixir.challenge.data.ChallengeEntity
 import com.example.elixir.challenge.data.StageItem
@@ -46,7 +45,7 @@ class ChallengeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         stageAdapter = ChallengeStageListAdapter(requireContext(), mutableListOf(), 1)
-        binding.challengeStageList.adapter = stageAdapter
+        binding.listStageChallenge.adapter = stageAdapter
 
         initializeViewModel()
         setupBottomSheet()
@@ -58,8 +57,8 @@ class ChallengeFragment : Fragment() {
             val db = ChallengeDB.getInstance(requireContext())
             val api = RetrofitClient.instanceChallengeApi
             val repository = ChallengeRepository(api, db.challengeDao())
-            val service = ChallengeService(repository)
-            viewModel = ChallengeViewModel(service)
+
+            viewModel = ChallengeViewModel(repository)
 
             if (isInitialLoad) {
                 loadInitialData()
@@ -85,7 +84,7 @@ class ChallengeFragment : Fragment() {
     }
 
     private fun setupBottomSheet() {
-        BottomSheetBehavior.from(binding.bottomSheet).apply {
+        BottomSheetBehavior.from(binding.cvBottomSheet).apply {
             peekHeight = 130
             addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
                 override fun onStateChanged(bottomSheet: View, newState: Int) {}
@@ -132,7 +131,7 @@ class ChallengeFragment : Fragment() {
 
     private fun showEmptyState() {
         binding.apply {
-            challengeStageList.adapter = null
+            listStageChallenge.adapter = null
             // TODO: Implement proper empty state UI
         }
     }
@@ -165,7 +164,7 @@ class ChallengeFragment : Fragment() {
             setDropDownViewResource(R.layout.item_challenge_spinner_dropdown)
         }
 
-        binding.challengeSpinner.apply {
+        binding.spinnerChallenge.apply {
             adapter = spinnerAdapter
             onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
@@ -201,22 +200,19 @@ class ChallengeFragment : Fragment() {
             4 -> R.drawable.png_challenge_4
             else -> R.drawable.png_challenge_5
         }
-        binding.challengeImage.setImageResource(imageRes)
+        binding.ivChallenge.setImageResource(imageRes)
 
         // 챌린지 상세 정보 표시
         binding.apply {
-            challengeSub3.text = getString(R.string.challenge_sub1)
-            challengeTitleText.text = challenge.name
-            challengePeriodText.text = challenge.period ?: ""
-            challengeSub1.text = getString(R.string.challenge_sub1_format, challenge.name)
-            challengeGoalText.text = challenge.purpose ?: ""
-            challengeDescriptionText.text = challenge.description ?: ""
-            challengeSub2.text = getString(R.string.challenge_sub2_format, challenge.name, challenge.achievementName ?: "")
+            tvChallengeSub2.text = getString(R.string.challenge_sub1)
+            tvTitleChallenge.text = challenge.name
+            tvPeriodChallenge.text = challenge.period ?: ""
+            tvChallengeSub1.text = getString(R.string.challenge_sub1_format, challenge.name)
+            tvGoalChallenge.text = challenge.purpose ?: ""
+            tvDescriptionChallenge.text = challenge.description ?: ""
+            tvChallengeSub3.text = getString(R.string.challenge_sub2_format, challenge.name, challenge.achievementName ?: "")
         }
 
-        // --- 변경된 부분 시작 ---
-        // `currentStage`가 5일 때만 다이얼로그를 띄우기 위해 월(month) 일치 여부 조건을 제거합니다.
-        // `challengeCompleted`는 서버에서 최종 완료 여부를 직접 알려주므로, 이 값을 따르는 것이 더 정확합니다.
         if (currentStage == 5) {
             Log.d("ChallengeFragment", "모든 스테이지 클리어! 최종 완료 여부 API 호출 시작...")
             viewModel.loadChallengeCompletionForPopup { completed, achievementName, achievementImageUrl ->
@@ -231,7 +227,6 @@ class ChallengeFragment : Fragment() {
             Log.d("ChallengeFragment", "챌린지 완료 다이얼로그 미표시. 조건 불만족: currentStage != 5")
             Log.d("ChallengeFragment", " - currentStage: $currentStage")
         }
-        // --- 변경된 부분 끝 ---
     }
 
     // 클리어된 단계 수에 따라 현재 스테이지 계산
@@ -363,31 +358,31 @@ class ChallengeFragment : Fragment() {
 
         Log.d("ChallengeFragment", "챌린지 완료 다이얼로그 표시")
 
-        dialogBinding.dialogTitle.text = achievementName ?: getString(R.string.challenge_completion_title)
-        dialogBinding.dialogMessage.text = getString(R.string.challenge_completion_message, challenge.name)
+        dialogBinding.tvDialogTitle.text = achievementName ?: getString(R.string.challenge_completion_title)
+        dialogBinding.tvDialogMessage.text = getString(R.string.challenge_completion_message, challenge.name)
         if (!achievementImageUrl.isNullOrEmpty()) {
             try {
                 // Glide를 사용하여 이미지 로드 (badgeImage 로드 로직과 유사하게)
                 Glide.with(dialogBinding.root)
                     .load(achievementImageUrl)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .placeholder(R.drawable.ic_recipe_white) // 기본 이미지 (필요시 뱃지 관련 이미지로 변경)
-                    .error(R.drawable.ic_recipe_white) // 에러 이미지 (필요시 뱃지 관련 이미지로 변경)
+                    .placeholder(R.drawable.bg_badge_empty) // 기본 이미지 (필요시 뱃지 관련 이미지로 변경)
+                    .error(R.drawable.bg_badge_empty) // 에러 이미지 (필요시 뱃지 관련 이미지로 변경)
                     .fitCenter() // 다이얼로그 이미지에도 fitCenter 적용
-                    .into(dialogBinding.dialogImage)
+                    .into(dialogBinding.imgDialog)
             } catch (e: Exception) {
                 Log.e("ChallengeFragment", "이미지 URI 로딩 실패", e)
-                dialogBinding.dialogImage.setImageResource(R.drawable.ic_recipe_white) // 실패 시 기본 이미지
+                dialogBinding.imgDialog.setImageResource(R.drawable.bg_badge_empty) // 실패 시 기본 이미지
             }
         } else {
-            dialogBinding.dialogImage.setImageResource(R.drawable.ic_recipe_white) // URL이 없으면 기본 이미지
+            dialogBinding.imgDialog.setImageResource(R.drawable.bg_badge_empty) // URL이 없으면 기본 이미지
         }
 
         val alertDialog = com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
             .setView(dialogBinding.root)
             .create()
 
-        dialogBinding.dialogButton.setOnClickListener {
+        dialogBinding.btnDialog.setOnClickListener {
             alertDialog.dismiss()
         }
 

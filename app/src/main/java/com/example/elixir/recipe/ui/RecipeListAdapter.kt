@@ -1,7 +1,6 @@
 package com.example.elixir.recipe.ui
 
 import android.annotation.SuppressLint
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -74,8 +73,8 @@ class RecipeListAdapter(
 
             Glide.with(holder.itemView.context)
                 .load(item.imageUrl)
-                .placeholder(R.drawable.img_blank)
-                .error(R.drawable.img_blank)
+                .placeholder(R.drawable.ic_recipe_white)
+                .error(R.drawable.ic_recipe_white)
                 .into(holder.binding.recipePicture)
 
             if (item.categoryType == "양념_소스_잼") item.categoryType = "양념/소스/잼"
@@ -135,7 +134,7 @@ class RecipeListAdapter(
                     }
                 }
                 fragmentManager.beginTransaction()
-                    .replace(R.id.fragmentContainer, detailFragment)
+                    .replace(R.id.flContainer, detailFragment)
                     .addToBackStack(null)
                     .commit()
             }

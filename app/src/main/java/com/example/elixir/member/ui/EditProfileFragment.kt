@@ -1,4 +1,4 @@
-package com.example.elixir.member
+package com.example.elixir.member.ui
 
 import android.app.Activity
 import android.content.Intent
@@ -257,15 +257,15 @@ class EditProfileFragment : Fragment() {
                     if (titleList.isEmpty()) {
                         val emptyList = listOf("칭호가 없습니다")
                         val adapter = ArrayAdapter(requireContext(), R.layout.item_spinner_year, emptyList)
-                        profileBinding.title.adapter = adapter
-                        profileBinding.title.isEnabled = false
+                        profileBinding.tvTitle.adapter = adapter
+                        profileBinding.tvTitle.isEnabled = false
                         title = ""
                     } else {
                         val adapter = ArrayAdapter(requireContext(), R.layout.item_spinner_year, titleList)
-                        profileBinding.title.adapter = adapter
-                        profileBinding.title.isEnabled = true
+                        profileBinding.tvTitle.adapter = adapter
+                        profileBinding.tvTitle.isEnabled = true
                         // 선택 리스너
-                        profileBinding.title.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                        profileBinding.tvTitle.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                                 title = parent.getItemAtPosition(position).toString()
                             }

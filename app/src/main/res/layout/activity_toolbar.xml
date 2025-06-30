@@ -24,14 +24,14 @@
             android:paddingHorizontal="16dp"
             android:paddingVertical="24dp"
             android:src="@drawable/ic_back_arrow"
-            app:layout_constraintEnd_toStartOf="@id/title"
+            app:layout_constraintEnd_toStartOf="@id/tvTitle"
             app:layout_constraintStart_toStartOf="parent"
             android:contentDescription="@string/back"
             tools:ignore="DuplicateSpeakableTextCheck" />
 
         <!-- 제목 (날짜, 메뉴 등등) -->
         <TextView
-            android:id="@+id/title"
+            android:id="@+id/tvTitle"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:fontFamily="@font/pretendard_bold"
@@ -54,7 +54,7 @@
             android:paddingVertical="24dp"
             android:src="@drawable/ic_more"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/title"
+            app:layout_constraintStart_toEndOf="@id/tvTitle"
             app:tint="@color/black"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 

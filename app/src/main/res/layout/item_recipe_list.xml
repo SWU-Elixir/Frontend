@@ -20,7 +20,7 @@
             android:id="@+id/recipePicture"
             android:layout_width="135dp"
             android:layout_height="135dp"
-            android:src="@drawable/img_blank"
+            android:src="@drawable/ic_recipe_white"
             android:scaleType="centerCrop"
             android:clipToOutline="true"
             app:layout_constraintDimensionRatio="1:1"
@@ -132,7 +132,8 @@
                 android:text="@string/recipe_name"
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_bold"
-                android:layout_marginBottom="3dp"
+                android:layout_marginTop="-3dp"
+                android:layout_marginBottom="6dp"
                 android:textStyle="bold"
                 android:maxLines="1"
                 android:ellipsize="end"
@@ -146,7 +147,7 @@
                 android:clipToPadding="false"
                 android:orientation="horizontal"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:listitem="@layout/item_recipe_recommendation_list_indeterminate" />
+                tools:listitem="@layout/item_recipe_list_tag" />
 
             <!-- 아래 여백용 View -->
             <LinearLayout

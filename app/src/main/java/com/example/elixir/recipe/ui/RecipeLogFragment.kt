@@ -38,7 +38,6 @@ import com.example.elixir.ingredient.data.IngredientData
 import com.example.elixir.ingredient.network.IngredientDB
 import com.example.elixir.ingredient.network.IngredientRepository
 import com.example.elixir.ingredient.ui.IngredientSearchFragment
-import com.example.elixir.ingredient.viewmodel.IngredientService
 import com.example.elixir.ingredient.viewmodel.IngredientViewModel
 import com.example.elixir.network.AppDatabase
 import com.example.elixir.recipe.data.CommentItem
@@ -98,7 +97,6 @@ class RecipeLogFragment : Fragment() {
     private var selectedPosition: Int = -1
     private lateinit var recipeRepository: RecipeRepository
     private var isDataSet = false // 데이터 설정 완료 여부
-    private var recipeDataObserved = false // 데이터 관찰 시작 여부
 
     private lateinit var pickThumbnailLauncher: ActivityResultLauncher<PickVisualMediaRequest>
 
@@ -170,9 +168,6 @@ class RecipeLogFragment : Fragment() {
     private fun setupUI() {
         Log.d("RecipeLogFragment", "Setting up UI elements")
         try {
-            // 레시피 기본 정보 설정
-            // setupRecipeInfo()
-
             // 레시피 썸네일 설정
             setupThumbnail()
 
@@ -294,8 +289,7 @@ class RecipeLogFragment : Fragment() {
             // 식재료 뷰모델 호출 및 데이터 가져오기
             val ingredientRepository = IngredientRepository(RetrofitClient.instanceIngredientApi,
                 IngredientDB.getInstance(requireContext()).ingredientDao())
-            val ingredientService = IngredientService(ingredientRepository)
-            val ingredientViewModel = IngredientViewModel(ingredientService)
+            val ingredientViewModel = IngredientViewModel(ingredientRepository)
 
             ingredientViewModel.loadIngredients()
 
@@ -1098,81 +1092,6 @@ class RecipeLogFragment : Fragment() {
         }
     }
 
-    // 식재료 태그
-    private fun setIngredientChips(ingredientTags: List<Int>?) {
-        if (ingredientTags.isNullOrEmpty()) return
-
-        // DB 태그 ID로 직접 비교
-        recipeBinding.tagsIngredient.children.forEach { view ->
-            if (view is Chip) {
-                val tagId = chipMap[view.id] // chipMap: chipId -> tagId
-                if (tagId in ingredientTags) {
-                    view.isChecked = true
-                }
-            }
-        }
-    }
-
-    // 알러지 태그 설정
-    private fun setupAllergyChips(allergies: MutableList<String>) {
-        val allergyList = listOf(
-            recipeBinding.allergyEgg, recipeBinding.allergyMilk, recipeBinding.allergyBuckwheat,
-            recipeBinding.allergyPeanut, recipeBinding.allergySoybean, recipeBinding.allergyWheat,
-            recipeBinding.allergyMackerel, recipeBinding.allergyCrab, recipeBinding.allergyShrimp,
-            recipeBinding.allergyPig, recipeBinding.allergyPeach, recipeBinding.allergyTomato,
-            recipeBinding.allergyDioxide, recipeBinding.allergyWalnut, recipeBinding.allergyChicken,
-            recipeBinding.allergyCow, recipeBinding.allergySquid, recipeBinding.allergySeashell,
-            recipeBinding.allergyOyster, recipeBinding.allergyPinenut
-        )
-        val chipNone = recipeBinding.nA // '해당 없음' 칩
-
-        // 1. 기존 선택 상태 복원
-        allergyList.forEach { chip ->
-            chip.isChecked = allergies.contains(chip.text.toString())
-        }
-        chipNone.isChecked = allergies.contains(chipNone.text.toString())
-
-        // null이거나 empty이거나, chipNone.text가 들어있으면 chipNone을 체크
-        if (allergies.isEmpty() || allergies.contains(chipNone.text.toString())) {
-            chipNone.isChecked = true
-        } else {
-            chipNone.isChecked = false
-        }
-
-        // 2. 체크 변경 리스너 설정
-        allergyList.forEach { chip ->
-            chip.setOnCheckedChangeListener { button, isChecked ->
-                if (isChecked) {
-                    // 최대 5개 제한
-                    if (allergies.size >= 5) {
-                        button.isChecked = false // 선택 취소
-                        Toast.makeText(button.context, "알레르기는 최대 5개까지 선택 가능합니다.", Toast.LENGTH_SHORT).show()
-                        return@setOnCheckedChangeListener
-                    }
-
-                    chipNone.isChecked = false
-                    allergies.remove(chipNone.text.toString())
-
-                    if (!allergies.contains(chip.text.toString())) {
-                        allergies.add(chip.text.toString())
-                    }
-                } else {
-                    allergies.remove(chip.text.toString())
-                }
-            }
-        }
-
-        chipNone.setOnCheckedChangeListener { button, isChecked ->
-            if (isChecked) {
-                allergyList.forEach { it.isChecked = false }
-                allergies.clear()
-                allergies.add(chipNone.text.toString())
-            } else {
-                allergies.remove(chipNone.text.toString())
-            }
-        }
-    }
-
     // RecipeData의 difficulty 값을 받아서 난이도 칩 초기 선택 상태 설정
     private fun setDifficultyChipFromData(difficultyValue: String) {
         val difficultyList = listOf(recipeBinding.levelEasy, recipeBinding.levelNormal, recipeBinding.levelHard)
@@ -1182,38 +1101,7 @@ class RecipeLogFragment : Fragment() {
         updateWriteButtonState()
     }
 
-    private fun showInitialIngredientChips(
-        ingredientTags: List<Int>,
-        ingredientMap: Map<Int, IngredientData>,
-        chipGroup: ChipGroup,
-        findIngredientChip: Chip
-    ) {
-        // 기존 Chip 모두 제거 (findIngredientChip만 남기기)
-        chipGroup.removeAllViews()
-        chipGroup.addView(findIngredientChip)
 
-        ingredientTags.forEach { ingredientId ->
-            val ingredientName = ingredientMap[ingredientId]?.name ?: "알 수 없음"
-            val chip = Chip(ContextThemeWrapper(chipGroup.context, R.style.ChipStyle_Short)).apply {
-                text = ingredientName
-                isClickable = true
-                isCheckable = false
-                chipBackgroundColor = ColorStateList.valueOf(
-                    ContextCompat.getColor(context, R.color.elixir_orange)
-                )
-                setTextColor(ContextCompat.getColor(context, R.color.white))
-                // 칩 삭제 리스너
-                setOnCloseIconClickListener {
-                    (ingredientTags as? MutableList)?.remove(ingredientId)
-                    chipGroup.removeView(this)
-                    updateWriteButtonState()
-                }
-            }
-            // findIngredientChip 앞에 삽입
-            val index = chipGroup.indexOfChild(findIngredientChip)
-            chipGroup.addView(chip, index)
-        }
-    }
 
     // Photo Picker URI를 내부 캐시에 복사
     private fun copyUriToInternal(context: Context, uri: Uri): Uri? {

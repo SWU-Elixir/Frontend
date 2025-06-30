@@ -2,11 +2,11 @@ package com.example.elixir
 
 import android.util.Log
 import com.example.elixir.calendar.network.DietApi
-import com.example.elixir.login.LoginService
+import com.example.elixir.login.network.LoginApi
 import com.example.elixir.ingredient.network.IngredientApi
 import com.example.elixir.challenge.network.ChallengeApi
 import com.example.elixir.member.network.MemberApi
-import com.example.elixir.chatbot.ChatApi
+import com.example.elixir.chatbot.network.ChatApi
 import com.example.elixir.recipe.network.api.CommentApi
 import com.example.elixir.recipe.network.api.RecipeApi
 import okhttp3.Interceptor
@@ -26,7 +26,7 @@ import org.threeten.bp.LocalDateTime
 object RetrofitClient {
     // 서버 주소
     private const val BASE_URL = "https://port-0-elixir-backend-g0424l70py8py.gksl2.cloudtype.app/"
-    private var authToken: String? = "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJBQGV4YW1wbGUuY29tIiwiYXV0aCI6IlVTRVIiLCJleHAiOjE3NTEwMzU5ODZ9.3orHY88C6Y3vmxdFfQIHtutKrs7hWSa7wMHcGEHpcOa_4iOZj-WJNgrCBCxCRjuU" // Bearer 토큰을 저장할 변수
+    private var authToken: String? = "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJBQGV4YW1wbGUuY29tIiwiYXV0aCI6IlVTRVIiLCJleHAiOjE3NTEyOTcyMzF9.h33nkXHIDAdIvmx3-FvPyxAWyrzD5s8h--gULuqzF_WSaN_Av2-lbJVUq6Rg1oy_" // Bearer 토큰을 저장할 변수
     private var isRefreshing = false // 토큰 갱신 중인지 여부를 추적하는 플래그
 
     fun setAuthToken(token: String?) {
@@ -117,13 +117,13 @@ object RetrofitClient {
         })
         .create()
 
-    val instance: LoginService by lazy {
+    val instance: LoginApi by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
-            .create(LoginService::class.java)
+            .create(LoginApi::class.java)
     }
 
     val instanceIngredientApi: IngredientApi by lazy {

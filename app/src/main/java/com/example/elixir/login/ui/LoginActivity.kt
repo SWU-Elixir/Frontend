@@ -1,4 +1,4 @@
-package com.example.elixir.login
+package com.example.elixir.login.ui
 
 import android.content.Intent
 import android.os.Bundle
@@ -13,6 +13,8 @@ import com.example.elixir.HomeActivity
 import com.example.elixir.RetrofitClient
 import com.example.elixir.ToolbarActivity
 import com.example.elixir.databinding.ActivityLoginBinding
+import com.example.elixir.login.data.LoginRequest
+import com.example.elixir.login.data.LoginResponse
 import retrofit2.Call
 
 class LoginActivity : AppCompatActivity() {
@@ -69,11 +71,6 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    // 로그인 검증
-    private fun checkLogin(email: String, password: String): Boolean {
-        return email == "example@example.com" && password == "123456"
-    }
-
     // 자동 로그인 저장
     private fun saveAutoLogin(email: String, password: String) {
         val prefs = getSharedPreferences("autoLoginPrefs", MODE_PRIVATE)
@@ -83,18 +80,6 @@ class LoginActivity : AppCompatActivity() {
             .apply()
     }
 
-    //login(email, password)
-
-    // 로그인 성공 시 현재 액티비티를 종료하고 홈 액티비티를 실행
-//    if (checkLogin(email, password)) {
-//        Toast.makeText(this, "로그인 성공!", Toast.LENGTH_SHORT).show()
-//        val intent = Intent(this, HomeActivity::class.java)
-//        startActivity(intent)
-//        finish()
-//    }
-//
-//    else {
-//        loginBinding.errorLogin.text = "이메일이나 비밀번호가 일치하지 않습니다."
 
     // 로그인 성공 시
     private fun login(email: String, password: String) {

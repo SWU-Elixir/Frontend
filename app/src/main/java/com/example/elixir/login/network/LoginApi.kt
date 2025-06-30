@@ -1,11 +1,15 @@
-package com.example.elixir.login
+package com.example.elixir.login.network
 
+import com.example.elixir.login.data.LoginRequest
+import com.example.elixir.login.data.LoginResponse
+import com.example.elixir.login.data.LogoutResponse
+import com.example.elixir.login.data.RefreshTokenResponse
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.Headers
 import retrofit2.http.POST
 
-interface LoginService {
+interface LoginApi {
     @Headers("Content-Type: application/json")
     @POST("/api/auth/login")
     fun login(@Body request: LoginRequest): Call<LoginResponse>
