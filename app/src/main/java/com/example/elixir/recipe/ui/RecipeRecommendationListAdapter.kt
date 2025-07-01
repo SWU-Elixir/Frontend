@@ -10,17 +10,16 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.elixir.R
 import com.example.elixir.databinding.ItemRecipeRecommendationListBinding
-import com.example.elixir.recipe.data.GetRecipeData
-import com.example.elixir.recipe.data.RecipeData
+import com.example.elixir.recipe.data.RecipeListItemData
 import com.example.elixir.recipe.viewmodel.RecipeViewModel
 
 class RecipeRecommendationListAdapter(
-    private var recipeList: List<GetRecipeData>,
+    private var recipeList: List<RecipeListItemData>,
     private val fragmentManager: FragmentManager,
     private val recipeViewModel: RecipeViewModel
 ) : RecyclerView.Adapter<RecipeRecommendationListAdapter.RecipeViewHolder>() {
 
-    fun updateData(newRecipeList: List<GetRecipeData>) {
+    fun updateData(newRecipeList: List<RecipeListItemData>) {
         recipeList = newRecipeList
         notifyDataSetChanged()
     }

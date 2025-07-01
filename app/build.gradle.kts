@@ -97,7 +97,6 @@ dependencies {
     implementation (libs.logging.interceptor)
     implementation (libs.androidx.core.splashscreen)
     implementation(libs.kotlin.stdlib)
-    implementation ("androidx.paging:paging-runtime-ktx:3.3.6")
 
     // Material Components 라이브러리 추가
     implementation (libs.material)
@@ -113,7 +112,6 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
 
-
     // OkHttp
     implementation (libs.okhttp)
 
@@ -123,4 +121,8 @@ dependencies {
     // Glide 라이브러리 추가
     implementation(libs.glide)
     ksp(libs.glide.compiler)
+
+    // 페이징 라이브러리 추가
+    implementation (libs.androidx.paging.runtime.ktx)
+    implementation (libs.androidx.paging.common.ktx)
 }

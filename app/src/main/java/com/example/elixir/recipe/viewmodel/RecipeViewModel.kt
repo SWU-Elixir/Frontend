@@ -5,15 +5,18 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
 import com.example.elixir.recipe.data.RecipeData
+import com.example.elixir.recipe.data.RecipeListItemData
 import com.example.elixir.recipe.data.RecipeRepository
 import com.example.elixir.recipe.data.entity.RecipeEntity
-import com.example.elixir.recipe.data.entity.toData
+import com.example.elixir.recipe.data.toData
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
-import okhttp3.MultipartBody
-import okhttp3.RequestBody
-import org.threeten.bp.LocalDateTime
-import org.threeten.bp.format.DateTimeFormatter
 import java.io.File
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -23,9 +26,6 @@ class RecipeViewModel(
 
     private val _recipeList = MutableLiveData<List<RecipeData>>()
     val recipeList: LiveData<List<RecipeData>> = _recipeList
-
-    private val _recipeDetail = MutableLiveData<RecipeData?>()
-    val recipeDetail: LiveData<RecipeData?> = _recipeDetail
 
     private val _uploadResult = MutableLiveData<Result<RecipeData?>>()
     val uploadResult: LiveData<Result<RecipeData?>> = _uploadResult
@@ -42,38 +42,44 @@ class RecipeViewModel(
     private val _errorMessage = MutableLiveData<String>()
     val errorMessage: LiveData<String> = _errorMessage
 
-    // 레시피 목록 불러오기
-    private var currentCategoryType: String? = null
-    private var currentSlowAging: String? = null
+    private val _recipeDetail = MutableLiveData<RecipeData?>()
+    val recipeDetail: LiveData<RecipeData?> = _recipeDetail
 
-    fun getRecipes(page: Int, size: Int, categoryType: String?, slowAging: String?) {
-        viewModelScope.launch {
-            // 필터가 바뀌면 기존 데이터 초기화
-            if (categoryType != currentCategoryType || slowAging != currentSlowAging) {
-                _recipeList.value = emptyList()
-                currentCategoryType = categoryType
-                currentSlowAging = slowAging
-            }
-            val newRecipes = repository.getRecipes(page, size, categoryType, slowAging)
-            val current = _recipeList.value ?: emptyList()
-            _recipeList.value = current + newRecipes // 누적
-        }
+
+
+    // 상세 데이터
+    /*private val _recipeDetail = MutableStateFlow<Result<RecipeData?>>(Result.success(null))
+    val recipeDetail: StateFlow<Result<RecipeData?>> = _recipeDetail*/
+
+    // 카테고리 필터 상태
+    private val categoryType = MutableStateFlow<String?>(null)
+    private val categorySlowAging = MutableStateFlow<String?>(null)
+
+    // 카테고리 필터 변경 함수
+    fun setCategoryType(type: String?) {
+        categoryType.value = type
     }
 
-    fun searchRecipes(
-        keyword: String,
-        page: Int,
-        size: Int,
-        categoryType: String?,
-        categorySlowAging: String?
-    ) {
-        viewModelScope.launch {
-            val recipes = repository.searchRecipes(keyword, page, size, categoryType, categorySlowAging)
-            _recipeList.value = recipes
-        }
+    fun setCategorySlowAging(slowAging: String?) {
+        categorySlowAging.value = slowAging
     }
 
-    // 레시피 상세 불러오기
+    // 검색 키워드
+    private val keyword = MutableStateFlow("")
+
+    // 카테고리 타입 검색에 따라 페이징 데이터 불러오기(flatMapLatest로 입력한 마지막 데이터만)
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    val recipes: Flow<PagingData<RecipeListItemData>> =
+        combine(categoryType, categorySlowAging) { type, slowAging ->
+            repository.getRecipes(type, slowAging)
+        }.flatMapLatest { it }
+
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    val searchResults: Flow<PagingData<RecipeListItemData>> =
+        combine(keyword, categoryType, categorySlowAging) { keyword, type, slowAging ->
+            repository.searchRecipes(keyword, type, slowAging)
+        }.flatMapLatest { it }
+
     fun getRecipeById(recipeId: Int) {
         viewModelScope.launch {
             try {

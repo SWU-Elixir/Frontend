@@ -65,7 +65,7 @@ interface RecipeApi {
         @Part("dto") dto: RequestBody,
         @Part image: MultipartBody.Part,
         @Part recipeStepImages: List<MultipartBody.Part>
-    ): Response<GetRecipePostResponse>
+    ): Response<GetRecipeResponse>
 
     @Multipart
     @PATCH("/api/recipe/{recipeId}")

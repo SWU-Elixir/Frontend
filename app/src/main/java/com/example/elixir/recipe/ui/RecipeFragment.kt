@@ -8,13 +8,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.elixir.R
 import com.example.elixir.RetrofitClient
@@ -27,12 +28,13 @@ import com.example.elixir.ingredient.viewmodel.IngredientService
 import com.example.elixir.ingredient.viewmodel.IngredientViewModel
 import com.example.elixir.ingredient.viewmodel.IngredientViewModelFactory
 import com.example.elixir.network.AppDatabase
-import com.example.elixir.recipe.data.GetRecipeData
 import com.example.elixir.recipe.viewmodel.RecipeViewModel
 import com.example.elixir.recipe.data.RecipeData
+import com.example.elixir.recipe.data.RecipeListItemData
 import com.example.elixir.recipe.data.RecipeRepository
 import com.example.elixir.recipe.viewmodel.RecipeViewModelFactory
 import com.google.gson.Gson
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 /**
@@ -50,7 +52,7 @@ class RecipeFragment : Fragment() {
 
     // 데이터
     private var recipeList: MutableList<RecipeData> = mutableListOf()
-    private var recommendRecipeList: List<GetRecipeData> = emptyList()
+    private var recommendRecipeList: List<RecipeListItemData> = emptyList()
     private lateinit var recipeListAdapter: RecipeListAdapter
 
     private lateinit var recipeRepository: RecipeRepository
@@ -81,10 +83,11 @@ class RecipeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentRecipeBinding.inflate(inflater, container, false)
-
+        // 다른 프래그먼트에서 다시 레시피 프래그먼트로 돌아왔을 때 갱신
         parentFragmentManager.setFragmentResultListener("refresh_recipes", this) { _, _ ->
             Log.d("RecipeFragment", "recipeViewModel.getRecipes 갱신")
-            recipeViewModel.getRecipes(currentPage, pageSize, selectedCategoryType, selectedSlowAging)
+            recipeViewModel.setCategoryType(selectedCategoryType)
+            recipeViewModel.setCategorySlowAging(selectedSlowAging)
         }
         return binding.root
     }
@@ -129,7 +132,8 @@ class RecipeFragment : Fragment() {
         Log.d("RecipeFragment", "Loading ingredient data...")
         ingredientViewModel.loadIngredients()
         Log.d("RecipeFragment", "Loading recipe data...")
-        recipeViewModel.getRecipes(currentPage, pageSize, selectedCategoryType, selectedSlowAging)
+        recipeViewModel.setCategoryType(selectedCategoryType)
+        recipeViewModel.setCategorySlowAging(selectedSlowAging)
 
         isDataInitialized = true
     }
@@ -142,8 +146,18 @@ class RecipeFragment : Fragment() {
             tryInitAdapter()
         }
 
-        recipeViewModel.deleteResult.observe(viewLifecycleOwner) { result ->
-            recipeViewModel.getRecipes(0, pageSize, selectedCategoryType, selectedSlowAging)
+        // 2. 페이징 Flow Collector (페이징 적용 시)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                recipeViewModel.recipes.collectLatest { pagingData ->
+                    recipeListAdapter.submitData(pagingData)
+                }
+            }
+        }
+
+        recipeViewModel.deleteResult.observe(viewLifecycleOwner) {
+            recipeViewModel.setCategoryType(selectedCategoryType)
+            recipeViewModel.setCategorySlowAging(selectedSlowAging)
         }
 
         // observe: 식재료 데이터 (항상 업데이트)
@@ -163,11 +177,11 @@ class RecipeFragment : Fragment() {
         }
     }
 
-    private fun loadMore() {
+    /*private fun loadMore() {
         Log.d("RecipeFragment", "loadMore called")
         currentPage++
         recipeViewModel.getRecipes(currentPage, pageSize, selectedCategoryType, selectedSlowAging)
-    }
+    }*/
 
     private fun setupUI() {
         // 레이아웃 매니저 설정
@@ -197,10 +211,8 @@ class RecipeFragment : Fragment() {
                 if (data != null) {
                     val newRecipe = Gson().fromJson(data, RecipeData::class.java)
                     recipeList.add(newRecipe)
-                    recipeListAdapter.updateData(recipeList)
-
-                    // 데이터 갱신
-                    recipeViewModel.getRecipes(currentPage, pageSize, selectedCategoryType, selectedSlowAging)
+                    recipeViewModel.setCategoryType(selectedCategoryType)
+                    recipeViewModel.setCategorySlowAging(selectedSlowAging)
                 }
             }
         }
@@ -223,8 +235,7 @@ class RecipeFragment : Fragment() {
             if (recipes.isNotEmpty()) {
                 if (!::recipeListAdapter.isInitialized) {
                     recipeList = recipes.toMutableList()
-                    recipeListAdapter = RecipeListAdapter(
-                        recipeList, safeIngredientMap,
+                    recipeListAdapter = RecipeListAdapter( safeIngredientMap,
                         onBookmarkClick = { recipe ->
                             recipe.scrappedByCurrentUser = !recipe.scrappedByCurrentUser
                             if (recipe.scrappedByCurrentUser) {
@@ -232,7 +243,6 @@ class RecipeFragment : Fragment() {
                             } else {
                                 recipeViewModel.deleteScrap(recipe.id)
                             }
-                            recipeListAdapter.notifyItemChanged(recipeList.indexOf(recipe))
                         },
                         onHeartClick = { recipe ->
                             recipe.likedByCurrentUser = !recipe.likedByCurrentUser
@@ -243,7 +253,6 @@ class RecipeFragment : Fragment() {
                                 recipe.likes--
                                 recipeViewModel.deleteLike(recipe.id)
                             }
-                            recipeListAdapter.notifyItemChanged(recipeList.indexOf(recipe))
                         },
                         fragmentManager = parentFragmentManager
                     )
@@ -251,8 +260,8 @@ class RecipeFragment : Fragment() {
                     binding.recipeList.adapter = recipeListAdapter
                 } else {
                     // 이미 초기화된 어댑터라면 데이터 업데이트
-                    Log.d("RecipeFragment", "Updating existing adapter with ${recipes.size} recipes and ${safeIngredientMap.size} ingredients")
-                    recipeListAdapter.updateData(recipes)
+                    recipeViewModel.setCategoryType(selectedCategoryType)
+                    recipeViewModel.setCategorySlowAging(selectedSlowAging)
 
                     // 식재료 데이터가 있다면 어댑터에 업데이트
                     if (safeIngredientMap.isNotEmpty()) {
@@ -265,7 +274,6 @@ class RecipeFragment : Fragment() {
                             Log.w("RecipeFragment", "updateIngredientMap method not found, calling notifyDataSetChanged()")
                             // 리플렉션이 실패하면 전체 데이터를 다시 설정
                             recipeListAdapter = RecipeListAdapter(
-                                recipes,
                                 safeIngredientMap,
                                 onBookmarkClick = { recipe ->
                                     recipe.scrappedByCurrentUser = !recipe.scrappedByCurrentUser
@@ -274,7 +282,6 @@ class RecipeFragment : Fragment() {
                                     } else {
                                         recipeViewModel.deleteScrap(recipe.id)
                                     }
-                                    recipeListAdapter.notifyItemChanged(recipeList.indexOf(recipe))
                                 },
                                 onHeartClick = { recipe ->
                                     recipe.likedByCurrentUser = !recipe.likedByCurrentUser
@@ -285,7 +292,6 @@ class RecipeFragment : Fragment() {
                                         recipe.likes--
                                         recipeViewModel.deleteLike(recipe.id)
                                     }
-                                    recipeListAdapter.notifyItemChanged(recipeList.indexOf(recipe))
                                 },
                                 fragmentManager = parentFragmentManager
                             )
@@ -304,10 +310,6 @@ class RecipeFragment : Fragment() {
         } else {
             Log.d("RecipeFragment", "Recipes data is null - waiting for data")
         }
-
-        recipeListAdapter.setOnMoreClickListener {
-            loadMore() // 다음 페이지 데이터 불러오기
-        }
     }
 
     override fun onDestroyView() {
@@ -323,7 +325,8 @@ class RecipeFragment : Fragment() {
             }
             recipeRegisterLauncher.launch(intent)
             // 데이터 갱신
-            recipeViewModel.getRecipes(currentPage, pageSize, selectedCategoryType, selectedSlowAging)
+            recipeViewModel.setCategoryType(selectedCategoryType)
+            recipeViewModel.setCategorySlowAging(selectedSlowAging)
         }
     }
 
@@ -370,7 +373,8 @@ class RecipeFragment : Fragment() {
                     selectedSlowAging = parent.getItemAtPosition(position).toString()
 
                     // ViewModel 함수 호출
-                    recipeViewModel.getRecipes(currentPage, pageSize, selectedCategoryType, selectedSlowAging)
+                    recipeViewModel.setCategoryType(selectedCategoryType)
+                    recipeViewModel.setCategorySlowAging(selectedSlowAging)
                     Log.d("RecipeFragment", "Method selected: $selectedSlowAging")
                 }
 
@@ -404,7 +408,8 @@ class RecipeFragment : Fragment() {
                     selectedCategoryType = "양념_소스_잼"
 
                 // ViewModel 함수 호출
-                recipeViewModel.getRecipes(currentPage, pageSize, selectedCategoryType, selectedSlowAging)
+                recipeViewModel.setCategoryType(selectedCategoryType)
+                recipeViewModel.setCategorySlowAging(selectedSlowAging)
                 Log.d("RecipeFragment", "Type selected: $selectedCategoryType")
             }
 
@@ -474,7 +479,7 @@ class RecipeFragment : Fragment() {
         }
 
         // 필터링된 레시피 목록으로 어댑터 데이터 업데이트
-        (binding.recipeList.adapter as RecipeListAdapter).updateData(filtered)
+        //(binding.recipeList.adapter as RecipeListAdapter).updateData(filtered)
 
         // 필터링 결과에 따른 UI 업데이트
         // 결과가 없는 경우 빈 화면 표시, 있는 경우 레시피 목록 표시

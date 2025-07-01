@@ -12,8 +12,23 @@ import org.threeten.bp.LocalDateTime
 import org.threeten.bp.format.DateTimeFormatter
 
 class CommentViewModel(private val repository: CommentRepository) : ViewModel() {
-    private var _comments = MutableLiveData<List<CommentItem>>()
-    var comments: LiveData<List<CommentItem>> = _comments
+    private var _comments = MutableLiveData<List<CommentItem>?>()
+    var comments: LiveData<List<CommentItem>?> = _comments
+
+    private val _error = MutableLiveData<String>()
+    val error: LiveData<String> = _error
+
+    // 댓글 불러오기
+    fun fetchComments(recipeId: Int) {
+        viewModelScope.launch {
+            val result = repository.getComments(recipeId)
+            result.onSuccess { commentList ->
+                _comments.value = commentList.data
+            }.onFailure { throwable ->
+                _error.value = throwable.message ?: "알 수 없는 에러가 발생했습니다."
+            }
+        }
+    }
 
     // 댓글 업로드
     fun uploadComment(recipeId: Int, content: String) = viewModelScope.launch {

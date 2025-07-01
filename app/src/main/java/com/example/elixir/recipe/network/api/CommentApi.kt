@@ -2,15 +2,22 @@ package com.example.elixir.recipe.network.api
 
 import com.example.elixir.recipe.network.request.CommentRequest
 import com.example.elixir.network.GetStringResponse
+import com.example.elixir.recipe.network.response.GetCommentListResponse
 import com.example.elixir.recipe.network.response.GetCommentResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
+import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
 
 interface CommentApi {
+    @GET("/api/recipe/{recipeId}/comment")
+    suspend fun getComment(
+        @Path("recipeId") recipeId: Int
+    ): Response<GetCommentListResponse>
+
     @POST("/api/recipe/{recipeId}/comment")
     suspend fun uploadComment(
         @Path("recipeId") recipeId: Int,

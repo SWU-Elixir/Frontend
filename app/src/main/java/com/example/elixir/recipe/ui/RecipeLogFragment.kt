@@ -82,11 +82,7 @@ class RecipeLogFragment : Fragment() {
     private var authorFollowByCurrentUser = false
     private var likedByCurrentUser = false
     private var scrappedByCurrentUser = false
-    private var authorNickname: String? = null
-    private var authorTitle: String? = null
-    private var authorProfileUrl: String? = null
     private var likes = 0
-    private var comments: List<CommentItem>? = null
     private var createdAt = LocalDateTime.now().toString()
 
     // 어댑터
@@ -216,12 +212,12 @@ class RecipeLogFragment : Fragment() {
                 categorySlowAging = recipeData.categorySlowAging
                 categoryType = recipeData.categoryType
                 difficulty = recipeData.difficulty
-                ingredientTags = recipeData.ingredientTagIds.toMutableList()
+                ingredientTags = recipeData.ingredientTagIds!!.toMutableList()
                 allergies = recipeData.allergies!!.toMutableList()
-                ingredientList = recipeData.ingredients.map { (name, value, unit) -> FlavoringItem(name = name, value = value, unit = unit)}.toMutableList()
-                seasoningList = recipeData.seasonings.map { (name, value, unit) -> FlavoringItem(name = name, value = value, unit = unit)}.toMutableList()
+                ingredientList = recipeData.ingredients!!.map { (name, value, unit) -> FlavoringItem(name = name, value = value, unit = unit)}.toMutableList()
+                seasoningList = recipeData.seasonings!!.map { (name, value, unit) -> FlavoringItem(name = name, value = value, unit = unit)}.toMutableList()
                 steps = recipeData.stepImageUrls.zip(recipeData.stepDescriptions) { img, desc -> RecipeStepData(stepImg = img, stepDescription = desc)}.toMutableList()
-                tips = recipeData.tips
+                tips = recipeData.tips!!
                 timeHours = recipeData.timeHours
                 timeMinutes = recipeData.timeMinutes
             }
@@ -561,12 +557,8 @@ class RecipeLogFragment : Fragment() {
                         authorFollowByCurrentUser = authorFollowByCurrentUser,
                         likedByCurrentUser = likedByCurrentUser,
                         scrappedByCurrentUser = scrappedByCurrentUser,
-                        authorNickname = authorNickname,
-                        authorTitle = authorTitle,
-                        authorProfileUrl = authorProfileUrl,
+                        authorId = 0,
                         likes = likes,
-                        scraps = 0,
-                        comments = comments,
                         createdAt = createdAt,
                         updatedAt = LocalDateTime.now().toString()
                     )
@@ -777,20 +769,16 @@ class RecipeLogFragment : Fragment() {
         categorySlowAging = recipeData.categorySlowAging
         categoryType = recipeData.categoryType
         difficulty = recipeData.difficulty
-        ingredientTags = recipeData.ingredientTagIds.toMutableList()
+        ingredientTags = recipeData.ingredientTagIds!!.toMutableList()
         allergies = recipeData.allergies!!.toMutableList()
-        tips = recipeData.tips
+        tips = recipeData.tips!!
         timeHours = recipeData.timeHours
         timeMinutes = recipeData.timeMinutes
 
         authorFollowByCurrentUser = recipeData.authorFollowByCurrentUser
         likedByCurrentUser = recipeData.likedByCurrentUser
         scrappedByCurrentUser = recipeData.scrappedByCurrentUser
-        authorTitle = recipeData.authorTitle
-
-        authorNickname = recipeData.authorNickname
         likes = recipeData.likes
-        comments = recipeData.comments
         createdAt = recipeData.createdAt
 
         isBindingData = true
@@ -815,7 +803,7 @@ class RecipeLogFragment : Fragment() {
         // 식재료 태그 칩
         Log.d("RecipeLogFragment", ingredientTags.toString())
         ingredientTags.clear()
-        ingredientTags.addAll(recipeData.ingredientTagIds)
+        ingredientTags.addAll(recipeData.ingredientTagIds!!.toMutableList())
         setIngredientChips(ingredientTags)
 
         // 알러지 칩: 존재하면 칩 누르기, 존재하지 않으면 해당 없음에 클릭
@@ -832,11 +820,11 @@ class RecipeLogFragment : Fragment() {
         Log.d("RecipeLogFragment", "요리 순서 데이터: $steps")
 
         ingredientList.clear()
-        ingredientList.addAll(recipeData.ingredients.map { (name, value, unit) ->
+        ingredientList.addAll(recipeData.ingredients!!.map { (name, value, unit) ->
             FlavoringItem(name = name, value = value, unit = unit)}.toMutableList())
 
         seasoningList.clear()
-        seasoningList.addAll(recipeData.seasonings.map { (name, value, unit) ->
+        seasoningList.addAll(recipeData.seasonings!!.map { (name, value, unit) ->
             FlavoringItem(name = name, value = value, unit = unit)}.toMutableList())
 
         steps.clear()

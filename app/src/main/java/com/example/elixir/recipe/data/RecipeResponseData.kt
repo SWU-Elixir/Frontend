@@ -45,12 +45,8 @@ fun RecipeResponseData.toRecipeData(): RecipeData  = RecipeData(
     authorFollowByCurrentUser = false,
     likedByCurrentUser = false,
     scrappedByCurrentUser = false,
-    authorNickname = null,
-    authorTitle = null,
-    authorProfileUrl = null,
+    authorId = 0,
     likes = likes,
-    scraps = scraps,
-    comments = null,
     createdAt = createdAt,
     updatedAt = updatedAt
 )
@@ -59,9 +55,6 @@ fun RecipeResponseData.toEntity(
     authorFollowByCurrentUser: Boolean = false,
     likedByCurrentUser: Boolean = false,
     scrappedByCurrentUser: Boolean = false,
-    authorNickname: String? = null,
-    authorTitle: String? = null,
-    authorProfileUrl: String? = null
 ): RecipeEntity {
     return RecipeEntity(
         id = id,
@@ -83,11 +76,8 @@ fun RecipeResponseData.toEntity(
         authorFollowByCurrentUser = authorFollowByCurrentUser,
         likedByCurrentUser = likedByCurrentUser,
         scrappedByCurrentUser = scrappedByCurrentUser,
-        authorNickname = authorNickname,
-        authorTitle = authorTitle,
-        authorProfileUrl = authorProfileUrl,
+        authorId = 0,
         likes = likes,
-        scraps = scraps,
         createdAt = createdAt,
         updatedAt = updatedAt
     )
