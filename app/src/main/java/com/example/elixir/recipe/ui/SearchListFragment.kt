@@ -11,7 +11,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.AdapterView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.elixir.R
 import com.example.elixir.RetrofitClient
@@ -19,7 +19,6 @@ import com.example.elixir.databinding.FragmentRecipeSearchListBinding
 import com.example.elixir.ingredient.data.IngredientData
 import com.example.elixir.ingredient.network.IngredientDB
 import com.example.elixir.ingredient.network.IngredientRepository
-import com.example.elixir.ingredient.viewmodel.IngredientService
 import com.example.elixir.ingredient.viewmodel.IngredientViewModel
 import com.example.elixir.ingredient.viewmodel.IngredientViewModelFactory
 import com.example.elixir.network.AppDatabase
@@ -27,6 +26,8 @@ import com.example.elixir.recipe.data.RecipeData
 import com.example.elixir.recipe.data.RecipeRepository
 import com.example.elixir.recipe.viewmodel.RecipeViewModel
 import com.example.elixir.recipe.viewmodel.RecipeViewModelFactory
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 /**
  * 레시피 검색 결과를 표시하는 프래그먼트
@@ -54,9 +55,8 @@ class SearchListFragment : Fragment() {
     }
 
     private lateinit var ingredientRepository: IngredientRepository
-    private lateinit var ingredientService: IngredientService
     private val ingredientViewModel: IngredientViewModel by viewModels {
-        IngredientViewModelFactory(ingredientService)
+        IngredientViewModelFactory(ingredientRepository)
     }
 
     // 현재 선택된 필터 조건
@@ -75,7 +75,6 @@ class SearchListFragment : Fragment() {
             RetrofitClient.instanceIngredientApi,
             IngredientDB.getInstance(requireContext()).ingredientDao()
         )
-        ingredientService = IngredientService(ingredientRepository)
 
         recipeRepository = RecipeRepository(
             RetrofitClient.instanceRecipeApi,
@@ -132,16 +131,55 @@ class SearchListFragment : Fragment() {
      * 레시피와 식재료 데이터가 모두 준비되었을 때만 어댑터를 설정하거나 업데이트합니다.
      */
     private fun tryInitOrUpdateAdapter() {
-        val recipes = latestRecipeSearchResults
         val ingredientMap = ingredientDataMap
 
-        Log.d("SearchListFragment", "tryInitOrUpdateAdapter called - recipes: ${recipes?.size}, ingredients: ${ingredientMap?.size}")
-
-        // 레시피 데이터와 식재료 맵이 모두 준비되었을 때만 처리
-        if (recipes != null && ingredientMap != null) {
+        if (ingredientMap != null) {
             // 어댑터가 초기화되지 않았다면 새로 생성
             if (!::recipeListAdapter.isInitialized) {
-                Log.d("SearchListFragment", "Creating new adapter with ${recipes.size} recipes")
+                recipeListAdapter = RecipeListAdapter(
+                    ingredientMap,
+                    onBookmarkClick = { recipe ->
+                        recipe.scrappedByCurrentUser = !recipe.scrappedByCurrentUser
+                        if (recipe.scrappedByCurrentUser) {
+                            recipeViewModel.addScrap(recipe.id)
+                        } else {
+                            recipeViewModel.deleteScrap(recipe.id)
+                        }
+                    },
+                    onHeartClick = { recipe ->
+                        recipe.likedByCurrentUser = !recipe.likedByCurrentUser
+                        if (recipe.likedByCurrentUser) {
+                            recipe.likes++
+                            recipeViewModel.addLike(recipe.id)
+                        } else {
+                            recipe.likes--
+                            recipeViewModel.deleteLike(recipe.id)
+                        }
+                    },
+                    fragmentManager = parentFragmentManager
+                )
+                binding.recipeList.adapter = recipeListAdapter
+
+                // 페이징 데이터 collect 시작
+                lifecycleScope.launch {
+                    recipeViewModel.recipes.collectLatest { pagingData ->
+                        recipeListAdapter.submitData(pagingData)
+                    }
+                }
+            } else {
+                // 어댑터가 이미 있다면 ingredientMap만 업데이트
+                recipeListAdapter.updateIngredientMap(ingredientMap)
+            }
+        } else {
+            Log.d("SearchListFragment", "Ingredients data is null - waiting for data")
+            /*// 식재료 데이터가 있다면 어댑터에 업데이트 (RecipeListAdapter에 updateIngredientMap 메서드가 있다고 가정)
+            try {
+                val updateMethod = recipeListAdapter.javaClass.getMethod("updateIngredientMap", Map::class.java)
+                updateMethod.invoke(recipeListAdapter, ingredientMap)
+                Log.d("SearchListFragment", "Successfully updated ingredient map in adapter")
+            } catch (e: Exception) {
+                Log.w("SearchListFragment", "updateIngredientMap method not found or failed, calling notifyDataSetChanged()")
+
                 recipeListAdapter = RecipeListAdapter(
                     recipes.toMutableList(),
                     ingredientMap,
@@ -162,64 +200,27 @@ class SearchListFragment : Fragment() {
                     fragmentManager = parentFragmentManager
                 )
                 binding.recipeList.adapter = recipeListAdapter
-            } else {
-                // 이미 초기화되었다면 데이터만 업데이트
-                Log.d("SearchListFragment", "Updating existing adapter with ${recipes.size} recipes and ${ingredientMap.size} ingredients")
-                recipeListAdapter.updateData(recipes.toMutableList())
-
-                // 식재료 데이터가 있다면 어댑터에 업데이트 (RecipeListAdapter에 updateIngredientMap 메서드가 있다고 가정)
-                try {
-                    val updateMethod = recipeListAdapter.javaClass.getMethod("updateIngredientMap", Map::class.java)
-                    updateMethod.invoke(recipeListAdapter, ingredientMap)
-                    Log.d("SearchListFragment", "Successfully updated ingredient map in adapter")
-                } catch (e: Exception) {
-                    Log.w("SearchListFragment", "updateIngredientMap method not found or failed, calling notifyDataSetChanged()")
-                    // 리플렉션이 실패하면 전체 데이터를 다시 설정 (강제로 어댑터 재생성)
-                    // 이 부분은 RecipeFragment와 유사하게, 어댑터가 이미 초기화되어 있다면 데이터만 업데이트하고,
-                    // 식재료 맵이 변경되었을 경우를 고려하여 `updateIngredientMap` 메서드를 호출하는 것이 좋습니다.
-                    // 만약 `RecipeListAdapter`에 `updateIngredientMap` 메서드가 없다면,
-                    // 데이터 업데이트 후 `notifyDataSetChanged()`를 호출하거나,
-                    // 새로운 어댑터를 생성하여 할당하는 방식으로 구현해야 합니다.
-                    recipeListAdapter = RecipeListAdapter(
-                        recipes.toMutableList(),
-                        ingredientMap,
-                        onBookmarkClick = { recipe -> // RecipeData 객체 전체를 전달
-                            if (recipe.scrappedByCurrentUser) {
-                                recipeViewModel.deleteScrap(recipe.id)
-                            } else {
-                                recipeViewModel.addScrap(recipe.id)
-                            }
-                        },
-                        onHeartClick = { recipe -> // RecipeData 객체 전체를 전달
-                            if (recipe.likedByCurrentUser) {
-                                recipeViewModel.deleteLike(recipe.id)
-                            } else {
-                                recipeViewModel.addLike(recipe.id)
-                            }
-                        },
-                        fragmentManager = parentFragmentManager
-                    )
-                    binding.recipeList.adapter = recipeListAdapter
-                }
             }
+        }
 
-            // 검색 결과에 따른 UI 표시 (레시피 리스트 / 빈 텍스트)
-            if (recipes.isEmpty()) {
-                binding.recipeList.visibility = View.GONE
-                binding.emptyRecipeText.visibility = View.VISIBLE
-                Log.d("SearchListFragment", "No recipes - showing empty text")
-            } else {
-                binding.recipeList.visibility = View.VISIBLE
-                binding.emptyRecipeText.visibility = View.GONE
-                Log.d("SearchListFragment", "RecipeList is now VISIBLE")
-            }
-        } else {
-            Log.d("SearchListFragment", "Recipes or Ingredients data is null - waiting for data")
-            // 데이터 로딩 중이므로 리스트를 숨기고 로딩 상태 표시 등을 고려할 수 있음
+        // 검색 결과에 따른 UI 표시 (레시피 리스트 / 빈 텍스트)
+        if (recipes.isEmpty()) {
             binding.recipeList.visibility = View.GONE
-            binding.emptyRecipeText.visibility = View.GONE // 혹은 로딩 인디케이터
+            binding.etSearch.visibility = View.VISIBLE
+            Log.d("SearchListFragment", "No recipes - showing empty text")
+        } else {
+            binding.recipeList.visibility = View.VISIBLE
+            binding.etSearch.visibility = View.GONE
+            Log.d("SearchListFragment", "RecipeList is now VISIBLE")
+        }
+    } else {
+        Log.d("SearchListFragment", "Recipes or Ingredients data is null - waiting for data")
+        // 데이터 로딩 중이므로 리스트를 숨기고 로딩 상태 표시 등을 고려할 수 있음
+        binding.recipeList.visibility = View.GONE
+        binding.etSearch.visibility = View.GONE // 혹은 로딩 인디케이터*/
         }
     }
+
 
 
     /**
@@ -227,13 +228,9 @@ class SearchListFragment : Fragment() {
      */
     private fun initializeSearchKeyword() {
         val keyword = arguments?.getString("search_keyword")?.trim() ?: ""
-        binding.searchEditText.setText(keyword)
+        binding.etSearch.setText(keyword)
         currentSearchKeyword = keyword // 현재 검색 키워드 업데이트
 
-        // 초기 검색 실행
-        // 스피너의 초기 선택이 "저속노화"와 "종류"이므로, null 대신 기본값을 전달
-        // ViewModel에서 API를 호출할 때 "저속노화"와 "종류"는 필터링하지 않음을 의미해야 합니다.
-        // 예를 들어, API 파라미터가 null 또는 특정 기본값이면 모든 카테고리를 포함하도록 처리해야 합니다.
         performSearchWithFilters()
     }
 
@@ -245,15 +242,12 @@ class SearchListFragment : Fragment() {
      */
     private fun setupSearchEvents() {
         // EditText 입력 감지
-        binding.searchEditText.addTextChangedListener(object : TextWatcher {
+        binding.etSearch.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {}
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 currentSearchKeyword = s.toString().trim()
-                // 텍스트 변경 즉시 검색을 시작하는 대신, 사용자가 타이핑을 멈췄을 때 또는
-                // 검색 버튼을 눌렀을 때만 검색하도록 설정할 수 있습니다.
-                // 여기서는 변경될 때마다 호출되도록 유지합니다.
                 performSearchWithFilters()
             }
         })
@@ -264,7 +258,7 @@ class SearchListFragment : Fragment() {
         }
 
         // 키보드 검색 버튼
-        binding.searchEditText.setOnEditorActionListener { _, actionId, _ ->
+        binding.etSearch.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 performSearchWithFilters()
                 // 검색 후 스피너 초기화는 필요에 따라 주석 처리 또는 유지
@@ -347,7 +341,7 @@ class SearchListFragment : Fragment() {
      * 뒤로가기 버튼 설정
      */
     private fun setupBackButton() {
-        binding.backButton.setOnClickListener {
+        binding.btnBack.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
     }
@@ -365,7 +359,7 @@ class SearchListFragment : Fragment() {
      * 현재 검색 키워드와 필터 조건으로 ViewModel에 검색 요청
      */
     private fun performSearchWithFilters() {
-        val keyword = binding.searchEditText.text.toString().trim()
+        val keyword = binding.etSearch.text.toString().trim()
         // 스피너의 0번째 인덱스는 "저속노화" 또는 "종류"이므로, 이들을 선택했을 때는 필터링하지 않음을 의미합니다.
         // ViewModel의 searchRecipes 메서드가 null을 받으면 모든 카테고리를 검색하도록 처리되어야 합니다.
         val method = if (binding.spinnerDifficulty.selectedItemPosition == 0) null else selectedSlowAging
@@ -373,7 +367,11 @@ class SearchListFragment : Fragment() {
 
         Log.d("SearchListFragment", "Performing search with keyword: '$keyword', method: '$method', type: '$type'")
         // ViewModel의 searchRecipes 호출
-        recipeViewModel.searchRecipes(keyword, 0, 10, type, method)
+        lifecycleScope.launch {
+            recipeViewModel.searchResults.collectLatest { pagingData ->
+                recipeListAdapter.submitData(pagingData)
+            }
+        }
     }
 
     /**

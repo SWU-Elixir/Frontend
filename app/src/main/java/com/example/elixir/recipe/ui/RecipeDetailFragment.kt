@@ -13,6 +13,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.example.elixir.R
@@ -23,11 +24,11 @@ import com.example.elixir.dialog.DeleteDialog
 import com.example.elixir.ingredient.data.IngredientData
 import com.example.elixir.ingredient.network.IngredientDB
 import com.example.elixir.ingredient.network.IngredientRepository
-import com.example.elixir.ingredient.viewmodel.IngredientService
 import com.example.elixir.ingredient.viewmodel.IngredientViewModel
+import com.example.elixir.ingredient.viewmodel.IngredientViewModelFactory
+import com.example.elixir.member.data.ProfileEntity
 import com.example.elixir.member.network.MemberDB
 import com.example.elixir.member.network.MemberRepository
-import com.example.elixir.member.viewmodel.MemberService
 import com.example.elixir.member.viewmodel.MemberViewModel
 import com.example.elixir.member.viewmodel.MemberViewModelFactory
 import com.example.elixir.network.AppDatabase
@@ -43,6 +44,7 @@ import com.example.elixir.recipe.viewmodel.RecipeViewModelFactory
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
+import kotlinx.coroutines.launch
 import java.util.Locale
 
 
@@ -59,6 +61,7 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
     private lateinit var recipeRepository: RecipeRepository
     private lateinit var memberRepository: MemberRepository
     private lateinit var commentRepository: CommentRepository
+    private lateinit var ingredientRepository: IngredientRepository
 
     private val recipeViewModel: RecipeViewModel by viewModels {
         RecipeViewModelFactory(recipeRepository)
@@ -77,13 +80,21 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
 
     // 멤버 뷰모델
     private val memberViewModel: MemberViewModel by viewModels {
-        MemberViewModelFactory(MemberService(memberRepository))
+        MemberViewModelFactory(memberRepository)
+    }
+
+    // 재료 뷰모델
+    private val ingredientViewModel: IngredientViewModel by viewModels {
+        IngredientViewModelFactory(ingredientRepository)
     }
 
     // 수정할 시 launcher 띄움
     private lateinit var editRecipeLauncher: ActivityResultLauncher<Intent>
     private var recipeId = -1
     private var ingredientDataMap: Map<Int, IngredientData>? = null
+
+    // 회원 정보
+    private lateinit var member: ProfileEntity
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -119,6 +130,13 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
         commentRepository = CommentRepository(RetrofitClient.instanceCommentApi,
             AppDatabase.getInstance(requireContext()).commentDao())
 
+        // 재료 (초기화 위치 변경)
+        ingredientRepository = IngredientRepository(RetrofitClient.instanceIngredientApi,
+            IngredientDB.getInstance(requireContext()).ingredientDao())
+
+        // ingredientViewModel 데이터 로드 (onViewCreated 초반에 한 번만 호출)
+        ingredientViewModel.loadIngredients()
+
         // ------------------------ 데이터 적용 ------------------------
         // arguments에서 레시피 아이디 꺼내서 서버로부터 레시피 불러오기
         recipeId = arguments?.getInt("recipeId") ?: return
@@ -130,14 +148,60 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                 // recipeData에 저장된 값으로 UI 초기화
                 Log.d("RecipeDetailFragment", "$recipeData")
                 // 유저
-                binding.memberTitle.text = if(recipeData.authorTitle.isNullOrBlank()) "일반" else recipeData.authorTitle
-                binding.memberNickname.text = recipeData.authorNickname
-                val profileImg = if(recipeData.authorProfileUrl.isNullOrBlank()) R.drawable.ic_profile else recipeData.authorProfileUrl
-                Glide.with(requireContext())
-                    .load(profileImg)
-                    .placeholder(R.drawable.ic_profile)
-                    .error(R.drawable.ic_profile)
-                    .into(binding.profileImage)
+                lifecycleScope.launch {
+                    // 유저
+                    val memberApi = RetrofitClient.instanceMemberApi
+                    val member = memberApi.getProfile(recipeData.authorId).data
+
+                    binding.tvMember.text = if(member.title.isNullOrBlank()) "일반" else member.title
+                    binding.tvNickname.text = member.nickname
+
+                    val profileImg = if(member.profileUrl.isNullOrBlank()) R.drawable.ic_profile else member.profileUrl
+                    Glide.with(requireContext())
+                        .load(profileImg)
+                        .placeholder(R.drawable.ic_profile)
+                        .error(R.drawable.ic_profile)
+                        .into(binding.imgProfile)
+
+                    // 팔로우 버튼 상태 초기화
+                    if(recipeData.authorFollowByCurrentUser) {
+                        binding.btnFollow.text = context?.getString(R.string.following)
+                        binding.btnFollow.setBackgroundResource(R.drawable.bg_rect_outline_gray)
+                        context?.getColor(R.color.black)?.let { binding.btnFollow.setTextColor(it) }
+                    } else {
+                        binding.btnFollow.text = context?.getString(R.string.follow)
+                        binding.btnFollow.setBackgroundResource(R.drawable.bg_rect_filled_orange)
+                        context?.getColor(R.color.white)?.let { binding.btnFollow.setTextColor(it) }
+                    }
+
+                    // 팔로우 버튼 클릭 이벤트 처리
+                    binding.btnFollow.setOnClickListener {
+                        val isFollowing = binding.btnFollow.text == getString(R.string.following)
+
+                        // 코루틴으로 감싸기!
+                        lifecycleScope.launch {
+                            if (isFollowing) {
+                                memberApi.unfollow(recipeData.authorId)
+                            } else {
+                                memberApi.follow(recipeData.authorId)
+                            }
+
+                            // UI 업데이트는 메인스레드에서 안전하게
+                            binding.btnFollow.text = if (isFollowing) getString(R.string.follow) else getString(R.string.following)
+                            binding.btnFollow.setBackgroundResource(
+                                if (isFollowing) R.drawable.bg_rect_filled_orange
+                                else R.drawable.bg_rect_outline_gray
+                            )
+                            binding.btnFollow.setTextColor(
+                                resources.getColor(
+                                    if (isFollowing) R.color.white
+                                    else R.color.black,
+                                    null
+                                )
+                            )
+                        }
+                    }
+                }
 
 
                 // 레시피
@@ -147,9 +211,9 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                 binding.recipeLevel.text = recipeData.difficulty
                 Glide.with(requireContext())
                     .load(recipeData.imageUrl)
-                    .placeholder(R.drawable.img_blank)
-                    .error(R.drawable.img_blank)
-                    .into(binding.recipeImage)
+                    .placeholder(R.drawable.ic_recipe_white)
+                    .error(R.drawable.ic_recipe_white)
+                    .into(binding.imgRecipe)
 
 
                 // 순서
@@ -216,40 +280,18 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                     binding.heartCount.text = formatCount(recipeData.likes)
                 }
 
-
-                val api = com.example.elixir.RetrofitClient.instanceMemberApi
-
-                // 팔로우 버튼 클릭 이벤트 처리
-                binding.followButton.setOnClickListener {
-                    val isFollowing = binding.followButton.text == getString(R.string.following)
-
-                    // 팔로우 상태 토글 및 UI 업데이트
-                    binding.followButton.text = if (isFollowing) getString(R.string.follow) else getString(R.string.following)
-                    binding.followButton.setBackgroundResource(
-                        if (isFollowing) R.drawable.bg_rect_filled_orange
-                        else R.drawable.bg_rect_outline_gray
-                    )
-                    binding.followButton.setTextColor(
-                        resources.getColor(
-                            if (isFollowing) R.color.white
-                            else R.color.black,
-                            null
-                        )
-                    )
-                }
-
                 // 회원 정보 불러오기
-                memberViewModel.loadMemberProfile()
+                memberViewModel.loadProfile()
                 memberViewModel.profile.observe(viewLifecycleOwner) { profile ->
                     profile?.let {
                         userNickname = profile.nickname
-                        if(recipeData.authorNickname == userNickname)
-                            binding.followButton.visibility = View.GONE
+                        if(member.nickname == userNickname)
+                            binding.btnFollow.visibility = View.GONE
                         else
-                            binding.followButton.visibility = View.VISIBLE
+                            binding.btnFollow.visibility = View.VISIBLE
 
                         // 사용자가 아니면 수정 못하게
-                        if(recipeData.authorNickname != profile.nickname)
+                        if(member.nickname != profile.nickname)
                             binding.menuButton.visibility = View.GONE
 
                         binding.commentNickname.text = profile.nickname
@@ -288,21 +330,31 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
 
                 // ------------------------ 3. 리스트 설정 ------------------------
                 // 태그 리스트 설정 (FlexboxLayoutManager 사용)
-                binding.tagList.apply {
-                    layoutManager = FlexboxLayoutManager(context).apply {
-                        flexDirection = FlexDirection.ROW
-                        justifyContent = JustifyContent.FLEX_START
-                    }
+                // ingredientViewModel 데이터 로드는 onViewCreated 초반에 이미 했으므로 여기서는 observer로 데이터 변경만 감지
+                ingredientViewModel.ingredients.observe(viewLifecycleOwner) { ingredientList ->
+                    Log.d("Debug", "ingredientList size: ${ingredientList?.size}")
 
-                    val ingredientRepository = IngredientRepository(
-                        RetrofitClient.instanceIngredientApi,
-                        IngredientDB.getInstance(requireContext()).ingredientDao())
-                    val ingredientViewModel = IngredientViewModel(IngredientService(ingredientRepository))
-
-                    ingredientViewModel.ingredients.observe(viewLifecycleOwner) { ingredientList ->
+                    if (ingredientList != null && ingredientList.isNotEmpty()) {
                         ingredientDataMap = ingredientList.associateBy { it.id }
-                        adapter = IngredientTagChipMapAdapter(recipeData.ingredientTagIds, ingredientDataMap!!)
-                        visibility = View.VISIBLE
+
+                        // 태그 리스트 설정 (FlexboxLayoutManager 사용)
+                        val tagIds = recipeData.ingredientTagIds
+                        if (tagIds != null && tagIds.isNotEmpty() && ingredientDataMap != null) {
+                            binding.listRepresentIngredient.apply {
+                                layoutManager = FlexboxLayoutManager(context).apply {
+                                    flexDirection = FlexDirection.ROW
+                                    justifyContent = JustifyContent.FLEX_START
+                                }
+                                adapter = IngredientTagChipMapAdapter(tagIds, ingredientDataMap!!)
+                                visibility = View.VISIBLE
+                            }
+                        } else {
+                            Log.w("RecipeDetailFragment", "ingredientTagIds is null or empty")
+                            binding.listRepresentIngredient.visibility = View.GONE
+                        }
+                    } else {
+                        Log.w("RecipeDetailFragment", "ingredientList is null or empty")
+                        binding.listRepresentIngredient.visibility = View.GONE
                     }
                 }
 
@@ -327,7 +379,7 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                         flexDirection = FlexDirection.ROW
                         justifyContent = JustifyContent.FLEX_START
                     }
-                    adapter = FlavoringAdapter(recipeData.ingredients.map { FlavoringItem(it.name, it.value, it.unit) })
+                    adapter = FlavoringAdapter(recipeData.ingredients!!.map { FlavoringItem(it.name, it.value, it.unit) })
                 }
 
                 // 양념 리스트 설정
@@ -336,20 +388,15 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                         flexDirection = FlexDirection.ROW
                         justifyContent = JustifyContent.FLEX_START
                     }
-                    adapter = FlavoringAdapter(recipeData.seasonings.map { FlavoringItem(it.name, it.value, it.unit) })
+                    adapter = FlavoringAdapter(recipeData.seasonings!!.map { FlavoringItem(it.name, it.value, it.unit) })
                 }
-
-                // 댓글 받아오기
-                comments = recipeData.comments!!.toMutableList()
-                Log.d("RecipeDetailFragment", "$comments")
 
                 // 댓글 리스트 설정
                 binding.commentList.layoutManager = LinearLayoutManager(requireContext())
-                commentAdapter = RecipeCommentAdapter(requireContext(), comments, this)
-                binding.commentList.adapter = commentAdapter
-
                 // ------------------------ 댓글 어댑터 연결 ------------------------
                 commentViewModel.comments.observe(viewLifecycleOwner) { newComments ->
+                    commentAdapter = RecipeCommentAdapter(requireContext(), newComments!!.toMutableList(), this)
+                    binding.commentList.adapter = commentAdapter
                     comments.clear()
                     comments.addAll(newComments)
                     commentAdapter.notifyDataSetChanged()
@@ -392,7 +439,7 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
         }
 
         // ------------------------ 4. 뒤로 가기 버튼 ------------------------
-        binding.backButton.setOnClickListener {
+        binding.btnBack.setOnClickListener {
             parentFragmentManager.setFragmentResult("refresh_recipes", Bundle()) // 결과 전달
             parentFragmentManager.popBackStack()
         }
