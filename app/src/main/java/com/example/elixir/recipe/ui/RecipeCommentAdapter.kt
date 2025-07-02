@@ -9,7 +9,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.elixir.R
 import com.example.elixir.databinding.ItemRecipeListCommentBinding
-import com.example.elixir.recipe.data.CommentData
 import com.example.elixir.recipe.data.CommentItem
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.format.DateTimeFormatter
