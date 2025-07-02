@@ -14,7 +14,7 @@ class RecipeKeywordAdapter(
 
     inner class KeywordViewHolder(private val binding: ItemMealListIndeterminateBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(keyword: String) {
-            binding.indeterminateName.text = keyword
+            binding.tvIndeterminateName.text = keyword
             binding.root.setOnClickListener {
                 onItemClick?.invoke(keyword)
             }

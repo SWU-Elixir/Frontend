@@ -1,4 +1,4 @@
-package com.example.elixir.member
+package com.example.elixir.member.data
 
 data class BadgeItem(
     val imageRes: Int,

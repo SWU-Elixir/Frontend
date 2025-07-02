@@ -1,9 +1,10 @@
-package com.example.elixir.member
+package com.example.elixir.member.ui
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.elixir.databinding.ItemMypageBadgeGridBinding
+import com.example.elixir.member.data.BadgeItem
 
 class BadgeGridAdapter(private val items: List<BadgeItem>) : RecyclerView.Adapter<BadgeGridAdapter.BadgeViewHolder>() {
 
@@ -16,9 +17,9 @@ class BadgeGridAdapter(private val items: List<BadgeItem>) : RecyclerView.Adapte
 
     override fun onBindViewHolder(holder: BadgeViewHolder, position: Int) {
         val item = items[position]
-        holder.binding.badgeImage.setImageResource(item.imageRes)
-        holder.binding.badgeTitle.text = item.title
-        holder.binding.badgeSubtitle.text = "${item.year}년 ${item.month}월 챌린지 성공"
+        holder.binding.imgBadge.setImageResource(item.imageRes)
+        holder.binding.tvBadge.text = item.title
+        holder.binding.tvBadgeSubTitle.text = "${item.year}년 ${item.month}월 챌린지 성공"
     }
 
     override fun getItemCount() = items.size

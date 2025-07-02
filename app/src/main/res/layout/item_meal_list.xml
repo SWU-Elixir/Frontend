@@ -60,7 +60,7 @@
 
         </LinearLayout>
         <ImageView
-            android:id="@+id/dietScore"
+            android:id="@+id/tvScoreLabel"
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:layout_gravity="center"

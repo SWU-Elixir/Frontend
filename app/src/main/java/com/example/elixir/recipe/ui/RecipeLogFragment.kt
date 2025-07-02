@@ -38,7 +38,6 @@ import com.example.elixir.ingredient.data.IngredientData
 import com.example.elixir.ingredient.network.IngredientDB
 import com.example.elixir.ingredient.network.IngredientRepository
 import com.example.elixir.ingredient.ui.IngredientSearchFragment
-import com.example.elixir.ingredient.viewmodel.IngredientService
 import com.example.elixir.ingredient.viewmodel.IngredientViewModel
 import com.example.elixir.network.AppDatabase
 import com.example.elixir.recipe.data.CommentItem
@@ -93,6 +92,7 @@ class RecipeLogFragment : Fragment() {
     private lateinit var chipMap: Map<Int, Int>
     private var selectedPosition: Int = -1
     private lateinit var recipeRepository: RecipeRepository
+    private var isDataSet = false // 데이터 설정 완료 여부
 
     private lateinit var pickThumbnailLauncher: ActivityResultLauncher<PickVisualMediaRequest>
 
@@ -126,34 +126,35 @@ class RecipeLogFragment : Fragment() {
         chipMap = emptyMap()
 
         try {
-            // 레시피 썸네일
             recipeRepository = RecipeRepository(RetrofitClient.instanceRecipeApi, AppDatabase.getInstance(requireContext()).recipeDao())
 
-            // 레시피 기본 정보 설정
-            recipeViewModel.recipeDetail.observe(viewLifecycleOwner) { recipeData ->
-                Log.d("RecipeFragment", "recipeData: $recipeData")
-                // 수정 모드
-                if (recipeData != null) {
-                    isEdit = true
-                    // UI 업데이트
-                    setRecipeDataToUI(recipeData)
-                }
-            }
-
-            // 데이터 초기화
-            if(!isEdit)
-                initData()
-
-            // UI 요소 초기화
-            setupUI()
-
-            // id 값 가져오기
-            recipeId = arguments?.getInt("recipeId") ?: return
+            // id 값 먼저 가져오기
+            recipeId = arguments?.getInt("recipeId") ?: -1
             Log.d("RecipeLogFragment", "recipeID: $recipeId")
 
-            // 만약 수정 모드라면 레시피 값이 -1이 아닐 것
-            if(recipeId != -1)
+            // 수정 모드 판단
+            isEdit = recipeId != -1
+
+            if (!isEdit) {
+                // 등록 모드: 데이터 초기화 후 UI 설정
+                initData()
+                setupUI()
+            } else {
+                // 수정 모드: UI 먼저 설정하고 데이터 관찰
+                setupUI()
+
+                // 레시피 데이터 관찰
+                recipeViewModel.recipeDetail.observe(viewLifecycleOwner) { recipeData ->
+                    Log.d("RecipeFragment", "recipeData: $recipeData")
+                    if (recipeData != null && !isDataSet) {
+                        isDataSet = true
+                        setRecipeDataToUI(recipeData)
+                    }
+                }
+
+                // 데이터 요청
                 recipeViewModel.getRecipeById(recipeId)
+            }
 
         } catch (e: Exception) {
             Log.e("RecipeLogFragment", "Error in onViewCreated", e)
@@ -163,9 +164,6 @@ class RecipeLogFragment : Fragment() {
     private fun setupUI() {
         Log.d("RecipeLogFragment", "Setting up UI elements")
         try {
-            // 레시피 기본 정보 설정
-            setupRecipeInfo()
-
             // 레시피 썸네일 설정
             setupThumbnail()
 
@@ -287,28 +285,29 @@ class RecipeLogFragment : Fragment() {
             // 식재료 뷰모델 호출 및 데이터 가져오기
             val ingredientRepository = IngredientRepository(RetrofitClient.instanceIngredientApi,
                 IngredientDB.getInstance(requireContext()).ingredientDao())
-            val ingredientService = IngredientService(ingredientRepository)
-            val ingredientViewModel = IngredientViewModel(ingredientService)
+            val ingredientViewModel = IngredientViewModel(ingredientRepository)
 
             ingredientViewModel.loadIngredients()
 
+            // 한 번만 관찰하도록 수정
             ingredientViewModel.ingredients.observe(viewLifecycleOwner) { ingredientList ->
-                val ingredientMap = ingredientList.associateBy { it.id }
-                Log.d("RecipeLogFragment", "ingredientTags: $ingredientTags, ingredientMap: $ingredientMap")
-                showInitialIngredientChips(ingredientTags = ingredientTags, ingredientMap = ingredientMap,
-                    chipGroup = recipeBinding.tagsIngredient, findIngredientChip = recipeBinding.findIngredient)
+                if (ingredientList.isNotEmpty()) {
+                    val ingredientMap = ingredientList.associateBy { it.id }
+                    Log.d("RecipeLogFragment", "ingredientTags: $ingredientTags, ingredientMap: $ingredientMap")
+
+                    // 수정 모드에서 기존 칩이 있다면 먼저 업데이트
+                    if (isEdit && ingredientTags.isNotEmpty()) {
+                        updateIngredientChips(ingredientTags, ingredientMap)
+                    }
+                }
             }
 
-            // 식재료 검색 버튼 클릭 리스너
+            // 식재료 검색 버튼 클릭 리스너 (기존과 동일)
             recipeBinding.findIngredient.setOnClickListener {
                 Log.d("RecipeLogFragment", "Find ingredient button clicked")
-                // 칩 상태 토글
                 recipeBinding.findIngredient.isChecked = !recipeBinding.findIngredient.isChecked
 
-                // IngredientSearchFragment로 이동
                 val ingredientSearchFragment = IngredientSearchFragment()
-
-                // ToolbarActivity의 fragment_registration 컨테이너를 사용하여 Fragment 전환
                 requireActivity().supportFragmentManager.beginTransaction()
                     .replace(android.R.id.content, ingredientSearchFragment)
                     .addToBackStack(null)
@@ -334,6 +333,47 @@ class RecipeLogFragment : Fragment() {
             Log.e("RecipeLogFragment", "Error setting up ingredient chips", e)
         }
     }
+
+    private fun updateIngredientChips(ingredientTags: List<Int>, ingredientMap: Map<Int, IngredientData>) {
+        // 기존 칩들 제거 (findIngredient 칩 제외)
+        val findIngredientChip = recipeBinding.findIngredient
+        val chipsToRemove = mutableListOf<View>()
+
+        for (i in 0 until recipeBinding.tagsIngredient.childCount) {
+            val child = recipeBinding.tagsIngredient.getChildAt(i)
+            if (child != findIngredientChip && child is Chip) {
+                chipsToRemove.add(child)
+            }
+        }
+
+        chipsToRemove.forEach { recipeBinding.tagsIngredient.removeView(it) }
+
+        // 새로운 칩들 추가
+        ingredientTags.forEach { ingredientId ->
+            val ingredientName = ingredientMap[ingredientId]?.name ?: "알 수 없음"
+            val chip = Chip(ContextThemeWrapper(requireContext(), R.style.ChipStyle_Short)).apply {
+                text = ingredientName
+                isClickable = true
+                isCheckable = false
+                chipBackgroundColor = ColorStateList.valueOf(
+                    ContextCompat.getColor(context, R.color.elixir_orange)
+                )
+                setTextColor(ContextCompat.getColor(context, R.color.white))
+
+                setOnClickListener {
+                    Log.d("RecipeLogFragment", "Chip clicked for removal: $ingredientName")
+                    this@RecipeLogFragment.ingredientTags.remove(ingredientId)
+                    recipeBinding.tagsIngredient.removeView(this)
+                    updateWriteButtonState()
+                }
+            }
+
+            // findIngredient Chip 앞에 삽입
+            val index = recipeBinding.tagsIngredient.indexOfChild(findIngredientChip)
+            recipeBinding.tagsIngredient.addView(chip, index)
+        }
+    }
+
 
     private fun handleIngredientSelection(bundle: Bundle) {
         try {
@@ -472,61 +512,98 @@ class RecipeLogFragment : Fragment() {
 
     // RecyclerView 설정
     private fun setupRecyclerViews() {
-        ingredientsAdapter = FlavoringLogAdapter(ingredientList,
-            { removeFlavoringItem(ingredientList, it, ingredientsAdapter, recipeBinding.frameEnterIngredients) },
-            { updateAddButtonState() }
-        )
-        seasoningAdapter = FlavoringLogAdapter(seasoningList,
-            { removeFlavoringItem(seasoningList, it, seasoningAdapter, recipeBinding.frameEnterSeasoning) },
-            { updateAddButtonState() }
-        )
-        stepAdapter = RecipeStepLogAdapter(steps,
-            { removeStepItem(it) }, { showSelectImgDialog(it) }, { updateAddButtonState() }
-        )
+        // 어댑터 초기화 (한 번만)
+        if (!::ingredientsAdapter.isInitialized) {
+            ingredientsAdapter = FlavoringLogAdapter(ingredientList,
+                { removeFlavoringItem(ingredientList, it, ingredientsAdapter, recipeBinding.frameEnterIngredients) },
+                { updateAddButtonState() }
+            )
+        }
 
-        // 수정 모드 진입 시 높이 갱신
-        ingredientsAdapter.notifyDataSetChanged()
-        seasoningAdapter.notifyDataSetChanged()
-        stepAdapter.notifyDataSetChanged()
+        if (!::seasoningAdapter.isInitialized) {
+            seasoningAdapter = FlavoringLogAdapter(seasoningList,
+                { removeFlavoringItem(seasoningList, it, seasoningAdapter, recipeBinding.frameEnterSeasoning) },
+                { updateAddButtonState() }
+            )
+        }
 
-        setupRecyclerView(recipeBinding.frameEnterIngredients, ingredientsAdapter)
-        setupRecyclerView(recipeBinding.frameEnterSeasoning, seasoningAdapter)
-        setupRecyclerView(recipeBinding.frameEnterRecipeStep, stepAdapter)
-        setupAddButtons()
+        if (!::stepAdapter.isInitialized) {
+            stepAdapter = RecipeStepLogAdapter(steps,
+                { removeStepItem(it) },
+                { showSelectImgDialog(it) },
+                { updateAddButtonState() }
+            )
+        }
 
-        updateAddButtonState()
-        updateWriteButtonState()
+        // RecyclerView 설정
+        view?.post {
+            try {
+                // 어댑터가 아직 설정되지 않았을 때만 설정
+                if (recipeBinding.frameEnterIngredients.adapter == null) {
+                    setupRecyclerView(recipeBinding.frameEnterIngredients, ingredientsAdapter)
+                }
+                if (recipeBinding.frameEnterSeasoning.adapter == null) {
+                    setupRecyclerView(recipeBinding.frameEnterSeasoning, seasoningAdapter)
+                }
+                if (recipeBinding.frameEnterRecipeStep.adapter == null) {
+                    setupRecyclerView(recipeBinding.frameEnterRecipeStep, stepAdapter)
+                }
+
+                updateAddButtonState()
+                updateWriteButtonState()
+            } catch (e: Exception) {
+                Log.e("RecipeLogFragment", "Error setting up RecyclerViews", e)
+            }
+        }
     }
 
     // 추가 버튼 설정
     private fun setupAddButtons() {
         recipeBinding.btnIngredientsAdd.setOnClickListener {
             ingredientList.add(FlavoringItem("", "", ""))
-            ingredientsAdapter.notifyItemInserted(ingredientList.size - 1)
-            Log.d("ingredientList", "itemList: ${ingredientList.map { it.hashCode() }}")
-            Log.d("ingredientList", "ingredientList size: ${ingredientList.size}")
-            updateAddButtonState()
+
+            // 안전한 어댑터 갱신
+            view?.post {
+                try {
+                    ingredientsAdapter.notifyItemInserted(ingredientList.size - 1)
+                    recipeBinding.frameEnterIngredients.requestLayout()
+                    updateAddButtonState()
+                } catch (e: Exception) {
+                    Log.e("RecipeLogFragment", "Error adding ingredient", e)
+                    // 실패 시 전체 갱신
+                    ingredientsAdapter.notifyDataSetChanged()
+                }
+            }
         }
+
         recipeBinding.btnSeasoningAdd.setOnClickListener {
             seasoningList.add(FlavoringItem("", "", ""))
-            seasoningAdapter.notifyItemInserted(seasoningList.size - 1)
-            updateAddButtonState()
+
+            view?.post {
+                try {
+                    seasoningAdapter.notifyItemInserted(seasoningList.size - 1)
+                    recipeBinding.frameEnterSeasoning.requestLayout()
+                    updateAddButtonState()
+                } catch (e: Exception) {
+                    Log.e("RecipeLogFragment", "Error adding seasoning", e)
+                    seasoningAdapter.notifyDataSetChanged()
+                }
+            }
         }
+
         recipeBinding.btnRecipeStepAdd.setOnClickListener {
             steps.add(RecipeStepData("android.resource://${requireContext().packageName}/${R.drawable.img_blank}", ""))
-            stepAdapter.notifyItemInserted(steps.size - 1) // 변경!
-            updateAddButtonState()
-        }
-        recipeBinding.frameEnterIngredients.post {
-            recipeBinding.frameEnterIngredients.requestLayout()
-        }
 
-        recipeBinding.frameEnterSeasoning.post {
-            recipeBinding.frameEnterSeasoning.requestLayout()
-        }
-
-        recipeBinding.frameEnterRecipeStep.post {
-            recipeBinding.frameEnterRecipeStep.requestLayout()
+            view?.post {
+                try {
+                    stepAdapter.notifyItemInserted(steps.size - 1)
+                    recipeBinding.frameEnterRecipeStep.requestLayout()
+                    updateAddButtonState()
+                } catch (e: Exception) {
+                    Log.e("RecipeLogFragment", "Error adding step", e)
+                    stepAdapter.notifyDataSetChanged()
+                }
+            }
         }
 
         updateWriteButtonState()
@@ -655,25 +732,95 @@ class RecipeLogFragment : Fragment() {
 
 
     // 식재료 없애기
-    private fun removeFlavoringItem(list: MutableList<FlavoringItem>, position: Int, adapter: FlavoringLogAdapter, recyclerView: RecyclerView) {
-        if (list.size > 1) {
-            list.removeAt(position)
-            adapter.notifyDataSetChanged()
+    private fun removeFlavoringItem(
+        list: MutableList<FlavoringItem>,
+        position: Int,
+        adapter: FlavoringLogAdapter,
+        recyclerView: ViewGroup
+    ) {
+        // isBindingData가 true일 때는 데이터를 바인딩 중이므로 삭제 로직을 실행하지 않음
+        if (isBindingData) {
+            Log.d("RemoveItem", "Data binding in progress, skipping removeFlavoringItem.")
+            return
+        }
+
+        // 유효한 인덱스인지 확인
+        if (position < 0 || position >= list.size) {
+            Log.e("RemoveItem", "Invalid position for removeFlavoringItem: $position, list size: ${list.size}")
+            return
+        }
+
+        // 최소 1개 항목은 유지 (빈 항목이라도)
+        if (list.size <= 1) {
+            // 마지막 항목을 빈 항목으로 초기화
+            list[0] = FlavoringItem("", "", "")
+            adapter.notifyItemChanged(0)
+            Log.d("RemoveItem", "Reset last item to empty instead of removing")
             updateAddButtonState()
-            updateWriteButtonState()
-        } else
-            Toast.makeText(requireContext(), "최소 하나의 항목은 필요합니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // 항목 삭제
+        list.removeAt(position)
+
+        // RecyclerView 상태를 안전하게 갱신
+        recyclerView.post {
+            try {
+                // 전체 데이터셋 갱신으로 변경 (더 안전함)
+                adapter.notifyDataSetChanged()
+                recyclerView.requestLayout()
+            } catch (e: Exception) {
+                Log.e("RemoveItem", "Error updating RecyclerView", e)
+            }
+        }
+
+        updateAddButtonState()
+        updateWriteButtonState()
     }
 
+    // 2. removeStepItem 함수 수정
     private fun removeStepItem(position: Int) {
-        if (steps.size > 1) {
-            steps.removeAt(position)
-            stepAdapter.notifyDataSetChanged()
+        // isBindingData가 true일 때는 데이터를 바인딩 중이므로 삭제 로직을 실행하지 않음
+        if (isBindingData) {
+            Log.d("RemoveItem", "Data binding in progress, skipping removeStepItem.")
+            return
+        }
+
+        // 유효한 인덱스인지 확인
+        if (position < 0 || position >= steps.size) {
+            Log.e("RemoveItem", "Invalid position for removeStepItem: $position, list size: ${steps.size}")
+            return
+        }
+
+        // 최소 1개 항목은 유지 (빈 항목이라도)
+        if (steps.size <= 1) {
+            // 마지막 항목을 빈 항목으로 초기화
+            steps[0] = RecipeStepData("android.resource://${requireContext().packageName}/${R.drawable.img_blank}", "")
+            stepAdapter.notifyItemChanged(0)
+            Log.d("RemoveItem", "Reset last step to empty instead of removing")
             updateAddButtonState()
-            updateWriteButtonState()
-        } else
-            Toast.makeText(requireContext(), "최소 하나의 항목은 필요합니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // 항목 삭제
+        steps.removeAt(position)
+
+        // RecyclerView 상태를 안전하게 갱신
+        recipeBinding.frameEnterRecipeStep.post {
+            try {
+                // 전체 데이터셋 갱신으로 변경 (더 안전함)
+                stepAdapter.notifyDataSetChanged()
+                recipeBinding.frameEnterRecipeStep.requestLayout()
+            } catch (e: Exception) {
+                Log.e("RemoveItem", "Error updating RecyclerView", e)
+            }
+        }
+
+        updateAddButtonState()
+        updateWriteButtonState()
     }
+
+
 
     private fun showSelectImgDialog(position: Int) {
         if (!isAdded) {
@@ -710,9 +857,14 @@ class RecipeLogFragment : Fragment() {
     }
 
     private fun updateAddButtonState() {
-        val isIngredientsValid = ingredientList.all { it.name.isNotBlank() && it.unit.isNotBlank() }
-        val isSeasoningValid = seasoningList.all { it.name.isNotBlank() && it.unit.isNotBlank() }
-        val isStepsValid = steps.all { it.stepDescription.isNotBlank() && it.stepImg.isNotBlank() }
+        // 어댑터가 초기화되지 않았다면 기본값으로 처리
+        val isIngredientsValid = if (ingredientList.isEmpty()) false
+        else ingredientList.all { it.name.isNotBlank() && it.unit.isNotBlank() }
+        val isSeasoningValid = if (seasoningList.isEmpty()) false
+        else seasoningList.all { it.name.isNotBlank() && it.unit.isNotBlank() }
+        val isStepsValid = if (steps.isEmpty()) false
+        else steps.all { it.stepDescription.isNotBlank() }
+
         setAddButtonState(recipeBinding.btnIngredientsAdd, isIngredientsValid)
         setAddButtonState(recipeBinding.btnSeasoningAdd, isSeasoningValid)
         setAddButtonState(recipeBinding.btnRecipeStepAdd, isStepsValid)
@@ -760,9 +912,10 @@ class RecipeLogFragment : Fragment() {
         )
     }
 
-    // 레시피 데이터를 UI에 설정하는 함수
     private fun setRecipeDataToUI(recipeData: RecipeData) {
-        // 저장된 데이터 값을 넣기
+        Log.d("RecipeLogFragment", "Setting recipe data to UI")
+
+        // 기본 데이터 설정
         recipeTitle = recipeData.title
         thumbnail = recipeData.imageUrl
         recipeDescription = recipeData.description
@@ -774,117 +927,153 @@ class RecipeLogFragment : Fragment() {
         tips = recipeData.tips!!
         timeHours = recipeData.timeHours
         timeMinutes = recipeData.timeMinutes
+        allergies = recipeData.allergies?.toMutableList() ?: mutableListOf()
 
+        // 기타 데이터
         authorFollowByCurrentUser = recipeData.authorFollowByCurrentUser
         likedByCurrentUser = recipeData.likedByCurrentUser
         scrappedByCurrentUser = recipeData.scrappedByCurrentUser
         likes = recipeData.likes
         createdAt = recipeData.createdAt
 
+        // 데이터 바인딩 시작
         isBindingData = true
 
-        // 텍스트 필드
-        recipeBinding.enterRecipeTitle.setText(recipeTitle)
-        recipeBinding.enterRecipeDescription.setText(recipeDescription)
-        recipeBinding.enterTipCaution.setText(tips)
+        // UI 업데이트를 post로 지연 실행하여 안전하게 처리
+        view?.post {
+            try {
+                // 어댑터가 초기화되었는지 확인
+                if (!::ingredientsAdapter.isInitialized ||
+                    !::seasoningAdapter.isInitialized ||
+                    !::stepAdapter.isInitialized) {
+                    Log.d("RecipeLogFragment", "Adapters not initialized, re-setting up RecyclerViews")
+                    setupRecyclerViews()
+                }
 
-        // 썸네일 이미지
-        thumbnail = recipeData.imageUrl
-        setImgview(thumbnail)
+                // 텍스트 필드 업데이트
+                recipeBinding.enterRecipeTitle.setText(recipeTitle)
+                recipeBinding.enterRecipeDescription.setText(recipeDescription)
+                recipeBinding.enterTipCaution.setText(tips)
 
-        // 카테고리 스피너
-        setSpinnerSelection(recipeBinding.selectLowAging, categorySlowAging)
-        setSpinnerSelection(recipeBinding.selectType, categoryType)
+                // 썸네일 이미지 업데이트
+                setImgview(thumbnail)
 
-        // 시간(시, 분) 스피너
-        setSpinnerSelection(recipeBinding.selectHour, recipeData.timeHours.toString())
-        setSpinnerSelection(recipeBinding.selectMin, "%02d".format(recipeData.timeMinutes))
+                // 스피너 업데이트
+                setSpinnerSelection(recipeBinding.selectLowAging, categorySlowAging)
+                setSpinnerSelection(recipeBinding.selectType, categoryType)
+                setSpinnerSelection(recipeBinding.selectHour, if (timeHours == 0) "시" else if (timeHours >= 12) "12시간 이상" else timeHours.toString())
+                setSpinnerSelection(recipeBinding.selectMin, if (timeMinutes == 0) "분" else timeMinutes.toString())
 
-        // 식재료 태그 칩
+        /*// 식재료 태그 칩
         Log.d("RecipeLogFragment", ingredientTags.toString())
         ingredientTags.clear()
         ingredientTags.addAll(recipeData.ingredientTagIds!!.toMutableList())
-        setIngredientChips(ingredientTags)
+        setIngredientChips(ingredientTags)*/
+                // 알러지 칩 설정
+                setAllergyChipsFromData(allergies)
 
-        // 알러지 칩: 존재하면 칩 누르기, 존재하지 않으면 해당 없음에 클릭
-        Log.d("RecipeLogFragment", allergies.toString())
-        if (recipeData.allergies != null) {
-            allergies.addAll(recipeData.allergies!!)
+                // 난이도 칩 설정
+                setDifficultyChipFromData(difficulty)
+
+                // 리스트 데이터 업데이트
+                updateListData(recipeData)
+
+                // 어댑터 갱신
+                updateAdapters()
+
+                Log.d("RecipeLogFragment", "Recipe data UI update completed")
+            } catch (e: Exception) {
+                Log.e("RecipeLogFragment", "Error updating UI", e)
+            } finally {
+                // 데이터 바인딩 종료
+                isBindingData = false
+            }
         }
-        setupAllergyChips(allergies)
+    }
 
-        // 난이도 칩
-        setDifficultyChipFromData(recipeData.difficulty)
-
-        // 재료, 양념, 요리 순서 리스트 초기화
-        Log.d("RecipeLogFragment", "요리 순서 데이터: $steps")
-
+    private fun updateListData(recipeData: RecipeData) {
+        // 식재료 리스트 업데이트
         ingredientList.clear()
         ingredientList.addAll(recipeData.ingredients!!.map { (name, value, unit) ->
-            FlavoringItem(name = name, value = value, unit = unit)}.toMutableList())
+            FlavoringItem(name = name, value = value, unit = unit)
+        })
+        if (ingredientList.isEmpty()) {
+            ingredientList.add(FlavoringItem("", "", ""))
+        }
 
+        // 조미료 리스트 업데이트
         seasoningList.clear()
         seasoningList.addAll(recipeData.seasonings!!.map { (name, value, unit) ->
-            FlavoringItem(name = name, value = value, unit = unit)}.toMutableList())
+            FlavoringItem(name = name, value = value, unit = unit)
+        })
+        if (seasoningList.isEmpty()) {
+            seasoningList.add(FlavoringItem("", "", ""))
+        }
 
+        // 단계 리스트 업데이트
         steps.clear()
         steps.addAll(recipeData.stepImageUrls.zip(recipeData.stepDescriptions) { img, desc ->
-            RecipeStepData(stepImg = img, stepDescription = desc)}.toMutableList())
-
-        // 어댑터에 데이터를 전달 (재생성 또는 리스트 교체)
-        ingredientsAdapter = FlavoringLogAdapter(ingredientList,
-            { removeFlavoringItem(ingredientList, it, ingredientsAdapter, recipeBinding.frameEnterIngredients) },
-            { updateAddButtonState() }
-        )
-        ingredientsAdapter.notifyDataSetChanged()
-
-        seasoningAdapter = FlavoringLogAdapter(seasoningList,
-            { removeFlavoringItem(seasoningList, it, seasoningAdapter, recipeBinding.frameEnterSeasoning) },
-            { updateAddButtonState() }
-        )
-        seasoningAdapter.notifyDataSetChanged()
-
-        stepAdapter = RecipeStepLogAdapter(steps,
-            { removeStepItem(it) }, { showSelectImgDialog(it) }, { updateAddButtonState() }
-        )
-        stepAdapter.notifyDataSetChanged()
-
-        setupRecyclerView(recipeBinding.frameEnterIngredients, ingredientsAdapter)
-        setupRecyclerView(recipeBinding.frameEnterSeasoning, seasoningAdapter)
-        setupRecyclerView(recipeBinding.frameEnterRecipeStep, stepAdapter)
-
-        recipeBinding.btnIngredientsAdd.setOnClickListener {
-            ingredientList.add(FlavoringItem("", "", ""))
-            ingredientsAdapter.notifyItemInserted(ingredientList.size - 1)
-            Log.d("ingredientList", "itemList: ${ingredientList.map { it.hashCode() }}")
-            Log.d("ingredientList", "ingredientList size: ${ingredientList.size}")
-            updateAddButtonState()
-        }
-        recipeBinding.btnSeasoningAdd.setOnClickListener {
-            seasoningList.add(FlavoringItem("", "", ""))
-            seasoningAdapter.notifyItemInserted(seasoningList.size - 1)
-            updateAddButtonState()
-        }
-        recipeBinding.btnRecipeStepAdd.setOnClickListener {
+            RecipeStepData(stepImg = img, stepDescription = desc)
+        })
+        if (steps.isEmpty()) {
             steps.add(RecipeStepData("android.resource://${requireContext().packageName}/${R.drawable.img_blank}", ""))
-            stepAdapter.notifyItemInserted(steps.size - 1) // 변경!
-            updateAddButtonState()
         }
-
-        recipeBinding.frameEnterIngredients.post {
-            recipeBinding.frameEnterIngredients.requestLayout()
-        }
-        recipeBinding.frameEnterSeasoning.post {
-            recipeBinding.frameEnterSeasoning.requestLayout()
-        }
-        recipeBinding.frameEnterRecipeStep.post {
-            recipeBinding.frameEnterRecipeStep.requestLayout()
-        }
-        updateAddButtonState()
-        updateWriteButtonState()
-
-        isBindingData = false
     }
+
+    private fun updateAdapters() {
+        try {
+            if (::ingredientsAdapter.isInitialized) {
+                ingredientsAdapter.notifyDataSetChanged()
+            }
+            if (::seasoningAdapter.isInitialized) {
+                seasoningAdapter.notifyDataSetChanged()
+            }
+            if (::stepAdapter.isInitialized) {
+                stepAdapter.notifyDataSetChanged()
+            }
+
+            // 레이아웃 갱신 요청
+            recipeBinding.frameEnterIngredients.requestLayout()
+            recipeBinding.frameEnterSeasoning.requestLayout()
+            recipeBinding.frameEnterRecipeStep.requestLayout()
+
+            // 버튼 상태 업데이트
+            updateAddButtonState()
+            updateWriteButtonState()
+        } catch (e: Exception) {
+            Log.e("RecipeLogFragment", "Error updating adapters", e)
+        }
+    }
+
+    private fun setAllergyChipsFromData(allergiesData: List<String>) {
+        val allergyList = listOf(
+            recipeBinding.allergyEgg, recipeBinding.allergyMilk, recipeBinding.allergyBuckwheat,
+            recipeBinding.allergyPeanut, recipeBinding.allergySoybean, recipeBinding.allergyWheat,
+            recipeBinding.allergyMackerel, recipeBinding.allergyCrab, recipeBinding.allergyShrimp,
+            recipeBinding.allergyPig, recipeBinding.allergyPeach, recipeBinding.allergyTomato,
+            recipeBinding.allergyDioxide, recipeBinding.allergyWalnut, recipeBinding.allergyChicken,
+            recipeBinding.allergyCow, recipeBinding.allergySquid, recipeBinding.allergySeashell,
+            recipeBinding.allergyOyster, recipeBinding.allergyPinenut
+        )
+        val chipNone = recipeBinding.nA
+
+        // 모든 칩 초기화
+        allergyList.forEach { it.isChecked = false }
+        chipNone.isChecked = false
+
+        // 데이터에 따라 칩 설정
+        if (allergiesData.isEmpty() || allergiesData.contains("해당없음") || allergiesData.contains("N/A")) {
+            chipNone.isChecked = true
+        } else {
+            allergyList.forEach { chip ->
+                if (allergiesData.contains(chip.text.toString())) {
+                    chip.isChecked = true
+                }
+            }
+        }
+    }
+
+
 
     // 스피너 카테고리 설정
     private fun setSpinnerSelection(spinner: android.widget.Spinner, value: String?) {
@@ -898,81 +1087,6 @@ class RecipeLogFragment : Fragment() {
         }
     }
 
-    // 식재료 태그
-    private fun setIngredientChips(ingredientTags: List<Int>?) {
-        if (ingredientTags.isNullOrEmpty()) return
-
-        // DB 태그 ID로 직접 비교
-        recipeBinding.tagsIngredient.children.forEach { view ->
-            if (view is Chip) {
-                val tagId = chipMap[view.id] // chipMap: chipId -> tagId
-                if (tagId in ingredientTags) {
-                    view.isChecked = true
-                }
-            }
-        }
-    }
-
-    // 알러지 태그 설정
-    private fun setupAllergyChips(allergies: MutableList<String>) {
-        val allergyList = listOf(
-            recipeBinding.allergyEgg, recipeBinding.allergyMilk, recipeBinding.allergyBuckwheat,
-            recipeBinding.allergyPeanut, recipeBinding.allergySoybean, recipeBinding.allergyWheat,
-            recipeBinding.allergyMackerel, recipeBinding.allergyCrab, recipeBinding.allergyShrimp,
-            recipeBinding.allergyPig, recipeBinding.allergyPeach, recipeBinding.allergyTomato,
-            recipeBinding.allergyDioxide, recipeBinding.allergyWalnut, recipeBinding.allergyChicken,
-            recipeBinding.allergyCow, recipeBinding.allergySquid, recipeBinding.allergySeashell,
-            recipeBinding.allergyOyster, recipeBinding.allergyPinenut
-        )
-        val chipNone = recipeBinding.nA // '해당 없음' 칩
-
-        // 1. 기존 선택 상태 복원
-        allergyList.forEach { chip ->
-            chip.isChecked = allergies.contains(chip.text.toString())
-        }
-        chipNone.isChecked = allergies.contains(chipNone.text.toString())
-
-        // null이거나 empty이거나, chipNone.text가 들어있으면 chipNone을 체크
-        if (allergies.isEmpty() || allergies.contains(chipNone.text.toString())) {
-            chipNone.isChecked = true
-        } else {
-            chipNone.isChecked = false
-        }
-
-        // 2. 체크 변경 리스너 설정
-        allergyList.forEach { chip ->
-            chip.setOnCheckedChangeListener { button, isChecked ->
-                if (isChecked) {
-                    // 최대 5개 제한
-                    if (allergies.size >= 5) {
-                        button.isChecked = false // 선택 취소
-                        Toast.makeText(button.context, "알레르기는 최대 5개까지 선택 가능합니다.", Toast.LENGTH_SHORT).show()
-                        return@setOnCheckedChangeListener
-                    }
-
-                    chipNone.isChecked = false
-                    allergies.remove(chipNone.text.toString())
-
-                    if (!allergies.contains(chip.text.toString())) {
-                        allergies.add(chip.text.toString())
-                    }
-                } else {
-                    allergies.remove(chip.text.toString())
-                }
-            }
-        }
-
-        chipNone.setOnCheckedChangeListener { button, isChecked ->
-            if (isChecked) {
-                allergyList.forEach { it.isChecked = false }
-                allergies.clear()
-                allergies.add(chipNone.text.toString())
-            } else {
-                allergies.remove(chipNone.text.toString())
-            }
-        }
-    }
-
     // RecipeData의 difficulty 값을 받아서 난이도 칩 초기 선택 상태 설정
     private fun setDifficultyChipFromData(difficultyValue: String) {
         val difficultyList = listOf(recipeBinding.levelEasy, recipeBinding.levelNormal, recipeBinding.levelHard)
@@ -982,38 +1096,7 @@ class RecipeLogFragment : Fragment() {
         updateWriteButtonState()
     }
 
-    private fun showInitialIngredientChips(
-        ingredientTags: List<Int>,
-        ingredientMap: Map<Int, IngredientData>,
-        chipGroup: ChipGroup,
-        findIngredientChip: Chip
-    ) {
-        // 기존 Chip 모두 제거 (findIngredientChip만 남기기)
-        chipGroup.removeAllViews()
-        chipGroup.addView(findIngredientChip)
 
-        ingredientTags.forEach { ingredientId ->
-            val ingredientName = ingredientMap[ingredientId]?.name ?: "알 수 없음"
-            val chip = Chip(ContextThemeWrapper(chipGroup.context, R.style.ChipStyle_Short)).apply {
-                text = ingredientName
-                isClickable = true
-                isCheckable = false
-                chipBackgroundColor = ColorStateList.valueOf(
-                    ContextCompat.getColor(context, R.color.elixir_orange)
-                )
-                setTextColor(ContextCompat.getColor(context, R.color.white))
-                // 칩 삭제 리스너
-                setOnCloseIconClickListener {
-                    (ingredientTags as? MutableList)?.remove(ingredientId)
-                    chipGroup.removeView(this)
-                    updateWriteButtonState()
-                }
-            }
-            // findIngredientChip 앞에 삽입
-            val index = chipGroup.indexOfChild(findIngredientChip)
-            chipGroup.addView(chip, index)
-        }
-    }
 
     // Photo Picker URI를 내부 캐시에 복사
     private fun copyUriToInternal(context: Context, uri: Uri): Uri? {

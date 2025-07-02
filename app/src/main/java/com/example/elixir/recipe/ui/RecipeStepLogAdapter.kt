@@ -20,17 +20,28 @@ class RecipeStepLogAdapter(
         private var textWatcher: android.text.TextWatcher? = null
 
         fun bind(step: RecipeStepData, position: Int) = with(binding) {
-            // 삭제
-            btnDel.setOnClickListener { onDeleteClick(position) }
+            // 삭제 버튼 클릭 리스너
+            btnDel.setOnClickListener {
+                val currentPosition = adapterPosition
+                if (currentPosition != RecyclerView.NO_POSITION) {
+                    onDeleteClick(currentPosition) // adapterPosition 사용
+                }
+            }
 
-            // 이미지 클릭
-            stepImg.setOnClickListener { onImageClick(position) }
+            // 이미지 클릭 리스너
+            stepImg.setOnClickListener {
+                val currentPosition = adapterPosition
+                if (currentPosition != RecyclerView.NO_POSITION) {
+                    onImageClick(currentPosition) // adapterPosition 사용
+                }
+            }
             Glide.with(stepImg.context)
                 .load(step.stepImg)
                 .placeholder(R.drawable.img_blank)
                 .error(R.drawable.img_blank)
                 .into(stepImg)
 
+            // 텍스트 변경 리스너 (기존 로직 유지)
             textWatcher?.let { stepDescription.removeTextChangedListener(it) }
             stepDescription.setText(step.stepDescription)
             textWatcher = object : android.text.TextWatcher {

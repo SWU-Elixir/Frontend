@@ -17,23 +17,23 @@ class IngredientSearchListAdapter(
         RecyclerView.ViewHolder(binding.root) {
         
         fun bind(item: IngredientData) {
-            binding.search.text = item.name
+            binding.tvSearch.text = item.name
 
 
             // 태그 설정
             when(item.type) {
                 "초가공식품" -> {
-                    binding.tag.visibility = View.VISIBLE
-                    binding.tag.text = "⚠ 초가공식품"
+                    binding.tvSearchTag.visibility = View.VISIBLE
+                    binding.tvSearchTag.text = "⚠ 초가공식품"
                 }
                 "챌린지" -> {
-                    binding.tag.visibility = View.VISIBLE
-                    binding.tag.setBackgroundResource(R.drawable.bg_rect_outline_orange_5)
-                    binding.tag.setTextColor(binding.root.context.getColor(R.color.elixir_orange))
-                    binding.tag.text = "🎉 챌린지"
+                    binding.tvSearchTag.visibility = View.VISIBLE
+                    binding.tvSearchTag.setBackgroundResource(R.drawable.bg_rect_outline_orange_5)
+                    binding.tvSearchTag.setTextColor(binding.root.context.getColor(R.color.elixir_orange))
+                    binding.tvSearchTag.text = "🎉 챌린지"
                 }
                 else -> {
-                    binding.tag.visibility = View.GONE
+                    binding.tvSearchTag.visibility = View.GONE
                 }
             }
 

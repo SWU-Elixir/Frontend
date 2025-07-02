@@ -1,4 +1,4 @@
-package com.example.elixir.member
+package com.example.elixir.member.ui
 
 import android.content.Intent
 import android.util.Log
@@ -14,12 +14,13 @@ import com.example.elixir.HomeActivity
 import com.example.elixir.databinding.ItemMypageFollowListBinding
 import com.example.elixir.R
 import com.example.elixir.ToolbarActivity
+import com.example.elixir.member.data.FollowItem
 import kotlinx.coroutines.launch
 
 class FollowListAdapter(
     val items: List<FollowItem>,
     private val myId: Int,
-    private val onFollowChanged: (() -> Unit)? = null ,
+    private val onFollowChanged: (() -> Unit)? = null,
     private val onItemClick: ((FollowItem) -> Unit)? = null,
 ) : RecyclerView.Adapter<FollowListAdapter.FollowViewHolder>() {
     companion object {
@@ -43,33 +44,33 @@ class FollowListAdapter(
             .placeholder(R.drawable.ic_profile) // 기본 이미지
             .error(R.drawable.ic_profile)       // 에러 시 이미지
             .circleCrop()                       // 동그란 프로필 이미지
-            .into(holder.binding.profileImage)
+            .into(holder.binding.imgProfile)
 
         // 타이틀 설정 (null이면 숨김)
         if (item.memberTitle.isNullOrEmpty() || item.memberTitle == "칭호 없음") {
-            holder.binding.memberTitle.visibility = View.GONE
+            holder.binding.tvMember.visibility = View.GONE
         } else {
-            holder.binding.memberTitle.visibility = View.VISIBLE
-            holder.binding.memberTitle.text = item.memberTitle
+            holder.binding.tvMember.visibility = View.VISIBLE
+            holder.binding.tvMember.text = item.memberTitle
         }
         
         // 닉네임 설정
-        holder.binding.memberNickname.text = item.memberNickname
+        holder.binding.tvNickname.text = item.memberNickname
 
         // 버튼 상태 초기화
         if (item.isFollowing) {
-            holder.binding.followButton.text = context.getString(R.string.following)
-            holder.binding.followButton.setBackgroundResource(R.drawable.bg_rect_outline_gray)
-            holder.binding.followButton.setTextColor(context.getColor(R.color.black))
+            holder.binding.btnFollow.text = context.getString(R.string.following)
+            holder.binding.btnFollow.setBackgroundResource(R.drawable.bg_rect_outline_gray)
+            holder.binding.btnFollow.setTextColor(context.getColor(R.color.black))
         } else {
-            holder.binding.followButton.text = context.getString(R.string.follow)
-            holder.binding.followButton.setBackgroundResource(R.drawable.bg_rect_filled_orange)
-            holder.binding.followButton.setTextColor(context.getColor(R.color.white))
+            holder.binding.btnFollow.text = context.getString(R.string.follow)
+            holder.binding.btnFollow.setBackgroundResource(R.drawable.bg_rect_filled_orange)
+            holder.binding.btnFollow.setTextColor(context.getColor(R.color.white))
         }
 
         // 팔로우 버튼 클릭 이벤트
-        holder.binding.followButton.setOnClickListener {
-            val isFollowing = holder.binding.followButton.text == context.getString(R.string.following)
+        holder.binding.btnFollow.setOnClickListener {
+            val isFollowing = holder.binding.btnFollow.text == context.getString(R.string.following)
             val targetMemberId = items[position].targetMemberId
 
             Log.d("FollowListAdapter", "targetMemberId: $targetMemberId") // 로그 추가
@@ -96,9 +97,9 @@ class FollowListAdapter(
 
         // 내 아이디면 팔로우 버튼 숨김
         if (item.targetMemberId == myId) {
-            holder.binding.followButton.visibility = View.GONE
+            holder.binding.btnFollow.visibility = View.GONE
         } else {
-            holder.binding.followButton.visibility = View.VISIBLE
+            holder.binding.btnFollow.visibility = View.VISIBLE
         }
 
         // 전체 아이템 클릭 이벤트 통합

@@ -1,6 +1,4 @@
-package com.example.elixir.login
-
-import com.google.gson.annotations.SerializedName
+package com.example.elixir.login.data
 
 // 임의적인 성공 여부 메세지
 data class LoginResponse(

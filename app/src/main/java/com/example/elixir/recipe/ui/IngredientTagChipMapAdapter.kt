@@ -33,7 +33,7 @@ class IngredientTagChipMapAdapter(
     override fun onBindViewHolder(holder: TagViewHolder, position: Int) {
         // 미리 계산된 재료 이름 목록에서 직접 가져와 설정합니다.
         // 이로써 onBindViewHolder 호출 시마다 Map 조회를 피할 수 있습니다.
-        holder.binding.indeterminateName.text = displayIngredientNames[position]
+        holder.binding.tvIndeterminateName.text = displayIngredientNames[position]
 
         // 디버깅 로그는 필요한 경우에만 활성화하세요.
         Log.d("IngredientChip", "Displaying ingredient: ${displayIngredientNames[position]}")

@@ -3,7 +3,6 @@ package com.example.elixir.calendar.network
 import com.example.elixir.calendar.network.response.GetMealResponse
 import com.example.elixir.calendar.network.response.GetMealListResponse
 import com.example.elixir.calendar.network.response.GetScoreResponse
-import com.example.elixir.chatbot.DietLogListResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response

@@ -17,7 +17,13 @@ class RecipeListSpinnerAdapter(
 ) : ArrayAdapter<String>(context, R.layout.item_recipe_category_spinner, items) {
 
     private val inflater = LayoutInflater.from(context)
-    private var selectedPosition: Int = -1 // 선택된 포지션 추적
+    private var selectedPosition: Int = 0 // 기본값을 0으로 설정
+
+    // 선택된 포지션을 설정하는 메서드 추가
+    fun setSelectedPosition(position: Int) {
+        selectedPosition = position
+        notifyDataSetChanged() // 뷰 업데이트
+    }
 
     override fun isEnabled(position: Int): Boolean {
         return true
@@ -25,11 +31,11 @@ class RecipeListSpinnerAdapter(
 
     override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
         val binding = ItemRecipeCategorySpinnerDropdownBinding.inflate(inflater, parent, false)
-        binding.spinnerItemText.text = items[position]
+        binding.tvSpinnerItem.text = items[position]
 
         // 선택된 항목이면 주황색, 아니면 검정
         val colorRes = if (position == selectedPosition && position != 0) R.color.elixir_orange else R.color.black
-        binding.spinnerItemText.setTextColor(ContextCompat.getColor(context, colorRes))
+        binding.tvSpinnerItem.setTextColor(ContextCompat.getColor(context, colorRes))
 
         return binding.root
     }
@@ -37,11 +43,14 @@ class RecipeListSpinnerAdapter(
     @SuppressLint("MissingInflatedId")
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val binding = ItemRecipeCategorySpinnerBinding.inflate(inflater, parent, false)
-        binding.spinnerText.text = items[position]
+        binding.tvSpinner.text = items[position]
+
+        // 스피너 배경의 선택 상태 설정
+        binding.root.isSelected = (position == selectedPosition && position != 0)
 
         // 선택된 항목은 오렌지, 기본은 검정
         val colorRes = if (position == 0) R.color.black else R.color.elixir_orange
-        binding.spinnerText.setTextColor(ContextCompat.getColor(context, colorRes))
+        binding.tvSpinner.setTextColor(ContextCompat.getColor(context, colorRes))
 
         return binding.root
     }

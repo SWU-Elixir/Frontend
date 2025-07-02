@@ -1,4 +1,4 @@
-package com.example.elixir.chatbot
+package com.example.elixir.chatbot.ui
 
 import android.graphics.PorterDuff
 import android.os.Bundle
@@ -10,6 +10,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.elixir.R
 import com.example.elixir.RetrofitClient
 import com.example.elixir.ToolbarActivity
+import com.example.elixir.chatbot.data.ChatItem
+import com.example.elixir.chatbot.data.ChatMeal
+import com.example.elixir.chatbot.data.ChatRecipe
+import com.example.elixir.chatbot.data.ChatRequestDto
+import com.example.elixir.chatbot.network.ChatGptService
 import com.example.elixir.databinding.ActivityChatbotBinding
 import com.example.elixir.ingredient.data.IngredientData
 import kotlinx.coroutines.launch
@@ -28,7 +33,7 @@ class ChatBotActivity : ToolbarActivity() {
         chatGptService = ChatGptService()
 
         // 툴바 UI 구성
-        toolBinding.title.text = "챗봇"
+        toolBinding.tvTitle.text = "챗봇"
         toolBinding.btnMore.visibility = View.VISIBLE
         toolBinding.btnMore.setImageResource(R.drawable.ic_chatbot_reload)
         toolBinding.btnMore.setColorFilter(ContextCompat.getColor(this, R.color.elixir_orange), PorterDuff.Mode.SRC_IN)
@@ -79,7 +84,7 @@ class ChatBotActivity : ToolbarActivity() {
                         chatList.add(ChatItem.TextMessage(loadingMessage, isFromUser = false))
                         val loadingPosition = chatList.size - 1
                         chatAdapter.notifyItemInserted(loadingPosition)
-                        binding.chatRecyclerView.scrollToPosition(loadingPosition)
+                        binding.rvChatList.scrollToPosition(loadingPosition)
 
                         // API 요청
                         lifecycleScope.launch {
@@ -91,18 +96,19 @@ class ChatBotActivity : ToolbarActivity() {
                                 // 실제 응답 추가
                                 chatList.add(ChatItem.TextMessage(responseDto.message, isFromUser = false))
                                 chatAdapter.notifyItemInserted(chatList.size - 1)
-                                binding.chatRecyclerView.scrollToPosition(chatList.size - 1)
+                                binding.rvChatList.scrollToPosition(chatList.size - 1)
                             } catch (e: Exception) {
                                 // 로딩 메시지 제거
                                 chatList.removeAt(loadingPosition)
                                 chatAdapter.notifyItemRemoved(loadingPosition)
                                 // 에러 메시지 추가
-                                chatList.add(ChatItem.TextMessage(
+                                chatList.add(
+                                    ChatItem.TextMessage(
                                     "죄송합니다. 응답을 생성하는데 실패했습니다. 다시 시도해주세요.",
                                     isFromUser = false
                                 ))
                                 chatAdapter.notifyItemInserted(chatList.size - 1)
-                                binding.chatRecyclerView.scrollToPosition(chatList.size - 1)
+                                binding.rvChatList.scrollToPosition(chatList.size - 1)
                             }
                         }
                     }
@@ -118,7 +124,7 @@ class ChatBotActivity : ToolbarActivity() {
                         chatList.add(ChatItem.TextMessage(loadingMessage, isFromUser = false))
                         val loadingPosition = chatList.size - 1
                         chatAdapter.notifyItemInserted(loadingPosition)
-                        binding.chatRecyclerView.scrollToPosition(loadingPosition)
+                        binding.rvChatList.scrollToPosition(loadingPosition)
 
                         // API 요청
                         lifecycleScope.launch {
@@ -130,18 +136,19 @@ class ChatBotActivity : ToolbarActivity() {
                                 // 실제 응답 추가
                                 chatList.add(ChatItem.TextMessage(responseDto.message, isFromUser = false))
                                 chatAdapter.notifyItemInserted(chatList.size - 1)
-                                binding.chatRecyclerView.scrollToPosition(chatList.size - 1)
+                                binding.rvChatList.scrollToPosition(chatList.size - 1)
                             } catch (e: Exception) {
                                 // 로딩 메시지 제거
                                 chatList.removeAt(loadingPosition)
                                 chatAdapter.notifyItemRemoved(loadingPosition)
                                 // 에러 메시지 추가
-                                chatList.add(ChatItem.TextMessage(
+                                chatList.add(
+                                    ChatItem.TextMessage(
                                     "죄송합니다. 응답을 생성하는데 실패했습니다. 다시 시도해주세요.",
                                     isFromUser = false
                                 ))
                                 chatAdapter.notifyItemInserted(chatList.size - 1)
-                                binding.chatRecyclerView.scrollToPosition(chatList.size - 1)
+                                binding.rvChatList.scrollToPosition(chatList.size - 1)
                             }
                         }
                     }
@@ -149,16 +156,16 @@ class ChatBotActivity : ToolbarActivity() {
                 }
             }
         )
-        binding.chatRecyclerView.layoutManager = LinearLayoutManager(this)
-        binding.chatRecyclerView.adapter = chatAdapter
+        binding.rvChatList.layoutManager = LinearLayoutManager(this)
+        binding.rvChatList.adapter = chatAdapter
     }
 
     private fun setupListeners() {
-        binding.sendButton.setOnClickListener {
-            val message = binding.messageEditText.text.toString().trim()
+        binding.btnSend.setOnClickListener {
+            val message = binding.etMessage.text.toString().trim()
             if (message.isNotEmpty()) {
                 sendMessage(message)
-                binding.messageEditText.text.clear()
+                binding.etMessage.text.clear()
             }
         }
     }
@@ -184,7 +191,7 @@ class ChatBotActivity : ToolbarActivity() {
                         } ?: emptyList()
                         chatList.add(ChatItem.ChatMealList(meals, requestDto))
                         chatAdapter.notifyItemInserted(chatList.size - 1)
-                        binding.chatRecyclerView.scrollToPosition(chatList.size - 1)
+                        binding.rvChatList.scrollToPosition(chatList.size - 1)
                     } catch (e: Exception) {
                         addBotMessage("식단 목록을 가져오는데 실패했습니다. 다시 시도해주세요.")
                     }
@@ -207,7 +214,7 @@ class ChatBotActivity : ToolbarActivity() {
                         } ?: emptyList()
                         chatList.add(ChatItem.ChatRecipeList(recipes, requestDto))
                         chatAdapter.notifyItemInserted(chatList.size - 1)
-                        binding.chatRecyclerView.scrollToPosition(chatList.size - 1)
+                        binding.rvChatList.scrollToPosition(chatList.size - 1)
                     } catch (e: Exception) {
                         addBotMessage("레시피 목록을 가져오는데 실패했습니다. 다시 시도해주세요.")
                     }
@@ -218,7 +225,7 @@ class ChatBotActivity : ToolbarActivity() {
                 addBotMessage("추천 받을 기간을 선택해 주세요.\n\n최대 일주일 선택이 가능하며, 하루 세끼를 기준으로 추천됩니다.", requestDto)
                 chatList.add(ChatItem.ExampleList((1..7).map { "${it}일" }, requestDto))
                 chatAdapter.notifyItemInserted(chatList.size - 1)
-                binding.chatRecyclerView.scrollToPosition(chatList.size - 1)
+                binding.rvChatList.scrollToPosition(chatList.size - 1)
             }
             "자유롭게 대화하기" -> {
                 val requestDto = ChatRequestDto(type = ChatRequestDto.TYPE_FREETALK)
@@ -233,7 +240,7 @@ class ChatBotActivity : ToolbarActivity() {
                 addBotMessage("이번 달 챌린지 식재료를 포함해서 식단을 짜드릴까요?", requestDto)
                 chatList.add(ChatItem.ExampleList(listOf("사용함", "사용안함"), requestDto))
                 chatAdapter.notifyItemInserted(chatList.size - 1)
-                binding.chatRecyclerView.scrollToPosition(chatList.size - 1)
+                binding.rvChatList.scrollToPosition(chatList.size - 1)
             }
             in listOf("사용함","사용안함") -> {
                 // "사용함" 또는 "사용안함"이 클릭되었을 때
@@ -258,14 +265,14 @@ class ChatBotActivity : ToolbarActivity() {
         val insertPosition = chatList.size
         chatList.add(ChatItem.TextMessage(message, isFromUser = false, requestDto = requestDto))
         chatAdapter.notifyItemInserted(insertPosition)
-        binding.chatRecyclerView.scrollToPosition(chatList.size - 1)
+        binding.rvChatList.scrollToPosition(chatList.size - 1)
     }
 
     private fun sendMessage(message: String) {
         // 1. 사용자 메시지를 채팅 리스트에 추가
         chatList.add(ChatItem.TextMessage(message, isFromUser = true))
         chatAdapter.notifyItemInserted(chatList.size - 1)
-        binding.chatRecyclerView.scrollToPosition(chatList.size - 1)
+        binding.rvChatList.scrollToPosition(chatList.size - 1)
 
         // 2. 바로 이전 챗봇 메시지를 확인하여 연결된 DTO가 있는지 확인
         val lastBotMessage = chatList.findLast { it is ChatItem.TextMessage && !it.isFromUser } as? ChatItem.TextMessage
@@ -285,7 +292,7 @@ class ChatBotActivity : ToolbarActivity() {
         chatList.add(ChatItem.TextMessage(loadingMessage, isFromUser = false))
         val loadingPosition = chatList.size - 1
         chatAdapter.notifyItemInserted(loadingPosition)
-        binding.chatRecyclerView.scrollToPosition(loadingPosition)
+        binding.rvChatList.scrollToPosition(loadingPosition)
 
         // 5. 서버 API 호출
         lifecycleScope.launch {
@@ -297,18 +304,19 @@ class ChatBotActivity : ToolbarActivity() {
                 // 실제 응답 추가
                 chatList.add(ChatItem.TextMessage(responseDto.message, isFromUser = false))
                 chatAdapter.notifyItemInserted(chatList.size - 1)
-                binding.chatRecyclerView.scrollToPosition(chatList.size - 1)
+                binding.rvChatList.scrollToPosition(chatList.size - 1)
             } catch (e: Exception) {
                 // 로딩 메시지 제거
                 chatList.removeAt(loadingPosition)
                 chatAdapter.notifyItemRemoved(loadingPosition)
                 // 에러 메시지 추가
-                chatList.add(ChatItem.TextMessage(
+                chatList.add(
+                    ChatItem.TextMessage(
                     "죄송합니다. 응답을 생성하는데 실패했습니다. 다시 시도해주세요.",
                     isFromUser = false
                 ))
                 chatAdapter.notifyItemInserted(chatList.size - 1)
-                binding.chatRecyclerView.scrollToPosition(chatList.size - 1)
+                binding.rvChatList.scrollToPosition(chatList.size - 1)
             }
         }
     }
@@ -336,6 +344,5 @@ class ChatBotActivity : ToolbarActivity() {
     // 챗봇 초기화 (초기화 버튼 클릭 시)
     private fun resetChat() {
         showWelcomeMessage()
-        // 눌러졌던 버튼 초기화
     }
 }

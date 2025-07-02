@@ -3,11 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="@drawable/bg_rect_filled_orange_5"
-    android:paddingTop="3dp"
-    android:paddingBottom="3dp"
-    android:paddingStart="10dp"
-    android:paddingEnd="10dp"
+    android:background="@drawable/bg_rect_outline_gray_5"
+    android:paddingTop="6dp"
+    android:paddingBottom="6dp"
+    android:paddingStart="14dp"
+    android:paddingEnd="14dp"
     android:layout_marginEnd="5dp"
     android:layout_marginBottom="5dp">
 
@@ -16,8 +16,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/tag"
-        android:textSize="11sp"
-        android:textColor="@color/white"
+        android:textSize="13sp"
+        android:textColor="@color/black"
         android:fontFamily="@font/pretendard_medium"
         tools:ignore="MissingConstraints" />
 

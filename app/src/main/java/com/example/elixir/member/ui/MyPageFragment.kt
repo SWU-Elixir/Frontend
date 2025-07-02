@@ -1,4 +1,4 @@
-package com.example.elixir.member
+package com.example.elixir.member.ui
 
 import android.app.Activity
 import android.content.Intent
@@ -10,22 +10,27 @@ import android.view.*
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.example.elixir.R
-import com.example.elixir.RetrofitClient
 import com.example.elixir.ToolbarActivity
 import com.example.elixir.databinding.FragmentMypageBinding
 import com.example.elixir.dialog.LogoutDialog
-import com.example.elixir.member.data.MemberEntity
+import com.example.elixir.member.network.MemberRepository
+import com.example.elixir.member.viewmodel.MemberViewModel
+import com.example.elixir.member.viewmodel.MemberViewModelFactory
+import com.example.elixir.RetrofitClient
 import com.example.elixir.member.data.ProfileEntity
-import kotlinx.coroutines.launch
+import com.example.elixir.member.network.MemberDB
+
 
 class MyPageFragment : Fragment() {
 
     private var myPageBinding: FragmentMypageBinding? = null
     private val binding get() = myPageBinding!!
+
+    private lateinit var memberViewModel: MemberViewModel // ViewModel 인스턴스 선언
 
     private val spanCount = 3 // 한 줄에 3개
     private val spacing = 16 // dp → px로 변환 필요
@@ -33,7 +38,7 @@ class MyPageFragment : Fragment() {
     private var profileEditLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             // 프로필 수정 성공 시 프로필 정보 새로고침
-            loadMemberProfile()
+            memberViewModel.loadProfile() // ViewModel을 통해 프로필 정보 로드 요청
         }
     }
 
@@ -46,6 +51,14 @@ class MyPageFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         myPageBinding = FragmentMypageBinding.inflate(inflater, container, false)
+
+        // ViewModel 초기화 (Repository와 Dao 주입)
+        val memberDao = MemberDB.getInstance(requireContext()).memberDao()
+        val memberApi = RetrofitClient.instanceMemberApi
+        val repository = MemberRepository(memberApi, memberDao)
+        val factory = MemberViewModelFactory(repository)
+        memberViewModel = ViewModelProvider(this, factory).get(MemberViewModel::class.java)
+
         return binding.root
     }
 
@@ -57,11 +70,14 @@ class MyPageFragment : Fragment() {
         binding.mypageRecipeGrid.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         binding.mypageScrapGrid.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
 
-        // 데이터 로드
-        loadMemberProfile()
-        loadTop3Achievements()
-        loadTop3Recipes()
-        loadTop3Scraps()
+        // 데이터 로드 요청 (ViewModel을 통해)
+        memberViewModel.loadProfile()
+        memberViewModel.loadTop3Achievements()
+        memberViewModel.loadMyRecipes()
+        memberViewModel.loadScrapRecipes()
+
+        // LiveData 관찰
+        setupObservers()
 
         // RecyclerView 간격 설정
         val spacingPx = TypedValue.applyDimension(
@@ -77,100 +93,53 @@ class MyPageFragment : Fragment() {
         setupClickListeners()
     }
 
-    private fun loadMemberProfile() {
-        lifecycleScope.launch {
-            try {
-                val api = RetrofitClient.instanceMemberApi
-                val response = api.getProfile()
-                if (response.status == 200) {
-                    response.data?.let { member ->
-                        setProfile(member)
-                    }
-                } else {
-                    Log.e(TAG, "회원 정보 로드 실패: ${response.message}")
-                    Toast.makeText(requireContext(), "회원 정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "회원 정보 로드 실패", e)
-                Toast.makeText(requireContext(), "회원 정보를 불러올 수 없습니다: ${e.message}", Toast.LENGTH_SHORT).show()
+    private fun setupObservers() {
+        memberViewModel.profile.observe(viewLifecycleOwner) { profile ->
+            profile?.let {
+                setProfile(it)
+            } ?: run {
+                Log.e(TAG, "회원 정보를 불러올 수 없습니다.")
+                Toast.makeText(requireContext(), "회원 정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
             }
         }
-    }
 
-    private fun loadTop3Achievements() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val api = RetrofitClient.instanceMemberApi
-                val response = api.getTop3Achievements()
-                myPageBinding?.let { binding ->
-                    if (response.status == 200) {
-                        val achievements = response.data
-                        val badgeList = if (achievements.isNotEmpty()) {
-                            achievements.map {
-                                Uri.parse(it.achievementImageUrl ?: "")
-                            }
-                        } else {
-                            emptyList()
-                        }
-                        binding.badgeNo.visibility =
-                            if (badgeList.isEmpty()) View.VISIBLE else View.GONE
-                        binding.mypageBadgeGrid.adapter = MyPageCollectionAdapter(badgeList, true)
-                    }
+        memberViewModel.top3Achievements.observe(viewLifecycleOwner) { achievements ->
+            val badgeList = if (achievements.isNotEmpty()) {
+                achievements.map {
+                    Uri.parse(it.achievementImageUrl ?: "")
                 }
-            } catch (e: Exception) {
-                Log.e(TAG, "뱃지 목록 로드 실패", e)
-                binding.mypageBadgeGrid.adapter = MyPageCollectionAdapter(emptyList(), true)
+            } else {
+                emptyList()
             }
+            binding.badgeNo.visibility = if (badgeList.isEmpty()) View.VISIBLE else View.GONE
+            binding.mypageBadgeGrid.adapter = MyPageCollectionAdapter(badgeList, true)
         }
-    }
 
-    private fun loadTop3Recipes() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val api = RetrofitClient.instanceMemberApi
-                val response = api.getMyRecipes()
-                myPageBinding?.let { binding ->
-                    if (response.status == 200) {
-                        val recipes = response.data.take(3)
-                        val recipeList = if (recipes.isNotEmpty()) {
-                            recipes.map {
-                                Uri.parse(it.imageUrl ?: "")
-                            }
-                        } else {
-                            emptyList()
-                        }
-                        binding.MyRecipeNo.visibility = if (recipeList.isEmpty()) View.VISIBLE else View.GONE
-                        binding.mypageRecipeGrid.adapter = MyPageCollectionAdapter(recipeList, false)
-                    }
+        memberViewModel.myRecipes.observe(viewLifecycleOwner) { recipes ->
+            val recipeList = if (recipes.isNotEmpty()) {
+                recipes.take(3).map { // 상위 3개만 보여주도록 take(3) 적용
+                    Uri.parse(it.imageUrl ?: "")
                 }
-            } catch (e: Exception) {
-                Log.e(TAG, "레시피 목록 로드 실패", e)
-                binding.mypageRecipeGrid.adapter = MyPageCollectionAdapter(emptyList(), false)
+            } else {
+                emptyList()
             }
+            binding.MyRecipeNo.visibility = if (recipeList.isEmpty()) View.VISIBLE else View.GONE
+            binding.mypageRecipeGrid.adapter = MyPageCollectionAdapter(recipeList, false)
         }
-    }
 
-    private fun loadTop3Scraps() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val api = RetrofitClient.instanceMemberApi
-                val response = api.getScrapRecipes()
-                myPageBinding?.let { binding ->
-                    if (response.status == 200) {
-                        val scraps = response.data.take(3)
-                        val scrapList = if (scraps.isNotEmpty()) {
-                            scraps.map { Uri.parse(it.imageUrl ?: "") }
-                        } else {
-                            emptyList()
-                        }
-                        binding.MyScrapNo.visibility =
-                            if (scrapList.isEmpty()) View.VISIBLE else View.GONE
-                        binding.mypageScrapGrid.adapter = MyPageCollectionAdapter(scrapList, false)
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "스크랩 목록 로드 실패", e)
-                binding.mypageScrapGrid.adapter = MyPageCollectionAdapter(emptyList(), false)
+        memberViewModel.scrapRecipes.observe(viewLifecycleOwner) { scraps ->
+            val scrapList = if (scraps.isNotEmpty()) {
+                scraps.take(3).map { Uri.parse(it.imageUrl ?: "") } // 상위 3개만 보여주도록 take(3) 적용
+            } else {
+                emptyList()
+            }
+            binding.MyScrapNo.visibility = if (scrapList.isEmpty()) View.VISIBLE else View.GONE
+            binding.mypageScrapGrid.adapter = MyPageCollectionAdapter(scrapList, false)
+        }
+
+        memberViewModel.error.observe(viewLifecycleOwner) { errorMessage ->
+            errorMessage?.let {
+                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
             }
         }
     }

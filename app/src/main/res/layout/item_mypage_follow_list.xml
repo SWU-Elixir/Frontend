@@ -6,7 +6,7 @@
     android:orientation="horizontal"
     android:layout_marginBottom="10dp">
     <ImageView
-        android:id="@+id/profileImage"
+        android:id="@+id/imgProfile"
         android:layout_width="45dp"
         android:layout_height="45dp"
         android:scaleType="centerCrop"
@@ -22,7 +22,7 @@
         android:layout_gravity="center"
         android:layout_marginStart="8dp">
         <TextView
-            android:id="@+id/memberTitle"
+            android:id="@+id/tvMember"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/member_title"
@@ -30,7 +30,7 @@
             android:textSize="14sp"
             android:fontFamily="@font/pretendard_medium"/>
         <TextView
-            android:id="@+id/memberNickname"
+            android:id="@+id/tvNickname"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/member_nickname"
@@ -39,7 +39,7 @@
             android:fontFamily="@font/pretendard_bold"/>
     </LinearLayout>
     <android.widget.Button
-        android:id="@+id/followButton"
+        android:id="@+id/btnFollow"
         android:layout_width="75dp"
         android:layout_height="35dp"
         android:background="@drawable/bg_rect_filled_orange"

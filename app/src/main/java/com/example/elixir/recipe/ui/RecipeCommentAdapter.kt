@@ -32,13 +32,13 @@ class RecipeCommentAdapter(
                 .load(item.authorProfileUrl)
                 .placeholder(R.drawable.ic_profile)
                 .error(R.drawable.ic_profile)
-                .into(binding.profileImage)
+                .into(binding.imgProfile)
 
             Log.d("RecipeCommentAdapter", "${item.title}, ${item.nickName}, ${item.content}, ${item.updatedAt}")
 
             // 회원 칭호와 닉네임: 칭호의 경우, 없으면 일반으로 표시
-            binding.memberTitle.text = if(item.title.isNullOrBlank()) "일반" else item.title
-            binding.memberNickname.text = item.nickName
+            binding.tvMember.text = if(item.title.isNullOrBlank()) "일반" else item.title
+            binding.tvNickname.text = item.nickName
             
             // 댓글 내용
             binding.commentText.text = item.content

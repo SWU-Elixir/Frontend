@@ -1,4 +1,4 @@
-package com.example.elixir.login
+package com.example.elixir.login.data
 
 import com.google.gson.annotations.SerializedName
 

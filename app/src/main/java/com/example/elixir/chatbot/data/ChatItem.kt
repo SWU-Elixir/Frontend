@@ -1,4 +1,4 @@
-package com.example.elixir.chatbot
+package com.example.elixir.chatbot.data
 
 //import com.example.elixir.calendar.DietLogData
 //import com.example.elixir.recipe.RecipeData

@@ -26,7 +26,7 @@
 
     <!--BottomSheet-->
     <androidx.cardview.widget.CardView
-        android:id="@+id/bottomSheet"
+        android:id="@+id/cvBottomSheet"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -57,7 +57,7 @@
 
             <!--MealPlanList-->
             <ListView
-                android:id="@+id/mealPlanList"
+                android:id="@+id/listMealPlan"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:dividerHeight="10dp"
@@ -69,7 +69,7 @@
                 android:visibility="visible"
                 />
             <TextView
-                android:id="@+id/emptyMealText"
+                android:id="@+id/tvEmptyMeal"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="@string/no_mealplan"

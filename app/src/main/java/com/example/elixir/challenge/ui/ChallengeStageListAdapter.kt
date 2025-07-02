@@ -41,8 +41,8 @@ class ChallengeStageListAdapter(
         val item = getItem(position)
 
         // 스테이지 번호와 미션 내용 설정
-        binding.challengeStage.text = context.getString(R.string.challenge_step, item.stepNumber)
-        binding.challengeMission.text = item.stepName ?: ""
+        binding.tvChallengeStage.text = context.getString(R.string.challenge_step, item.stepNumber)
+        binding.tvChallengeMission.text = item.stepName ?: ""
 
         // 스테이지 타입에 따른 아이콘 설정
         val iconRes = when (item.stepName) {
@@ -53,7 +53,7 @@ class ChallengeStageListAdapter(
             "Other" -> R.drawable.ic_challenge_other
             else -> R.drawable.ic_challenge_other // 기본 아이콘
         }
-        binding.challengeIcon.setImageResource(iconRes)
+        binding.imgChallengeIcon.setImageResource(iconRes)
 
         // 완료된 스테이지는 50% 투명도로 표시
         view.alpha = if (item.isComplete) 0.5f else 1.0f

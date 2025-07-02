@@ -14,7 +14,7 @@ import com.example.elixir.recipe.data.FlavoringItem
 
 class FlavoringLogAdapter(
     private val itemList: MutableList<FlavoringItem>,
-    private val onDeleteClick: (Int) -> Unit,
+    private val onDeleteClick: (Int) -> Unit, // onDeleteClick으로 콜백 이름을 사용합니다.
     private val onUpdateButtonState: () -> Unit
 ) : RecyclerView.Adapter<FlavoringLogAdapter.ItemViewHolder>() {
 
@@ -26,7 +26,7 @@ class FlavoringLogAdapter(
 
         fun bind(item: FlavoringItem, position: Int) {
             with(binding) {
-                // 기존 리스너 제거
+                // 기존 리스너 제거 (중복 등록 방지)
                 enterItemData.removeTextChangedListener(nameWatcher)
                 enterItemAmount.removeTextChangedListener(amountWatcher)
                 enterItemUnit.removeTextChangedListener(unitWatcher)
@@ -48,9 +48,13 @@ class FlavoringLogAdapter(
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 spinnerUnit.adapter = adapter
 
-                // Spinner 위치 설정
+                // Spinner 위치 설정 (기존 데이터에 맞는 단위 선택)
                 val unitIndex = units.indexOfFirst { getShortUnit(it) == item.unit }
                 spinnerUnit.setSelection(if (unitIndex != -1) unitIndex else units.size - 1)
+
+                // "직접 입력" 선택 시 enterItemUnit 활성화 여부
+                enterItemUnit.isEnabled = (spinnerUnit.selectedItem == "직접 입력")
+
 
                 // Spinner 리스너 등록
                 spinnerListener = object : AdapterView.OnItemSelectedListener {
@@ -58,14 +62,14 @@ class FlavoringLogAdapter(
                         val selected = units[pos]
                         if (selected == "직접 입력") {
                             enterItemUnit.isEnabled = true
-                            enterItemUnit.setText(item.unit)
+                            enterItemUnit.setText(item.unit) // 기존 직접 입력 값 유지
                         } else {
                             val shortUnit = getShortUnit(selected)
                             enterItemUnit.isEnabled = false
                             enterItemUnit.setText(shortUnit)
-                            item.unit = shortUnit
+                            item.unit = shortUnit // 선택된 단위로 업데이트
                         }
-                        onUpdateButtonState()
+                        onUpdateButtonState() // UI 상태 갱신
                     }
                     override fun onNothingSelected(parent: AdapterView<*>) {}
                 }
@@ -99,7 +103,8 @@ class FlavoringLogAdapter(
                 enterItemUnit.setText(item.unit)
                 unitWatcher = object : TextWatcher {
                     override fun afterTextChanged(s: Editable?) {
-                        if (spinnerUnit.selectedItem == "직접 입력") {
+                        // "직접 입력"이 선택된 경우에만 item.unit을 업데이트
+                        if (spinnerUnit.selectedItem.toString() == "직접 입력") {
                             item.unit = s.toString()
                         }
                         onUpdateButtonState()
@@ -110,7 +115,16 @@ class FlavoringLogAdapter(
                 enterItemUnit.addTextChangedListener(unitWatcher)
 
                 // 삭제 버튼
-                btnDel.setOnClickListener { onDeleteClick(position) }
+                btnDel.setOnClickListener {
+                    // **중요: adapterPosition을 사용합니다.**
+                    val currentPosition = adapterPosition
+                    if (currentPosition != RecyclerView.NO_POSITION) { // 유효한 포지션인지 확인
+                        onDeleteClick(currentPosition)
+                    } else {
+                        Log.w("FlavoringLogAdapter", "Delete button clicked but adapterPosition is NO_POSITION.")
+                    }
+                }
+
             }
         }
     }

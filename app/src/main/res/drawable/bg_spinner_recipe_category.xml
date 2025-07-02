@@ -1,6 +1,6 @@
-<?xml version ="1.0" encoding ="utf-8"?><!--  Learn More about how to use App Actions: https://developer.android.com/guide/actions/index.html -->
+<?xml version ="1.0" encoding ="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_selected="true" android:state_enabled="true" android:state_pressed="false">
+    <item android:state_selected="true">
         <layer-list>
             <item>
                 <shape android:shape="rectangle">
@@ -15,7 +15,6 @@
                     <corners android:radius="5dp" />
                 </shape>
             </item>
-
             <item
                 android:drawable="@drawable/ic_category_down_selected"
                 android:gravity="center|end"
@@ -31,7 +30,7 @@
                     <solid android:color="@color/white"/>
                     <stroke
                         android:width="1dp"
-                        android:color="@color/elixir_gray"/>
+                        android:color="@color/elixir_orange"/>
                     <padding
                         android:top="6dp"
                         android:bottom="6dp"
@@ -39,7 +38,6 @@
                     <corners android:radius="5dp" />
                 </shape>
             </item>
-
             <item
                 android:drawable="@drawable/ic_category_down"
                 android:gravity="center|end"

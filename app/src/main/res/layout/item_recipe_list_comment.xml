@@ -11,7 +11,7 @@
 
     <!-- 프로필 이미지 -->
     <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/profileImage"
+        android:id="@+id/imgProfile"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_marginStart="8dp"
@@ -26,7 +26,7 @@
 
     <!-- memberTitle -->
     <TextView
-        android:id="@+id/memberTitle"
+        android:id="@+id/tvMember"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:maxWidth="120dp"
@@ -34,14 +34,14 @@
         android:textColor="@color/elixir_orange"
         android:textSize="12sp"
         android:fontFamily="@font/pretendard_medium"
-        app:layout_constraintStart_toEndOf="@id/profileImage"
-        app:layout_constraintTop_toTopOf="@id/profileImage"
+        app:layout_constraintStart_toEndOf="@id/imgProfile"
+        app:layout_constraintTop_toTopOf="@id/imgProfile"
         app:layout_constraintBottom_toTopOf="@id/commentText"
         android:layout_marginStart="8dp"/>
 
     <!-- memberNickname -->
     <TextView
-        android:id="@+id/memberNickname"
+        android:id="@+id/tvNickname"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:maxWidth="150dp"
@@ -50,8 +50,8 @@
         android:textSize="14sp"
         android:layout_marginStart="5dp"
         android:fontFamily="@font/pretendard_bold"
-        app:layout_constraintStart_toEndOf="@id/memberTitle"
-        app:layout_constraintBaseline_toBaselineOf="@id/memberTitle" />
+        app:layout_constraintStart_toEndOf="@id/tvMember"
+        app:layout_constraintBaseline_toBaselineOf="@id/tvMember" />
 
     <!-- 메뉴 버튼 -->
     <ImageButton
@@ -81,7 +81,7 @@
         android:textColor="@color/black"
         android:textSize="14sp"
         android:fontFamily="@font/pretendard_medium"
-        app:layout_constraintTop_toBottomOf="@id/profileImage"
+        app:layout_constraintTop_toBottomOf="@id/imgProfile"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

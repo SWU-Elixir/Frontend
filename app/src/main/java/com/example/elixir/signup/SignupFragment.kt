@@ -10,28 +10,26 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import com.example.elixir.R
 import com.example.elixir.databinding.FragmentSignupBinding
-import com.example.elixir.member.network.MemberDB
 import com.example.elixir.member.network.MemberRepository
-import com.example.elixir.member.viewmodel.MemberService
+import com.example.elixir.member.viewmodel.MemberViewModel
+import com.example.elixir.member.viewmodel.MemberViewModelFactory
+import com.example.elixir.RetrofitClient
+import com.example.elixir.member.network.MemberDB
 
 class SignupFragment : Fragment() {
     private lateinit var signupBinding: FragmentSignupBinding
     private val userModel: UserInfoViewModel by activityViewModels()
     private var profileImageFile: java.io.File? = null
 
-    // MemberViewModel을 Factory로 생성
-    private val memberViewModel: com.example.elixir.member.viewmodel.MemberViewModel by activityViewModels {
-        val api = com.example.elixir.RetrofitClient.instanceMemberApi
+    // MemberViewModel을 Factory로 생성 (MemberService 제거)
+    private val memberViewModel: MemberViewModel by activityViewModels {
+        val api = RetrofitClient.instanceMemberApi
         val db = MemberDB.getInstance(requireContext())
         val dao = db.memberDao()
         MemberViewModelFactory(
-            MemberService(
-                MemberRepository(api, dao)
-            )
+            MemberRepository(api, dao)
         )
     }
 
@@ -181,7 +179,7 @@ class SignupFragment : Fragment() {
                         } catch (e: Exception) {
                             null
                         }
-                        
+
                         userModel.setProfile(profileImage, nickname, gender, birthYear)
                         handleChipSelection(0, true) {}
                     }
@@ -253,15 +251,3 @@ class SignupFragment : Fragment() {
     }
 }
 
-// MemberViewModelFactory 정의
-class MemberViewModelFactory(
-    private val service: MemberService
-) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(com.example.elixir.member.viewmodel.MemberViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return com.example.elixir.member.viewmodel.MemberViewModel(service) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
-    }
-}

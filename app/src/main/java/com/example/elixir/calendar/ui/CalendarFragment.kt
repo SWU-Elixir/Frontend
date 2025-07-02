@@ -150,7 +150,7 @@ class CalendarFragment : Fragment(), OnMealClickListener {
         // -------------------- 리스트뷰 설정 --------------------
         // 1. 어댑터를 빈 리스트로 먼저 생성
         mealAdapter = MealListAdapter(requireContext(), mutableListOf(), this)
-        binding.mealPlanList.adapter = mealAdapter
+        binding.listMealPlan.adapter = mealAdapter
 
         // 2. ViewModel에서 데이터 요청 (초기 선택 날짜)
         mealViewModel.getDietLogsByDate(
@@ -182,7 +182,7 @@ class CalendarFragment : Fragment(), OnMealClickListener {
 
 
         // ----------------- FAB 및 바텀시트 ---------------------
-        val behavior = BottomSheetBehavior.from(binding.bottomSheet)
+        val behavior = BottomSheetBehavior.from(binding.cvBottomSheet)
         binding.fab.hide()
         var bottomSheetState = BottomSheetBehavior.STATE_COLLAPSED
         behavior.peekHeight = 130
@@ -462,13 +462,13 @@ class CalendarFragment : Fragment(), OnMealClickListener {
     private fun updateEventList(selectedDate: String) {
         val events = eventMap[selectedDate]
         if (events.isNullOrEmpty()) {
-            binding.mealPlanList.visibility = View.GONE
-            binding.emptyMealText.visibility = View.VISIBLE
+            binding.listMealPlan.visibility = View.GONE
+            binding.tvEmptyMeal.visibility = View.VISIBLE
         } else {
-            binding.mealPlanList.visibility = View.VISIBLE
-            binding.emptyMealText.visibility = View.GONE
+            binding.listMealPlan.visibility = View.VISIBLE
+            binding.tvEmptyMeal.visibility = View.GONE
             mealAdapter.updateData(events)
-            binding.mealPlanList.smoothScrollToPosition(0)
+            binding.listMealPlan.smoothScrollToPosition(0)
         }
     }
 

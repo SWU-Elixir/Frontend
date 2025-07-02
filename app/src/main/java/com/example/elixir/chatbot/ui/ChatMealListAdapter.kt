@@ -1,6 +1,5 @@
-package com.example.elixir.chatbot
+package com.example.elixir.chatbot.ui
 
-import android.net.Uri
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -8,6 +7,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.example.elixir.R
+import com.example.elixir.chatbot.data.ChatMeal
 import com.example.elixir.databinding.ItemChatMealBinding
 import com.example.elixir.ingredient.data.IngredientData
 
@@ -34,18 +34,18 @@ class ChatMealListAdapter(
                 Glide.with(binding.root.context)
                     .load(imageUrl)
                     .apply(requestOptions)
-                    .into(binding.icon)
+                    .into(binding.imgMeal)
             } else {
-                binding.icon.setImageResource(R.drawable.ic_recipe_white)
+                binding.imgMeal.setImageResource(R.drawable.ic_recipe_white)
             }
             val onlyDate = item.date.substring(0, 10)
-            binding.date.text = onlyDate
-            binding.title.text = item.title
+            binding.tvDate.text = onlyDate
+            binding.tvTitle.text = item.title
             
             val ingredientNames = item.ingredientTags.mapNotNull { ingredientMap[it]?.name }
             val subtitle = ingredientNames.joinToString("/")
-            binding.subtitle.text = subtitle
-            binding.badge.text = item.badgeNumber.toString()
+            binding.tvSubTitle.text = subtitle
+            binding.tvScore.text = item.badgeNumber.toString()
 
             binding.root.isSelected = (position == selectedIndex)
             binding.root.setOnClickListener {

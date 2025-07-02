@@ -11,8 +11,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import com.example.elixir.R
 import com.example.elixir.RetrofitClient
-import com.example.elixir.login.LogoutResponse
-import com.example.elixir.login.LoginActivity
+import com.example.elixir.login.data.LogoutResponse
+import com.example.elixir.login.ui.LoginActivity
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
