@@ -303,9 +303,9 @@ class RecipeLogFragment : Fragment() {
             }
 
             // 식재료 검색 버튼 클릭 리스너 (기존과 동일)
-            recipeBinding.findIngredient.setOnClickListener {
+            recipeBinding.chipFindIngredient.setOnClickListener {
                 Log.d("RecipeLogFragment", "Find ingredient button clicked")
-                recipeBinding.findIngredient.isChecked = !recipeBinding.findIngredient.isChecked
+                recipeBinding.chipFindIngredient.isChecked = !recipeBinding.chipFindIngredient.isChecked
 
                 val ingredientSearchFragment = IngredientSearchFragment()
                 requireActivity().supportFragmentManager.beginTransaction()
@@ -317,7 +317,7 @@ class RecipeLogFragment : Fragment() {
             // Fragment가 다시 보일 때 검색 칩 상태 초기화
             viewLifecycleOwner.lifecycle.addObserver(object : androidx.lifecycle.DefaultLifecycleObserver {
                 override fun onResume(owner: androidx.lifecycle.LifecycleOwner) {
-                    recipeBinding.findIngredient.isChecked = false
+                    recipeBinding.chipFindIngredient.isChecked = false
                 }
             })
 
@@ -336,17 +336,17 @@ class RecipeLogFragment : Fragment() {
 
     private fun updateIngredientChips(ingredientTags: List<Int>, ingredientMap: Map<Int, IngredientData>) {
         // 기존 칩들 제거 (findIngredient 칩 제외)
-        val findIngredientChip = recipeBinding.findIngredient
+        val findIngredientChip = recipeBinding.chipFindIngredient
         val chipsToRemove = mutableListOf<View>()
 
-        for (i in 0 until recipeBinding.tagsIngredient.childCount) {
-            val child = recipeBinding.tagsIngredient.getChildAt(i)
+        for (i in 0 until recipeBinding.cgTagsIngredient.childCount) {
+            val child = recipeBinding.cgTagsIngredient.getChildAt(i)
             if (child != findIngredientChip && child is Chip) {
                 chipsToRemove.add(child)
             }
         }
 
-        chipsToRemove.forEach { recipeBinding.tagsIngredient.removeView(it) }
+        chipsToRemove.forEach { recipeBinding.cgTagsIngredient.removeView(it) }
 
         // 새로운 칩들 추가
         ingredientTags.forEach { ingredientId ->
@@ -363,14 +363,14 @@ class RecipeLogFragment : Fragment() {
                 setOnClickListener {
                     Log.d("RecipeLogFragment", "Chip clicked for removal: $ingredientName")
                     this@RecipeLogFragment.ingredientTags.remove(ingredientId)
-                    recipeBinding.tagsIngredient.removeView(this)
+                    recipeBinding.cgTagsIngredient.removeView(this)
                     updateWriteButtonState()
                 }
             }
 
             // findIngredient Chip 앞에 삽입
-            val index = recipeBinding.tagsIngredient.indexOfChild(findIngredientChip)
-            recipeBinding.tagsIngredient.addView(chip, index)
+            val index = recipeBinding.cgTagsIngredient.indexOfChild(findIngredientChip)
+            recipeBinding.cgTagsIngredient.addView(chip, index)
         }
     }
 
@@ -383,7 +383,7 @@ class RecipeLogFragment : Fragment() {
             Log.d("RecipeLogFragment", "Handling ingredient selection - ID: $ingredientId, Name: $ingredientName")
 
             if (ingredientId == -1) return
-            val findIngredientChip = recipeBinding.findIngredient
+            val findIngredientChip = recipeBinding.chipFindIngredient
 
             // 중복 방지
             if (ingredientTags.contains(ingredientId)) {
@@ -411,14 +411,14 @@ class RecipeLogFragment : Fragment() {
                 setOnClickListener {
                     Log.d("RecipeLogFragment", "Chip clicked for removal: $ingredientName")
                     ingredientTags.remove(ingredientId)
-                    recipeBinding.tagsIngredient.removeView(this)
+                    recipeBinding.cgTagsIngredient.removeView(this)
                     updateWriteButtonState()
                 }
             }
 
             // findIngredient Chip 앞에 삽입
-            val index = recipeBinding.tagsIngredient.indexOfChild(findIngredientChip)
-            recipeBinding.tagsIngredient.addView(chip, index)
+            val index = recipeBinding.cgTagsIngredient.indexOfChild(findIngredientChip)
+            recipeBinding.cgTagsIngredient.addView(chip, index)
 
             // 리스트에 추가 (ID 저장)
             ingredientTags.add(ingredientId)
