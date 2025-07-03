@@ -44,15 +44,16 @@ class DietLogRepository (private val dietLogDao: DietLogDao, private val dietApi
     }
 
 
-//    // 전체 식단 기록 가져오기
-//    suspend fun getAllDietLogs(): List<DietLogEntity> {
-//        return try {
-//            dietLogDao.getAllDietLogs()
-//        } catch (e: Exception) {
-//            Log.e("DietRepo", "getAllDietLogs 오류: ${e.message}")
-//            emptyList()
-//        }
-//    }
+    // 전체 식단 기록 가져오기
+    suspend fun getAllDietLogs(): List<MealDto>?  {
+        return try {
+            val response = dietApi.getDietLogsAll()
+            if (response.isSuccessful) response.body()?.data else null
+        } catch (e: Exception) {
+            Log.e("DietRepo", "getDietLogById 오류: ${e.message}")
+            null
+        }
+    }
 
     // 서버
     // 식단 기록 등록

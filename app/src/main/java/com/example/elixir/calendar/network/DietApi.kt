@@ -36,6 +36,10 @@ interface DietApi {
         @Query("days") days: Int
     ): Response<GetMealListResponse>
 
+    @GET("/api/diet-log/all")
+    suspend fun getDietLogsAll(
+    ): Response<GetMealListResponse>
+
     @GET("/api/diet-log/{dietLogId}")
     suspend fun getDietLogById(
         @Path("dietLogId") dietLogId: Int

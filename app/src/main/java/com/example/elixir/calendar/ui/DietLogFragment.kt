@@ -76,6 +76,7 @@ class DietLogFragment : Fragment() {
     private var selectedHour: Int = -1
     private var selectedMin: Int = -1
     private lateinit var selectedTime: LocalTime
+    private var selectedDate: LocalDate? = null // 선택된 날짜 저장용
 
     // 정보
     private var dietImg: String = "" // 이미지 URI (http/s, file, android.resource)
@@ -119,6 +120,17 @@ class DietLogFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         // -------------------------------------------- 초기화 -----------------------------------------------//
         mealDataJson = arguments?.getString("mealData")
+
+        // 선택된 날짜 받아오기
+        val selectedDateStr = arguments?.getString("selectedDate")
+        selectedDate = if (selectedDateStr != null) {
+            LocalDate.parse(selectedDateStr)
+        } else {
+            LocalDate.now() // 기본값은 오늘
+        }
+        // 날짜 초기화 후 로그 추가
+        Log.d("DietLogFragment", "Selected date: $selectedDate")
+        Log.d("DietLogFragment", "Selected date string: $selectedDateStr")
 
         // 데이터베이스와 API 초기화
         dietDao = AppDatabase.getInstance(requireContext()).dietLogDao()
@@ -262,8 +274,10 @@ class DietLogFragment : Fragment() {
                 // 선택된 시간 텍스트뷰에 띄워주기
                 formattedTime = DateTimeFormatter.ofPattern("a h:mm", Locale.ENGLISH).format(selectedTime)
                 dietLogBinding.time12h.text = formattedTime
+
+                checkAllValid()
             }
-            checkAllValid()
+
         }
 
         // 식단명 입력, 변경 탐지 및 유효성 검사
@@ -446,23 +460,25 @@ class DietLogFragment : Fragment() {
             SaveDialog(requireActivity()) {
                 // 현재 입력된 값들로 mealData 객체 생성
                 val currentMealData = DietLogData(
-                    id = if (isEditMode) dietId else 0, // 수정 모드일 때 mealData.id 사용, 아니면 0
+                    id = if (isEditMode) dietId else 0,
                     dietTitle = dietTitle,
                     dietCategory = dietCategory,
                     score = score,
                     ingredientTags = ingredientTags,
                     time = if (isEditMode) {
-                        // 수정 모드일 때는 기존 날짜 유지
+                        // 수정 모드일 때는 기존 날짜에 새로운 시간 적용
                         LocalDateTime.of(mealData.time.toLocalDate(), selectedTime)
                     } else {
-                        // 새로운 기록일 때는 현재 날짜 사용
-                        selectedTime.atDate(LocalDate.now())
+                        // 새로운 기록일 때는 선택된 날짜 사용 (selectedDate가 null이면 오늘 날짜)
+                        LocalDateTime.of(selectedDate ?: LocalDate.now(), selectedTime)
                     },
                     dietImg = dietImg
                 )
 
-                Log.d("DietLogFragment", "저장할 selectedTime: $selectedTime")
-                Log.d("DietLogFragment", "저장할 dietImg URI: $dietImg")
+                // 저장 시 로그 추가
+                Log.d("DietLogFragment", "저장할 날짜: ${selectedDate ?: LocalDate.now()}")
+                Log.d("DietLogFragment", "저장할 시간: $selectedTime")
+                Log.d("DietLogFragment", "최종 DateTime: ${if (isEditMode) LocalDateTime.of(mealData.time.toLocalDate(), selectedTime) else LocalDateTime.of(selectedDate ?: LocalDate.now(), selectedTime)}")
 
                 // 업로드용 이미지 File 객체 생성
                 val imageFile: File? = when {
