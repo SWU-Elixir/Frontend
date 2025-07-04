@@ -15,7 +15,7 @@ import com.example.elixir.R
 import com.example.elixir.databinding.FragmentMypageImageGridBinding
 import com.example.elixir.RetrofitClient
 import com.example.elixir.member.data.BadgeItem
-import com.example.elixir.recipe.ui.RecipeDetailFragment
+import com.example.elixir.recipe.ui.fragment.RecipeDetailFragment
 import kotlinx.coroutines.launch
 
 class MyPageImageGridFragment : Fragment() {

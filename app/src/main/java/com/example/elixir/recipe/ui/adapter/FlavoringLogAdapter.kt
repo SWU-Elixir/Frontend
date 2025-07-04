@@ -1,4 +1,4 @@
-package com.example.elixir.recipe.ui
+package com.example.elixir.recipe.ui.adapter
 
 import android.text.Editable
 import android.text.TextWatcher

@@ -6,10 +6,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.elixir.recipe.data.CommentItem
-import com.example.elixir.recipe.data.CommentRepository
+import com.example.elixir.recipe.repository.CommentRepository
 import kotlinx.coroutines.launch
 import org.threeten.bp.LocalDateTime
-import org.threeten.bp.format.DateTimeFormatter
 
 class CommentViewModel(private val repository: CommentRepository) : ViewModel() {
     private var _comments = MutableLiveData<List<CommentItem>?>()

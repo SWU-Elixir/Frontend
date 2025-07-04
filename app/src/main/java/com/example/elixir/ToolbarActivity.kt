@@ -36,11 +36,11 @@ import com.example.elixir.member.network.MemberApi
 import com.example.elixir.member.network.MemberDB
 import com.example.elixir.member.network.MemberRepository
 import com.example.elixir.network.AppDatabase
-import com.example.elixir.recipe.ui.RecipeLogFragment
+import com.example.elixir.recipe.ui.fragment.RecipeLogFragment
 import com.example.elixir.signup.CreateAccountFragment
 import com.example.elixir.member.ui.EditProfileFragment
 import com.example.elixir.member.ui.SurveyEditFragment
-import com.example.elixir.recipe.ui.RecipeGuideFragment
+import com.example.elixir.recipe.ui.fragment.RecipeGuideFragment
 import com.example.elixir.signup.FindPasswordFragment
 import com.example.elixir.signup.SettingProfileFragment
 

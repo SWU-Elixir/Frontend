@@ -1,18 +1,23 @@
-package com.example.elixir.recipe.data
+package com.example.elixir.recipe.repository
 
 import android.util.Log
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import com.example.elixir.recipe.data.RecipeData
+import com.example.elixir.recipe.data.RecipeItemData
+import com.example.elixir.recipe.data.RecipeListItemData
+import com.example.elixir.recipe.data.SearchItemData
 import com.example.elixir.recipe.data.dao.RecipeDao
 import com.example.elixir.recipe.data.entity.RecipeEntity
+import com.example.elixir.recipe.data.toDto
+import com.example.elixir.recipe.data.toEntity
 import com.example.elixir.recipe.network.api.RecipeApi
-import com.example.elixir.recipe.ui.RecipePagingSource
-import com.example.elixir.recipe.ui.SearchPagingSource
+import com.example.elixir.recipe.ui.paging.RecipePagingSource
+import com.example.elixir.recipe.ui.paging.SearchPagingSource
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -23,25 +28,19 @@ import kotlin.math.max
 
 class RecipeRepository(private val api: RecipeApi, private val dao: RecipeDao) {
     // 레시피 상세 조회 (API로 불러오기, 페이징 적용)
-    fun getRecipes(categoryType: String?, categorySlowAging: String?
-    ): Flow<PagingData<RecipeListItemData>> {
+    fun getRecipes(type: String?, slowAging: String?): Flow<PagingData<RecipeListItemData>> {
         return Pager(
             config = PagingConfig(pageSize = 10),
-            pagingSourceFactory = {
-                RecipePagingSource(api, categoryType, categorySlowAging)
-            }
+            pagingSourceFactory = { RecipePagingSource(api, type, slowAging) }
         ).flow
     }
 
     // 레시피 검색
     fun searchRecipes(keyword: String, categoryType: String?, categorySlowAging: String?
-    ): Flow<PagingData<RecipeListItemData>> {
+    ): Flow<PagingData<SearchItemData>> {
         return Pager(
             config = PagingConfig(pageSize = 10),
-            pagingSourceFactory = {
-                SearchPagingSource(api, keyword, categoryType, categorySlowAging)
-            }
-        ).flow
+            pagingSourceFactory = { SearchPagingSource(api, keyword, categoryType, categorySlowAging) }).flow
     }
 
     // 레시피 상세 조회 (API로 불러오기)

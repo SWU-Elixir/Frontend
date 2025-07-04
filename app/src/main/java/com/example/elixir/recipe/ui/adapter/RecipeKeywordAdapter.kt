@@ -1,10 +1,8 @@
-package com.example.elixir.adapter
+package com.example.elixir.recipe.ui.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.elixir.R
 import com.example.elixir.databinding.ItemMealListIndeterminateBinding
 
 class RecipeKeywordAdapter(

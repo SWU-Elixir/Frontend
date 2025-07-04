@@ -1,4 +1,4 @@
-package com.example.elixir.recipe.ui
+package com.example.elixir.recipe.ui.fragment
 
 import android.os.Bundle
 import android.view.LayoutInflater

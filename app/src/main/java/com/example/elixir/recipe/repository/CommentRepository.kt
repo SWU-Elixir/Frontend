@@ -1,4 +1,4 @@
-package com.example.elixir.recipe.data
+package com.example.elixir.recipe.repository
 
 import com.example.elixir.recipe.data.dao.CommentDao
 import com.example.elixir.recipe.data.entity.CommentEntity

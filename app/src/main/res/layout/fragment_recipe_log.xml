@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:paddingHorizontal="16dp"
     android:fitsSystemWindows="true"
-    tools:context=".recipe.ui.RecipeLogFragment">
+    tools:context=".recipe.ui.fragment.RecipeLogFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"

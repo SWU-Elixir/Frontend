@@ -1,4 +1,4 @@
-package com.example.elixir.recipe.ui
+package com.example.elixir.recipe.ui.fragment
 
 import android.content.ContentValues.TAG
 import android.content.Context
@@ -23,8 +23,8 @@ import com.google.android.flexbox.JustifyContent
 import android.content.res.ColorStateList
 import androidx.lifecycle.lifecycleScope
 import com.example.elixir.RetrofitClient
-import com.example.elixir.adapter.RecipeKeywordAdapter
-import com.example.elixir.adapter.RecommendRecipeKeywordAdapter
+import com.example.elixir.recipe.ui.adapter.RecipeKeywordAdapter
+import com.example.elixir.recipe.ui.adapter.RecommendRecipeKeywordAdapter
 import kotlinx.coroutines.launch
 
 class SearchFragment : Fragment() {

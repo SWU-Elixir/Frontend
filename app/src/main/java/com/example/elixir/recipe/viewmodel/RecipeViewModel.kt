@@ -7,8 +7,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import com.example.elixir.recipe.data.RecipeData
+import com.example.elixir.recipe.data.RecipeItemData
 import com.example.elixir.recipe.data.RecipeListItemData
-import com.example.elixir.recipe.data.RecipeRepository
+import com.example.elixir.recipe.data.SearchItemData
+import com.example.elixir.recipe.repository.RecipeRepository
 import com.example.elixir.recipe.data.entity.RecipeEntity
 import com.example.elixir.recipe.data.toData
 import kotlinx.coroutines.flow.Flow
@@ -45,12 +47,6 @@ class RecipeViewModel(
     private val _recipeDetail = MutableLiveData<RecipeData?>()
     val recipeDetail: LiveData<RecipeData?> = _recipeDetail
 
-
-
-    // 상세 데이터
-    /*private val _recipeDetail = MutableStateFlow<Result<RecipeData?>>(Result.success(null))
-    val recipeDetail: StateFlow<Result<RecipeData?>> = _recipeDetail*/
-
     // 카테고리 필터 상태
     private val categoryType = MutableStateFlow<String?>(null)
     private val categorySlowAging = MutableStateFlow<String?>(null)
@@ -75,10 +71,14 @@ class RecipeViewModel(
         }.flatMapLatest { it }
 
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
-    val searchResults: Flow<PagingData<RecipeListItemData>> =
+    val searchResults: Flow<PagingData<SearchItemData>> =
         combine(keyword, categoryType, categorySlowAging) { keyword, type, slowAging ->
             repository.searchRecipes(keyword, type, slowAging)
         }.flatMapLatest { it }
+
+    fun setSearchKeyword(newKeyword: String) {
+        keyword.value = newKeyword
+    }
 
     fun getRecipeById(recipeId: Int) {
         viewModelScope.launch {

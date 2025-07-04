@@ -1,17 +1,15 @@
-package com.example.elixir.recipe.ui
+package com.example.elixir.recipe.ui.fragment
 
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
-import android.widget.AdapterView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.elixir.R
 import com.example.elixir.RetrofitClient
@@ -23,7 +21,8 @@ import com.example.elixir.ingredient.viewmodel.IngredientViewModel
 import com.example.elixir.ingredient.viewmodel.IngredientViewModelFactory
 import com.example.elixir.network.AppDatabase
 import com.example.elixir.recipe.data.RecipeData
-import com.example.elixir.recipe.data.RecipeRepository
+import com.example.elixir.recipe.repository.RecipeRepository
+import com.example.elixir.recipe.ui.adapter.SearchListAdapter
 import com.example.elixir.recipe.viewmodel.RecipeViewModel
 import com.example.elixir.recipe.viewmodel.RecipeViewModelFactory
 import kotlinx.coroutines.flow.collectLatest
@@ -40,7 +39,7 @@ class SearchListFragment : Fragment() {
     private val binding get() = _binding!!
 
     // 어댑터 및 데이터
-    private lateinit var recipeListAdapter: RecipeListAdapter
+    private lateinit var searchListAdapter: SearchListAdapter
 
     // Ingredient 데이터를 Map으로 저장하여 효율적으로 사용
     private var ingredientDataMap: Map<Int, IngredientData>? = null
@@ -91,7 +90,7 @@ class SearchListFragment : Fragment() {
 
         // ViewModel에서 데이터 관찰
         setupObservers()
-
+/*
         // 1. 검색어 초기화 및 설정
         initializeSearchKeyword()
 
@@ -102,7 +101,7 @@ class SearchListFragment : Fragment() {
         setupSpinners()
 
         // 4. 뒤로가기 버튼 설정
-        setupBackButton()
+        setupBackButton()*/
 
         // 재료 데이터 로드 (필수)
         ingredientViewModel.loadIngredients()
@@ -135,40 +134,11 @@ class SearchListFragment : Fragment() {
 
         if (ingredientMap != null) {
             // 어댑터가 초기화되지 않았다면 새로 생성
-            if (!::recipeListAdapter.isInitialized) {
-                recipeListAdapter = RecipeListAdapter(
-                    ingredientMap,
-                    onBookmarkClick = { recipe ->
-                        recipe.scrappedByCurrentUser = !recipe.scrappedByCurrentUser
-                        if (recipe.scrappedByCurrentUser) {
-                            recipeViewModel.addScrap(recipe.id)
-                        } else {
-                            recipeViewModel.deleteScrap(recipe.id)
-                        }
-                    },
-                    onHeartClick = { recipe ->
-                        recipe.likedByCurrentUser = !recipe.likedByCurrentUser
-                        if (recipe.likedByCurrentUser) {
-                            recipe.likes++
-                            recipeViewModel.addLike(recipe.id)
-                        } else {
-                            recipe.likes--
-                            recipeViewModel.deleteLike(recipe.id)
-                        }
-                    },
-                    fragmentManager = parentFragmentManager
-                )
-                binding.recipeList.adapter = recipeListAdapter
-
-                // 페이징 데이터 collect 시작
-                lifecycleScope.launch {
-                    recipeViewModel.recipes.collectLatest { pagingData ->
-                        recipeListAdapter.submitData(pagingData)
-                    }
-                }
+            if (!::searchListAdapter.isInitialized) {
+                setUpRecipeListAdapter(ingredientMap)
             } else {
                 // 어댑터가 이미 있다면 ingredientMap만 업데이트
-                recipeListAdapter.updateIngredientMap(ingredientMap)
+                searchListAdapter.updateIngredientMap(ingredientMap)
             }
         } else {
             Log.d("SearchListFragment", "Ingredients data is null - waiting for data")
@@ -222,7 +192,79 @@ class SearchListFragment : Fragment() {
     }
 
 
+    // 레시피 리스트 어댑터 설정
+    private fun setUpRecipeListAdapter(safeIngredientMap: Map<Int, IngredientData>) {
+        val typeItems = resources.getStringArray(R.array.type_list).toList()
+        val methodItems = resources.getStringArray(R.array.method_list).toList()
 
+        searchListAdapter = SearchListAdapter(
+            safeIngredientMap,
+            onBookmarkClick = { recipe ->
+                recipe.scrappedByCurrentUser = !recipe.scrappedByCurrentUser
+                if (recipe.scrappedByCurrentUser) {
+                    recipeViewModel.addScrap(recipe.id)
+                } else {
+                    recipeViewModel.deleteScrap(recipe.id)
+                }
+            },
+            onHeartClick = { recipe ->
+                recipe.likedByCurrentUser = !recipe.likedByCurrentUser
+                if (recipe.likedByCurrentUser) {
+                    recipe.likes++
+                    recipeViewModel.addLike(recipe.id)
+                } else {
+                    recipe.likes--
+                    recipeViewModel.deleteLike(recipe.id)
+                }
+            },
+            fragmentManager = parentFragmentManager,
+            recipeViewModel = recipeViewModel,
+            onSearchKeywordChanged = { keyword -> onSearchKeywordChanged(keyword) },
+            onTypeSelected = { type ->
+                selectedCategoryType = type
+                recipeViewModel.setCategoryType(selectedCategoryType)
+                recipeViewModel.setCategorySlowAging(selectedSlowAging)
+                searchListAdapter.notifyItemChanged(1)                  // 검색 스피너 헤더만 업데이트(모드 번호: 1)
+            },
+            onMethodSelected = { method ->
+                selectedSlowAging = method
+                recipeViewModel.setCategoryType(selectedCategoryType)
+                recipeViewModel.setCategorySlowAging(selectedSlowAging)
+                searchListAdapter.notifyItemChanged(1)                  // 검색 스피너 헤더만 업데이트(모드 번호: 1)
+            },
+            onResetClicked = {
+                selectedCategoryType = null
+                selectedSlowAging = null
+                recipeViewModel.setCategoryType(null)
+                recipeViewModel.setCategorySlowAging(null)
+                searchListAdapter.notifyItemChanged(1)                  // 검색 스피너 헤더만 업데이트(모드 번호: 1)
+            }
+        )
+        searchListAdapter.typeItems = typeItems
+        searchListAdapter.methodItems = methodItems
+        binding.recipeList.adapter = searchListAdapter
+
+        observePagingData()
+    }
+
+    private fun observePagingData() {
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                recipeViewModel.searchResults.collectLatest { pagingData ->
+                    searchListAdapter.submitData(pagingData)
+                }
+            }
+        }
+    }
+
+    private fun onSearchKeywordChanged(keyword: String) {
+        currentSearchKeyword = keyword
+        recipeViewModel.setSearchKeyword(keyword)
+        searchListAdapter.currentKeyword = keyword
+        searchListAdapter.notifyItemChanged(0) // SearchTextHeader 위치
+    }
+
+/*
     /**
      * 검색어 초기화 및 설정
      */
@@ -387,5 +429,5 @@ class SearchListFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
+    }*/
 }

@@ -1,4 +1,4 @@
-package com.example.elixir.recipe.ui
+package com.example.elixir.recipe.ui.fragment
 
 import android.app.Activity
 import android.content.Intent
@@ -33,10 +33,15 @@ import com.example.elixir.member.viewmodel.MemberViewModel
 import com.example.elixir.member.viewmodel.MemberViewModelFactory
 import com.example.elixir.network.AppDatabase
 import com.example.elixir.recipe.data.CommentItem
-import com.example.elixir.recipe.data.CommentRepository
+import com.example.elixir.recipe.repository.CommentRepository
 import com.example.elixir.recipe.data.FlavoringItem
-import com.example.elixir.recipe.data.RecipeRepository
+import com.example.elixir.recipe.repository.RecipeRepository
 import com.example.elixir.recipe.data.RecipeStepData
+import com.example.elixir.recipe.ui.adapter.CommentActionListener
+import com.example.elixir.recipe.ui.adapter.FlavoringAdapter
+import com.example.elixir.recipe.ui.adapter.IngredientTagChipMapAdapter
+import com.example.elixir.recipe.ui.adapter.RecipeCommentAdapter
+import com.example.elixir.recipe.ui.adapter.RecipeStepAdapter
 import com.example.elixir.recipe.viewmodel.CommentViewModel
 import com.example.elixir.recipe.viewmodel.CommentViewModelFactory
 import com.example.elixir.recipe.viewmodel.RecipeViewModel
