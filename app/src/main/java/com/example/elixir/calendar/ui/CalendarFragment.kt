@@ -165,7 +165,7 @@ class CalendarFragment : Fragment(), OnMealClickListener {
         binding.calendarView.setWeekDayFormatter(CustomWeekDayFormatter(requireContext()))
         binding.calendarView.setTitleFormatter(CustomTitleFormatter(requireContext()))
 
-        mealViewModel.get30daysDietLogs(30)
+        mealViewModel.getAllDietLogs()
 
         // 오늘 날짜 배경 원 데코레이터 (최초 1회만 추가)
         try {
@@ -203,7 +203,7 @@ class CalendarFragment : Fragment(), OnMealClickListener {
             selectedCalendarDay = date
             val selectedDateStr = "%04d-%02d-%02d".format(date.year, date.month + 1, date.day)
             mealViewModel.getDietLogsByDate(selectedDateStr)
-            mealViewModel.get30daysDietLogs(30)
+            mealViewModel.getAllDietLogs()
 
             updateSelectedDateDecorator()
 
@@ -276,7 +276,7 @@ class CalendarFragment : Fragment(), OnMealClickListener {
         super.onResume()
         // 선택된 날짜 스타일 복원
         updateSelectedDateDecorator()
-        mealViewModel.get30daysDietLogs(30)
+        mealViewModel.getAllDietLogs()
         val selectedDateStr = "%04d-%02d-%02d".format(selectedCalendarDay.year, selectedCalendarDay.month + 1, selectedCalendarDay.day)
         mealViewModel.getDietLogsByDate(selectedDateStr) // 데이터 다시 불러오기
         // 캘린더 선택 날짜는 항상 유지

@@ -245,9 +245,21 @@ class MealRecentListFragment : Fragment(), OnMealClickListener {
         if (searchText.isEmpty()) {
             filteredMealList.addAll(allMealList)
         } else {
-            // 식단 제목으로 검색
             val filtered = allMealList.filter { meal ->
-                meal.dietTitle.contains(searchText, ignoreCase = true)
+                // 1. 식단 제목으로 검색
+                val titleMatch = meal.dietTitle.contains(searchText, ignoreCase = true)
+
+                // 2. 식재료 이름으로 검색
+                val ingredientMatch = searchInIngredients(meal.ingredientTags, searchText)
+
+                // 3. 날짜로 검색 (여러 형식 지원)
+                val dateMatch = searchInDate(meal.time, searchText)
+
+                // 4. 식단 카테고리로 검색
+                val categoryMatch = meal.dietCategory.contains(searchText, ignoreCase = true)
+
+                // 하나라도 매치되면 결과에 포함
+                titleMatch || ingredientMatch || dateMatch || categoryMatch
             }
             filteredMealList.addAll(filtered)
         }
@@ -255,6 +267,7 @@ class MealRecentListFragment : Fragment(), OnMealClickListener {
         mealAdapter.updateData(filteredMealList)
         updateListVisibility()
     }
+
 
     private fun updateSearchUI(isSearching: Boolean) {
         binding.btnClear.visibility = if (isSearching) View.VISIBLE else View.GONE
@@ -280,6 +293,88 @@ class MealRecentListFragment : Fragment(), OnMealClickListener {
             updateListVisibility()
         }
     }
+
+    private fun searchInIngredients(ingredientTags: List<Int>, searchText: String): Boolean {
+        return try {
+            // 식재료 맵이 있는지 확인
+            val ingredientMap = mealAdapter.getIngredientMap()
+
+            // 각 식재료 ID에 대해 이름 확인
+            ingredientTags.any { tagId ->
+                val ingredient = ingredientMap[tagId]
+                ingredient?.name?.contains(searchText, ignoreCase = true) == true
+            }
+        } catch (e: Exception) {
+            Log.e("MealRecentList", "Error searching ingredients: ${e.message}")
+            false
+        }
+    }
+
+    private fun searchInDate(dateTime: LocalDateTime, searchText: String): Boolean {
+        return try {
+            val searchLower = searchText.lowercase()
+
+            // 다양한 날짜 형식으로 검색 지원
+            val year = dateTime.year.toString()
+            val month = dateTime.monthValue.toString().padStart(2, '0')
+            val day = dateTime.dayOfMonth.toString().padStart(2, '0')
+            val hour = dateTime.hour.toString().padStart(2, '0')
+            val minute = dateTime.minute.toString().padStart(2, '0')
+
+            // 검색 가능한 날짜 형식들
+            val dateFormats = listOf(
+                // 년도
+                year,
+                // 월
+                month,
+                "${month}월",
+                // 일
+                day,
+                "${day}일",
+                // 년-월
+                "$year-$month",
+                "${year}년 ${month}월",
+                // 년-월-일
+                "$year-$month-$day",
+                "${year}년 ${month}월 ${day}일",
+                "$year.$month.$day",
+                "$year/$month/$day",
+                // 월-일
+                "$month-$day",
+                "${month}월 ${day}일",
+                "$month.$day",
+                "$month/$day",
+                // 시간
+                "$hour:$minute",
+                "${hour}시",
+                "${hour}시 ${minute}분",
+                // 요일 (한국어)
+                getKoreanDayOfWeek(dateTime)
+            )
+
+            // 검색어가 날짜 형식 중 하나와 일치하는지 확인
+            dateFormats.any { format ->
+                format.lowercase().contains(searchLower)
+            }
+        } catch (e: Exception) {
+            Log.e("MealRecentList", "Error searching date: ${e.message}")
+            false
+        }
+    }
+
+    private fun getKoreanDayOfWeek(dateTime: LocalDateTime): String {
+        return when (dateTime.dayOfWeek.value) {
+            1 -> "월요일"
+            2 -> "화요일"
+            3 -> "수요일"
+            4 -> "목요일"
+            5 -> "금요일"
+            6 -> "토요일"
+            7 -> "일요일"
+            else -> ""
+        }
+    }
+
 
     private fun convertMealDtoToDietLogData(mealDto: MealDto): DietLogData {
         return DietLogData(

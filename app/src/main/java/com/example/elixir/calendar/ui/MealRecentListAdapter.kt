@@ -38,10 +38,10 @@ class MealRecentListAdapter(
                 .load(item.dietImg)
                 .placeholder(R.drawable.img_blank)
                 .error(R.drawable.img_blank)
-                .into(binding.dietPicture)
+                .into(binding.imgDiet)
             // --- 이미지 처리 끝 ---
 
-            binding.dietNameText.text = item.dietTitle
+            binding.tvDietName.text = item.dietTitle
 
             // 식단 점수에 따른 아이콘 설정 (1~5점)
             val iconRes = when (item.score) {
@@ -56,20 +56,20 @@ class MealRecentListAdapter(
 
             // --- 재료 목록을 FlexboxLayoutManager를 사용하여 표시 (방어 코드 추가) ---
             if (item.ingredientTags.isNullOrEmpty()) {
-                binding.dietIngredientList.visibility = android.view.View.GONE
+                binding.rvDietIngredient.visibility = android.view.View.GONE
                 Log.d("MealListAdapter", "No ingredient tags for item: ${item.dietTitle}, hiding RecyclerView.")
             } else {
-                binding.dietIngredientList.visibility = android.view.View.VISIBLE
+                binding.rvDietIngredient.visibility = android.view.View.VISIBLE
 
                 // FlexboxLayoutManager는 ViewHolder가 생성될 때 한 번만 설정하면 됩니다.
-                if (binding.dietIngredientList.layoutManager == null) {
+                if (binding.rvDietIngredient.layoutManager == null) {
                     val flexboxLayoutManager = FlexboxLayoutManager(context)
                     flexboxLayoutManager.flexDirection = FlexDirection.ROW
                     flexboxLayoutManager.justifyContent = JustifyContent.FLEX_START
-                    binding.dietIngredientList.layoutManager = flexboxLayoutManager
+                    binding.rvDietIngredient.layoutManager = flexboxLayoutManager
                     Log.d("MealListAdapter", "FlexboxLayoutManager set for dietIngredientList.")
                 }
-                binding.dietIngredientList.adapter = MealListIngredientAdapter(item.ingredientTags, ingredientMap)
+                binding.rvDietIngredient.adapter = MealListIngredientAdapter(item.ingredientTags, ingredientMap)
             }
             // --- 재료 목록 처리 끝 ---
 
@@ -80,7 +80,7 @@ class MealRecentListAdapter(
 
             val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
             // 식사 시간 표시
-            binding.dietTimesText.text = buildString {
+            binding.tvDietTimes.text = buildString {
                 append(item.time.format(dateFormatter)) // 년월일만 출력
                 append(" ")
                 append(item.dietCategory)
@@ -103,22 +103,15 @@ class MealRecentListAdapter(
     // 아이템 개수 반환
     override fun getItemCount(): Int = data.size
 
-    // 데이터 업데이트 메소드 (기존과 동일)
+    // 데이터 업데이트 메소드 - 최신순으로 정렬
     fun updateData(newData: List<DietLogData>) {
-        val sortedData = newData.sortedWith(compareBy {
-            when (it.dietCategory) {
-                context.getString(R.string.breakfast) -> 1
-                context.getString(R.string.lunch) -> 2
-                context.getString(R.string.dinner) -> 3
-                context.getString(R.string.snack) -> 4
-                else -> 5
-            }
-        }).toMutableList()
+        // 날짜와 시간 기준으로 최신순 정렬 (내림차순)
+        val sortedData = newData.sortedByDescending { it.time }.toMutableList()
 
         data.clear()
         data.addAll(sortedData)
         notifyDataSetChanged()
-        Log.d("MealListAdapter", "Data updated. Total items: ${data.size}")
+        Log.d("MealListAdapter", "Data updated with latest sort. Total items: ${data.size}")
     }
 
     // 재료 맵 업데이트 메소드 (기존과 동일)
@@ -126,5 +119,9 @@ class MealRecentListAdapter(
         this.ingredientMap = map
         notifyDataSetChanged()
         Log.d("MealListAdapter", "Ingredient map updated. Map size: ${ingredientMap.size}")
+    }
+
+    fun getIngredientMap(): Map<Int, IngredientData> {
+        return ingredientMap
     }
 }
