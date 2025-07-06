@@ -1,9 +1,11 @@
 package com.example.elixir.recipe.repository
 
 import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.liveData
 import com.example.elixir.recipe.data.RecipeData
 import com.example.elixir.recipe.data.RecipeItemData
 import com.example.elixir.recipe.data.RecipeListItemData
@@ -28,46 +30,27 @@ import kotlin.math.max
 
 class RecipeRepository(private val api: RecipeApi, private val dao: RecipeDao) {
     // 레시피 상세 조회 (API로 불러오기, 페이징 적용)
-    fun getRecipes(type: String?, slowAging: String?): Flow<PagingData<RecipeListItemData>> {
+    fun getRecipes(type: String?, slowAging: String?): LiveData<PagingData<RecipeListItemData>> {
         return Pager(
             config = PagingConfig(pageSize = 10),
             pagingSourceFactory = { RecipePagingSource(api, type, slowAging) }
-        ).flow
+        ).liveData
     }
 
     // 레시피 검색
-    fun searchRecipes(keyword: String, categoryType: String?, categorySlowAging: String?
-    ): Flow<PagingData<SearchItemData>> {
+    fun searchRecipes(keyword: String?, categoryType: String?, categorySlowAging: String?
+    ): LiveData<PagingData<SearchItemData>> {
         return Pager(
             config = PagingConfig(pageSize = 10),
-            pagingSourceFactory = { SearchPagingSource(api, keyword, categoryType, categorySlowAging) }).flow
+            pagingSourceFactory = { SearchPagingSource(api, keyword, categoryType, categorySlowAging) }
+        ).liveData
     }
-
-    // 레시피 상세 조회 (API로 불러오기)
-    /*suspend fun getRecipeById(recipeId: Int): Result<RecipeData?> = withContext(Dispatchers.IO) {
-        try {
-            // API에서 레시피 데이터 가져오기
-            val response = api.getRecipeById(recipeId)
-
-            // 데이터를 가져왔다면 데이터 반환. 실패 시 예외 처리
-            if (response.isSuccessful) {
-                val recipe = response.body()?.data
-                Result.success(recipe)
-            } else {
-                Result.failure(Exception("레시피 상세 조회 중 오류가 발생했습니다. 오류코드: ${response.code()}"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }*/
 
     // 상세 레시피 가져오기
     suspend fun getRecipeById(recipeId: Int): RecipeData? = withContext(Dispatchers.IO) {
         try {
-            Log.d("RecipeRepository", "네트워크 요청 시작: recipeId=$recipeId")
             // API에서 레시피 데이터 가져오기
             val response = api.getRecipeById(recipeId)
-            Log.d("RecipeRepository", "네트워크 요청 완료: recipeId=$recipeId")
 
             // 데이터를 가져왔다면 데이터 반환. 실패 시 예외 처리
             if (response.isSuccessful) {

@@ -10,6 +10,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.paging.PagingData
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.elixir.R
 import com.example.elixir.RetrofitClient
@@ -21,6 +22,8 @@ import com.example.elixir.ingredient.viewmodel.IngredientViewModel
 import com.example.elixir.ingredient.viewmodel.IngredientViewModelFactory
 import com.example.elixir.network.AppDatabase
 import com.example.elixir.recipe.data.RecipeData
+import com.example.elixir.recipe.data.RecipeListItemData
+import com.example.elixir.recipe.data.SearchItemData
 import com.example.elixir.recipe.repository.RecipeRepository
 import com.example.elixir.recipe.ui.adapter.SearchListAdapter
 import com.example.elixir.recipe.viewmodel.RecipeViewModel
@@ -45,7 +48,7 @@ class SearchListFragment : Fragment() {
     private var ingredientDataMap: Map<Int, IngredientData>? = null
 
     // 검색 결과를 저장할 변수
-    private var latestRecipeSearchResults: List<RecipeData>? = null
+    private var latestPagingData: PagingData<SearchItemData>? = null
 
     // Repository 및 ViewModel
     private lateinit var recipeRepository: RecipeRepository
@@ -118,10 +121,14 @@ class SearchListFragment : Fragment() {
         }
 
         // 레시피 검색 결과 데이터 관찰
-        recipeViewModel.recipeList.observe(viewLifecycleOwner) { recipes ->
-            latestRecipeSearchResults = recipes
-            Log.d("SearchListFragment", "Recipe search results size: ${recipes.size}")
-            tryInitOrUpdateAdapter()
+        recipeViewModel.searchResults.observe(viewLifecycleOwner) { pagingData ->
+            Log.d("SearchListFragment", "PagingData received from ViewModel")
+            if (::searchListAdapter.isInitialized) {
+                searchListAdapter.submitData(viewLifecycleOwner.lifecycle, pagingData)
+            } else {
+                latestPagingData = pagingData // 아래에서 넘기기 위해 잠깐 저장
+                tryInitOrUpdateAdapter()
+            }
         }
     }
 
@@ -222,21 +229,21 @@ class SearchListFragment : Fragment() {
             onSearchKeywordChanged = { keyword -> onSearchKeywordChanged(keyword) },
             onTypeSelected = { type ->
                 selectedCategoryType = type
-                recipeViewModel.setCategoryType(selectedCategoryType)
-                recipeViewModel.setCategorySlowAging(selectedSlowAging)
+                recipeViewModel.setSearchCategoryType(selectedCategoryType)
+                recipeViewModel.setSearchCategorySlowAging(selectedSlowAging)
                 searchListAdapter.notifyItemChanged(1)                  // 검색 스피너 헤더만 업데이트(모드 번호: 1)
             },
             onMethodSelected = { method ->
                 selectedSlowAging = method
-                recipeViewModel.setCategoryType(selectedCategoryType)
-                recipeViewModel.setCategorySlowAging(selectedSlowAging)
+                recipeViewModel.setSearchCategoryType(selectedCategoryType)
+                recipeViewModel.setSearchCategorySlowAging(selectedSlowAging)
                 searchListAdapter.notifyItemChanged(1)                  // 검색 스피너 헤더만 업데이트(모드 번호: 1)
             },
             onResetClicked = {
                 selectedCategoryType = null
                 selectedSlowAging = null
-                recipeViewModel.setCategoryType(null)
-                recipeViewModel.setCategorySlowAging(null)
+                recipeViewModel.setSearchCategoryType(null)
+                recipeViewModel.setSearchCategorySlowAging(null)
                 searchListAdapter.notifyItemChanged(1)                  // 검색 스피너 헤더만 업데이트(모드 번호: 1)
             }
         )
@@ -248,12 +255,8 @@ class SearchListFragment : Fragment() {
     }
 
     private fun observePagingData() {
-        lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                recipeViewModel.searchResults.collectLatest { pagingData ->
-                    searchListAdapter.submitData(pagingData)
-                }
-            }
+        recipeViewModel.searchResults.observe(viewLifecycleOwner) { pagingData ->
+            searchListAdapter.submitData(lifecycle, pagingData)
         }
     }
 

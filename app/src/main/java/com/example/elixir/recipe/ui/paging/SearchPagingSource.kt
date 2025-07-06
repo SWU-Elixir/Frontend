@@ -7,7 +7,7 @@ import com.example.elixir.recipe.network.api.RecipeApi
 
 class SearchPagingSource(
     private val api: RecipeApi,
-    private val keyword: String,
+    private val keyword: String?,
     private val categoryType: String?,
     private val categorySlowAging: String?
 ) : PagingSource<Int, SearchItemData>() {
@@ -16,14 +16,16 @@ class SearchPagingSource(
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, SearchItemData> {
         try {
             val page = params.key ?: 1
-            val response = api.searchRecipe(
-                keyword = keyword,
-                page = page,
-                size = params.loadSize,
-                categoryType = categoryType,
-                categorySlowAging = categorySlowAging
-            )
-            val responseBody = response.body()
+            val response = keyword?.let {
+                api.searchRecipe(
+                    keyword = it,
+                    page = page,
+                    size = params.loadSize,
+                    categoryType = categoryType,
+                    categorySlowAging = categorySlowAging
+                )
+            }
+            val responseBody = response?.body()
             val recipes = responseBody?.data?.content ?: emptyList()
 
             // 여기서 타입을 명확히!

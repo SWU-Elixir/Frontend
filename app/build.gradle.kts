@@ -125,4 +125,7 @@ dependencies {
     // 페이징 라이브러리 추가
     implementation (libs.androidx.paging.runtime.ktx)
     implementation (libs.androidx.paging.common.ktx)
+
+    implementation (libs.androidx.lifecycle.livedata)
+    implementation (libs.androidx.lifecycle.livedata.ktx)
 }

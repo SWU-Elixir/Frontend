@@ -44,7 +44,6 @@ class HeaderRecommendViewHolder(
     private val recipeViewModel: RecipeViewModel,
     private val onSearchClicked: () -> Unit
 ) : RecipeViewHolder(binding.root) {
-
     private var recommendAdapter: RecipeRecommendationListAdapter? = null
 
     // 추천 레시피 데이터와 식재료 맵을 받아서 뷰 갱신
@@ -137,13 +136,12 @@ class HeaderSpinnerViewHolder(
     }
 }
 
-
 // 레시피 리스트 아이템 홀더: 아이템 정의 및 스크랩, 좋아요 정의
-class ItemViewHolder(val binding: ItemRecipeListBinding, private val ingredientMap: Map<Int, IngredientData>,
+class ItemViewHolder(val binding: ItemRecipeListBinding,
     private val onBookmarkClick: (RecipeItemData) -> Unit, private val onHeartClick: (RecipeItemData) -> Unit,
     private val fragmentManager: FragmentManager) : RecipeViewHolder(binding.root) {
 
-    fun bind(item: RecipeItemData) {
+    fun bind(item: RecipeItemData, ingredientMap: Map<Int, IngredientData>) {
         // 레시피 썸네일
         Glide.with(binding.root.context)
             .load(item.imageUrl)
@@ -178,7 +176,7 @@ class ItemViewHolder(val binding: ItemRecipeListBinding, private val ingredientM
                 flexDirection = FlexDirection.ROW
                 justifyContent = JustifyContent.FLEX_START
             }
-            adapter = IngredientTagChipMapAdapter(
+            binding.ingredientList.adapter = IngredientTagChipMapAdapter(
                 item.ingredientTagIds ?: emptyList(),
                 ingredientMap
             )
@@ -292,7 +290,7 @@ class RecipeListAdapter(
             // 바디: 레시피 리스트 아이템 바인딩
             else -> {
                 val binding = ItemRecipeListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-                ItemViewHolder(binding, ingredientMap, onBookmarkClick, onHeartClick, fragmentManager)
+                ItemViewHolder(binding, onBookmarkClick, onHeartClick, fragmentManager)
             }
         }
     }
@@ -306,7 +304,7 @@ class RecipeListAdapter(
             is RecipeListItemData.SearchSpinnerHeader -> (holder as HeaderSpinnerViewHolder).bind(
                 selectedType, selectedSlowAging, typeItems, methodItems
             )
-            is RecipeListItemData.RecipeItem -> (holder as ItemViewHolder).bind(item.data)
+            is RecipeListItemData.RecipeItem -> (holder as ItemViewHolder).bind(item.data, ingredientMap)
         }
     }
     fun updateIngredientMap(newIngredientMap: Map<Int, IngredientData>) {

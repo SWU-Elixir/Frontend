@@ -11,10 +11,8 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.elixir.R
 import com.example.elixir.RetrofitClient
@@ -29,14 +27,10 @@ import com.example.elixir.network.AppDatabase
 import com.example.elixir.recipe.viewmodel.RecipeViewModel
 import com.example.elixir.recipe.data.RecipeData
 import com.example.elixir.recipe.data.RecipeItemData
-import com.example.elixir.recipe.data.RecipeListItemData
 import com.example.elixir.recipe.repository.RecipeRepository
 import com.example.elixir.recipe.ui.adapter.RecipeListAdapter
-import com.example.elixir.recipe.ui.adapter.RecipeListSpinnerAdapter
-import com.example.elixir.recipe.ui.adapter.RecipeRecommendationListAdapter
 import com.example.elixir.recipe.viewmodel.RecipeViewModelFactory
 import com.google.gson.Gson
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 /**
@@ -45,251 +39,104 @@ import kotlinx.coroutines.launch
  */
 class RecipeFragment : Fragment() {
 
-    companion object {
-        private const val TAG = "RecipeFragment"
-    }
-
     private var _binding: FragmentRecipeBinding? = null
     private val binding get() = _binding!!
 
-    // 데이터
-    private var recipeList: MutableList<RecipeData> = mutableListOf()
-    private var recommendRecipeList: List<RecipeItemData> = emptyList()
     private lateinit var recipeListAdapter: RecipeListAdapter
-
-    private lateinit var recipeRepository: RecipeRepository
+    private lateinit var recipeViewModel: RecipeViewModel
     private lateinit var ingredientViewModel: IngredientViewModel
 
     private var selectedCategoryType: String? = null
     private var selectedSlowAging: String? = null
 
-    // 뷰모델
-    private val recipeViewModel: RecipeViewModel by viewModels {
-        RecipeViewModelFactory(recipeRepository)
-    }
+    private var ingredientDataMap: Map<Int, IngredientData>? = null
+    private var recommendRecipeList: List<RecipeItemData> = emptyList()
 
     private lateinit var recipeRegisterLauncher: ActivityResultLauncher<Intent>
 
-    // 데이터 상태 관리
-    private var latestRecipeList: List<RecipeData>? = null
-    private var ingredientDataMap: Map<Int, IngredientData>? = null
-    private var isDataInitialized = false // 데이터 초기화 상태 추가
-
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentRecipeBinding.inflate(inflater, container, false)
-        // 다른 프래그먼트에서 다시 레시피 프래그먼트로 돌아왔을 때 갱신
+
         parentFragmentManager.setFragmentResultListener("refresh_recipes", this) { _, _ ->
-            Log.d("RecipeFragment", "recipeViewModel.getRecipes 갱신")
-            recipeViewModel.setCategoryType(selectedCategoryType)
-            recipeViewModel.setCategorySlowAging(selectedSlowAging)
-            // 검색 스피너 갱신
-            recipeListAdapter.updateSearchHeader(
-                selectedType = selectedCategoryType,
-                selectedMethod = selectedSlowAging,
-                typeItems = resources.getStringArray(R.array.type_list).toList(),
-                methodItems = resources.getStringArray(R.array.method_list).toList()
-            )
+            refreshRecipes()
         }
+
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+        val recipeRepo = RecipeRepository(RetrofitClient.instanceRecipeApi, AppDatabase.getInstance(requireContext()).recipeDao())
+        val ingredientRepo = IngredientRepository(RetrofitClient.instanceIngredientApi, IngredientDB.getInstance(requireContext()).ingredientDao())
 
-        // 항상 초기화 진행 (중복 초기화 방지는 내부에서 처리)
-        initializeData()
+        recipeViewModel = ViewModelProvider(this, RecipeViewModelFactory(recipeRepo))[RecipeViewModel::class.java]
+        ingredientViewModel = ViewModelProvider(this, IngredientViewModelFactory(ingredientRepo))[IngredientViewModel::class.java]
+
         setupUI()
+        setupObservers()
+        setupRecipeRegisterLauncher()
+
+        ingredientViewModel.loadIngredients()
+        refreshRecipes()
+        loadRecommendRecipe()
     }
 
-    private fun initializeData() {
-        // 이미 초기화된 경우에도 Observer는 다시 설정
-        if (isDataInitialized) {
-            setupObservers()
-            // 기존 데이터가 있다면 바로 어댑터 업데이트
-            if (latestRecipeList != null) {
-                tryInitAdapter()
-            }
-            return
-        }
-
-        // db 초기화
-        val recipeDao = AppDatabase.getInstance(requireContext()).recipeDao()
-        val recipeApi = RetrofitClient.instanceRecipeApi
-        recipeRepository = RecipeRepository(recipeApi, recipeDao)
-
-        // 식재료 ViewModel 초기화
-        val ingredientRepository = IngredientRepository(
-            RetrofitClient.instanceIngredientApi,
-            IngredientDB.getInstance(requireContext()).ingredientDao()
-        )
-        ingredientViewModel = ViewModelProvider(this,
-            IngredientViewModelFactory(ingredientRepository))[IngredientViewModel::class.java]
-
-        // Observer 설정 (항상 실행)
-        setupObservers()
-
-        // 데이터 로딩
-        Log.d("RecipeFragment", "Loading ingredient data...")
-        ingredientViewModel.loadIngredients()
-        Log.d("RecipeFragment", "Loading recipe data...")
+    private fun refreshRecipes() {
         recipeViewModel.setCategoryType(selectedCategoryType)
         recipeViewModel.setCategorySlowAging(selectedSlowAging)
-
-        isDataInitialized = true
     }
 
     private fun setupObservers() {
-        // observe: 레시피 데이터
-        recipeViewModel.recipeList.observe(viewLifecycleOwner) { recipes ->
-            Log.d("RecipeFragment", "Recipe data received: ${recipes?.size ?: 0} items")
-            latestRecipeList = recipes
-            tryInitAdapter()
-        }
-
-        recipeViewModel.deleteResult.observe(viewLifecycleOwner) {
-            recipeViewModel.setCategoryType(selectedCategoryType)
-            recipeViewModel.setCategorySlowAging(selectedSlowAging)
-        }
-
-        // observe: 식재료 데이터 (항상 업데이트)
-        ingredientViewModel.ingredients.observe(viewLifecycleOwner) { ingredientList ->
-            Log.d("RecipeFragment", "Ingredient data received: ${ingredientList?.size ?: 0} items")
-            if (ingredientList != null && ingredientList.isNotEmpty()) {
-                ingredientDataMap = ingredientList.associateBy { it.id }
-                Log.d("RecipeFragment", "Ingredient map created with ${ingredientDataMap?.size} items")
-                // 샘플 로그 추가
-                ingredientList.take(3).forEach { ingredient ->
-                    Log.d("RecipeFragment", "Sample ingredient: ${ingredient.name} (ID: ${ingredient.id})")
-                }
-                tryInitAdapter()
-            } else {
-                Log.d("RecipeFragment", "Ingredient list is null or empty")
+        // 레시피 목록
+        recipeViewModel.recipes.observe(viewLifecycleOwner) { pagingData ->
+            if (!::recipeListAdapter.isInitialized) {
+                setupRecipeListAdapter(ingredientDataMap ?: emptyMap())
             }
+            recipeListAdapter.submitData(lifecycle, pagingData)
+        }
+
+        // 식재료 목록
+        ingredientViewModel.ingredients.observe(viewLifecycleOwner) { ingredients ->
+            ingredientDataMap = ingredients.associateBy { it.id }
+
+            if (::recipeListAdapter.isInitialized) {
+                try {
+                    val updateMethod = recipeListAdapter.javaClass.getMethod("updateIngredientMap", Map::class.java)
+                    updateMethod.invoke(recipeListAdapter, ingredientDataMap)
+                    recipeListAdapter.notifyItemRangeChanged(0, recipeListAdapter.itemCount)
+                } catch (e: Exception) {
+                    Log.w("RecipeFragment", "updateIngredientMap() reflection failed: ${e.message}")
+                }
+            }
+        }
+
+        // 삭제 후 다시 로드
+        recipeViewModel.deleteResult.observe(viewLifecycleOwner) {
+            refreshRecipes()
         }
     }
 
     private fun setupUI() {
-        // 레이아웃 매니저 설정
         binding.recipeList.layoutManager = LinearLayoutManager(requireContext())
-
-        // FAB, 스피너, 검색 등 UI 설정
-        setupFabClickListener()
-
-        // 추천 레시피 데이터 로드 (한 번만)
-        if (recommendRecipeList.isEmpty()) {
-            loadRecommendRecipe()
-        }
-        setupRecipeRegisterLauncher()
-    }
-
-    private fun setupRecipeRegisterLauncher() {
-        recipeRegisterLauncher = registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult()
-        ) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val data = result.data?.getStringExtra("recipeData")
-                if (data != null) {
-                    val newRecipe = Gson().fromJson(data, RecipeData::class.java)
-                    recipeList.add(newRecipe)
-                    recipeViewModel.setCategoryType(selectedCategoryType)
-                    recipeViewModel.setCategorySlowAging(selectedSlowAging)
-                    recipeListAdapter.updateSearchHeader(
-                        selectedType = selectedCategoryType,
-                        selectedMethod = selectedSlowAging,
-                        typeItems = resources.getStringArray(R.array.type_list).toList(),
-                        methodItems = resources.getStringArray(R.array.method_list).toList()
-                    )
-                }
+        binding.fab.setOnClickListener {
+            val intent = Intent(requireContext(), ToolbarActivity::class.java).apply {
+                putExtra("mode", 9)
             }
+            recipeRegisterLauncher.launch(intent)
         }
     }
 
-    // 두 데이터가 모두 준비됐을 때만 어댑터 초기화
-    private fun tryInitAdapter() {
-        val recipes = latestRecipeList
-        val ingredientMap = ingredientDataMap
-
-        Log.d(
-            "RecipeFragment",
-            "tryInitAdapter called - recipes: ${recipes?.size}, ingredients: ${ingredientMap?.size}"
-        )
-
-        // 레시피 데이터만 있어도 일단 어댑터 초기화 (식재료는 나중에 업데이트)
-        if (recipes != null) {
-            // 식재료 맵이 없으면 빈 맵으로 초기화
-            val safeIngredientMap = ingredientMap ?: emptyMap()
-
-            Log.d("RecipeFragment", "Using ingredient map size: ${safeIngredientMap.size}")
-
-            if (recipes.isNotEmpty()) {
-                setUpRecipeListAdapter(safeIngredientMap)
-                if (!::recipeListAdapter.isInitialized) {
-                    recipeList = recipes.toMutableList()
-                    setUpRecipeListAdapter(safeIngredientMap)
-                } else {
-                    // 이미 초기화된 어댑터라면 데이터 업데이트
-                    recipeViewModel.setCategoryType(selectedCategoryType)
-                    recipeViewModel.setCategorySlowAging(selectedSlowAging)
-                    recipeListAdapter.updateSearchHeader(
-                        selectedType = selectedCategoryType,
-                        selectedMethod = selectedSlowAging,
-                        typeItems = resources.getStringArray(R.array.type_list).toList(),
-                        methodItems = resources.getStringArray(R.array.method_list).toList()
-                    )
-
-                    // 식재료 데이터가 있다면 어댑터에 업데이트
-                    if (safeIngredientMap.isNotEmpty()) {
-                        // RecipeListAdapter에 updateIngredientMap 메서드가 있는지 확인 필요
-                        try {
-                            val updateMethod = recipeListAdapter.javaClass.getMethod(
-                                "updateIngredientMap",
-                                Map::class.java
-                            )
-                            updateMethod.invoke(recipeListAdapter, safeIngredientMap)
-                            Log.d(
-                                "RecipeFragment",
-                                "Successfully updated ingredient map in adapter"
-                            )
-                        } catch (e: Exception) {
-                            Log.w(
-                                "RecipeFragment",
-                                "updateIngredientMap method not found, calling notifyDataSetChanged()"
-                            )
-                            // 리플렉션이 실패하면 전체 데이터를 다시 설정
-                            setUpRecipeListAdapter(safeIngredientMap)
-                        }
-                    }
-                }
-                binding.recipeList.visibility = View.VISIBLE
-                binding.tvNoRecipe.visibility = View.GONE
-                Log.d("RecipeFragment", "RecipeList is now VISIBLE")
-            } else {
-                binding.recipeList.visibility = View.GONE
-                binding.tvNoRecipe.visibility = View.VISIBLE
-                Log.d("RecipeFragment", "No recipes - showing empty text")
-            }
-        } else {
-            Log.d("RecipeFragment", "Recipes data is null - waiting for data")
-        }
-    }
-
-    // 레시피 리스트 어댑터 설정
-    private fun setUpRecipeListAdapter(safeIngredientMap: Map<Int, IngredientData>) {
+    private fun setupRecipeListAdapter(ingredientMap: Map<Int, IngredientData>) {
         val typeItems = resources.getStringArray(R.array.type_list).toList()
         val methodItems = resources.getStringArray(R.array.method_list).toList()
 
         recipeListAdapter = RecipeListAdapter(
-            safeIngredientMap,
+            ingredientMap,
             onBookmarkClick = { recipe ->
                 recipe.scrappedByCurrentUser = !recipe.scrappedByCurrentUser
-                if (recipe.scrappedByCurrentUser) {
-                    recipeViewModel.addScrap(recipe.id)
-                } else {
-                    recipeViewModel.deleteScrap(recipe.id)
-                }
+                if (recipe.scrappedByCurrentUser) recipeViewModel.addScrap(recipe.id)
+                else recipeViewModel.deleteScrap(recipe.id)
             },
             onHeartClick = { recipe ->
                 recipe.likedByCurrentUser = !recipe.likedByCurrentUser
@@ -304,44 +151,50 @@ class RecipeFragment : Fragment() {
             fragmentManager = parentFragmentManager,
             recipeViewModel = recipeViewModel,
             onSearchClicked = {
-                val transaction = parentFragmentManager.beginTransaction()
-                transaction.replace(R.id.fullscreenContainer, SearchFragment())
-                transaction.addToBackStack(null)
-                transaction.commit()
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.fullscreenContainer, SearchFragment())
+                    .addToBackStack(null)
+                    .commit()
             },
             onTypeSelected = { type ->
                 selectedCategoryType = type
-                recipeViewModel.setCategoryType(selectedCategoryType)
+                refreshRecipes()
             },
             onMethodSelected = { method ->
                 selectedSlowAging = method
-                recipeViewModel.setCategoryType(selectedCategoryType)
-                recipeViewModel.setCategorySlowAging(selectedSlowAging)
-                recipeListAdapter.notifyItemChanged(1)                  // 검색 스피너 헤더만 업데이트(모드 번호: 1)
+                refreshRecipes()
+                recipeListAdapter.notifyItemChanged(1)
             },
             onResetClicked = {
                 selectedCategoryType = null
                 selectedSlowAging = null
-                recipeViewModel.setCategoryType(null)
-                recipeViewModel.setCategorySlowAging(null)
-                recipeListAdapter.notifyItemChanged(1)                  // 검색 스피너 헤더만 업데이트(모드 번호: 1)
+                refreshRecipes()
+                recipeListAdapter.notifyItemChanged(1)
             }
-        )
-        recipeListAdapter.typeItems = typeItems
-        recipeListAdapter.methodItems = methodItems
+        ).apply {
+            this.typeItems = typeItems
+            this.methodItems = methodItems
+            this.recommendRecipeList = recommendRecipeList
+        }
+
         binding.recipeList.adapter = recipeListAdapter
-
-        observePagingData()
-
-        // 추천 레시피 데이터 로드
-        //loadRecommendRecipe()
     }
 
-    private fun observePagingData() {
-        lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                recipeViewModel.recipes.collectLatest { pagingData ->
-                    recipeListAdapter.submitData(pagingData)
+    private fun setupRecipeRegisterLauncher() {
+        recipeRegisterLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                result.data?.getStringExtra("recipeData")?.let { json ->
+                    val newRecipe = Gson().fromJson(json, RecipeItemData::class.java)
+                    recipeViewModel.setCategoryType(selectedCategoryType)
+                    recipeViewModel.setCategorySlowAging(selectedSlowAging)
+                    recipeListAdapter.updateSearchHeader(
+                        selectedType = selectedCategoryType,
+                        selectedMethod = selectedSlowAging,
+                        typeItems = resources.getStringArray(R.array.type_list).toList(),
+                        methodItems = resources.getStringArray(R.array.method_list).toList()
+                    )
                 }
             }
         }
@@ -350,20 +203,18 @@ class RecipeFragment : Fragment() {
     private fun loadRecommendRecipe() {
         lifecycleScope.launch {
             try {
-                val api = RetrofitClient.instanceRecipeApi
-                val response = api.getRecipeByRecommend()
+                val response = RetrofitClient.instanceRecipeApi.getRecipeByRecommend()
                 if (response.isSuccessful) {
-                    response.body()?.data?.let { recommendList ->
-                        recommendRecipeList = recommendList
-                        // 어댑터가 이미 초기화되어 있으면 바로 전달
+                    response.body()?.data?.let {
+                        recommendRecipeList = it
                         if (::recipeListAdapter.isInitialized) {
-                            recipeListAdapter.recommendRecipeList = recommendList
+                            recipeListAdapter.recommendRecipeList = it
                             recipeListAdapter.notifyItemChanged(0)
                         }
                     }
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "추천 레시피 로드 실패", e)
+                Log.e("RecipeFragment", "추천 레시피 로드 실패", e)
             }
         }
     }
@@ -372,203 +223,4 @@ class RecipeFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
-
-    // 등록 설정
-    private fun setupFabClickListener() {
-        binding.fab.setOnClickListener {
-            val intent = Intent(requireContext(), ToolbarActivity::class.java).apply {
-                putExtra("mode", 9) // 레시피 등록 모드
-            }
-            recipeRegisterLauncher.launch(intent)
-            // 데이터 갱신
-            recipeViewModel.setCategoryType(selectedCategoryType)
-            recipeViewModel.setCategorySlowAging(selectedSlowAging)
-        }
-    }
-/*
-    // 저속노화 스피너
-    private fun setupMethodSpinner() {
-        val methodItems = resources.getStringArray(R.array.method_list).toList()
-        val methodAdapter = RecipeListSpinnerAdapter(requireContext(), methodItems)
-
-        binding.spinnerDifficulty.adapter = methodAdapter
-        binding.spinnerDifficulty.setSelection(0)
-        binding.spinnerDifficulty.onItemSelectedListener =
-            object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(
-                    parent: AdapterView<*>,
-                    view: View?,
-                    position: Int,
-                    id: Long
-                ) {
-                    if (position == 0) { // 첫 번째 항목 "선택" 시 (자동 이동 제외)
-                        selectedSlowAging = null
-                    } else {
-                        selectedSlowAging = parent.getItemAtPosition(position).toString()
-                    }
-
-                    // ViewModel 함수 호출
-                    recipeViewModel.setCategoryType(selectedCategoryType)
-                    recipeViewModel.setCategorySlowAging(selectedSlowAging)
-                    Log.d("RecipeFragment", "Method selected: $selectedSlowAging")
-
-                    updateResetButtonVisibility()
-                }
-
-                override fun onNothingSelected(parent: AdapterView<*>) {
-                    // 아무것도 선택되지 않았을 때도 가시성 업데이트 (필요하다면)
-                    updateResetButtonVisibility()
-                }
-            }
-    }
-
-    // 레시피 종류 스피너
-    private fun setupTypeSpinner() {
-        val typeItems = resources.getStringArray(R.array.type_list).toList()
-        val typeAdapter = RecipeListSpinnerAdapter(requireContext(), typeItems)
-        binding.spinnerType.adapter = typeAdapter
-        binding.spinnerType.setSelection(0)
-        binding.spinnerType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                if (position == 0) { // 첫 번째 항목 "선택" 시 (자동 이동 제외)
-                    selectedCategoryType = null
-                } else {
-                    selectedCategoryType = parent.getItemAtPosition(position).toString()
-                    if (selectedCategoryType == "음료/차")
-                        selectedCategoryType = "음료_차"
-                    else if (selectedCategoryType == "양념/소스/잼")
-                        selectedCategoryType = "양념_소스_잼"
-                }
-
-                // ViewModel 함수 호출
-                recipeViewModel.setCategoryType(selectedCategoryType)
-                recipeViewModel.setCategorySlowAging(selectedSlowAging)
-                Log.d("RecipeFragment", "Type selected: $selectedCategoryType")
-
-                // !!! 중요: 스피너 선택 시 리셋 버튼 가시성 업데이트 호출 !!!
-                updateResetButtonVisibility()
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>) {
-                // 아무것도 선택되지 않았을 때도 가시성 업데이트 (필요하다면)
-                updateResetButtonVisibility()
-            }
-        }
-    }
-
-    // 리셋 버튼 클릭 이벤트
-    private fun setupResetButton() {
-        binding.resetButton.setOnClickListener {
-            resetSpinners()
-            updateResetButtonVisibility()
-        }
-    }
-*/
-    /**
-     * 추천 레시피 ViewPager 설정
-     */
-    /*private fun setupRecommendationViewPager() {
-        val recommendationAdapter = RecipeRecommendationListAdapter(
-            recommendRecipeList,
-            fragmentManager = parentFragmentManager,
-            recipeViewModel,
-            ingredientDataMap // 추가
-        )
-        binding.recommendationList.adapter = recommendationAdapter
-
-        // 페이지 전환 애니메이션 설정
-        binding.recommendationList.setPageTransformer { page, position ->
-            val absPos = kotlin.math.abs(position)
-            page.scaleY = 0.85f + (1 - absPos) * 0.15f
-            page.scaleX = 0.85f + (1 - absPos) * 0.15f
-            page.translationX = -position * 40
-        }
-
-        // DotsIndicator를 ViewPager2에 연결
-        binding.indicator.attachTo(binding.recommendationList)
-    }
-
-    *//**
-     * 검색 버튼 클릭 이벤트 설정
-     * 전체 화면으로 SearchFragment 전환
-     *//*
-    private fun setupSearchButton() {
-        binding.searchButton.setOnClickListener {
-            val transaction = parentFragmentManager.beginTransaction()
-            transaction.replace(R.id.fullscreenContainer, SearchFragment())
-            transaction.addToBackStack(null)
-            transaction.commit()
-        }
-    }
-
-    *//**
-     * 필터 조건에 따라 레시피 리스트 필터링
-     * 선택된 저속노화 방법과 레시피 종류에 따라 레시피 목록을 필터링하고 UI를 업데이트
-     *//*
-    private fun filterRecipes() {
-        // 스피너에서 선택된 저속노화 방법과 레시피 종류 가져오기
-        val selectedMethod = binding.spinnerDifficulty.selectedItem?.toString()
-        val selectedType = binding.spinnerType.selectedItem?.toString()
-
-        // 선택된 조건에 따라 레시피 필터링
-        val filtered = recipeList.filter { recipe ->
-            // 저속노화 방법 필터링 조건
-            // "저속노화"가 선택된 경우 모든 레시피 포함, 그 외에는 선택된 방법과 일치하는 레시피만 포함
-            val methodMatch = selectedMethod == "저속노화" || recipe.categorySlowAging == selectedMethod
-            // 레시피 종류 필터링 조건
-            // "종류"가 선택된 경우 모든 레시피 포함, 그 외에는 선택된 종류와 일치하는 레시피만 포함
-            val typeMatch = selectedType == "종류" || recipe.categoryType == selectedType
-            // 두 조건이 모두 만족하는 레시피만 필터링
-            methodMatch && typeMatch
-        }
-
-        // 필터링된 레시피 목록으로 어댑터 데이터 업데이트
-        //(binding.recipeList.adapter as RecipeListAdapter).updateData(filtered)
-
-        // 필터링 결과에 따른 UI 업데이트
-        // 결과가 없는 경우 빈 화면 표시, 있는 경우 레시피 목록 표시
-
-    }
-
-    *//**
-     * 필터링 결과에 따른 UI 업데이트
-     *//*
-    private fun resetSpinners() {
-        binding.spinnerDifficulty.setSelection(0)
-        binding.spinnerType.setSelection(0)
-    }*/
-
-    /*private fun loadRecommendRecipe() {
-        lifecycleScope.launch {
-            try {
-                val api = RetrofitClient.instanceRecipeApi
-                val response = api.getRecipeByRecommend()
-                if (response.isSuccessful) {
-                    response.body()?.data?.let { recommendList ->
-                        recommendRecipeList = recommendList
-                        // ViewPager2 어댑터 업데이트
-                        (binding.recommendationList.adapter as? RecipeRecommendationListAdapter)?.updateData(recommendList)
-                            ?: run {
-                                // 어댑터가 없는 경우 새로 생성
-                                binding.recommendationList.adapter = RecipeRecommendationListAdapter(
-                                    recommendList,
-                                    fragmentManager = parentFragmentManager,
-                                    recipeViewModel,
-                                    ingredientDataMap // 추가
-                                )
-                            }
-                    }
-                } else {
-                    Log.e(TAG, "추천 레시피 로드 실패: ${response.code()}, ${response.message()}")
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "추천 레시피 로드 실패", e)
-            }
-        }
-    }*/
 }
