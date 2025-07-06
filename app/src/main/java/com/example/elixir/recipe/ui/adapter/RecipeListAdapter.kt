@@ -90,13 +90,16 @@ class HeaderSpinnerViewHolder(
     private val onResetClicked: () -> Unit
 ) : RecipeViewHolder(binding.root) {
 
-    fun bind(selectedType: String?, selectedMethod: String?, typeItems: List<String>, methodItems: List<String>) {
+    fun bind(selectedType: String?, selectedSlowAging: String?, typeItems: List<String>, slowAgingItems: List<String>) {
         // 레시피 종류 스피너
         val typeAdapter = RecipeListSpinnerAdapter(binding.root.context, typeItems)
         binding.spinnerType.adapter = typeAdapter
 
         val typeIndex = typeItems.indexOf(selectedType)
-        binding.spinnerType.setSelection(if (typeIndex >= 0) typeIndex else 0, false)
+        val validTypeIndex = if (typeIndex >= 0) typeIndex else 0
+
+        typeAdapter.setSelectedPosition(validTypeIndex)
+        binding.spinnerType.setSelection(validTypeIndex, false)
 
         binding.spinnerType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
@@ -105,23 +108,29 @@ class HeaderSpinnerViewHolder(
                 if(value == "음료/차") value = "음료_차"
                 else if(value == "양념/소스/잼") value = "양념_소스_잼"
 
-                // 값이 다를 때만 갱신
+                // UI 업데이트
+                (binding.spinnerType.adapter as? RecipeListSpinnerAdapter)?.setSelectedPosition(position)
+
                 if (value != selectedType) {
                     onTypeSelected(value)
                 }
             }
+
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
 
         // 저속노화 스피너
-        val methodAdapter = RecipeListSpinnerAdapter(binding.root.context, methodItems)
-        binding.spinnerDifficulty.adapter = methodAdapter
-        val methodIndex = methodItems.indexOf(selectedMethod)
-        binding.spinnerDifficulty.setSelection(if (methodIndex >= 0) methodIndex else 0, false)
+        val slowAgingAdapter = RecipeListSpinnerAdapter(binding.root.context, slowAgingItems)
+        binding.spinnerDifficulty.adapter = slowAgingAdapter
+
+        val slowAgingIndex = slowAgingItems.indexOf(selectedSlowAging)
+        val validSlowAgingIndex = if (slowAgingIndex >= 0) slowAgingIndex else 0
+
+        slowAgingAdapter.setSelectedPosition(validSlowAgingIndex)
+        binding.spinnerDifficulty.setSelection(validSlowAgingIndex, false)
+
         binding.spinnerDifficulty.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            private var initialized = false
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                if (!initialized) { initialized = true; return }
                 val value = if (position == 0) null else parent.getItemAtPosition(position).toString()
                 onMethodSelected(value)
             }
@@ -129,7 +138,7 @@ class HeaderSpinnerViewHolder(
         }
 
         // 리셋 버튼
-        val isMethodSelected = !selectedMethod.isNullOrEmpty()
+        val isMethodSelected = !selectedSlowAging.isNullOrEmpty()
         val isTypeSelected = !selectedType.isNullOrEmpty()
         binding.resetButton.visibility = if (isMethodSelected || isTypeSelected) View.VISIBLE else View.GONE
         binding.resetButton.setOnClickListener { onResetClicked() }
@@ -190,7 +199,6 @@ class ItemViewHolder(val binding: ItemRecipeListBinding,
         )
         binding.bookmarkButton.setOnClickListener {
             onBookmarkClick(item)
-            // notifyItemChanged는 Adapter에서 처리
         }
 
         // 좋아요 버튼

@@ -1,4 +1,4 @@
-package com.example.elixir.recipe.viewmodel
+﻿package com.example.elixir.recipe.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -7,7 +7,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
-import androidx.paging.cachedIn
 import com.example.elixir.recipe.data.RecipeData
 import com.example.elixir.recipe.data.RecipeListItemData
 import com.example.elixir.recipe.data.SearchItemData
@@ -57,26 +56,27 @@ class RecipeViewModel(private val repository: RecipeRepository) : ViewModel() {
     // 카테고리 필터 변경 함수
     fun setCategoryType(type: String?) {
         categoryType = type
+        Log.d("RecipeViewModel", "categoryType: $categoryType")
         loadRecipes()
     }
 
     fun setCategorySlowAging(slowAging: String?) {
         categorySlowAging = slowAging
+        Log.d("RecipeViewModel", "categorySlowAging: $categorySlowAging")
         loadRecipes()
     }
 
     private fun loadRecipes() {
-        // 새 LiveData 받기
-        val newSource = repository.getRecipes(categoryType, categorySlowAging)
+        currentSource?.let { _recipes.removeSource(it) }  // 이전 소스 제거
 
-        // 기존 소스 제거
-        currentSource?.let { _recipes.removeSource(it) }
+        val newSource = repository.getRecipes(categoryType, categorySlowAging)
 
         currentSource = newSource
         _recipes.addSource(newSource) {
             _recipes.value = it
         }
     }
+
 
     // 검색 필터 세팅 함수들
     fun setSearchKeyword(keyword: String?) {

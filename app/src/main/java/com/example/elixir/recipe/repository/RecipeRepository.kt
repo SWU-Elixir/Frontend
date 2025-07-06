@@ -32,7 +32,7 @@ class RecipeRepository(private val api: RecipeApi, private val dao: RecipeDao) {
     // 레시피 상세 조회 (API로 불러오기, 페이징 적용)
     fun getRecipes(type: String?, slowAging: String?): LiveData<PagingData<RecipeListItemData>> {
         return Pager(
-            config = PagingConfig(pageSize = 10),
+            config = PagingConfig(pageSize = 30),
             pagingSourceFactory = { RecipePagingSource(api, type, slowAging) }
         ).liveData
     }
@@ -41,7 +41,7 @@ class RecipeRepository(private val api: RecipeApi, private val dao: RecipeDao) {
     fun searchRecipes(keyword: String?, categoryType: String?, categorySlowAging: String?
     ): LiveData<PagingData<SearchItemData>> {
         return Pager(
-            config = PagingConfig(pageSize = 10),
+            config = PagingConfig(pageSize = 30),
             pagingSourceFactory = { SearchPagingSource(api, keyword, categoryType, categorySlowAging) }
         ).liveData
     }

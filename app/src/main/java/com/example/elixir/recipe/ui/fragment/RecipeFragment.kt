@@ -163,13 +163,11 @@ class RecipeFragment : Fragment() {
             onMethodSelected = { method ->
                 selectedSlowAging = method
                 refreshRecipes()
-                recipeListAdapter.notifyItemChanged(1)
             },
             onResetClicked = {
                 selectedCategoryType = null
                 selectedSlowAging = null
                 refreshRecipes()
-                recipeListAdapter.notifyItemChanged(1)
             }
         ).apply {
             this.typeItems = typeItems
