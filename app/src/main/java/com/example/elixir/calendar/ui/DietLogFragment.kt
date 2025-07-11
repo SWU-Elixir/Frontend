@@ -61,6 +61,8 @@ import java.io.File
 import java.io.FileOutputStream
 import java.util.Locale
 import android.graphics.Bitmap
+import com.example.elixir.dialog.EditNoticedDialog
+import com.example.elixir.dialog.PreviousNoticedDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -495,104 +497,153 @@ class DietLogFragment : Fragment() {
 
         // 작성 버튼
         dietLogBinding.btnWriteDietLog.setOnClickListener {
-            SaveDialog(requireActivity()) {
-                // 현재 입력된 값들로 mealData 객체 생성
-                val currentMealData = DietLogData(
-                    id = if (isEditMode) dietId else 0,
-                    dietTitle = dietTitle,
-                    dietCategory = dietCategory,
-                    score = score,
-                    ingredientTags = ingredientTags,
-                    time = if (isEditMode) {
-                        LocalDateTime.of(mealData.time.toLocalDate(), selectedTime)
-                    } else {
-                        LocalDateTime.of(selectedDate ?: LocalDate.now(), selectedTime)  // ← 새 식단이므로 선택된 날짜 사용
-                    },
-                    dietImg = dietImg
-                )
 
-                // 코루틴으로 이미지 처리
-                lifecycleScope.launch {
-                    // 업로드용 이미지 File 객체 생성
-                    val imageFile: File? = when {
-                        dietImg.startsWith("http://") || dietImg.startsWith("https://") -> {
-                            // 🔥 서버 이미지 처리 로직 수정
-                            Log.d("DietLogFragment", "Processing server image: $dietImg")
+            // 시간 계산
+            val calculatedTime = if (isEditMode) {
+                LocalDateTime.of(mealData.time.toLocalDate(), selectedTime)
+            } else {
+                LocalDateTime.of(selectedDate ?: LocalDate.now(), selectedTime)
+            }
 
-                            // 불러온 식단의 서버 이미지를 다운로드해서 파일로 변환
-                            val downloadedFile = downloadImageToFile(dietImg)
-                            if (downloadedFile != null) {
-                                Log.d("DietLogFragment", "Server image downloaded successfully")
-                                downloadedFile
-                            } else {
-                                Log.e("DietLogFragment", "Failed to download server image")
-                                // 다운로드 실패 시에도 null 반환하지 말고 기본 이미지로 처리
-                                val defaultImageResId = when (dietCategory) {
-                                    getString(R.string.breakfast) -> R.drawable.ic_meal_morning
-                                    getString(R.string.lunch) -> R.drawable.ic_meal_lunch
-                                    getString(R.string.dinner) -> R.drawable.ic_meal_dinner
-                                    getString(R.string.snack) -> R.drawable.ic_meal_snack
-                                    else -> R.drawable.img_blank
-                                }
-                                copyResourceToFile(requireContext(), defaultImageResId)
-                            }
-                        }
-                        dietImg.startsWith("android.resource://") -> {
-                            val resId = dietImg.substringAfterLast("/").toIntOrNull()
-                            copyResourceToFile(requireContext(), resId ?: R.drawable.img_blank)
-                        }
-                        dietImg.startsWith("content://") -> {
-                            val uri = Uri.parse(dietImg)
-                            val copiedUri = copyUriToInternal(requireContext(), uri)
-                            copiedUri?.let {
-                                val file = File(it.path ?: "")
-                                if (file.exists()) file else null
-                            }
-                        }
-                        dietImg.startsWith("file://") -> {
-                            val uri = Uri.parse(dietImg)
-                            val file = File(uri.path ?: "")
-                            if (file.exists()) file else null
-                        }
-                        else -> {
-                            if (dietImg.isNotBlank()) {
-                                val file = File(dietImg)
-                                if (file.exists()) file else null
-                            } else null
-                        }
-                    }
+            // 실제 저장 로직을 실행하는 함수
+            fun executeSave() {
+                SaveDialog(requireActivity()) {
+                    // 현재 입력된 값들로 mealData 객체 생성
+                    val currentMealData = DietLogData(
+                        id = if (isEditMode) dietId else 0,
+                        dietTitle = dietTitle,
+                        dietCategory = dietCategory,
+                        score = score,
+                        ingredientTags = ingredientTags,
+                        time = calculatedTime,
+                        dietImg = dietImg
+                    )
 
-                    // 메인 스레드에서 UI 업데이트
-                    withContext(Dispatchers.Main) {
-                        // 수정 모드
-                        if (isEditMode) {
-                            try {
-                                dietLogViewModel.updateDietLog(currentMealData, imageFile)
-                                Toast.makeText(requireContext(), "식단 기록을 수정하였습니다.", Toast.LENGTH_SHORT).show()
-                            } catch (e: Exception) {
-                                Log.e("DietLogFragment", "식단 기록 수정 중 오류", e)
-                                dietLogViewModel.updateToLocalDB(currentMealData)
-                                Toast.makeText(requireContext(), "식단 기록 수정에 실패했습니다. 로컬에 저장되었습니다.", Toast.LENGTH_SHORT).show()
-                            }
-                        } else {
-                            try {
-                                if (imageFile != null) {
-                                    dietLogViewModel.saveAndUpload(currentMealData, imageFile)
-                                    Toast.makeText(requireContext(), "식단 기록을 저장하였습니다.", Toast.LENGTH_SHORT).show()
+                    // 코루틴으로 이미지 처리
+                    lifecycleScope.launch {
+                        // 업로드용 이미지 File 객체 생성
+                        val imageFile: File? = when {
+                            dietImg.startsWith("http://") || dietImg.startsWith("https://") -> {
+                                // 🔥 서버 이미지 처리 로직 수정
+                                Log.d("DietLogFragment", "Processing server image: $dietImg")
+
+                                // 불러온 식단의 서버 이미지를 다운로드해서 파일로 변환
+                                val downloadedFile = downloadImageToFile(dietImg)
+                                if (downloadedFile != null) {
+                                    Log.d("DietLogFragment", "Server image downloaded successfully")
+                                    downloadedFile
                                 } else {
-                                    Toast.makeText(requireContext(), "이미지 파일 처리에 실패했습니다.", Toast.LENGTH_SHORT).show()
-                                    Log.e("DietLogFragment", "Image file is null for new save")
-                                    return@withContext
+                                    Log.e("DietLogFragment", "Failed to download server image")
+                                    // 다운로드 실패 시에도 null 반환하지 말고 기본 이미지로 처리
+                                    val defaultImageResId = when (dietCategory) {
+                                        getString(R.string.breakfast) -> R.drawable.ic_meal_morning
+                                        getString(R.string.lunch) -> R.drawable.ic_meal_lunch
+                                        getString(R.string.dinner) -> R.drawable.ic_meal_dinner
+                                        getString(R.string.snack) -> R.drawable.ic_meal_snack
+                                        else -> R.drawable.img_blank
+                                    }
+                                    copyResourceToFile(requireContext(), defaultImageResId)
                                 }
-                            } catch (e: Exception) {
-                                Log.e("DietLogFragment", "식단 기록 저장 중 오류", e)
-                                dietLogViewModel.saveToLocalDB(currentMealData)
-                                Toast.makeText(requireContext(), "식단 기록을 저장하지 못했습니다. 로컬에 저장되었습니다.", Toast.LENGTH_SHORT).show()
+                            }
+                            dietImg.startsWith("android.resource://") -> {
+                                val resId = dietImg.substringAfterLast("/").toIntOrNull()
+                                copyResourceToFile(requireContext(), resId ?: R.drawable.img_blank)
+                            }
+                            dietImg.startsWith("content://") -> {
+                                val uri = Uri.parse(dietImg)
+                                val copiedUri = copyUriToInternal(requireContext(), uri)
+                                copiedUri?.let {
+                                    val file = File(it.path ?: "")
+                                    if (file.exists()) file else null
+                                }
+                            }
+                            dietImg.startsWith("file://") -> {
+                                val uri = Uri.parse(dietImg)
+                                val file = File(uri.path ?: "")
+                                if (file.exists()) file else null
+                            }
+                            else -> {
+                                if (dietImg.isNotBlank()) {
+                                    val file = File(dietImg)
+                                    if (file.exists()) file else null
+                                } else null
+                            }
+                        }
+
+                        // 메인 스레드에서 UI 업데이트
+                        withContext(Dispatchers.Main) {
+                            // 수정 모드
+                            if (isEditMode) {
+                                try {
+                                    dietLogViewModel.updateDietLog(currentMealData, imageFile)
+                                    Toast.makeText(requireContext(), "식단 기록을 수정하였습니다.", Toast.LENGTH_SHORT).show()
+                                } catch (e: Exception) {
+                                    Log.e("DietLogFragment", "식단 기록 수정 중 오류", e)
+                                    dietLogViewModel.updateToLocalDB(currentMealData)
+                                    Toast.makeText(requireContext(), "식단 기록 수정에 실패했습니다. 로컬에 저장되었습니다.", Toast.LENGTH_SHORT).show()
+                                }
+                            } else {
+                                try {
+                                    if (imageFile != null) {
+                                        dietLogViewModel.saveAndUpload(currentMealData, imageFile)
+                                        Toast.makeText(requireContext(), "식단 기록을 저장하였습니다.", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        Toast.makeText(requireContext(), "이미지 파일 처리에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                                        Log.e("DietLogFragment", "Image file is null for new save")
+                                        return@withContext
+                                    }
+                                } catch (e: Exception) {
+                                    Log.e("DietLogFragment", "식단 기록 저장 중 오류", e)
+                                    dietLogViewModel.saveToLocalDB(currentMealData)
+                                    Toast.makeText(requireContext(), "식단 기록을 저장하지 못했습니다. 로컬에 저장되었습니다.", Toast.LENGTH_SHORT).show()
+                                }
                             }
                         }
                     }
+                }.show()
+            }
+
+            // 다이얼로그 조건 검사
+            if (isEditMode) {
+                // 수정 모드: EditNoticedDialog 표시
+                val prefs = requireContext().getSharedPreferences("dialog_prefs", Context.MODE_PRIVATE)
+                val skipEditNotice = prefs.getBoolean("skip_edit_notice", false)
+
+                if (!skipEditNotice) {
+                    // EditNoticedDialog를 먼저 띄우고, 완료 후 저장 다이얼로그 실행
+                    EditNoticedDialog(requireActivity()) { checked ->
+                        if (checked) {
+                            prefs.edit().putBoolean("skip_edit_notice", true).apply()
+                        }
+                        // EditNoticedDialog가 닫힌 후 저장 다이얼로그 실행
+                        executeSave()
+                    }.show()
+                } else {
+                    // "다시 보지 않기"가 설정되어 있으면 바로 저장 다이얼로그 실행
+                    executeSave()
                 }
-            }.show()
+            } else if ((selectedDate ?: LocalDate.now()).isBefore(LocalDate.now())) {
+                // 새 저장 모드 + 과거 날짜: PreviousNoticedDialog 표시
+                val prefs = requireContext().getSharedPreferences("dialog_prefs", Context.MODE_PRIVATE)
+                val skipPreviousNotice = prefs.getBoolean("skip_previous_notice", false)
+
+                if (!skipPreviousNotice) {
+                    // PreviousNoticedDialog를 먼저 띄우고, 완료 후 저장 다이얼로그 실행
+                    PreviousNoticedDialog(requireActivity()) { checked ->
+                        if (checked) {
+                            prefs.edit().putBoolean("skip_previous_notice", true).apply()
+                        }
+                        // PreviousNoticedDialog가 닫힌 후 저장 다이얼로그 실행
+                        executeSave()
+                    }.show()
+                } else {
+                    // "다시 보지 않기"가 설정되어 있으면 바로 저장 다이얼로그 실행
+                    executeSave()
+                }
+            } else {
+                // 새 저장 모드 + 현재/미래 날짜: 바로 저장 다이얼로그 실행
+                executeSave()
+            }
         }
 
         setupImageSelectionListeners()

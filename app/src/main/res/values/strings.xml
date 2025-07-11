@@ -398,5 +398,10 @@
     <string name="searchItem">검색어</string>
     <string name="title">제목</string>
     <string name="subtitle">서브제목</string>
+    <string name="EditNoticedTitle">수정 시, 챌린지 및 업적에 \n반영되지 않습니다.</string>
+    <string name="EditNoticedMessage">이미 등록된 식단 또는 레시피를 수정하는 경우,\n챌린지 및 업적에는 반영되지 않습니다.</string>
+    <string name="Noticed1Month">한 달간 이 안내 보지 않기</string>
+    <string name="PreviousNoticedMessage">챌린지 및 업적은 \'당일 식단 기록\'만 인정됩니다. \n\n과거 날짜로 식단을 기록해도 챌린지에는 반영되지 않아요. \n\n기록은 가능하지만, 챌린지 참여를 원하신다면 오늘 날짜에 맞춰 식단을 등록해주세요.</string>
+    <string name="PreviousNoticedTitle">해당 날짜는 \n오늘 이전의 기록입니다.</string>
 
 </resources>
