@@ -1,6 +1,6 @@
 package com.example.elixir.member.viewmodel
 
-import com.example.elixir.member.data.AchievementEntity
+import com.example.elixir.member.data.ChallengeEntity
 import com.example.elixir.member.data.MemberEntity
 import com.example.elixir.member.network.MemberRepository
 import com.example.elixir.member.data.FollowEntity
@@ -29,19 +29,19 @@ class MemberService (
         return repository.getProfileFromDb()
     }
 
-    suspend fun getAchievement(): List<AchievementEntity> {
-        return repository.fetchAndSaveAchievements()
+    suspend fun getAchievement(): List<ChallengeEntity> {
+        return repository.fetchAndSaveChallenges()
     }
 
-    suspend fun getAchievementFromDb(): List<AchievementEntity> {
-        return repository.getAchievementsFromDb()
+    suspend fun getAchievementFromDb(): List<ChallengeEntity> {
+        return repository.getChallengesFromDb()
     }
 
-    suspend fun getTop3Achievements(): List<AchievementEntity> {
-        return repository.fetchAndSaveTop3Achievements()
+    suspend fun getTop3Achievements(): List<ChallengeEntity> {
+        return repository.fetchAndSaveTop3Challenges()
     }
-    suspend fun getTop3AchievementsFromDb(): List<AchievementEntity> {
-        return repository.getTop3AchievementsFromDb()
+    suspend fun getTop3AchievementsFromDb(): List<ChallengeEntity> {
+        return repository.getTop3ChallengesFromDb()
     }
 
     suspend fun getFollowing(targetMemberId: Int): List<FollowEntity> {

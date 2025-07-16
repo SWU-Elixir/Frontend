@@ -72,7 +72,7 @@ class MyPageFragment : Fragment() {
 
         // 데이터 로드 요청 (ViewModel을 통해)
         memberViewModel.loadProfile()
-        memberViewModel.loadTop3Achievements()
+        memberViewModel.loadTop3Challenges()
         memberViewModel.loadMyRecipes()
         memberViewModel.loadScrapRecipes()
 
@@ -103,7 +103,7 @@ class MyPageFragment : Fragment() {
             }
         }
 
-        memberViewModel.top3Achievements.observe(viewLifecycleOwner) { achievements ->
+        memberViewModel.top3Challenges.observe(viewLifecycleOwner) { achievements ->
             val badgeList = if (achievements.isNotEmpty()) {
                 achievements.map {
                     Uri.parse(it.achievementImageUrl ?: "")

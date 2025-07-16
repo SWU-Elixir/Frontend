@@ -247,36 +247,89 @@ class MyPageImageGridFragment : Fragment() {
             try {
                 val api = RetrofitClient.instanceMemberApi
                 Log.d(TAG, "뱃지 로드 시작 - memberId: $member")
-                val response = if (member != -1) {
-                    Log.d(TAG, "특정 사용자의 뱃지 목록 요청 - memberId: $member")
-                    api.getAchievements(member)
+
+                // 1. 챌린지 업적 데이터 가져오기
+                val challengeResponse = if (member != -1) {
+                    Log.d(TAG, "특정 사용자의 챌린지 업적 목록 요청 - memberId: $member")
+                    api.getChallenges(member)
                 } else {
-                    Log.d(TAG, "현재 사용자의 뱃지 목록 요청")
-                    api.getAchievements()
+                    Log.d(TAG, "현재 사용자의 챌린지 업적 목록 요청")
+                    api.getChallenges()
                 }
-                val badgeList = response.data.map {
-                    BadgeItem(
-                        imageRes = 0, // Glide로 imageUrl 사용
-                        title = it.achievementName ?: "알 수 없음",
-                        year = it.year,
-                        month = it.month
-                    ) to it.achievementImageUrl
+
+                val challengeBadgeItems = if (challengeResponse.status == 200 && challengeResponse.data != null) {
+                    challengeResponse.data.map {
+                        // 챌린지 업적 데이터에 연도/월 정보를 subtitle로 추가
+                        BadgeItem(
+                            imageRes = 0,
+                            title = it.achievementName ?: "알 수 없음",
+                            year = it.year,
+                            month = it.month,
+                            subtitle = "${it.year}년 ${it.month}월 챌린지" // 챌린지 서브타이틀
+                        ) to (it.achievementImageUrl ?: "")
+                    }
+                } else {
+                    Log.e(TAG, "챌린지 업적 API 응답 실패: ${challengeResponse.message}")
+                    emptyList()
                 }
+
+                // 2. 업적 데이터 가져오기
+                val achievementResponse = api.getAchievements()
+
+                val achievementBadgeItems = if (achievementResponse.status == 200 && achievementResponse.data != null) {
+                    achievementResponse.data.map {
+                        // 순수 업적 데이터에 고정된 subtitle 추가
+                        BadgeItem(
+                            imageRes = 0,
+                            title = it.achievementName ?: "알 수 없음",
+                            year = 0,
+                            month = 0,
+                            subtitle = it.description
+                        ) to (it.achievementImageUrl ?: "")
+                    }
+                } else {
+                    Log.e(TAG, "순수 업적 API 응답 실패: ${achievementResponse.message}")
+                    emptyList()
+                }
+
+                // 3. 두 리스트를 하나로 합치기
+                val combinedBadgeList = challengeBadgeItems + achievementBadgeItems
+
+                // 4. RecyclerView 어댑터 설정
                 val adapter = object : androidx.recyclerview.widget.RecyclerView.Adapter<BadgeViewHolder>() {
                     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BadgeViewHolder {
                         val binding = com.example.elixir.databinding.ItemMypageBadgeGridBinding.inflate(LayoutInflater.from(parent.context), parent, false)
                         return BadgeViewHolder(binding)
                     }
                     override fun onBindViewHolder(holder: BadgeViewHolder, position: Int) {
-                        val (item, imageUrl) = badgeList[position]
-                        Glide.with(holder.binding.root).load(imageUrl).into(holder.binding.imgBadge)
+                        val (item, imageUrl) = combinedBadgeList[position]
+
+                        if (imageUrl.isNotEmpty()) {
+                            Glide.with(holder.binding.root.context)
+                                .load(imageUrl)
+                                .placeholder(R.drawable.bg_badge_empty)
+                                .error(R.drawable.bg_badge_empty)
+                                .into(holder.binding.imgBadge)
+                        } else {
+                            holder.binding.imgBadge.setImageResource(R.drawable.bg_badge_empty)
+                            Log.w(TAG, "이미지 URL이 없습니다: ${item.title}")
+                        }
+
                         holder.binding.tvBadge.text = item.title
-                        holder.binding.tvBadgeSubTitle.text = "${item.year}년 ${item.month}월 챌린지"
+
+                        // subtitle 필드가 있을 경우에만 표시
+                        if (!item.subtitle.isNullOrBlank()) {
+                            holder.binding.tvBadgeSubTitle.text = item.subtitle
+                            holder.binding.tvBadgeSubTitle.visibility = View.VISIBLE // 서브타이틀 표시
+                        } else {
+                            holder.binding.tvBadgeSubTitle.visibility = View.GONE // 서브타이틀 숨김
+                        }
                     }
-                    override fun getItemCount() = badgeList.size
+                    override fun getItemCount() = combinedBadgeList.size
                 }
                 binding.rvImage.adapter = adapter
             } catch (e: Exception) {
+                Log.e(TAG, "뱃지/업적 로드 실패", e)
                 e.printStackTrace()
                 binding.rvImage.adapter = BadgeGridAdapter(emptyList())
             }

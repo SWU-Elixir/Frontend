@@ -16,6 +16,12 @@ interface MemberDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertProfile(member: ProfileEntity)
 
+    @Query("SELECT * FROM challenge")
+    suspend fun getChallenges(): List<ChallengeEntity>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertChallenges(achievements: List<ChallengeEntity>)
+
     @Query("SELECT * FROM achievement")
     suspend fun getAchievements(): List<AchievementEntity>
 

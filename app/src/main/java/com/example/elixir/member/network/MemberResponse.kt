@@ -24,6 +24,21 @@ data class ProfileResponse(
     val data: ProfileEntity
 )
 
+data class ChallengeResponse(
+    val status: Int,
+    val code: String,
+    val message: String,
+    val data: List<ChallengeData>
+)
+
+data class ChallengeData(
+    val year: Int,
+    val month: Int,
+    val achievementName: String,
+    val achievementImageUrl: String,
+    val challengeCompleted: Boolean
+)
+
 data class AchievementResponse(
     val status: Int,
     val code: String,
@@ -32,11 +47,13 @@ data class AchievementResponse(
 )
 
 data class AchievementData(
-    val year: Int,
-    val month: Int,
     val achievementName: String,
     val achievementImageUrl: String,
-    val challengeCompleted: Boolean
+    val completed: Boolean,
+    val level: Int,
+    val type: String,
+    val code: String,
+    val description: String
 )
 
 data class RecipeListResponse(

@@ -3,6 +3,7 @@ package com.example.elixir.member.network
 import android.util.Log
 import androidx.room.Transaction
 import com.example.elixir.member.data.AchievementEntity
+import com.example.elixir.member.data.ChallengeEntity
 import com.example.elixir.member.data.FollowEntity
 import com.example.elixir.member.data.MemberDao
 import com.example.elixir.member.data.MemberEntity
@@ -282,9 +283,9 @@ class MemberRepository(
     }
 
     // 업적 정보
-    suspend fun getAchievementsFromDb(): List<AchievementEntity> {
+    suspend fun getChallengesFromDb(): List<ChallengeEntity> {
         return try {
-            dao.getAchievements()
+            dao.getChallenges()
         } catch (e: Exception) {
             Log.e("MemberRepository", "업적 DB 조회 실패", e)
             emptyList()
@@ -292,12 +293,12 @@ class MemberRepository(
     }
 
     @Transaction
-    suspend fun fetchAndSaveAchievements(): List<AchievementEntity> {
+    suspend fun fetchAndSaveChallenges(): List<ChallengeEntity> {
         return try {
-            val response = api.getAchievements()
+            val response = api.getChallenges()
             if (response.status == 200) {
                 val entities = response.data.map {
-                    AchievementEntity(
+                    ChallengeEntity(
                         year = it.year,
                         month = it.month,
                         achievementName = it.achievementName,
@@ -305,33 +306,33 @@ class MemberRepository(
                         challengeCompleted = it.challengeCompleted
                     )
                 }
-                dao.insertAchievements(entities)
+                dao.insertChallenges(entities)
                 entities
             } else {
                 Log.e("MemberRepository", "업적 API 호출 실패: ${response.message}")
-                getAchievementsFromDb()
+                getChallengesFromDb()
             }
         } catch (e: Exception) {
             Log.e("MemberRepository", "업적 데이터 저장 실패", e)
-            getAchievementsFromDb()
+            getChallengesFromDb()
         }
     }
 
-    suspend fun getTop3AchievementsFromDb(): List<AchievementEntity> {
+    suspend fun getTop3ChallengesFromDb(): List<ChallengeEntity> {
         return try {
-            dao.getAchievements().take(3)
+            dao.getChallenges().take(3)
         } catch (e: Exception) {
             emptyList()
         }
     }
 
     @Transaction
-    suspend fun fetchAndSaveTop3Achievements(): List<AchievementEntity> {
+    suspend fun fetchAndSaveTop3Challenges(): List<ChallengeEntity> {
         return try {
-            val response = api.getTop3Achievements()
+            val response = api.getAllAchievements()
             if (response.status == 200) {
                 val entities = response.data.map {
-                    AchievementEntity(
+                    ChallengeEntity(
                         year = it.year,
                         month = it.month,
                         achievementName = it.achievementName,
@@ -339,13 +340,95 @@ class MemberRepository(
                         challengeCompleted = it.challengeCompleted
                     )
                 }
+                dao.insertChallenges(entities)
+                entities
+            } else {
+                getTop3ChallengesFromDb()
+            }
+        } catch (e: Exception) {
+            getTop3ChallengesFromDb()
+        }
+    }
+
+    // 모든 업적을 DB에서 가져오는 함수
+    suspend fun getAllAchievementsFromDb(): List<AchievementEntity> {
+        return try {
+            // dao.getAllAchievements() 호출 (AchievementDao의 메서드)
+            dao.getAchievements()
+        } catch (e: Exception) {
+            Log.e("MemberRepository", "업적 DB 조회 실패", e)
+            emptyList()
+        }
+    }
+
+    // API에서 모든 업적을 가져와 DB에 저장하는 함수
+    @Transaction
+    suspend fun fetchAndSaveAllAchievements(): List<AchievementEntity> {
+        return try {
+            val response = api.getAchievements() // 업적 API 호출
+            if (response.status == 200 && response.data != null) {
+                val entities = response.data.map {
+                    // API 응답 데이터에 맞춰 AchievementEntity로 매핑
+                    AchievementEntity(
+                        code = it.code, // 업적 코드를 사용
+                        achievementName = it.achievementName,
+                        description = it.description,
+                        achievementImageUrl = it.achievementImageUrl,
+                        completed = it.completed,
+                        level = it.level,
+                        type = it.type
+                    )
+                }
+                // achievementDao.insertAllAchievements(entities) 호출 (AchievementDao의 메서드)
                 dao.insertAchievements(entities)
                 entities
             } else {
-                getTop3AchievementsFromDb()
+                Log.e("MemberRepository", "업적 API 호출 실패: ${response.message}")
+                getAllAchievementsFromDb() // API 실패 시 DB에서 기존 데이터 반환
             }
         } catch (e: Exception) {
-            getTop3AchievementsFromDb()
+            Log.e("MemberRepository", "업적 데이터 저장/조회 실패", e)
+            getAllAchievementsFromDb() // 예외 발생 시 DB에서 기존 데이터 반환
+        }
+    }
+
+    // DB에서 상위 3개의 업적을 가져오는 함수 (예시: 완료된 업적 중 레벨이 높은 3개)
+    suspend fun getTop3AchievementsFromDb(): List<AchievementEntity> {
+        return try {
+            // dao.getTop3CompletedAchievements() 호출 (AchievementDao의 메서드)
+            dao.getAchievements().take(3)
+        } catch (e: Exception) {
+            Log.e("MemberRepository", "상위 3개 업적 DB 조회 실패", e)
+            emptyList()
+        }
+    }
+
+    // API에서 상위 3개 업적을 가져와 DB에 저장하는 함수 (API가 상위 3개만 제공하는 경우)
+    @Transaction
+    suspend fun fetchAndSaveTop3Achievements(): List<AchievementEntity> {
+        return try {
+            val response = api.getTop3Achievements() // 상위 3개 업적 API 호출 (가상의 API)
+            if (response.status == 200 && response.data != null) {
+                val entities = response.data.map {
+                    AchievementEntity(
+                        code = it.code,
+                        achievementName = it.achievementName,
+                        description = it.description,
+                        achievementImageUrl = it.achievementImageUrl,
+                        completed = it.completed,
+                        level = it.level,
+                        type = it.type
+                    )
+                }
+                dao.insertAchievements(entities) // 상위 3개 업적을 DB에 저장
+                entities
+            } else {
+                Log.e("MemberRepository", "상위 3개 업적 API 호출 실패: ${response.message}")
+                getTop3AchievementsFromDb() // API 실패 시 DB에서 기존 데이터 반환
+            }
+        } catch (e: Exception) {
+            Log.e("MemberRepository", "상위 3개 업적 저장/조회 실패", e)
+            getTop3AchievementsFromDb() // 예외 발생 시 DB에서 기존 데이터 반환
         }
     }
 

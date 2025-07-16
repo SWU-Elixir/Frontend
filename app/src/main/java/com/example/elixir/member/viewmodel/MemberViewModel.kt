@@ -1,12 +1,10 @@
 package com.example.elixir.member.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.elixir.member.data.AchievementEntity
+import com.example.elixir.member.data.ChallengeEntity
 import com.example.elixir.member.data.FollowEntity
 import com.example.elixir.member.data.FollowItem
 import com.example.elixir.member.data.MemberEntity
@@ -27,11 +25,11 @@ class MemberViewModel(private val repository: MemberRepository) : ViewModel() { 
     private val _profile = MutableLiveData<ProfileEntity?>()
     val profile: LiveData<ProfileEntity?> = _profile
 
-    private val _achievements = MutableLiveData<List<AchievementEntity>>()
-    val achievements: LiveData<List<AchievementEntity>> = _achievements
+    private val _challenges = MutableLiveData<List<ChallengeEntity>>()
+    val challenges: LiveData<List<ChallengeEntity>> = _challenges
 
-    private val _top3Achievements = MutableLiveData<List<AchievementEntity>>()
-    val top3Achievements: LiveData<List<AchievementEntity>> = _top3Achievements
+    private val _top3Challenges = MutableLiveData<List<ChallengeEntity>>()
+    val top3Challenges: LiveData<List<ChallengeEntity>> = _top3Challenges
 
     private val _myRecipes = MutableLiveData<List<RecipeEntity>>()
     val myRecipes: LiveData<List<RecipeEntity>> = _myRecipes
@@ -177,17 +175,17 @@ class MemberViewModel(private val repository: MemberRepository) : ViewModel() { 
     fun loadAchievements() {
         viewModelScope.launch {
             try {
-                _achievements.value = repository.fetchAndSaveAchievements()
+                _challenges.value = repository.fetchAndSaveChallenges()
             } catch (e: Exception) {
                 _error.value = "업적을 불러올 수 없습니다: ${e.message}"
             }
         }
     }
 
-    fun loadTop3Achievements() {
+    fun loadTop3Challenges() {
         viewModelScope.launch {
             try {
-                _top3Achievements.value = repository.fetchAndSaveTop3Achievements()
+                _top3Challenges.value = repository.fetchAndSaveTop3Challenges()
             } catch (e: Exception) {
                 _error.value = "상위 3개 업적을 불러올 수 없습니다: ${e.message}"
             }

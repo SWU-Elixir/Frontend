@@ -88,18 +88,42 @@ interface MemberApi {
     @GET("/api/member/achievement/top3")
     suspend fun getTop3Achievements(): AchievementResponse
 
-    @GET("/api/member/{memberId}/achievements")
+    @GET("/api/member/{memberId}/achievement")
     suspend fun getAchievements(
         @Path("memberId") id: Int
     ): AchievementResponse
 
-    @GET("/api/member/{memberId}/achievements/top3")
+    @GET("/api/member/{memberId}/achievement/top3")
     suspend fun getTop3Achievements(
         @Path("memberId") id: Int
     ): AchievementResponse
 
-    @GET("/api/member/achievement/title")
+    @GET("/api/member/all-achievement/top3")
+    suspend fun getAllAchievements(): ChallengeResponse
+
+    @GET("/api/member/{memberId}/all-achievement/top3")
+    suspend fun getAllAchievements(
+        @Path("memberId") id: Int
+    ): ChallengeResponse
+
+    @GET("/api/member/challenge/title")
     suspend fun getTitle(): TitleResponse
+
+    @GET("/api/member/challenge")
+    suspend fun getChallenges(): ChallengeResponse
+
+    @GET("/api/member/challenge/top3")
+    suspend fun getTop3Challenges(): ChallengeResponse
+
+    @GET("/api/member/{memberId}/challenge")
+    suspend fun getChallenges(
+        @Path("memberId") id: Int
+    ): ChallengeResponse
+
+    @GET("/api/member/{memberId}/challenge/top3")
+    suspend fun getTop3Challenges(
+        @Path("memberId") id: Int
+    ): ChallengeResponse
 
 
     // ---------------------
