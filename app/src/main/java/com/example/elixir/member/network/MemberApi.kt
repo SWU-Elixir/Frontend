@@ -106,7 +106,7 @@ interface MemberApi {
         @Path("memberId") id: Int
     ): ChallengeResponse
 
-    @GET("/api/member/challenge/title")
+    @GET("/api/member/achievement/title")
     suspend fun getTitle(): TitleResponse
 
     @GET("/api/member/challenge")
