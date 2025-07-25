@@ -82,6 +82,9 @@ interface MemberApi {
     // 업적 관련
     // ---------------------
 
+    @POST("/api/member/access")
+    suspend fun access(): SignupResponse
+
     @GET("/api/member/achievement")
     suspend fun getAchievements(): AchievementResponse
 

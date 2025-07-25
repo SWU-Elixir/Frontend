@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 class MyPageImageGridFragment : Fragment() {
     private var _binding: FragmentMypageImageGridBinding? = null
     private val binding get() = _binding!!
-    
+
     private var contentType: Int = 0 // 0: 레시피, 1: 스크랩, 2: 뱃지
     private var member: Int = -1
 
@@ -65,18 +65,40 @@ class MyPageImageGridFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        binding.rvImage.layoutManager = GridLayoutManager(context, 3)
         when (contentType) {
             TYPE_RECIPE -> {
+                setupNormalLayout()
+                binding.rvImage.layoutManager = GridLayoutManager(context, 3)
                 loadMyRecipesAsync()
             }
             TYPE_SCRAP -> {
+                setupNormalLayout()
+                binding.rvImage.layoutManager = GridLayoutManager(context, 3)
                 loadMyScrapsAsync()
             }
             TYPE_BADGE -> {
+                setupBadgeLayout()
                 loadBadgesAsync()
             }
         }
+    }
+
+    private fun setupNormalLayout() {
+        // 일반 레시피/스크랩용 레이아웃
+        binding.rvImage.visibility = View.VISIBLE
+        binding.layoutChallengeSection.visibility = View.GONE
+        binding.layoutAchievementSection.visibility = View.GONE
+    }
+
+    private fun setupBadgeLayout() {
+        // 뱃지용 분할 레이아웃
+        binding.rvImage.visibility = View.GONE
+        binding.layoutChallengeSection.visibility = View.VISIBLE
+        binding.layoutAchievementSection.visibility = View.VISIBLE
+
+        // 각 RecyclerView의 LayoutManager 설정
+        binding.rvChallengeeBadges.layoutManager = GridLayoutManager(context, 3)
+        binding.rvAchievementBadges.layoutManager = GridLayoutManager(context, 3)
     }
 
     private fun loadMyRecipesAsync() {
@@ -242,6 +264,63 @@ class MyPageImageGridFragment : Fragment() {
         }
     }
 
+    private fun createRecipeAdapter(recipeList: List<Pair<Int, String?>>): androidx.recyclerview.widget.RecyclerView.Adapter<BadgeViewHolder> {
+        return object : androidx.recyclerview.widget.RecyclerView.Adapter<BadgeViewHolder>() {
+            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BadgeViewHolder {
+                val binding = com.example.elixir.databinding.ItemMypageBadgeGridBinding.inflate(
+                    LayoutInflater.from(parent.context),
+                    parent,
+                    false
+                )
+                return BadgeViewHolder(binding)
+            }
+
+            override fun onBindViewHolder(holder: BadgeViewHolder, position: Int) {
+                val (recipeId, imageUrl) = recipeList[position]
+
+                // Glide 옵션 설정
+                val requestOptions = RequestOptions()
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .placeholder(R.drawable.ic_recipe_white)
+                    .error(R.drawable.ic_recipe_white)
+
+                // 이미지 로드
+                if (!imageUrl.isNullOrEmpty()) {
+                    Glide.with(holder.binding.root)
+                        .load(imageUrl)
+                        .centerCrop()
+                        .apply(requestOptions)
+                        .into(holder.binding.imgBadge)
+                } else {
+                    // 이미지 URL이 null이거나 비어있는 경우 기본 이미지 표시
+                    holder.binding.imgBadge.setImageResource(R.drawable.ic_recipe_white)
+                }
+
+                holder.binding.tvBadge.visibility = View.GONE
+                holder.binding.tvBadgeSubTitle.visibility = View.GONE
+
+                // 전체 아이템 클릭 이벤트 추가
+                holder.binding.root.setOnClickListener {
+                    Log.d("RecipeAdapter", "아이템 클릭됨: $recipeId")
+                    val detailFragment = RecipeDetailFragment().apply {
+                        arguments = Bundle().apply {
+                            putInt("recipeId", recipeId)
+                        }
+                    }
+                    // fragment_overlay를 visible로!
+                    activity?.findViewById<View>(R.id.fragment_overlay)?.visibility = View.VISIBLE
+
+                    parentFragmentManager.beginTransaction()
+                        .add(R.id.fragment_overlay, detailFragment)
+                        .addToBackStack(null)
+                        .commit()
+                }
+            }
+
+            override fun getItemCount() = recipeList.size
+        }
+    }
+
     private fun loadBadgesAsync() {
         lifecycleScope.launch {
             try {
@@ -292,48 +371,105 @@ class MyPageImageGridFragment : Fragment() {
                     emptyList()
                 }
 
-                // 3. 두 리스트를 하나로 합치기
-                val combinedBadgeList = challengeBadgeItems + achievementBadgeItems
+                // 3. 각각의 RecyclerView에 어댑터 설정
+                setupChallengeRecyclerView(challengeBadgeItems)
+                setupAchievementRecyclerView(achievementBadgeItems)
 
-                // 4. RecyclerView 어댑터 설정
-                val adapter = object : androidx.recyclerview.widget.RecyclerView.Adapter<BadgeViewHolder>() {
-                    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BadgeViewHolder {
-                        val binding = com.example.elixir.databinding.ItemMypageBadgeGridBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-                        return BadgeViewHolder(binding)
-                    }
-                    override fun onBindViewHolder(holder: BadgeViewHolder, position: Int) {
-                        val (item, imageUrl) = combinedBadgeList[position]
-
-                        if (imageUrl.isNotEmpty()) {
-                            Glide.with(holder.binding.root.context)
-                                .load(imageUrl)
-                                .placeholder(R.drawable.bg_badge_empty)
-                                .error(R.drawable.bg_badge_empty)
-                                .into(holder.binding.imgBadge)
-                        } else {
-                            holder.binding.imgBadge.setImageResource(R.drawable.bg_badge_empty)
-                            Log.w(TAG, "이미지 URL이 없습니다: ${item.title}")
-                        }
-
-                        holder.binding.tvBadge.text = item.title
-
-                        // subtitle 필드가 있을 경우에만 표시
-                        if (!item.subtitle.isNullOrBlank()) {
-                            holder.binding.tvBadgeSubTitle.text = item.subtitle
-                            holder.binding.tvBadgeSubTitle.visibility = View.VISIBLE // 서브타이틀 표시
-                        } else {
-                            holder.binding.tvBadgeSubTitle.visibility = View.GONE // 서브타이틀 숨김
-                        }
-                    }
-                    override fun getItemCount() = combinedBadgeList.size
-                }
-                binding.rvImage.adapter = adapter
+                Log.d(TAG, "뱃지 로드 완료 - 챌린지: ${challengeBadgeItems.size}개, 업적: ${achievementBadgeItems.size}개")
             } catch (e: Exception) {
                 Log.e(TAG, "뱃지/업적 로드 실패", e)
                 e.printStackTrace()
-                binding.rvImage.adapter = BadgeGridAdapter(emptyList())
+                // 에러 시 빈 어댑터 설정
+                binding.rvChallengeeBadges.adapter = BadgeGridAdapter(emptyList())
+                binding.rvAchievementBadges.adapter = BadgeGridAdapter(emptyList())
             }
         }
+    }
+
+    private fun setupChallengeRecyclerView(challengeBadgeItems: List<Pair<BadgeItem, String>>) {
+        val adapter = object : androidx.recyclerview.widget.RecyclerView.Adapter<BadgeViewHolder>() {
+            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BadgeViewHolder {
+                val binding = com.example.elixir.databinding.ItemMypageBadgeGridBinding.inflate(
+                    LayoutInflater.from(parent.context),
+                    parent,
+                    false
+                )
+                return BadgeViewHolder(binding)
+            }
+
+            override fun onBindViewHolder(holder: BadgeViewHolder, position: Int) {
+                val (item, imageUrl) = challengeBadgeItems[position]
+
+                if (imageUrl.isNotEmpty()) {
+                    Glide.with(holder.binding.root.context)
+                        .load(imageUrl)
+                        .placeholder(R.drawable.bg_badge_empty)
+                        .error(R.drawable.bg_badge_empty)
+                        .into(holder.binding.imgBadge)
+                } else {
+                    holder.binding.imgBadge.setImageResource(R.drawable.bg_badge_empty)
+                    Log.w(TAG, "이미지 URL이 없습니다: ${item.title}")
+                }
+
+                holder.binding.tvBadge.text = item.title
+                holder.binding.tvBadge.visibility = View.VISIBLE
+
+                // subtitle 필드가 있을 경우에만 표시
+                if (!item.subtitle.isNullOrBlank()) {
+                    holder.binding.tvBadgeSubTitle.text = item.subtitle
+                    holder.binding.tvBadgeSubTitle.visibility = View.VISIBLE
+                } else {
+                    holder.binding.tvBadgeSubTitle.visibility = View.GONE
+                }
+            }
+
+            override fun getItemCount() = challengeBadgeItems.size
+        }
+
+        binding.rvChallengeeBadges.adapter = adapter
+    }
+
+    private fun setupAchievementRecyclerView(achievementBadgeItems: List<Pair<BadgeItem, String>>) {
+        val adapter = object : androidx.recyclerview.widget.RecyclerView.Adapter<BadgeViewHolder>() {
+            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BadgeViewHolder {
+                val binding = com.example.elixir.databinding.ItemMypageBadgeGridBinding.inflate(
+                    LayoutInflater.from(parent.context),
+                    parent,
+                    false
+                )
+                return BadgeViewHolder(binding)
+            }
+
+            override fun onBindViewHolder(holder: BadgeViewHolder, position: Int) {
+                val (item, imageUrl) = achievementBadgeItems[position]
+
+                if (imageUrl.isNotEmpty()) {
+                    Glide.with(holder.binding.root.context)
+                        .load(imageUrl)
+                        .placeholder(R.drawable.bg_badge_empty)
+                        .error(R.drawable.bg_badge_empty)
+                        .into(holder.binding.imgBadge)
+                } else {
+                    holder.binding.imgBadge.setImageResource(R.drawable.bg_badge_empty)
+                    Log.w(TAG, "이미지 URL이 없습니다: ${item.title}")
+                }
+
+                holder.binding.tvBadge.text = item.title
+                holder.binding.tvBadge.visibility = View.VISIBLE
+
+                // subtitle 필드가 있을 경우에만 표시
+                if (!item.subtitle.isNullOrBlank()) {
+                    holder.binding.tvBadgeSubTitle.text = item.subtitle
+                    holder.binding.tvBadgeSubTitle.visibility = View.VISIBLE
+                } else {
+                    holder.binding.tvBadgeSubTitle.visibility = View.GONE
+                }
+            }
+
+            override fun getItemCount() = achievementBadgeItems.size
+        }
+
+        binding.rvAchievementBadges.adapter = adapter
     }
 
     class BadgeViewHolder(val binding: com.example.elixir.databinding.ItemMypageBadgeGridBinding) : androidx.recyclerview.widget.RecyclerView.ViewHolder(binding.root)
