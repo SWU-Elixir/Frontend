@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -77,16 +78,17 @@ class HeaderSearchSpinnerViewHolder(private val binding: ItemRecipeHeaderSpinner
         binding.spinnerType.setSelection(typeItems.indexOf(selectedType ?: typeItems.first()))
         binding.spinnerType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                val value = if (position == 0) null
-                else {
+                val value =
                     if(parent.getItemAtPosition(position).toString() == "음료/차")
                         "음료_차"
                     else if(parent.getItemAtPosition(position).toString() == "양념/소스/잼")
                         "양념_소스_잼"
+                    else if(parent.getItemAtPosition(position).toString() == "종류")
+                        null
                     else
                         parent.getItemAtPosition(position).toString()
-                }
                 onTypeSelected(value)
+                updateResetButtonVisibility()
             }
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
@@ -97,19 +99,40 @@ class HeaderSearchSpinnerViewHolder(private val binding: ItemRecipeHeaderSpinner
         binding.spinnerDifficulty.setSelection(methodItems.indexOf(selectedMethod ?: methodItems.first()))
         binding.spinnerDifficulty.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                val value = if (position == 0) null else parent.getItemAtPosition(position).toString()
+                val value =
+                    if (parent.getItemAtPosition(position).toString() == "저속노화")
+                        null
+                    else
+                        parent.getItemAtPosition(position).toString()
                 onMethodSelected(value)
+                updateResetButtonVisibility()
             }
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
 
-        // 리셋 버튼: 스피너 둘다 null이나 empty가 아닐 때만 버튼 보여주기
-        val isMethodSelected = !selectedMethod.isNullOrEmpty()
-        val isTypeSelected = !selectedType.isNullOrEmpty()
-        binding.resetButton.visibility = if (isMethodSelected || isTypeSelected) View.VISIBLE else View.GONE
-
         // 리셋 버튼 클릭 리스너
-        binding.resetButton.setOnClickListener { onResetClicked() }
+        binding.resetButton.setOnClickListener {
+            // UI 초기화
+            binding.spinnerType.setSelection(0, false) // "종류"
+            binding.spinnerDifficulty.setSelection(0, false) // "저속노화"
+            onResetClicked()
+
+            // 리셋 버튼 숨기기
+            binding.resetButton.visibility = View.GONE
+        }
+    }
+
+    // 리셋 버튼 업데이트
+    private fun updateResetButtonVisibility() {
+        val typeSelected = binding.spinnerType.selectedItem?.toString()?.let {
+            it != "종류" && it.isNotBlank()
+        } ?: false
+
+        val slowAgingSelected = binding.spinnerDifficulty.selectedItem?.toString()?.let {
+            it != "저속노화" && it.isNotBlank()
+        } ?: false
+
+        binding.resetButton.visibility = if (typeSelected || slowAgingSelected) View.VISIBLE else View.GONE
     }
 }
 

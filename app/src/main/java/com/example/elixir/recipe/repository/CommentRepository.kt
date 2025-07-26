@@ -6,26 +6,39 @@ import com.example.elixir.recipe.data.entity.toEntity
 import com.example.elixir.recipe.data.entity.toRequest
 import com.example.elixir.recipe.network.api.CommentApi
 import com.example.elixir.network.GetStringResponse
-import com.example.elixir.recipe.network.response.GetCommentListResponse
+import com.example.elixir.recipe.data.CommentItem
 import com.example.elixir.recipe.network.response.GetCommentResponse
+import com.google.gson.JsonParseException
+import java.io.IOException
 
 class CommentRepository(private val commentApi: CommentApi, private val commentDao: CommentDao) {
     // 댓글 불러오기
-    suspend fun getComments(recipeId: Int): Result<GetCommentListResponse> {
+    suspend fun getComments(recipeId: Int): Result<List<CommentItem>> {
         return try {
             val response = commentApi.getComment(recipeId)
-            if (response.isSuccessful) {
-                val body = response.body()
-                if (body != null) {
-                    Result.success(body)
-                } else {
-                    Result.failure(Exception("댓글을 불러오지 못했습니다."))
+
+            // 응답 코드 별 대응
+            when (response.code()) {
+                // 성공 시 응답 데이터가 있다면 반환, 없으면 등록된 댓글이 없다는 텍스트 반환.
+                200 -> {
+                    val responseData = response.body()
+                    if (responseData?.data != null) Result.success(responseData.data)
+                    else Result.failure(Exception("등록된 댓글이 없습니다."))
                 }
-            } else {
-                Result.failure(Exception("알수 없는 오류가 발생하였습니다. 에러 코드: ${response.code()} ${response.message()}"))
+                // 응답 실패 시 나타날 수 있는 주요 코드 별 대응
+                401 -> Result.failure(Exception("로그인 세션이 만료되었습니다. 다시 로그인해주세요."))
+                403 -> Result.failure(Exception("댓글 조회 권한이 없습니다."))
+                404 -> Result.failure(Exception("레시피가 존재하지 않습니다."))
+                500 -> Result.failure(Exception("서버에 오류가 발생했습니다."))
+                else -> Result.failure(Exception("알 수 없는 오류가 발생했습니다: ${response.code()}: ${response.message()}"))
             }
+        // 예외 처리
         } catch (e: Exception) {
-            Result.failure(e)
+            when (e) {
+                is IOException -> Result.failure(Exception("네트워크 연결에 문제가 있습니다."))
+                is JsonParseException -> Result.failure(Exception("서버 응답 처리 중 오류가 발생했습니다."))
+                else -> Result.failure(Exception(e.localizedMessage))
+            }
         }
     }
 
@@ -37,7 +50,7 @@ class CommentRepository(private val commentApi: CommentApi, private val commentD
         return try {
             val response = commentApi.uploadComment(recipeId, request)
             if (response.isSuccessful) {
-                val savedComment = response.body()?.toEntity() // GetCommentResponse를 CommentEntity로 변환하는 확장 함수 필요
+                val savedComment = response.body()?.toEntity()
                 savedComment?.let { commentDao.insert(it) }
                 Result.success(response.body()!!)
             } else {

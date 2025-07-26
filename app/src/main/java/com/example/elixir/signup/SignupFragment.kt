@@ -3,6 +3,7 @@ package com.example.elixir.signup
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,6 +23,9 @@ class SignupFragment : Fragment() {
     private lateinit var signupBinding: FragmentSignupBinding
     private val userModel: UserInfoViewModel by activityViewModels()
     private var profileImageFile: java.io.File? = null
+
+    private var loginType: String? = null
+    private var email: String? = null
 
     // MemberViewModel을 Factory로 생성 (MemberService 제거)
     private val memberViewModel: MemberViewModel by activityViewModels {
@@ -45,6 +49,9 @@ class SignupFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        loginType = arguments?.getString("loginType")
+        email = arguments?.getString("email")
+
         with(signupBinding) {
             // 상단 단계 인디케이터 고정, 현재 단계 프래그먼트
             setStepFragment(SurveyIndicatorFragment())
@@ -52,14 +59,17 @@ class SignupFragment : Fragment() {
 
             // 처음엔 다음 버튼 비활성화
             btnNext.isEnabled = false
+            if(loginType.isNullOrBlank())
+                btnPrev.isEnabled = false
 
             // 이전 버튼 클릭 이벤트 처리
             btnPrev.setOnClickListener {
                 if (userModel.currentStep == 0) {
-                    // 첫 단계일 경우 계정 생성 화면으로 이동
-                    parentFragmentManager.beginTransaction()
-                        .replace(R.id.fragment_registration, CreateAccountFragment())
-                        .commit()
+                    // 일반 로그인 첫 단계일 경우 계정 생성 화면으로 이동
+                    if(loginType.isNullOrBlank())
+                        parentFragmentManager.beginTransaction()
+                            .replace(R.id.fragment_registration, CreateAccountFragment())
+                            .commit()
                 } else {
                     // 그 외는 이전 단계로 이동
                     userModel.currentStep -= 1
@@ -70,22 +80,43 @@ class SignupFragment : Fragment() {
             // 다음 버튼 클릭 이벤트 처리
             btnNext.setOnClickListener {
                 if (userModel.currentStep == userModel.maxStep) {
-                    val signupRequest = userModel.toSignupRequest()
-                    if (signupRequest != null) {
-                        // profileImageFile이 null이 아닐 때만 회원가입 진행
-                        if (profileImageFile != null) {
-                            memberViewModel.signup(signupRequest, profileImageFile)
+                    Log.d("Signup", "로그인 타입: $loginType")
+                    if(loginType.isNullOrBlank()) {
+                        val signupRequest = userModel.toSignupRequest()
+                        if (signupRequest != null) {
+                            // 일반 회원가입
+                            if(userModel.getLoginType().isNullOrBlank()) {
+                                // profileImageFile이 null이 아닐 때만 회원가입 진행
+                                if (profileImageFile != null) {
+                                    memberViewModel.signup(signupRequest, profileImageFile)
+                                } else {
+                                    Toast.makeText(requireContext(), "프로필 이미지를 선택해주세요.", Toast.LENGTH_SHORT).show()
+                                }
+                            }
                         } else {
-                            Toast.makeText(requireContext(), "프로필 이미지를 선택해주세요.", Toast.LENGTH_SHORT).show()
+
+                            Toast.makeText(requireContext(), "입력값을 모두 확인해주세요.", Toast.LENGTH_SHORT).show()
                         }
                     } else {
-                        Toast.makeText(requireContext(), "입력값을 모두 확인해주세요.", Toast.LENGTH_SHORT).show()
+                        val socialRequest = userModel.toSocialRequest()
+                        Log.d("Signup", "socialRequest")
+                        if (socialRequest != null) {
+                            // 일반 회원가입
+                            if(userModel.getLoginType().isNullOrBlank()) {
+                                // profileImageFile이 null이 아닐 때만 회원가입 진행
+                                Log.d("Signup", "데이터: $socialRequest")
+                                memberViewModel.socialSignup(loginType!!, socialRequest, profileImageFile)
+                            }
+                        } else {
+                            Toast.makeText(requireContext(), "입력값을 모두 확인해주세요.", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 } else {
                     // 다음 단계로 이동
                     userModel.currentStep += 1
                     setSurveyStepFragment(userModel.currentStep)
                 }
+
             }
 
             // 회원가입 결과 관찰
@@ -162,30 +193,70 @@ class SignupFragment : Fragment() {
 
         // 단계별 프래그먼트 설정
         val fragment = when (step) {
-            0 -> SettingProfileFragment().apply {
-                listener = object : OnProfileCompletedListener {
-                    override fun onProfileCompleted(profileImage: String, nickname: String, gender: String, birthYear: Int) {
-                        // 프로필 이미지 파일 생성
-                        profileImageFile = try {
-                            val imageUri = android.net.Uri.parse(profileImage)
-                            val inputStream = requireContext().contentResolver.openInputStream(imageUri)
-                            val file = java.io.File(requireContext().cacheDir, "profile_image.jpg")
-                            inputStream?.use { input ->
-                                file.outputStream().use { output ->
-                                    input.copyTo(output)
+            0 ->{
+                val profileDataJson = arguments?.getString("profileData")
+                if (!profileDataJson.isNullOrBlank()) {
+                    SettingProfileFragment.newInstance(profileDataJson, email).apply {
+                        listener = object : OnProfileCompletedListener {
+                            override fun onProfileCompleted(profileImage: String, nickname: String, gender: String, birthYear: Int) {
+                                profileImageFile = try {
+                                    val imageUri = android.net.Uri.parse(profileImage)
+                                    val inputStream = requireContext().contentResolver.openInputStream(imageUri)
+                                    val file = java.io.File(requireContext().cacheDir, "profile_image.jpg")
+                                    inputStream?.use { input ->
+                                        file.outputStream().use { output ->
+                                            input.copyTo(output)
+                                        }
+                                    }
+                                    file
+                                } catch (e: Exception) {
+                                    null
                                 }
+
+                                userModel.setProfile(profileImage, nickname, gender, birthYear)
+                                Log.d("SettingProfileFragment", "${userModel.getProfile()}")
+                                handleChipSelection(0, true) {}
                             }
-                            file
-                        } catch (e: Exception) {
-                            null
+
+                            override fun onProfileInvalid() {
+                                handleChipSelection(0, false) {}
+                            }
                         }
-
-                        userModel.setProfile(profileImage, nickname, gender, birthYear)
-                        handleChipSelection(0, true) {}
                     }
+                } else {
+                    SettingProfileFragment().apply {
+                        listener = object : OnProfileCompletedListener {
+                            override fun onProfileCompleted(
+                                profileImage: String,
+                                nickname: String,
+                                gender: String,
+                                birthYear: Int
+                            ) {
+                                // 프로필 이미지 파일 생성
+                                profileImageFile = try {
+                                    val imageUri = android.net.Uri.parse(profileImage)
+                                    val inputStream =
+                                        requireContext().contentResolver.openInputStream(imageUri)
+                                    val file =
+                                        java.io.File(requireContext().cacheDir, "profile_image.jpg")
+                                    inputStream?.use { input ->
+                                        file.outputStream().use { output ->
+                                            input.copyTo(output)
+                                        }
+                                    }
+                                    file
+                                } catch (e: Exception) {
+                                    null
+                                }
 
-                    override fun onProfileInvalid() {
-                        handleChipSelection(0, false) {}
+                                userModel.setProfile(profileImage, nickname, gender, birthYear)
+                                handleChipSelection(0, true) {}
+                            }
+
+                            override fun onProfileInvalid() {
+                                handleChipSelection(0, false) {}
+                            }
+                        }
                     }
                 }
             }

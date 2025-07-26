@@ -31,8 +31,9 @@ import kotlin.math.max
 class RecipeRepository(private val api: RecipeApi, private val dao: RecipeDao) {
     // 레시피 상세 조회 (API로 불러오기, 페이징 적용)
     fun getRecipes(type: String?, slowAging: String?): LiveData<PagingData<RecipeListItemData>> {
+        Log.d("RecipeFragment", "Repository: type: $type, slowAging: $slowAging")
         return Pager(
-            config = PagingConfig(pageSize = 30),
+            config = PagingConfig(pageSize = 10),
             pagingSourceFactory = { RecipePagingSource(api, type, slowAging) }
         ).liveData
     }

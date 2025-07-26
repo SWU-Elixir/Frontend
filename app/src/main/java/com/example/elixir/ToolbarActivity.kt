@@ -43,6 +43,7 @@ import com.example.elixir.member.ui.SurveyEditFragment
 import com.example.elixir.recipe.ui.fragment.RecipeGuideFragment
 import com.example.elixir.signup.FindPasswordFragment
 import com.example.elixir.signup.SettingProfileFragment
+import com.example.elixir.signup.SignupFragment
 
 open class ToolbarActivity : AppCompatActivity() {
     // 선언부
@@ -107,8 +108,25 @@ open class ToolbarActivity : AppCompatActivity() {
                     AlertExitDialog(this).show()
                 }
 
-                // 계정 생성 프래그먼트 띄워주기
-                setFragment(CreateAccountFragment())
+                // 소셜 로그인이면 회원 데이터 값 넘겨주기
+                val loginType = intent.getStringExtra("loginType")
+                val email = intent.getStringExtra("email")
+
+                if (loginType == "GOOGLE" || loginType == "KAKAO" || loginType == "NAVER") {
+                    val profileData = intent.getStringExtra("profileData")
+                    val fragment = SignupFragment().apply {
+                        arguments = Bundle().apply {
+                            putString("loginType", loginType)
+                            putString("email", email)
+                            putString("profileData", profileData)
+                        }
+                    }
+
+                    setFragment(fragment)
+                }
+                // 소셜 로그인 아니면 그냥
+                 else
+                    setFragment(CreateAccountFragment())
             }
 
             // 비밀번호 찾기 모드

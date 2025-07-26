@@ -10,7 +10,6 @@ import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -25,7 +24,6 @@ import com.example.elixir.ingredient.viewmodel.IngredientViewModel
 import com.example.elixir.ingredient.viewmodel.IngredientViewModelFactory
 import com.example.elixir.network.AppDatabase
 import com.example.elixir.recipe.viewmodel.RecipeViewModel
-import com.example.elixir.recipe.data.RecipeData
 import com.example.elixir.recipe.data.RecipeItemData
 import com.example.elixir.recipe.repository.RecipeRepository
 import com.example.elixir.recipe.ui.adapter.RecipeListAdapter
@@ -63,30 +61,58 @@ class RecipeFragment : Fragment() {
             refreshRecipes()
         }
 
+        // 레시피 등록 후 현재 프래그먼트로 되돌아왔을 때 refresh
+        recipeRegisterLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                result.data?.getStringExtra("recipeData")?.let { json ->
+                    refreshRecipes()
+                    recipeListAdapter.updateSearchHeader(
+                        selectedType = selectedCategoryType,
+                        selectedMethod = selectedSlowAging,
+                        typeItems = resources.getStringArray(R.array.type_list).toList(),
+                        methodItems = resources.getStringArray(R.array.method_list).toList()
+                    )
+                }
+            }
+        }
+
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        // 레포지토리 초기화
         val recipeRepo = RecipeRepository(RetrofitClient.instanceRecipeApi, AppDatabase.getInstance(requireContext()).recipeDao())
         val ingredientRepo = IngredientRepository(RetrofitClient.instanceIngredientApi, IngredientDB.getInstance(requireContext()).ingredientDao())
 
-        recipeViewModel = ViewModelProvider(this, RecipeViewModelFactory(recipeRepo))[RecipeViewModel::class.java]
-        ingredientViewModel = ViewModelProvider(this, IngredientViewModelFactory(ingredientRepo))[IngredientViewModel::class.java]
+        // 뷰모델 초기화
+        recipeViewModel = ViewModelProvider(requireActivity(), RecipeViewModelFactory(recipeRepo)).get(RecipeViewModel::class.java)
+        ingredientViewModel = ViewModelProvider(requireActivity(), IngredientViewModelFactory(ingredientRepo))[IngredientViewModel::class.java]
 
-        setupUI()
+        binding.recipeList.layoutManager = LinearLayoutManager(requireContext())
+        binding.fab.setOnClickListener {
+            val intent = Intent(requireContext(), ToolbarActivity::class.java).apply {
+                putExtra("mode", 9)
+            }
+            recipeRegisterLauncher.launch(intent)
+        }
+
         setupObservers()
-        setupRecipeRegisterLauncher()
+        //setupRecipeRegisterLauncher()
 
         ingredientViewModel.loadIngredients()
         refreshRecipes()
         loadRecommendRecipe()
     }
 
+    // 레시피 필터 리프래시
     private fun refreshRecipes() {
         recipeViewModel.setCategoryType(selectedCategoryType)
         recipeViewModel.setCategorySlowAging(selectedSlowAging)
     }
 
+    // 라이브데이터 관찰
     private fun setupObservers() {
         // 레시피 목록
         recipeViewModel.recipes.observe(viewLifecycleOwner) { pagingData ->
@@ -114,16 +140,6 @@ class RecipeFragment : Fragment() {
         // 삭제 후 다시 로드
         recipeViewModel.deleteResult.observe(viewLifecycleOwner) {
             refreshRecipes()
-        }
-    }
-
-    private fun setupUI() {
-        binding.recipeList.layoutManager = LinearLayoutManager(requireContext())
-        binding.fab.setOnClickListener {
-            val intent = Intent(requireContext(), ToolbarActivity::class.java).apply {
-                putExtra("mode", 9)
-            }
-            recipeRegisterLauncher.launch(intent)
         }
     }
 
@@ -158,10 +174,12 @@ class RecipeFragment : Fragment() {
             },
             onTypeSelected = { type ->
                 selectedCategoryType = type
+                recipeViewModel.setCategoryType(selectedCategoryType)
                 refreshRecipes()
             },
             onMethodSelected = { method ->
                 selectedSlowAging = method
+                recipeViewModel.setCategorySlowAging(selectedSlowAging)
                 refreshRecipes()
             },
             onResetClicked = {
@@ -172,19 +190,19 @@ class RecipeFragment : Fragment() {
         ).apply {
             this.typeItems = typeItems
             this.methodItems = methodItems
-            this.recommendRecipeList = recommendRecipeList
         }
 
         binding.recipeList.adapter = recipeListAdapter
     }
-
+/*
+    // 레시피 등록 후 refresh
     private fun setupRecipeRegisterLauncher() {
         recipeRegisterLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 result.data?.getStringExtra("recipeData")?.let { json ->
-                    val newRecipe = Gson().fromJson(json, RecipeItemData::class.java)
+                    //val newRecipe = Gson().fromJson(json, RecipeItemData::class.java)
                     recipeViewModel.setCategoryType(selectedCategoryType)
                     recipeViewModel.setCategorySlowAging(selectedSlowAging)
                     recipeListAdapter.updateSearchHeader(
@@ -196,8 +214,9 @@ class RecipeFragment : Fragment() {
                 }
             }
         }
-    }
+    }*/
 
+    // 추천 레시피 불러오기
     private fun loadRecommendRecipe() {
         lifecycleScope.launch {
             try {

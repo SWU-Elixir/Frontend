@@ -58,7 +58,8 @@ import java.util.Locale
  * 레시피의 기본 정보, 재료, 조리 순서, 댓글 등을 보여주고 관리
  */
 class RecipeDetailFragment : Fragment(), CommentActionListener {
-    // ViewBinding 관련 변수
+    // ---------------------------- 변수 -------------------------------- //
+    // Binding
     private var _binding: FragmentRecipeDetailBinding? = null
     private val binding get() = _binding!!
 
@@ -68,8 +69,13 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
     private lateinit var commentRepository: CommentRepository
     private lateinit var ingredientRepository: IngredientRepository
 
+    // ViewModel
     private val recipeViewModel: RecipeViewModel by viewModels {
         RecipeViewModelFactory(recipeRepository)
+    }
+
+    private val commentViewModel: CommentViewModel by viewModels {
+        CommentViewModelFactory(commentRepository)
     }
 
     // 댓글 관련 변수
@@ -77,11 +83,6 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
     private var comments = mutableListOf<CommentItem>()
     private var editingCommentId: Int = -1
     private var userNickname: String? = null
-
-    // 댓글 뷰모델
-    private val commentViewModel: CommentViewModel by viewModels {
-        CommentViewModelFactory(commentRepository)
-    }
 
     // 멤버 뷰모델
     private val memberViewModel: MemberViewModel by viewModels {
@@ -290,16 +291,18 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                 memberViewModel.profile.observe(viewLifecycleOwner) { profile ->
                     profile?.let {
                         userNickname = profile.nickname
-                        if(member.nickname == userNickname)
+                        Log.d("RecipeFragment", "닉네임: $userNickname")
+                        // 닉네임
+                        binding.commentNickname.text = userNickname
+
+                        if(member.nickname == userNickname) {
                             binding.btnFollow.visibility = View.GONE
-                        else
+                            binding.menuButton.visibility = View.VISIBLE
+                        }
+                        else {
                             binding.btnFollow.visibility = View.VISIBLE
-
-                        // 사용자가 아니면 수정 못하게
-                        if(member.nickname != profile.nickname)
                             binding.menuButton.visibility = View.GONE
-
-                        binding.commentNickname.text = profile.nickname
+                        }
                     }
                 }
 
@@ -399,6 +402,7 @@ class RecipeDetailFragment : Fragment(), CommentActionListener {
                 // 댓글 리스트 설정
                 binding.commentList.layoutManager = LinearLayoutManager(requireContext())
                 // ------------------------ 댓글 어댑터 연결 ------------------------
+                commentViewModel.getComments(recipeId)
                 commentViewModel.comments.observe(viewLifecycleOwner) { newComments ->
                     commentAdapter = RecipeCommentAdapter(requireContext(), newComments!!.toMutableList(), this)
                     binding.commentList.adapter = commentAdapter

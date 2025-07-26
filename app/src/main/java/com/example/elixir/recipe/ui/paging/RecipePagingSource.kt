@@ -1,5 +1,6 @@
 package com.example.elixir.recipe.ui.paging
 
+import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.example.elixir.recipe.data.RecipeItemData
@@ -28,6 +29,8 @@ class RecipePagingSource(
                 categoryType = categoryType,
                 categorySlowAging = categorySlowAging
             )
+
+            Log.d("RecipeFragment", "PagingSource: type: $categoryType, slowAging: $categorySlowAging")
             if (!response.isSuccessful) {
                 throw Exception("API 호출 실패: ${response.code()}")
             }

@@ -2,6 +2,7 @@ package com.example.elixir.signup
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.elixir.member.network.SocialSignupDto
 import com.example.elixir.signup.SignupRequest
 
 // 사용자 정보 뷰 모델 (회원가입, 정보 수정)
@@ -12,6 +13,8 @@ class UserInfoViewModel : ViewModel() {
     private var preferredDiets: List<String>? = mutableListOf()
     private var preferredRecipes: List<String>? = mutableListOf()
     private var signupReasons: List<String>? = mutableListOf()
+    private var loginType: String? = null
+    private var email: String = ""
 
     fun toSignupRequest(): SignupRequest? {
         val account = getAccount() ?: return null
@@ -27,6 +30,26 @@ class UserInfoViewModel : ViewModel() {
             nickname = profile.nickname,
             gender = profile.gender,
             birthYear = profile.birthYear,
+            allergies = allergies,
+            mealStyles = mealStyles,
+            recipeStyles = recipeStyles,
+            reasons = reasons
+        )
+    }
+
+    fun toSocialRequest(): SocialSignupDto? {
+        val profile = getProfile() ?: return null
+        val allergies = getAllergies() ?: emptyList()
+        val mealStyles = getPreferredDiets() ?: emptyList()
+        val recipeStyles = getPreferredRecipes() ?: emptyList()
+        val reasons = getSignupReason() ?: emptyList()
+
+        return SocialSignupDto(
+            email = email,
+            nickname = profile.nickname,
+            gender = profile.gender,
+            birthYear = profile.birthYear,
+            profileImageUrl = profile.profileImage,
             allergies = allergies,
             mealStyles = mealStyles,
             recipeStyles = recipeStyles,
@@ -71,12 +94,25 @@ class UserInfoViewModel : ViewModel() {
         profileData = ProfileData(profileImage, nickname, gender, birthYear)
     }
 
+    fun setLoginType(loginType: String) {
+        this.loginType = loginType
+    }
+
+    fun getLoginType(): String? = loginType
+
     // 프로필 조회
     fun getProfile(): ProfileData? {
         return if (profileData.profileImage.isNotBlank() && profileData.nickname.isNotBlank()
             && profileData.gender.isNotBlank() && profileData.birthYear != 0)
             profileData
         else null
+    }
+
+    // 이메일
+    fun getEmail(): String = email
+
+    fun setEmail(email: String) {
+        this.email = email
     }
 
     // 설문조사 - 알러지 정보 설정

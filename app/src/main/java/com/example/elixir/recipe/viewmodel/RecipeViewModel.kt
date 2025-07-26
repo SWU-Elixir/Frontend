@@ -56,7 +56,7 @@ class RecipeViewModel(private val repository: RecipeRepository) : ViewModel() {
     // 카테고리 필터 변경 함수
     fun setCategoryType(type: String?) {
         categoryType = type
-        Log.d("RecipeViewModel", "categoryType: $categoryType")
+        Log.d("RecipeViewModel", "categoryType: '$categoryType'")
         loadRecipes()
     }
 
@@ -67,16 +67,21 @@ class RecipeViewModel(private val repository: RecipeRepository) : ViewModel() {
     }
 
     private fun loadRecipes() {
-        currentSource?.let { _recipes.removeSource(it) }  // 이전 소스 제거
+        Log.d("RecipeViewModel", "loadRecipes() called")
+
+        currentSource?.let {
+            _recipes.removeSource(it)
+            Log.d("RecipeViewModel", "Previous source removed")
+        }
 
         val newSource = repository.getRecipes(categoryType, categorySlowAging)
-
         currentSource = newSource
+
         _recipes.addSource(newSource) {
+            Log.d("RecipeViewModel", "New source emitting data")
             _recipes.value = it
         }
     }
-
 
     // 검색 필터 세팅 함수들
     fun setSearchKeyword(keyword: String?) {
@@ -95,9 +100,11 @@ class RecipeViewModel(private val repository: RecipeRepository) : ViewModel() {
     }
 
     private fun loadSearchResults() {
-        val newSearchSource = repository.searchRecipes(keyword, categoryType, categorySlowAging)
+        currentSearchSource?.let {
+            _searchResults.removeSource(it)
+        }
 
-        currentSearchSource?.let { _searchResults.removeSource(it) }
+        val newSearchSource = repository.searchRecipes(keyword, categoryType, categorySlowAging)
         currentSearchSource = newSearchSource
 
         _searchResults.addSource(newSearchSource) {

@@ -51,6 +51,7 @@ class MemberRepository(
     // 프로필 정보
     suspend fun getProfileFromDb(): ProfileEntity? {
         return try {
+            Log.d("MemberRepository", "프로필: ${dao.getProfile()}")
             dao.getProfile()
         } catch (e: Exception) {
             Log.e("MemberRepository", "DB 조회 실패", e)
@@ -431,6 +432,23 @@ class MemberRepository(
         }
     }
 
+    // 회원가입 및 인증
+    suspend fun socialSignup(loginType: String, signupRequest: SocialSignupDto, profileImageFile: File?): Any? {
+        return try {
+            val gson = Gson()
+            val dtoJson = gson.toJson(signupRequest)
+            val dtoBody = dtoJson.toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
+            val imagePart = profileImageFile?.let {
+                val reqFile = it.asRequestBody("image/*".toMediaTypeOrNull())
+                MultipartBody.Part.createFormData("profileImage", it.name, reqFile)
+            }
+            api.socialSignup(loginType, dtoBody, imagePart)
+        } catch (e: Exception) {
+            Log.e("MemberRepository", "회원가입 실패", e)
+            null
+        }
+    }
+
     // 이메일 인증 요청
     suspend fun requestEmailVerification(email: String): SignupResponse? {
         return try {
@@ -464,5 +482,23 @@ class MemberRepository(
         }
     }
 
-
+    // 소셜 로그인
+    suspend fun socialLogin(loginType: String, accessToken: String): Result<SocialLoginData> {
+        return try {
+            val response = api.socialLogin(loginType, AccessTokenRequest(accessToken))
+            Log.d("MemberRepository", response.status.toString())
+            when(response.status) {
+                200 -> Result.success(response.data)
+                400 -> Result.failure(Throwable("잘못된 요청입니다."))
+                401 -> Result.failure(Throwable("인증이 필요합니다."))
+                403 -> Result.failure(Throwable("권한이 없습니다."))
+                404 -> Result.failure(Throwable("사용자를 찾을 수 없습니다."))
+                409 -> Result.failure(Throwable("이미 가입된 계정입니다."))
+                500 -> Result.failure(Throwable("서버 오류입니다."))
+                else -> Result.failure(Throwable("알 수 없는 오류가 발생했습니다."))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

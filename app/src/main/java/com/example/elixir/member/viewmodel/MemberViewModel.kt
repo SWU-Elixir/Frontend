@@ -1,11 +1,17 @@
 package com.example.elixir.member.viewmodel
 
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.elixir.HomeActivity
+import com.example.elixir.ToolbarActivity
 import com.example.elixir.member.data.AchievementEntity
 import com.example.elixir.member.data.FollowEntity
 import com.example.elixir.member.data.FollowItem
@@ -14,6 +20,9 @@ import com.example.elixir.member.data.ProfileEntity
 import com.example.elixir.member.data.RecipeEntity
 import com.example.elixir.member.network.MemberRepository // MemberRepository를 import 합니다.
 import com.example.elixir.member.network.SignupResponse
+import com.example.elixir.member.network.SocialLoginData
+import com.example.elixir.member.network.SocialSignupDto
+import com.example.elixir.member.network.SocialUserInfoData
 import com.example.elixir.member.network.SurveyData // SurveyData import
 import com.example.elixir.signup.SignupRequest
 import kotlinx.coroutines.launch
@@ -100,10 +109,25 @@ class MemberViewModel(private val repository: MemberRepository) : ViewModel() { 
     private val _surveyActionSuccess = MutableLiveData<Boolean>()
     val surveyActionSuccess: LiveData<Boolean> = _surveyActionSuccess
 
+    private val _socialLoginResult = MutableLiveData<Result<SocialLoginData>>()
+    val socialLoginResult: LiveData<Result<SocialLoginData>> = _socialLoginResult
+
     fun signup(signupRequest: SignupRequest, profileImageFile: File?) {
         viewModelScope.launch {
             try {
                 val result = repository.signup(signupRequest, profileImageFile)
+                _signupResult.value = result
+            } catch (e: Exception) {
+                _signupResult.value = null
+                _error.value = "회원가입 실패: ${e.message}"
+            }
+        }
+    }
+
+    fun socialSignup(loginType: String, signupRequest: SocialSignupDto, profileImageFile: File?) {
+        viewModelScope.launch {
+            try {
+                val result = repository.socialSignup(loginType, signupRequest, profileImageFile)
                 _signupResult.value = result
             } catch (e: Exception) {
                 _signupResult.value = null
@@ -167,6 +191,7 @@ class MemberViewModel(private val repository: MemberRepository) : ViewModel() { 
     fun loadProfile() {
         viewModelScope.launch {
             try {
+                Log.d("MemberViewModel", "프로필: ${repository.fetchAndSaveProfile()}")
                 _profile.value = repository.fetchAndSaveProfile()
             } catch (e: Exception) {
                 _error.value = "프로필 정보를 불러올 수 없습니다: ${e.message}"
@@ -359,4 +384,12 @@ class MemberViewModel(private val repository: MemberRepository) : ViewModel() { 
         }
     }
 
+    // 소셜 로그인
+    fun socialLogin(loginType: String, accessToken: String) {
+        viewModelScope.launch {
+            val result = repository.socialLogin(loginType, accessToken)
+            Log.d("MemberViewModel", "socialLogin result: $result")
+            _socialLoginResult.value = result
+        }
+    }
 }

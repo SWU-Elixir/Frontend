@@ -26,7 +26,7 @@ import org.threeten.bp.LocalDateTime
 object RetrofitClient {
     // 서버 주소
     private const val BASE_URL = "https://port-0-elixir-backend-g0424l70py8py.gksl2.cloudtype.app/"
-    private var authToken: String? = "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJBQGV4YW1wbGUuY29tIiwiYXV0aCI6IlVTRVIiLCJleHAiOjE3NTEyOTcyMzF9.h33nkXHIDAdIvmx3-FvPyxAWyrzD5s8h--gULuqzF_WSaN_Av2-lbJVUq6Rg1oy_" // Bearer 토큰을 저장할 변수
+    private var authToken: String? = "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJBQGV4YW1wbGUuY29tIiwiYXV0aCI6IlVTRVIiLCJleHAiOjE3NTIxNDEyMTF9.VCiXYyUbQ3zL2ZexXspY9YoJ8XvdJElqGb6kGnGvP-5DGEgO1HGNkrbaA441DlnT" // Bearer 토큰을 저장할 변수
     private var isRefreshing = false // 토큰 갱신 중인지 여부를 추적하는 플래그
 
     fun setAuthToken(token: String?) {

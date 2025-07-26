@@ -84,10 +84,8 @@ class HeaderRecommendViewHolder(
 }
 
 class HeaderSpinnerViewHolder(
-    private val binding: ItemRecipeHeaderSpinnerBinding,
-    private val onTypeSelected: (String?) -> Unit,
-    private val onMethodSelected: (String?) -> Unit,
-    private val onResetClicked: () -> Unit
+    private val binding: ItemRecipeHeaderSpinnerBinding, private val onTypeSelected: (String?) -> Unit,
+    private val onMethodSelected: (String?) -> Unit, private val onResetClicked: () -> Unit
 ) : RecipeViewHolder(binding.root) {
 
     fun bind(selectedType: String?, selectedSlowAging: String?, typeItems: List<String>, slowAgingItems: List<String>) {
@@ -103,19 +101,18 @@ class HeaderSpinnerViewHolder(
 
         binding.spinnerType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                var value = if (position == 0) null else parent.getItemAtPosition(position).toString()
-
-                if(value == "음료/차") value = "음료_차"
-                else if(value == "양념/소스/잼") value = "양념_소스_잼"
-
-                // UI 업데이트
-                (binding.spinnerType.adapter as? RecipeListSpinnerAdapter)?.setSelectedPosition(position)
-
-                if (value != selectedType) {
-                    onTypeSelected(value)
-                }
+                val value =
+                    if(parent.getItemAtPosition(position).toString() == "음료/차")
+                        "음료_차"
+                    else if(parent.getItemAtPosition(position).toString() == "양념/소스/잼")
+                        "양념_소스_잼"
+                    else if(parent.getItemAtPosition(position).toString() == "종류")
+                        null
+                    else
+                        parent.getItemAtPosition(position).toString()
+                onTypeSelected(value)
+                updateResetButtonVisibility()
             }
-
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
 
@@ -131,17 +128,39 @@ class HeaderSpinnerViewHolder(
 
         binding.spinnerDifficulty.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                val value = if (position == 0) null else parent.getItemAtPosition(position).toString()
+                val value =
+                    if (parent.getItemAtPosition(position).toString() == "저속노화")
+                        null
+                    else
+                        parent.getItemAtPosition(position).toString()
                 onMethodSelected(value)
+                updateResetButtonVisibility()
             }
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
 
-        // 리셋 버튼
-        val isMethodSelected = !selectedSlowAging.isNullOrEmpty()
-        val isTypeSelected = !selectedType.isNullOrEmpty()
-        binding.resetButton.visibility = if (isMethodSelected || isTypeSelected) View.VISIBLE else View.GONE
-        binding.resetButton.setOnClickListener { onResetClicked() }
+        // 리셋 버튼 클릭 리스너
+        binding.resetButton.setOnClickListener {
+            // UI 초기화
+            binding.spinnerType.setSelection(0, false) // "종류"
+            binding.spinnerDifficulty.setSelection(0, false) // "저속노화"
+            onResetClicked()
+
+            // 리셋 버튼 숨기기
+            binding.resetButton.visibility = View.GONE
+        }
+    }
+
+    private fun updateResetButtonVisibility() {
+        val typeSelected = binding.spinnerType.selectedItem?.toString()?.let {
+            it != "종류" && it.isNotBlank()
+        } ?: false
+
+        val slowAgingSelected = binding.spinnerDifficulty.selectedItem?.toString()?.let {
+            it != "저속노화" && it.isNotBlank()
+        } ?: false
+
+        binding.resetButton.visibility = if (typeSelected || slowAgingSelected) View.VISIBLE else View.GONE
     }
 }
 
@@ -164,6 +183,7 @@ class ItemViewHolder(val binding: ItemRecipeListBinding,
             "음료_차" -> "음료/차"
             else -> item.categoryType
         }
+
         // 차례대로 레시피명, 저속노화, 종류, 난이도, 좋아요 갯수 정의
         binding.recipeNameText.text = item.title
         binding.categorySlowAging.text = item.categorySlowAging

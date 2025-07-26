@@ -14,18 +14,27 @@ class CommentViewModel(private val repository: CommentRepository) : ViewModel() 
     private var _comments = MutableLiveData<List<CommentItem>?>()
     var comments: LiveData<List<CommentItem>?> = _comments
 
-    private val _error = MutableLiveData<String>()
-    val error: LiveData<String> = _error
+    private val _error = MutableLiveData<String?>()
+    val error: LiveData<String?> = _error
 
-    // 댓글 불러오기
-    fun fetchComments(recipeId: Int) {
+    private val _isLoading = MutableLiveData<Boolean>()
+    val isLoading: LiveData<Boolean> = _isLoading
+
+    fun getComments(recipeId: Int) {
         viewModelScope.launch {
+            _isLoading.value = true
             val result = repository.getComments(recipeId)
-            result.onSuccess { commentList ->
-                _comments.value = commentList.data
-            }.onFailure { throwable ->
-                _error.value = throwable.message ?: "알 수 없는 에러가 발생했습니다."
-            }
+            result.fold(
+                onSuccess = { response ->
+                    _comments.value = response
+                    _error.value = null
+                },
+                onFailure = { error ->
+                    _comments.value = emptyList()
+                    _error.value = error.message ?: "알 수 없는 오류가 발생했습니다."
+                }
+            )
+            _isLoading.value = false
         }
     }
 
