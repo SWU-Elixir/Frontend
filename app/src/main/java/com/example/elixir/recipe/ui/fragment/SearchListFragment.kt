@@ -88,6 +88,20 @@ class SearchListFragment : Fragment() {
         // 재료 데이터 로드 (필수)
         ingredientViewModel.loadIngredients()
         refreshRecipes()
+
+        recipeViewModel.searchResults.observe(viewLifecycleOwner) { pagingData ->
+            if (!::searchListAdapter.isInitialized) {
+                setupRecipeListAdapter(ingredientDataMap ?: emptyMap())
+            }
+            searchListAdapter.submitData(lifecycle, pagingData)
+
+            // UI가 갱신되고 나서 itemCount를 로그로 확인
+            binding.recipeList.post {
+                val count = searchListAdapter.itemCount
+                Log.d("PagingDebug", "submitData 이후 adapter에 들어있는 아이템 개수: $count")
+            }
+        }
+
     }
 
     // 레시피 필터 리프래시
@@ -252,11 +266,19 @@ class SearchListFragment : Fragment() {
     }*/
 
     private fun onSearchKeywordChanged(keyword: String) {
+        // 이미 같은 값이면 변화없음
+        if (currentSearchKeyword == keyword) return
+
         currentSearchKeyword = keyword
         recipeViewModel.setSearchKeyword(keyword)
         searchListAdapter.currentKeyword = keyword
-        searchListAdapter.notifyItemChanged(0) // SearchTextHeader 위치
+
+        // Handler로 post 해서 안전하게 notify
+        binding.recipeList.post {
+            searchListAdapter.notifyItemChanged(0)
+        }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

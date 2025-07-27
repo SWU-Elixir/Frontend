@@ -30,6 +30,7 @@ import com.example.elixir.login.network.GoogleSignInHelper
 import com.example.elixir.member.network.GoogleSignupResponse
 import com.example.elixir.member.network.MemberDB
 import com.example.elixir.member.network.MemberRepository
+import com.example.elixir.member.network.SocialLoginData
 import com.example.elixir.member.network.SocialSignupDto
 import com.example.elixir.member.viewmodel.MemberViewModel
 import com.example.elixir.member.viewmodel.MemberViewModelFactory
@@ -142,7 +143,20 @@ class LoginActivity : AppCompatActivity() {
                 }
                 // 등록 회원이면 로그인
                 else {
-                    Log.d("LoginActivity", "로그인만")
+                    // 소셜 로그인 시 발급받은 토큰 저장
+                    memberViewModel.socialLoginResult.observe(this) { result ->
+                        if(result.isSuccess){
+                            val socialLoginData = result.getOrNull() // SocialLoginData?
+                            socialLoginData?.let {
+                                val token = it.accessToken
+                                RetrofitClient.setAuthToken(token)
+                                saveToken(token)
+                            }
+                        } else {
+                            // 에러 처리
+                            Log.e("LoginActivity", result.exceptionOrNull().toString())
+                        }
+                    }
                     val intent = Intent(this@LoginActivity, HomeActivity::class.java)
                     startActivity(intent)
                     finish()
@@ -377,7 +391,6 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-
     private fun fetchKakaoUserInfo(token: String) {
         UserApiClient.instance.me { user, error ->
             if (error != null) {
@@ -389,6 +402,7 @@ class LoginActivity : AppCompatActivity() {
                     requestAdditionalConsent()
                 } else {
                     // 소셜 로그인
+                    Log.d("LoginActivity", "소셜 로그인 토큰: $token")
                     memberViewModel.socialLogin("KAKAO", token)
                 }
             }
@@ -447,6 +461,7 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    // 구글
     private fun getAccessTokenFromAuthCode(authCode: String?) {
         if (authCode == null) return
 
@@ -488,11 +503,5 @@ class LoginActivity : AppCompatActivity() {
                 }
             }
         })
-    }
-
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        setIntent(intent)
-         Log.d("KakaoLogin", "onNewIntent 호출됨")
     }
 }

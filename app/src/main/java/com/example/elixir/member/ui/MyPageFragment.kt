@@ -96,6 +96,7 @@ class MyPageFragment : Fragment() {
     private fun setupObservers() {
         memberViewModel.profile.observe(viewLifecycleOwner) { profile ->
             profile?.let {
+                Log.d("Mypage", "회원 정보: $it")
                 setProfile(it)
             } ?: run {
                 Log.e(TAG, "회원 정보를 불러올 수 없습니다.")

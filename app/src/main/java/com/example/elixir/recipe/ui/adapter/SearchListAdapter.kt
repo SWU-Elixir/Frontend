@@ -36,18 +36,31 @@ class HeaderSearchTextViewHolder(
     private val onBack: (() -> Unit)?
 ) : RecipeViewHolder(binding.root) {
 
-    fun bind(currentKeyword: String?) {
-        // EditText에 현재 키워드 설정
-        binding.etSearch.setText(currentKeyword ?: "")
+    private var currentListener: TextWatcher? = null
 
-        // EditText 입력 감지
-        binding.etSearch.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {}
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+    fun bind(currentKeyword: String?) {
+        // 기존 리스너 제거
+        currentListener?.let {
+            binding.etSearch.removeTextChangedListener(it)
+        }
+
+        // setText 직전 현재 텍스트와 다를 때만 setText 호출
+        if (binding.etSearch.text.toString() != currentKeyword) {
+            binding.etSearch.setText(currentKeyword ?: "")
+        }
+
+        // 새 리스너 등록
+        currentListener = object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) { }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                onSearch(s.toString())
+                // EditText 내용이 바뀌면(=사용자 입력이면)만 onSearch 호출
+                if (s.toString() != currentKeyword) {
+                    onSearch(s.toString())
+                }
             }
-        })
+        }
+        binding.etSearch.addTextChangedListener(currentListener)
 
         // 검색 버튼 클릭
         binding.searchButton.setOnClickListener {
