@@ -22,7 +22,7 @@ class RecipePagingSource(
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, RecipeListItemData> {
         try {
-            val page = params.key ?: 1
+            val page = params.key ?: 0
             val response = api.getRecipe(
                 page = page,
                 size = params.loadSize,
@@ -42,19 +42,18 @@ class RecipePagingSource(
                 .map { RecipeListItemData.RecipeItem(it) }
                 .toMutableList()
 
-            if (page == 1) {
+            if (page == 0) {
                 itemList.add(0, RecipeListItemData.SearchSpinnerHeader)
                 itemList.add(0, RecipeListItemData.RecommendHeader)
             }
 
             return LoadResult.Page(
                 data = itemList,
-                prevKey = if (page == 1) null else page - 1,
+                prevKey = if (page == 0) null else page - 1,
                 nextKey = if (recipes.isEmpty()) null else page + 1
             )
         } catch (e: Exception) {
             return LoadResult.Error(e)
         }
     }
-
 }

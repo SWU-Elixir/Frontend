@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
@@ -13,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.elixir.R
 import com.example.elixir.RetrofitClient
 import com.example.elixir.ToolbarActivity
@@ -27,6 +29,7 @@ import com.example.elixir.recipe.viewmodel.RecipeViewModel
 import com.example.elixir.recipe.data.RecipeItemData
 import com.example.elixir.recipe.repository.RecipeRepository
 import com.example.elixir.recipe.ui.adapter.RecipeListAdapter
+import com.example.elixir.recipe.ui.paging.StickyHeaderItemDecoration
 import com.example.elixir.recipe.viewmodel.RecipeViewModelFactory
 import com.google.gson.Gson
 import kotlinx.coroutines.launch
@@ -51,6 +54,8 @@ class RecipeFragment : Fragment() {
     private var recommendRecipeList: List<RecipeItemData> = emptyList()
 
     private lateinit var recipeRegisterLauncher: ActivityResultLauncher<Intent>
+
+    private var currentStickyHeader: View? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -192,7 +197,46 @@ class RecipeFragment : Fragment() {
             this.methodItems = methodItems
         }
 
-        binding.recipeList.adapter = recipeListAdapter
+        // 레시피 리스트에 어댑터 및 선형 레이아웃 매니저 부착
+        binding.recipeList.apply {
+            adapter = recipeListAdapter
+            layoutManager = LinearLayoutManager(context)
+        }
+
+        binding.recipeList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(rv: RecyclerView, dx: Int, dy: Int) {
+                handleStickyHeaderVisibility()
+            }
+        })
+    }
+
+    private fun handleStickyHeaderVisibility() {
+        val layoutManager = binding.recipeList.layoutManager as? LinearLayoutManager ?: return
+        val firstVisiblePosition = layoutManager.findFirstVisibleItemPosition()
+
+        if (firstVisiblePosition >= 2) {
+            if (binding.stickyHeader.childCount == 0) {
+                val viewType = recipeListAdapter.getItemViewType(1)
+                val vh = recipeListAdapter.onCreateViewHolder(binding.recipeList, viewType)
+                recipeListAdapter.onBindViewHolder(vh, 1)
+                val headerView = vh.itemView
+
+                measureAndLayoutHeader(headerView)
+
+                binding.stickyHeader.addView(headerView)
+                currentStickyHeader = headerView
+            }
+        } else {
+            binding.stickyHeader.removeAllViews()
+            currentStickyHeader = null
+        }
+    }
+
+    private fun measureAndLayoutHeader(headerView: View) {
+        val widthSpec = View.MeasureSpec.makeMeasureSpec(binding.recipeList.width, View.MeasureSpec.EXACTLY)
+        val heightSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        headerView.measure(widthSpec, heightSpec)
+        headerView.layout(0, 0, headerView.measuredWidth, headerView.measuredHeight)
     }
 /*
     // 레시피 등록 후 refresh

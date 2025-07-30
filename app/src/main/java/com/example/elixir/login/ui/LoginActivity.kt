@@ -17,10 +17,8 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
-import androidx.fragment.app.activityViewModels
 import com.example.elixir.BuildConfig
 import com.example.elixir.HomeActivity
-import com.example.elixir.KakaoAuthClient
 import com.example.elixir.RetrofitClient
 import com.example.elixir.ToolbarActivity
 import com.example.elixir.databinding.ActivityLoginBinding
@@ -30,8 +28,6 @@ import com.example.elixir.login.network.GoogleSignInHelper
 import com.example.elixir.member.network.GoogleSignupResponse
 import com.example.elixir.member.network.MemberDB
 import com.example.elixir.member.network.MemberRepository
-import com.example.elixir.member.network.SocialLoginData
-import com.example.elixir.member.network.SocialSignupDto
 import com.example.elixir.member.viewmodel.MemberViewModel
 import com.example.elixir.member.viewmodel.MemberViewModelFactory
 import com.example.elixir.signup.ProfileData

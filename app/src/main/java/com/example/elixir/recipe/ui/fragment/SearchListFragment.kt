@@ -72,12 +72,19 @@ class SearchListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // 레포지토리 초기화
-        val recipeRepo = RecipeRepository(RetrofitClient.instanceRecipeApi, AppDatabase.getInstance(requireContext()).recipeDao())
-        val ingredientRepo = IngredientRepository(RetrofitClient.instanceIngredientApi, IngredientDB.getInstance(requireContext()).ingredientDao())
+        recipeRepository = RecipeRepository(RetrofitClient.instanceRecipeApi, AppDatabase.getInstance(requireContext()).recipeDao())
+        ingredientRepository = IngredientRepository(RetrofitClient.instanceIngredientApi, IngredientDB.getInstance(requireContext()).ingredientDao())
 
         // 뷰모델 초기화
-        recipeViewModel = ViewModelProvider(this, RecipeViewModelFactory(recipeRepo))[RecipeViewModel::class.java]
-        ingredientViewModel = ViewModelProvider(this, IngredientViewModelFactory(ingredientRepo))[IngredientViewModel::class.java]
+        recipeViewModel = ViewModelProvider(this, RecipeViewModelFactory(recipeRepository))[RecipeViewModel::class.java]
+        ingredientViewModel = ViewModelProvider(this, IngredientViewModelFactory(ingredientRepository))[IngredientViewModel::class.java]
+
+        // SearchFragment에서 보낸 검색어 가져오기 (null이 아닐 때만)
+        arguments?.getString("search_keyword")?.let {
+            currentSearchKeyword = it
+            recipeViewModel.setSearchKeyword(currentSearchKeyword)
+        }
+
 
         // 레시피 리스트 초기화
         binding.recipeList.layoutManager = LinearLayoutManager(requireContext())
@@ -88,20 +95,6 @@ class SearchListFragment : Fragment() {
         // 재료 데이터 로드 (필수)
         ingredientViewModel.loadIngredients()
         refreshRecipes()
-
-        recipeViewModel.searchResults.observe(viewLifecycleOwner) { pagingData ->
-            if (!::searchListAdapter.isInitialized) {
-                setupRecipeListAdapter(ingredientDataMap ?: emptyMap())
-            }
-            searchListAdapter.submitData(lifecycle, pagingData)
-
-            // UI가 갱신되고 나서 itemCount를 로그로 확인
-            binding.recipeList.post {
-                val count = searchListAdapter.itemCount
-                Log.d("PagingDebug", "submitData 이후 adapter에 들어있는 아이템 개수: $count")
-            }
-        }
-
     }
 
     // 레시피 필터 리프래시

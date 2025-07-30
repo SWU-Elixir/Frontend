@@ -5,14 +5,18 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asFlow
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
+import androidx.paging.insertHeaderItem
 import com.example.elixir.recipe.data.RecipeData
 import com.example.elixir.recipe.data.RecipeListItemData
 import com.example.elixir.recipe.data.SearchItemData
 import com.example.elixir.recipe.repository.RecipeRepository
 import com.example.elixir.recipe.data.entity.RecipeEntity
 import com.example.elixir.recipe.data.toData
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.io.File
 import kotlin.coroutines.cancellation.CancellationException
@@ -74,6 +78,7 @@ class RecipeViewModel(private val repository: RecipeRepository) : ViewModel() {
             Log.d("RecipeViewModel", "Previous source removed")
         }
 
+        // 헤더는 Adapter에서 처리하므로 여기서는 추가하지 않음
         val newSource = repository.getRecipes(categoryType, categorySlowAging)
         currentSource = newSource
 
@@ -105,12 +110,21 @@ class RecipeViewModel(private val repository: RecipeRepository) : ViewModel() {
         }
 
         val newSearchSource = repository.searchRecipes(keyword, categoryType, categorySlowAging)
+            .asFlow()
+            .map { pagingData ->
+                pagingData
+                    .insertHeaderItem(item = SearchItemData.SearchSpinnerHeader)
+                    .insertHeaderItem(item = SearchItemData.SearchTextHeader)
+            }
+            .asLiveData()
+
         currentSearchSource = newSearchSource
 
         _searchResults.addSource(newSearchSource) {
             _searchResults.value = it
         }
     }
+
 
     fun getRecipeById(recipeId: Int) {
         viewModelScope.launch {

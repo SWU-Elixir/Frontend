@@ -275,10 +275,12 @@ class RecipeListAdapter(
     }
 
     override fun getItemViewType(position: Int): Int {
-        return when (position) {
-            0 -> RecipeViewType.RECOMMEND.value
-            1 -> RecipeViewType.SEARCH_SPINNER.value
-            else -> RecipeViewType.ITEM.value
+        val item = getItem(position) ?: return RecipeViewType.ITEM.value
+
+        return when (item) {
+            is RecipeListItemData.RecommendHeader -> RecipeViewType.RECOMMEND.value
+            is RecipeListItemData.SearchSpinnerHeader -> RecipeViewType.SEARCH_SPINNER.value
+            is RecipeListItemData.RecipeItem -> RecipeViewType.ITEM.value
         }
     }
 
@@ -326,15 +328,27 @@ class RecipeListAdapter(
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: RecipeViewHolder, position: Int) {
         val item = getItem(position) ?: return
-        when (item) {
-            is RecipeListItemData.RecommendHeader -> (holder as HeaderRecommendViewHolder).bind(recommendRecipeList,ingredientDataMap)
-            // 검색 스피너에 값 넘겨주기
-            is RecipeListItemData.SearchSpinnerHeader -> (holder as HeaderSpinnerViewHolder).bind(
-                selectedType, selectedSlowAging, typeItems, methodItems
-            )
-            is RecipeListItemData.RecipeItem -> (holder as ItemViewHolder).bind(item.data, ingredientMap)
+        Log.d("RecipeListAdapter", "Binding position: $position, holder: ${holder::class.simpleName}, item: ${item.let { it::class.simpleName }}")
+
+        // ViewHolder 타입과 아이템 타입을 모두 확인하여 안전하게 캐스팅
+        when {
+            holder is HeaderRecommendViewHolder && item is RecipeListItemData.RecommendHeader -> {
+                holder.bind(recommendRecipeList, ingredientDataMap)
+            }
+            holder is HeaderSpinnerViewHolder && item is RecipeListItemData.SearchSpinnerHeader -> {
+                holder.bind(selectedType, selectedSlowAging, typeItems, methodItems)
+            }
+            holder is ItemViewHolder && item is RecipeListItemData.RecipeItem -> {
+                holder.bind(item.data, ingredientMap)
+            }
+            else -> {
+                // 예상치 못한 조합일 경우 로그를 출력하고 처리하지 않음
+                Log.e("RecipeListAdapter", "Mismatched ViewHolder and Item types: " +
+                        "holder=${holder::class.simpleName}, item=${item::class.simpleName}, position=$position")
+            }
         }
     }
+
     fun updateIngredientMap(newIngredientMap: Map<Int, IngredientData>) {
         ingredientMap = newIngredientMap
         // 모든 아이템에 영향을 줄 수 있으니, 전체 갱신

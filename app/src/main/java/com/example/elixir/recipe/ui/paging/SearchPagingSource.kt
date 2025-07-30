@@ -15,7 +15,7 @@ class SearchPagingSource(
     // 사이즈에 맞게 데이터 불러오기
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, SearchItemData> {
         try {
-            val page = params.key ?: 1
+            val page = params.key ?: 0
             val response = keyword?.let {
                 api.searchRecipe(
                     keyword = it,
