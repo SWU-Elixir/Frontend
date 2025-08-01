@@ -70,7 +70,7 @@ class RecipeViewModel(private val repository: RecipeRepository) : ViewModel() {
         loadRecipes()
     }
 
-    private fun loadRecipes() {
+    fun loadRecipes() {
         Log.d("RecipeViewModel", "loadRecipes() called")
 
         currentSource?.let {

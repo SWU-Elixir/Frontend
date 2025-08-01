@@ -100,6 +100,7 @@ class RecipeFragment : Fragment() {
             recipeRegisterLauncher.launch(intent)
         }
 
+        setupRecipeListAdapter(ingredientDataMap ?: emptyMap())
         setupObservers()
         //setupRecipeRegisterLauncher()
 
@@ -118,9 +119,6 @@ class RecipeFragment : Fragment() {
     private fun setupObservers() {
         // 레시피 목록
         recipeViewModel.recipes.observe(viewLifecycleOwner) { pagingData ->
-            if (!::recipeListAdapter.isInitialized) {
-                setupRecipeListAdapter(ingredientDataMap ?: emptyMap())
-            }
             recipeListAdapter.submitData(lifecycle, pagingData)
         }
 
@@ -285,6 +283,12 @@ class RecipeFragment : Fragment() {
             }
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+        recipeViewModel.loadRecipes()
+    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
