@@ -101,18 +101,19 @@ class HeaderSpinnerViewHolder(
 
         binding.spinnerType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                val value =
-                    if(parent.getItemAtPosition(position).toString() == "음료/차")
-                        "음료_차"
-                    else if(parent.getItemAtPosition(position).toString() == "양념/소스/잼")
-                        "양념_소스_잼"
-                    else if(parent.getItemAtPosition(position).toString() == "종류")
-                        null
-                    else
-                        parent.getItemAtPosition(position).toString()
+                val value = when (val rawValue = parent.getItemAtPosition(position).toString()) {
+                    "음료/차" -> "음료_차"
+                    "양념/소스/잼" -> "양념_소스_잼"
+                    "종류" -> null
+                    else -> rawValue
+                }
+
+                // Spinner 변경 시 어댑터의 selectedType 값도 갱신됨
                 onTypeSelected(value)
+
                 updateResetButtonVisibility()
             }
+
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
 
@@ -128,16 +129,18 @@ class HeaderSpinnerViewHolder(
 
         binding.spinnerDifficulty.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                val value =
-                    if (parent.getItemAtPosition(position).toString() == "저속노화")
-                        null
-                    else
-                        parent.getItemAtPosition(position).toString()
+                val rawValue = parent.getItemAtPosition(position).toString()
+                val value = if (rawValue == "저속노화") null else rawValue
+
+                // Spinner 변경 시 selectedSlowAging 갱신
                 onMethodSelected(value)
+
                 updateResetButtonVisibility()
             }
+
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
+
 
         // 리셋 버튼 클릭 리스너
         binding.resetButton.setOnClickListener {
@@ -267,6 +270,16 @@ class RecipeListAdapter(
     private val onMethodSelected: (String?) -> Unit,
     private val onResetClicked: () -> Unit
 ) : PagingDataAdapter<RecipeListItemData, RecipeViewHolder>(RecipeDiffCallback()) {
+    // 추천, 스티키헤더, 아이템 데이터
+    var recommendRecipeList: List<RecipeItemData>? = null
+    private var ingredientDataMap: Map<Int, IngredientData>? = null
+
+    // 검색 스피너 값 정의
+    var selectedType: String? = null
+    var selectedSlowAging: String? = null
+    var typeItems: List<String> = emptyList()
+    var methodItems: List<String> = emptyList()
+
     // 리사이클러뷰 모드 지정
     enum class RecipeViewType(val value: Int) {
         RECOMMEND(0),       // 추천 레시피 헤더 (스크롤 시 사라지게)
@@ -283,16 +296,6 @@ class RecipeListAdapter(
             is RecipeListItemData.RecipeItem -> RecipeViewType.ITEM.value
         }
     }
-
-    // 추천, 스티키헤더, 아이템 데이터
-    var recommendRecipeList: List<RecipeItemData>? = null
-    private var ingredientDataMap: Map<Int, IngredientData>? = null
-
-    // 검색 스피너 값 정의
-    private var selectedType: String? = null
-    private var selectedSlowAging: String? = null
-    var typeItems: List<String> = emptyList()
-    var methodItems: List<String> = emptyList()
 
     // 검색 헤더 정보 갱신
     fun updateSearchHeader(selectedType: String?, selectedMethod: String?,
@@ -347,12 +350,6 @@ class RecipeListAdapter(
                         "holder=${holder::class.simpleName}, item=${item::class.simpleName}, position=$position")
             }
         }
-    }
-
-    fun updateIngredientMap(newIngredientMap: Map<Int, IngredientData>) {
-        ingredientMap = newIngredientMap
-        // 모든 아이템에 영향을 줄 수 있으니, 전체 갱신
-        notifyDataSetChanged() // 단순화를 위해, 실제로는 DiffUtil이 알아서 처리하므로 필요 없을 수 있음
     }
 }
 

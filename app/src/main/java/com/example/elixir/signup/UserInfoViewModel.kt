@@ -8,7 +8,7 @@ import com.example.elixir.signup.SignupRequest
 // 사용자 정보 뷰 모델 (회원가입, 정보 수정)
 class UserInfoViewModel : ViewModel() {
     private var accountData: AccountData = AccountData("", "")
-    private var profileData: ProfileData = ProfileData("", "", "", 0)
+    private var profileData: ProfileData = ProfileData("", "", null, 0)
     private var allergies: List<String>? = mutableListOf()
     private var preferredDiets: List<String>? = mutableListOf()
     private var preferredRecipes: List<String>? = mutableListOf()
@@ -90,7 +90,7 @@ class UserInfoViewModel : ViewModel() {
     }
 
     // 프로필 생성
-    fun setProfile(profileImage: String, nickname: String, gender: String, birthYear: Int) {
+    fun setProfile(profileImage: String, nickname: String, gender: String?, birthYear: Int) {
         profileData = ProfileData(profileImage, nickname, gender, birthYear)
     }
 
@@ -103,7 +103,7 @@ class UserInfoViewModel : ViewModel() {
     // 프로필 조회
     fun getProfile(): ProfileData? {
         return if (profileData.profileImage.isNotBlank() && profileData.nickname.isNotBlank()
-            && profileData.gender.isNotBlank() && profileData.birthYear != 0)
+            && profileData.birthYear != 0)
             profileData
         else null
     }

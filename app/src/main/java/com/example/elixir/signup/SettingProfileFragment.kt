@@ -27,7 +27,7 @@ class SettingProfileFragment : Fragment() {
 
     private var profileImage: String = ""
     private var nickname: String = ""
-    private var gender: String = ""
+    private var gender: String? = null
     private var birthYear: Int = 1990
 
     companion object {
@@ -63,6 +63,8 @@ class SettingProfileFragment : Fragment() {
 
         val profileDataJson = arguments?.getString("profileData")
         val email = arguments?.getString("email")
+
+        // 소셜 회원가입 중이라 이메일 값이 존재한다면, 이메일 값 저장
         if(!email.isNullOrBlank())
             userModel.setEmail(email)
 
@@ -76,18 +78,7 @@ class SettingProfileFragment : Fragment() {
             gender = data.gender
             birthYear = data.birthYear
 
-            with(profileBinding) {
-                // 설정: 이미지 링크 파싱, 닉네임에 작성한 닉네임 불러오기, 선택한 성별에 따라 버튼 누르게
-                registProfile.setImageURI(Uri.parse(profileImage))
-                registNick.setText(nickname)
-
-                when (gender) {
-                    R.string.female.toString() -> selectGender.check(R.id.btn_female)
-                    R.string.male.toString() -> selectGender.check(R.id.btn_male)
-                    R.string.other.toString() -> selectGender.check(R.id.btn_other)
-                    R.string.selected_not.toString() -> selectGender.check(R.id.btn_selected_not)
-                }
-            }
+            setInitialUI()
         } else if(!profileDataJson.isNullOrBlank()) {
             val profileData = Gson().fromJson(profileDataJson, ProfileData::class.java)
             // 클래스 속성에 데이터 값 집어넣기
@@ -102,22 +93,7 @@ class SettingProfileFragment : Fragment() {
 
             userModel.setProfile(profileImage, nickname, gender, birthYear)
 
-            with(profileBinding) {
-                // 설정: 이미지 링크 파싱, 닉네임에 작성한 닉네임 불러오기, 선택한 성별에 따라 버튼 누르게
-                Glide.with(this@SettingProfileFragment)
-                    .load(profileImage)
-                    .error(R.drawable.img_blank)
-                    .placeholder(R.drawable.img_blank)
-                    .into(registProfile)
-                registNick.setText(nickname)
-
-                when (gender) {
-                    R.string.female.toString() -> selectGender.check(R.id.btn_female)
-                    R.string.male.toString() -> selectGender.check(R.id.btn_male)
-                    R.string.other.toString() -> selectGender.check(R.id.btn_other)
-                    R.string.selected_not.toString() -> selectGender.check(R.id.btn_selected_not)
-                }
-            }
+            setInitialUI()
         }
 
         // 프로필 이미지 선택
@@ -139,13 +115,33 @@ class SettingProfileFragment : Fragment() {
                 R.id.btn_female -> gender = "female"
                 R.id.btn_male -> gender = "male"
                 R.id.btn_other -> gender = "other"
-                R.id.btn_selected_not -> gender = "not_selected"
+                R.id.btn_selected_not -> gender = null
             }
             checkAllValid()
         }
 
         // 생년월일 드롭다운 메뉴
         selectBirthYear()
+    }
+
+    // 초기 설정: 저장한 이미지, 닉네임, 성별을 ui에 반영
+    private fun setInitialUI() {
+        with(profileBinding) {
+            Glide.with(this@SettingProfileFragment)
+                .load(profileImage)
+                .error(R.drawable.img_blank)
+                .placeholder(R.drawable.img_blank)
+                .into(registProfile)
+
+            registNick.setText(nickname)
+
+            when (gender) {
+                "female" -> selectGender.check(R.id.btn_female)
+                "male" -> selectGender.check(R.id.btn_male)
+                "other" -> selectGender.check(R.id.btn_other)
+                else -> selectGender.check(R.id.btn_selected_not)
+            }
+        }
     }
 
     // 출생년도 스피너 드롭다운 메뉴 보여주기
@@ -185,12 +181,16 @@ class SettingProfileFragment : Fragment() {
         }
         // 프로필 이미지를 눌렀을 때,
         profileBinding.registProfile.setOnClickListener {
-            // 커스텀 다이얼로그 띄우기
+            // 커스텀 다이얼로그 띄우기: 기본 이미지 / 갤러리
             SelectImgDialog(requireContext(),
                 {
                     val uri = Uri.parse("android.resource://${requireContext().packageName}/${R.drawable.img_blank}")
-                    profileBinding.registProfile.setImageURI(uri)
                     profileImage = uri.toString()
+                    Glide.with(this@SettingProfileFragment)
+                        .load(profileImage)
+                        .error(R.drawable.img_blank)
+                        .placeholder(R.drawable.img_blank)
+                        .into(profileBinding.registProfile)
                     checkAllValid()
                 },
                 { imgSelector.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }
@@ -200,7 +200,7 @@ class SettingProfileFragment : Fragment() {
 
     // 모든 변수에 유효한 값이 들어왔는지 확인
     fun checkAllValid() {
-        if (profileImage.isNotBlank() && nickname.isNotBlank() && gender.isNotBlank() && birthYear != 0) {
+        if (profileImage.isNotBlank() && nickname.isNotBlank() && birthYear != 0) {
             Log.d("Signup", "이미지: $profileImage")
             Log.d("Signup", "닉네임: $nickname")
             Log.d("Signup", "성별: $gender")

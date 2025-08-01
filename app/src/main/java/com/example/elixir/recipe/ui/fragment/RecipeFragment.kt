@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
@@ -29,9 +28,7 @@ import com.example.elixir.recipe.viewmodel.RecipeViewModel
 import com.example.elixir.recipe.data.RecipeItemData
 import com.example.elixir.recipe.repository.RecipeRepository
 import com.example.elixir.recipe.ui.adapter.RecipeListAdapter
-import com.example.elixir.recipe.ui.paging.StickyHeaderItemDecoration
 import com.example.elixir.recipe.viewmodel.RecipeViewModelFactory
-import com.google.gson.Gson
 import kotlinx.coroutines.launch
 
 /**
@@ -179,17 +176,26 @@ class RecipeFragment : Fragment() {
             },
             onTypeSelected = { type ->
                 selectedCategoryType = type
+                recipeListAdapter.selectedType = selectedCategoryType     // 어댑터에도 값 반영
+                recipeListAdapter.notifyItemRangeChanged(0, recipeListAdapter.itemCount) // 헤더 포함 모두 갱신
                 recipeViewModel.setCategoryType(selectedCategoryType)
                 refreshRecipes()
             },
             onMethodSelected = { method ->
                 selectedSlowAging = method
-                recipeViewModel.setCategorySlowAging(selectedSlowAging)
+                recipeListAdapter.selectedSlowAging = selectedSlowAging
+                recipeListAdapter.notifyItemRangeChanged(0, recipeListAdapter.itemCount)
+                recipeViewModel.setCategorySlowAging(method)
                 refreshRecipes()
             },
             onResetClicked = {
                 selectedCategoryType = null
                 selectedSlowAging = null
+                recipeListAdapter.selectedType = selectedCategoryType
+                recipeListAdapter.selectedSlowAging = selectedSlowAging
+                recipeListAdapter.notifyItemRangeChanged(0, recipeListAdapter.itemCount)
+                recipeViewModel.setCategoryType(selectedCategoryType)
+                recipeViewModel.setCategorySlowAging(selectedSlowAging)
                 refreshRecipes()
             }
         ).apply {
