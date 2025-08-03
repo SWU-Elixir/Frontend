@@ -85,10 +85,14 @@ class HeaderRecommendViewHolder(
 
 class HeaderSpinnerViewHolder(
     private val binding: ItemRecipeHeaderSpinnerBinding, private val onTypeSelected: (String?) -> Unit,
-    private val onMethodSelected: (String?) -> Unit, private val onResetClicked: () -> Unit
+    private val onMethodSelected: (String?) -> Unit, private val onResetClicked: () -> Unit,
 ) : RecipeViewHolder(binding.root) {
 
-    fun bind(selectedType: String?, selectedSlowAging: String?, typeItems: List<String>, slowAgingItems: List<String>) {
+    private var lastTypeSelected: String? = null
+    private var lastMethodSelected: String? = null
+
+    fun bind(selectedType: String?, selectedSlowAging: String?, typeItems: List<String>,
+             slowAgingItems: List<String>, showResetButton: Boolean) {
         // 레시피 종류 스피너
         val typeAdapter = RecipeListSpinnerAdapter(binding.root.context, typeItems)
         binding.spinnerType.adapter = typeAdapter
@@ -108,10 +112,12 @@ class HeaderSpinnerViewHolder(
                     else -> rawValue
                 }
 
-                // Spinner 변경 시 어댑터의 selectedType 값도 갱신됨
-                onTypeSelected(value)
-
-                updateResetButtonVisibility()
+                // 값이 바뀌었을 때만 뷰 모델을 갱신하고 서버에 값 요청
+                if (value != lastTypeSelected) {
+                    lastTypeSelected = value
+                    onTypeSelected(value)
+                    updateResetButtonVisibility()
+                }
             }
 
             override fun onNothingSelected(parent: AdapterView<*>) {}
@@ -132,15 +138,19 @@ class HeaderSpinnerViewHolder(
                 val rawValue = parent.getItemAtPosition(position).toString()
                 val value = if (rawValue == "저속노화") null else rawValue
 
-                // Spinner 변경 시 selectedSlowAging 갱신
-                onMethodSelected(value)
-
-                updateResetButtonVisibility()
+                // 값이 바뀌었을 때만 뷰 모델을 갱신하고 서버에 값 요청
+                if (value != lastMethodSelected) {
+                    lastMethodSelected = value
+                    onMethodSelected(value)
+                    updateResetButtonVisibility()
+                }
             }
 
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
 
+        // 리셋 버튼 초기 visibility 설정
+        binding.resetButton.visibility = if (showResetButton) View.VISIBLE else View.GONE
 
         // 리셋 버튼 클릭 리스너
         binding.resetButton.setOnClickListener {
@@ -280,6 +290,8 @@ class RecipeListAdapter(
     var typeItems: List<String> = emptyList()
     var methodItems: List<String> = emptyList()
 
+    var shouldShowResetButton: Boolean = false
+
     // 리사이클러뷰 모드 지정
     enum class RecipeViewType(val value: Int) {
         RECOMMEND(0),       // 추천 레시피 헤더 (스크롤 시 사라지게)
@@ -339,7 +351,7 @@ class RecipeListAdapter(
                 holder.bind(recommendRecipeList, ingredientDataMap)
             }
             holder is HeaderSpinnerViewHolder && item is RecipeListItemData.SearchSpinnerHeader -> {
-                holder.bind(selectedType, selectedSlowAging, typeItems, methodItems)
+                holder.bind(selectedType, selectedSlowAging, typeItems, methodItems, shouldShowResetButton)
             }
             holder is ItemViewHolder && item is RecipeListItemData.RecipeItem -> {
                 holder.bind(item.data, ingredientMap)

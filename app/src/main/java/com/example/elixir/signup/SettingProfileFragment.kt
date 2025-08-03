@@ -86,13 +86,20 @@ class SettingProfileFragment : Fragment() {
             nickname = profileData.nickname
             gender = profileData.gender
             birthYear = profileData.birthYear
+            Log.d("Signup", "-----------소셜 로그인-----------")
             Log.d("Signup", "이미지: $profileImage")
             Log.d("Signup", "닉네임: $nickname")
             Log.d("Signup", "성별: $gender")
             Log.d("Signup", "출생년도: $birthYear")
+            Log.d("Signup", "-------------------------------")
+
+            // 만약, 성별 값이 m이나 f로 들어오면, 풀네임으로 저장되게
+            gender = if(gender == "M" || gender == "m" || gender == "male") "male"
+                        else if (gender == "F" || gender == "f" || gender == "female") "female"
+                        else if (gender.isNullOrBlank()) null
+                        else "other"
 
             userModel.setProfile(profileImage, nickname, gender, birthYear)
-
             setInitialUI()
         }
 
@@ -201,10 +208,12 @@ class SettingProfileFragment : Fragment() {
     // 모든 변수에 유효한 값이 들어왔는지 확인
     fun checkAllValid() {
         if (profileImage.isNotBlank() && nickname.isNotBlank() && birthYear != 0) {
+            Log.d("Signup", "-----------값 확인-----------")
             Log.d("Signup", "이미지: $profileImage")
             Log.d("Signup", "닉네임: $nickname")
             Log.d("Signup", "성별: $gender")
             Log.d("Signup", "출생년도: $birthYear")
+            Log.d("Signup", "----------------------------")
             userModel.setProfile(profileImage, nickname, gender, birthYear)
             listener?.onProfileCompleted(profileImage, nickname, gender, birthYear)
         } else {

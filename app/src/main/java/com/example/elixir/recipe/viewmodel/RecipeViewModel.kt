@@ -57,17 +57,33 @@ class RecipeViewModel(private val repository: RecipeRepository) : ViewModel() {
     // 검색 키워드
     private var keyword: String? = null
 
+    // 디바운스 관련 변수
+    private val debounceHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private var debounceRunnable: Runnable? = null
+
     // 카테고리 필터 변경 함수
     fun setCategoryType(type: String?) {
+        if (categoryType == type) return                        // 중복 요청 방지
         categoryType = type
         Log.d("RecipeViewModel", "categoryType: '$categoryType'")
-        loadRecipes()
+        scheduleDebouncedLoad()
     }
 
     fun setCategorySlowAging(slowAging: String?) {
+        if (categorySlowAging == slowAging) return              // 중복 요청 방지
         categorySlowAging = slowAging
         Log.d("RecipeViewModel", "categorySlowAging: $categorySlowAging")
-        loadRecipes()
+        scheduleDebouncedLoad()
+    }
+
+    private fun scheduleDebouncedLoad() {
+        debounceRunnable?.let { debounceHandler.removeCallbacks(it) }
+
+        debounceRunnable = Runnable {
+            loadRecipes()
+        }
+
+        debounceHandler.postDelayed(debounceRunnable!!, 300)
     }
 
     fun loadRecipes() {

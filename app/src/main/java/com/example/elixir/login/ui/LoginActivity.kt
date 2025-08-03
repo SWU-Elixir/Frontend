@@ -19,6 +19,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import com.example.elixir.BuildConfig
 import com.example.elixir.HomeActivity
+import com.example.elixir.R
 import com.example.elixir.RetrofitClient
 import com.example.elixir.ToolbarActivity
 import com.example.elixir.databinding.ActivityLoginBinding
@@ -120,10 +121,12 @@ class LoginActivity : AppCompatActivity() {
                 if(!data.registered) {
                     // 받아온 데이터
                     val profileData = data.socialUserInfo
-                    val image = if(profileData.profileImage.isNullOrBlank()) "" else profileData.profileImage!!
-                    val gender = if(profileData.gender.isNullOrBlank()) "" else profileData.gender!!
-                    val birthYear = if(profileData.birthYear == null) 0 else profileData.birthYear!!
-                    val nickname = if(profileData.nickname.isNullOrBlank()) "" else profileData.nickname!!
+                    val image = if(profileData.profileImage.isNullOrBlank())
+                                    "android.resource://${this.packageName}/${R.drawable.ic_profile}"
+                                else profileData.profileImage!!
+                    val gender = profileData.gender
+                    val birthYear = if(profileData.birthYear == null) 1990 else profileData.birthYear!!
+                    val nickname = if(profileData.nickname.isNullOrBlank()) profileData.email else profileData.nickname!!
 
                     userModel.setLoginType(data.loginType)
                     userModel.setEmail(profileData.email)

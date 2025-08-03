@@ -68,7 +68,7 @@ class RecipeFragment : Fragment() {
             ActivityResultContracts.StartActivityForResult()
         ) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
-                result.data?.getStringExtra("recipeData")?.let { json ->
+                result.data?.getStringExtra("recipeData")?.let {
                     refreshRecipes()
                     recipeListAdapter.updateSearchHeader(
                         selectedType = selectedCategoryType,
@@ -89,7 +89,7 @@ class RecipeFragment : Fragment() {
         val ingredientRepo = IngredientRepository(RetrofitClient.instanceIngredientApi, IngredientDB.getInstance(requireContext()).ingredientDao())
 
         // 뷰모델 초기화
-        recipeViewModel = ViewModelProvider(requireActivity(), RecipeViewModelFactory(recipeRepo)).get(RecipeViewModel::class.java)
+        recipeViewModel = ViewModelProvider(requireActivity(), RecipeViewModelFactory(recipeRepo))[RecipeViewModel::class.java]
         ingredientViewModel = ViewModelProvider(requireActivity(), IngredientViewModelFactory(ingredientRepo))[IngredientViewModel::class.java]
 
         binding.recipeList.layoutManager = LinearLayoutManager(requireContext())
@@ -113,6 +113,10 @@ class RecipeFragment : Fragment() {
     private fun refreshRecipes() {
         recipeViewModel.setCategoryType(selectedCategoryType)
         recipeViewModel.setCategorySlowAging(selectedSlowAging)
+
+        val isResetVisible = !(selectedCategoryType == null && selectedSlowAging == null)
+        recipeListAdapter.shouldShowResetButton = isResetVisible
+        recipeListAdapter.notifyItemChanged(1)
     }
 
     // 라이브데이터 관찰
@@ -174,8 +178,8 @@ class RecipeFragment : Fragment() {
             },
             onTypeSelected = { type ->
                 selectedCategoryType = type
-                recipeListAdapter.selectedType = selectedCategoryType     // 어댑터에도 값 반영
-                recipeListAdapter.notifyItemRangeChanged(0, recipeListAdapter.itemCount) // 헤더 포함 모두 갱신
+                recipeListAdapter.selectedType = selectedCategoryType
+                recipeListAdapter.notifyItemRangeChanged(0, recipeListAdapter.itemCount)
                 recipeViewModel.setCategoryType(selectedCategoryType)
                 refreshRecipes()
             },
