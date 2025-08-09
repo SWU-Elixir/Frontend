@@ -185,7 +185,7 @@ class MyPageFragmentId : Fragment() {
         lifecycleScope.launch {
             try {
                 val api = RetrofitClient.instanceMemberApi
-                val response = api.getTop3Achievements(memberId)
+                val response = api.getAllAchievements(memberId)
                 if (response.status == 200) {
                     val achievements = response.data
                     val badgeList = if (achievements.isNotEmpty()) {

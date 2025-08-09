@@ -4,5 +4,6 @@ data class BadgeItem(
     val imageRes: Int,
     val title: String,
     val year: Int?,
-    val month: Int?
+    val month: Int?,
+    val subtitle: String? = null
 ) 

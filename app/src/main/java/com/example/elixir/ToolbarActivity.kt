@@ -168,6 +168,13 @@ open class ToolbarActivity : AppCompatActivity() {
                 val fragment = DietLogFragment().apply {
                     arguments = Bundle().apply {
                         putString("mealData", mealDataJson)
+
+                        // selectedDate 추가 - LocalDate.parse()가 요구하는 형식으로 전달
+                        val selectedDateStr = String.format("%04d-%02d-%02d", year, month, day)
+                        putString("selectedDate", selectedDateStr)
+
+                        // 디버깅용 로그
+                        Log.d("ToolbarActivity", "Passing selectedDate to fragment: $selectedDateStr")
                     }
                 }
 

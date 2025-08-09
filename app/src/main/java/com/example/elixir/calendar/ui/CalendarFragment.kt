@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.*
-import android.net.Uri
 import android.os.Bundle
 import android.text.style.ForegroundColorSpan
 import android.text.style.LineBackgroundSpan
@@ -38,7 +37,6 @@ import com.prolificinteractive.materialcalendarview.*
 import com.prolificinteractive.materialcalendarview.format.TitleFormatter
 import com.prolificinteractive.materialcalendarview.format.WeekDayFormatter
 import org.threeten.bp.LocalDateTime
-import org.threeten.bp.format.DateTimeFormatter
 
 // ----------------------------- 프래그먼트 클래스 -------------------------------------
 class CalendarFragment : Fragment(), OnMealClickListener {
@@ -167,7 +165,7 @@ class CalendarFragment : Fragment(), OnMealClickListener {
         binding.calendarView.setWeekDayFormatter(CustomWeekDayFormatter(requireContext()))
         binding.calendarView.setTitleFormatter(CustomTitleFormatter(requireContext()))
 
-        mealViewModel.getAllDietLogs(30)
+        mealViewModel.getAllDietLogs()
 
         // 오늘 날짜 배경 원 데코레이터 (최초 1회만 추가)
         try {
@@ -205,18 +203,26 @@ class CalendarFragment : Fragment(), OnMealClickListener {
             selectedCalendarDay = date
             val selectedDateStr = "%04d-%02d-%02d".format(date.year, date.month + 1, date.day)
             mealViewModel.getDietLogsByDate(selectedDateStr)
-            mealViewModel.getAllDietLogs(30)
+            mealViewModel.getAllDietLogs()
 
             updateSelectedDateDecorator()
 
-            binding.fab.visibility = if (selectedCalendarDay == today && bottomSheetState != BottomSheetBehavior.STATE_COLLAPSED) View.VISIBLE else View.GONE
+            // 과거 날짜와 오늘 날짜 모두에서 FAB 표시 (미래 날짜는 제외)
+            val isDateNotInFuture = !selectedCalendarDay.isAfter(today)
+            binding.fab.visibility = if (isDateNotInFuture && bottomSheetState != BottomSheetBehavior.STATE_COLLAPSED) View.VISIBLE else View.GONE
         }
 
         // FAB 클릭 이벤트
         binding.fab.setOnClickListener {
+            val selectedDateStr = String.format("%04d-%02d-%02d",
+                selectedCalendarDay.year,
+                selectedCalendarDay.month + 1,
+                selectedCalendarDay.day)
+
             val intent = Intent(context, ToolbarActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
                 putExtra("mode", 2)
+                putExtra("selectedDate", selectedDateStr) // 이 부분 추가
                 putExtra("year", selectedCalendarDay.year)
                 putExtra("month", selectedCalendarDay.month + 1)
                 putExtra("day", selectedCalendarDay.day)
@@ -252,7 +258,9 @@ class CalendarFragment : Fragment(), OnMealClickListener {
         behavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 bottomSheetState = newState
-                binding.fab.visibility = if (selectedCalendarDay == today && newState != BottomSheetBehavior.STATE_COLLAPSED) View.VISIBLE else View.GONE
+                // 선택된 날짜가 오늘이거나 과거일 때만 FAB를 표시
+                val isDateNotInFuture = !selectedCalendarDay.isAfter(today)
+                binding.fab.visibility = if (isDateNotInFuture && newState != BottomSheetBehavior.STATE_COLLAPSED) View.VISIBLE else View.GONE
             }
             override fun onSlide(bottomSheet: View, slideOffset: Float) {}
         })
@@ -268,7 +276,7 @@ class CalendarFragment : Fragment(), OnMealClickListener {
         super.onResume()
         // 선택된 날짜 스타일 복원
         updateSelectedDateDecorator()
-        mealViewModel.getAllDietLogs(30)
+        mealViewModel.getAllDietLogs()
         val selectedDateStr = "%04d-%02d-%02d".format(selectedCalendarDay.year, selectedCalendarDay.month + 1, selectedCalendarDay.day)
         mealViewModel.getDietLogsByDate(selectedDateStr) // 데이터 다시 불러오기
         // 캘린더 선택 날짜는 항상 유지

@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import com.example.elixir.BuildConfig
+import androidx.lifecycle.lifecycleScope
 import com.example.elixir.HomeActivity
 import com.example.elixir.R
 import com.example.elixir.RetrofitClient
@@ -47,6 +48,10 @@ import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.CancellationException
 import retrofit2.Call
 import java.security.MessageDigest
 import java.io.IOException
@@ -279,9 +284,14 @@ class LoginActivity : AppCompatActivity() {
                         // 자동 로그인 정보 저장
                         saveAutoLogin(email, password)
                         Toast.makeText(this@LoginActivity, "로그인 성공!", Toast.LENGTH_SHORT).show()
-                        val intent = Intent(this@LoginActivity, HomeActivity::class.java)
-                        startActivity(intent)
-                        finish()
+
+                        // access() 호출을 HomeActivity 이동 전에 실행하고, 완료 후 화면 전환
+                        access { success ->
+                            val intent = Intent(this@LoginActivity, HomeActivity::class.java)
+                            startActivity(intent)
+                            finish()
+                        }
+
                     } else {
                         // 로그인 실패 시 토큰 제거
                         clearTokens()
@@ -334,11 +344,50 @@ class LoginActivity : AppCompatActivity() {
         return token
     }
 
+    // access 함수를 콜백 방식으로 수정
+    private fun access(onComplete: (Boolean) -> Unit) {
+        // Activity가 활성 상태인지 확인
+        if (isFinishing || isDestroyed) {
+            onComplete(false)
+            return
+        }
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val api = RetrofitClient.instanceMemberApi
+                val response = api.access()
+
+                withContext(Dispatchers.Main) {
+                    if (response.status == 200) {
+                        Log.d("LoginActivity", "앱 접속 호출 성공")
+                        onComplete(true)
+                    } else {
+                        Log.w("LoginActivity", "앱 접속 응답 오류: ${response.code}")
+                        onComplete(false)
+                    }
+                }
+
+            } catch (e: CancellationException) {
+                Log.d("LoginActivity", "앱 접속 호출이 취소됨")
+                withContext(Dispatchers.Main) {
+                    onComplete(false)
+                }
+                throw e // CancellationException은 다시 던져야 함
+            } catch (e: Exception) {
+                Log.e("LoginActivity", "앱 접속 호출 실패", e)
+                withContext(Dispatchers.Main) {
+                    onComplete(false)
+                }
+            }
+        }
+
+    }
+
     // 토큰 제거 함수 추가
     private fun clearTokens() {
         // RetrofitClient의 토큰 제거
         RetrofitClient.setAuthToken(null)
-        
+
         // SharedPreferences에서 토큰 제거
         val prefs = getSharedPreferences("authPrefs", MODE_PRIVATE)
         prefs.edit()

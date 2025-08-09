@@ -44,9 +44,7 @@ import com.example.elixir.member.network.MemberApi
 import com.example.elixir.member.network.MemberDB
 import com.example.elixir.member.network.MemberRepository
 import com.example.elixir.network.AppDatabase
-import com.google.android.flexbox.FlexDirection
-import com.google.android.flexbox.FlexboxLayoutManager
-import com.google.android.flexbox.JustifyContent
+import androidx.fragment.app.setFragmentResultListener
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.timepicker.MaterialTimePicker
@@ -59,13 +57,14 @@ import org.threeten.bp.ZoneId
 import org.threeten.bp.format.DateTimeFormatter
 import org.threeten.bp.Instant
 import org.threeten.bp.LocalDate
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.util.Locale
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Matrix
+import com.example.elixir.dialog.EditNoticedDialog
+import com.example.elixir.dialog.PreviousNoticedDialog
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class DietLogFragment : Fragment() {
     // 바인딩, 뷰모델 정의
@@ -76,6 +75,7 @@ class DietLogFragment : Fragment() {
     private var selectedHour: Int = -1
     private var selectedMin: Int = -1
     private lateinit var selectedTime: LocalTime
+    private var selectedDate: LocalDate? = null // 선택된 날짜 저장용
 
     // 정보
     private var dietImg: String = "" // 이미지 URI (http/s, file, android.resource)
@@ -101,6 +101,8 @@ class DietLogFragment : Fragment() {
     private var dietId: Int = -1
 
     private var isUserSelectedImage: Boolean = false // 사용자가 갤러리에서 직접 선택했는지 추적
+    private var initialDietImg: String = ""
+    private var isDefaultImage: Boolean = false
 
 
     private val dietLogViewModel: MealViewModel by viewModels {
@@ -120,6 +122,17 @@ class DietLogFragment : Fragment() {
         // -------------------------------------------- 초기화 -----------------------------------------------//
         mealDataJson = arguments?.getString("mealData")
 
+        // 선택된 날짜 받아오기
+        val selectedDateStr = arguments?.getString("selectedDate")
+        selectedDate = if (selectedDateStr != null) {
+            LocalDate.parse(selectedDateStr)
+        } else {
+            LocalDate.now() // 기본값은 오늘
+        }
+        // 날짜 초기화 후 로그 추가
+        Log.d("DietLogFragment", "Selected date: $selectedDate")
+        Log.d("DietLogFragment", "Selected date string: $selectedDateStr")
+
         // 데이터베이스와 API 초기화
         dietDao = AppDatabase.getInstance(requireContext()).dietLogDao()
         dietApi = RetrofitClient.instanceDietApi
@@ -138,12 +151,30 @@ class DietLogFragment : Fragment() {
             dietRepository.setCurrentMemberIdFromDb(memberRepository)
         }
 
+        // 기존 식단 가져오기
+        parentFragmentManager.setFragmentResultListener("meal_selection_request", viewLifecycleOwner) { key, bundle ->
+            val mealDataJsonFromRecent = bundle.getString("selected_meal_data")
+            if (mealDataJsonFromRecent != null) {
+                // 수신된 데이터를 DietLogData 객체로 변환
+                val selectedMeal = Gson().fromJson(mealDataJsonFromRecent, DietLogData::class.java)
+                Log.d("DietLogFragment", "Received meal from recent list: ${selectedMeal.dietTitle}")
+                Log.d("DietLogFragment", "Received meal data: $mealDataJsonFromRecent")
+
+                // UI 업데이트 및 수정 모드 전환
+                updateUIWithSelectedMeal(selectedMeal)
+            }
+        }
+
         // 수정 모드일 때 초기화
         if (mealDataJson != null) {
             mealData = Gson().fromJson(mealDataJson, DietLogData::class.java)
+            updateUIWithSelectedMeal(mealData)
             isEditMode = true
             dietId = mealData.id // 수정 모드일 때 기존 ID 저장
-            dietLogBinding.enterDietTitle.setText(mealData.dietTitle)
+            dietLogBinding.etDietTitle.setText(mealData.dietTitle)
+
+            // 수정 모드일 때 최근 버튼 숨기기
+            dietLogBinding.btnRecent.visibility = View.GONE
 
             dietTitle = mealData.dietTitle
             dietImg = mealData.dietImg // 기존 이미지 URI 설정
@@ -157,31 +188,45 @@ class DietLogFragment : Fragment() {
                 .load(dietImg) // mealData.dietImg가 이미 적절한 URI 형태일 것이므로 그대로 사용
                 .placeholder(R.drawable.img_blank)
                 .error(R.drawable.img_blank)
-                .into(dietLogBinding.dietImg)
+                .into(dietLogBinding.imgDiet)
 
             // 시간 처리
             selectedTime = mealData.time.toLocalTime()
             selectedHour = selectedTime.hour
             selectedMin = selectedTime.minute
-            dietLogBinding.setNowCb.isChecked = (selectedTime.hour == LocalTime.now().hour && selectedTime.minute == LocalTime.now().minute) // 현재 시간과 정확히 일치하는지 확인
-            dietLogBinding.time12h.text = mealData.time.format(DateTimeFormatter.ofPattern("a h:mm", Locale.ENGLISH))
+            dietLogBinding.cbSetNow.isChecked = (selectedTime.hour == LocalTime.now().hour && selectedTime.minute == LocalTime.now().minute) // 현재 시간과 정확히 일치하는지 확인
+            dietLogBinding.tvTime12h.text = mealData.time.format(DateTimeFormatter.ofPattern("a h:mm", Locale.ENGLISH))
 
             // 점수(1~5)에 따라 라디오버튼 체크
             when (score) {
-                1 -> dietLogBinding.selectScore.check(dietLogBinding.btn1.id)
-                2 -> dietLogBinding.selectScore.check(dietLogBinding.btn2.id)
-                3 -> dietLogBinding.selectScore.check(dietLogBinding.btn3.id)
-                4 -> dietLogBinding.selectScore.check(dietLogBinding.btn4.id)
-                5 -> dietLogBinding.selectScore.check(dietLogBinding.btn5.id)
+                1 -> dietLogBinding.rgSelectScore.check(dietLogBinding.btn1.id)
+                2 -> dietLogBinding.rgSelectScore.check(dietLogBinding.btn2.id)
+                3 -> dietLogBinding.rgSelectScore.check(dietLogBinding.btn3.id)
+                4 -> dietLogBinding.rgSelectScore.check(dietLogBinding.btn4.id)
+                5 -> dietLogBinding.rgSelectScore.check(dietLogBinding.btn5.id)
             }
 
             // 카테고리(아침, 점심, 저녁, 간식)에 따라 라디오버튼 체크
             when (dietCategory) {
-                getString(R.string.breakfast) -> dietLogBinding.selectDiet.check(dietLogBinding.btnBreakfast.id)
-                getString(R.string.lunch) -> dietLogBinding.selectDiet.check(dietLogBinding.btnLunch.id)
-                getString(R.string.dinner) -> dietLogBinding.selectDiet.check(dietLogBinding.btnDinner.id)
-                getString(R.string.snack) -> dietLogBinding.selectDiet.check(dietLogBinding.btnSnack.id)
+                getString(R.string.breakfast) -> dietLogBinding.rgSelectDiet.check(dietLogBinding.btnBreakfast.id)
+                getString(R.string.lunch) -> dietLogBinding.rgSelectDiet.check(dietLogBinding.btnLunch.id)
+                getString(R.string.dinner) -> dietLogBinding.rgSelectDiet.check(dietLogBinding.btnDinner.id)
+                getString(R.string.snack) -> dietLogBinding.rgSelectDiet.check(dietLogBinding.btnSnack.id)
             }
+
+            // 기본 이미지인지 판단 (더 정확한 판단을 위해)
+            isDefaultImage = when {
+                dietImg.contains("ic_meal_morning") || dietImg.contains("default_resource_image") -> true
+                dietImg.contains("ic_meal_lunch") || dietImg.contains("default_resource_image") -> true
+                dietImg.contains("ic_meal_dinner") || dietImg.contains("default_resource_image") -> true
+                dietImg.contains("ic_meal_snack") || dietImg.contains("default_resource_image") -> true
+                dietImg.contains("img_blank") || dietImg.contains("default_resource_image") -> true
+                // 파일명으로도 판단 (copyResourceToFile에서 생성된 파일명 패턴)
+                dietImg.contains("default_resource_image_") -> true
+                else -> false
+            }
+
+            isUserSelectedImage = !isDefaultImage
 
             // 식재료 태그
             ingredientTags = mealData.ingredientTags.toMutableList()
@@ -196,26 +241,30 @@ class DietLogFragment : Fragment() {
                 val ingredientTags = mealData.ingredientTags
 
                 showInitialIngredientChips(ingredientTags = ingredientTags, ingredientMap = ingredientMap,
-                    chipGroup = dietLogBinding.tagsIngredient, findIngredientChip = dietLogBinding.findIngredient)
+                    chipGroup = dietLogBinding.cgTagsIngredient, findIngredientChip = dietLogBinding.chipFindIngredient)
             }
 
             checkAllValid()
 
         } else {
+            // 새로운 식단 작성 모드일 때 최근 버튼 표시
+            dietLogBinding.btnRecent.visibility = View.VISIBLE
+
             // 기본 이미지로 설정
             val defaultUri = Uri.parse("android.resource://${requireContext().packageName}/${R.drawable.img_blank}")
-            dietLogBinding.dietImg.setImageURI(defaultUri)
+            dietLogBinding.imgDiet.setImageURI(defaultUri)
             dietImg = defaultUri.toString() // dietImg 변수에도 저장
+            initialDietImg = defaultUri.toString()
 
             // 현재 시간으로 초기화
             selectedTime = LocalTime.now()
-            dietLogBinding.setNowCb.isChecked = true
+            dietLogBinding.cbSetNow.isChecked = true
 
             selectedHour = selectedTime.hour
             selectedMin = selectedTime.minute
 
             formattedTime = DateTimeFormatter.ofPattern("a h:mm", Locale.ENGLISH).format(selectedTime)
-            dietLogBinding.time12h.text = formattedTime
+            dietLogBinding.tvTime12h.text = formattedTime
 
             isUserSelectedImage = false
 
@@ -224,23 +273,32 @@ class DietLogFragment : Fragment() {
 
         // -------------------------------------------- 리스너 -----------------------------------------------//
         // 현재 시간으로 설정: 체크하면 현재 시간으로 설정되도록
-        dietLogBinding.setNowCb.setOnCheckedChangeListener { _, isChecked ->
+        dietLogBinding.cbSetNow.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 // 시간 현재로 재설정
                 val now = LocalTime.now()
                 selectedTime = now // 현재 시간으로 업데이트
-                dietLogBinding.setNowCb.isChecked = (selectedTime.hour == now.hour && selectedTime.minute == now.minute) // 정확한 비교
+                dietLogBinding.cbSetNow.isChecked = (selectedTime.hour == now.hour && selectedTime.minute == now.minute) // 정확한 비교
 
                 formattedTime = DateTimeFormatter.ofPattern("a h:mm", Locale.ENGLISH).format(selectedTime)
-                dietLogBinding.time12h.text = formattedTime
+                dietLogBinding.tvTime12h.text = formattedTime
                 selectedHour = now.hour
                 selectedMin = now.minute
             }
             checkAllValid()
         }
 
+        dietLogBinding.btnRecent.setOnClickListener{
+            val mealRecentFragment = MealRecentListFragment()
+
+            requireActivity().supportFragmentManager.beginTransaction()
+                .add(android.R.id.content, mealRecentFragment)
+                .addToBackStack(null) // 백 스택에 추가하여 뒤로 가기 버튼으로 돌아올 수 있도록 합니다.
+                .commit()
+        }
+
         // 타임피커: 다이얼로그 띄워주기(material3 제공)
-        dietLogBinding.timePicker.setOnClickListener {
+        dietLogBinding.btnTimePicker.setOnClickListener {
             // 현재 시간으로 설정 체크박스 해제
             val picker = MaterialTimePicker.Builder()
                 .setTimeFormat(TimeFormat.CLOCK_12H)
@@ -257,17 +315,19 @@ class DietLogFragment : Fragment() {
                 selectedHour = picker.hour
                 selectedMin = picker.minute
                 selectedTime = LocalTime.of(selectedHour, selectedMin)
-                dietLogBinding.setNowCb.isChecked = false
+                dietLogBinding.cbSetNow.isChecked = false
 
                 // 선택된 시간 텍스트뷰에 띄워주기
                 formattedTime = DateTimeFormatter.ofPattern("a h:mm", Locale.ENGLISH).format(selectedTime)
-                dietLogBinding.time12h.text = formattedTime
+                dietLogBinding.tvTime12h.text = formattedTime
+
+                checkAllValid()
             }
-            checkAllValid()
+
         }
 
         // 식단명 입력, 변경 탐지 및 유효성 검사
-        dietLogBinding.enterDietTitle.addTextChangedListener(object : TextWatcher {
+        dietLogBinding.etDietTitle.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
@@ -277,7 +337,7 @@ class DietLogFragment : Fragment() {
         })
 
         // 라디오 버튼 : 식단 유형 선택
-        dietLogBinding.selectDiet.setOnCheckedChangeListener { _, checkedId ->
+        dietLogBinding.rgSelectDiet.setOnCheckedChangeListener { _, checkedId ->
             val oldDietCategory = dietCategory
             when(checkedId) {
                 dietLogBinding.btnBreakfast.id -> {
@@ -294,8 +354,8 @@ class DietLogFragment : Fragment() {
                 }
             }
 
-            // 사용자가 갤러리에서 직접 선택하지 않은 경우에만 이미지 변경
-            if (!isUserSelectedImage) {
+            // 기본 이미지이고 사용자가 갤러리에서 선택하지 않은 경우에만 이미지 변경
+            if (!isUserSelectedImage && (isDefaultImage || !isEditMode)) {
                 val defaultImageResId = when (dietCategory) {
                     getString(R.string.breakfast) -> R.drawable.ic_meal_morning
                     getString(R.string.lunch) -> R.drawable.ic_meal_lunch
@@ -304,26 +364,20 @@ class DietLogFragment : Fragment() {
                     else -> R.drawable.img_blank
                 }
 
-                // SVG를 파일로 변환
                 val imageFile = copyResourceToFile(requireContext(), defaultImageResId)
                 if (imageFile != null) {
                     val fileUri = Uri.fromFile(imageFile)
-                    dietLogBinding.dietImg.setImageURI(fileUri)
+                    dietLogBinding.imgDiet.setImageURI(fileUri)
                     dietImg = fileUri.toString()
                     Log.d("DietLogFragment", "Diet category changed, image updated: $dietImg")
                 } else {
-                    // 변환 실패 시 리소스 URI 사용
                     val uri = Uri.parse("android.resource://${requireContext().packageName}/$defaultImageResId")
-                    dietLogBinding.dietImg.setImageURI(uri)
+                    dietLogBinding.imgDiet.setImageURI(uri)
                     dietImg = uri.toString()
-                    Log.w("DietLogFragment", "Failed to convert SVG, using resource URI: $dietImg")
                 }
-            } else {
-                Log.d("DietLogFragment", "User selected image preserved")
             }
-
-            checkAllValid()
         }
+
 
         // SearchFragment에서 전달된 결과 수신
         parentFragmentManager.setFragmentResultListener("ingredient_selection", viewLifecycleOwner) { _, bundle ->
@@ -331,7 +385,7 @@ class DietLogFragment : Fragment() {
             val ingredientName = bundle.getString("ingredientName") ?: return@setFragmentResultListener
 
             if (ingredientId == -1) return@setFragmentResultListener
-            val findIngredientChip = dietLogBinding.findIngredient
+            val findIngredientChip = dietLogBinding.chipFindIngredient
 
             // 중복 방지
             if (ingredientTags.contains(ingredientId)) {
@@ -358,14 +412,14 @@ class DietLogFragment : Fragment() {
                 // 칩 클릭 리스너로 변경
                 setOnClickListener {
                     ingredientTags.remove(ingredientId)
-                    dietLogBinding.tagsIngredient.removeView(this)
+                    dietLogBinding.cgTagsIngredient.removeView(this)
                     checkAllValid()
                 }
             }
 
             // findIngredient Chip 앞에 삽입
-            val index = dietLogBinding.tagsIngredient.indexOfChild(findIngredientChip)
-            dietLogBinding.tagsIngredient.addView(chip, index)
+            val index = dietLogBinding.cgTagsIngredient.indexOfChild(findIngredientChip)
+            dietLogBinding.cgTagsIngredient.addView(chip, index)
 
             // 리스트에 추가 (ID 저장)
             ingredientTags.add(ingredientId)
@@ -373,9 +427,9 @@ class DietLogFragment : Fragment() {
         }
 
         // 식재료 검색 버튼 클릭 리스너
-        dietLogBinding.findIngredient.setOnClickListener {
+        dietLogBinding.chipFindIngredient.setOnClickListener {
             // 칩 상태 토글 (선택 해제)
-            dietLogBinding.findIngredient.isChecked = false // 항상 false로 설정하여, 검색 Fragment에서 돌아왔을 때 다시 누를 수 있도록 함
+            dietLogBinding.chipFindIngredient.isChecked = false // 항상 false로 설정하여, 검색 Fragment에서 돌아왔을 때 다시 누를 수 있도록 함
 
             // IngredientSearchFragment로 이동
             val ingredientSearchFragment = IngredientSearchFragment()
@@ -391,12 +445,12 @@ class DietLogFragment : Fragment() {
         viewLifecycleOwner.lifecycle.addObserver(object : androidx.lifecycle.DefaultLifecycleObserver {
             override fun onResume(owner: androidx.lifecycle.LifecycleOwner) {
                 // 이전에 눌렸던 상태와 상관없이 항상 초기화
-                dietLogBinding.findIngredient.isChecked = false
+                dietLogBinding.chipFindIngredient.isChecked = false
             }
         })
 
         // 라디오 버튼: 점수
-        dietLogBinding.selectScore.setOnCheckedChangeListener { _, checkedId ->
+        dietLogBinding.rgSelectScore.setOnCheckedChangeListener { _, checkedId ->
             when (checkedId) {
                 dietLogBinding.btn1.id -> score = 1
                 dietLogBinding.btn2.id -> score = 2
@@ -443,91 +497,195 @@ class DietLogFragment : Fragment() {
 
         // 작성 버튼
         dietLogBinding.btnWriteDietLog.setOnClickListener {
-            SaveDialog(requireActivity()) {
-                // 현재 입력된 값들로 mealData 객체 생성
-                val currentMealData = DietLogData(
-                    id = if (isEditMode) dietId else 0, // 수정 모드일 때 mealData.id 사용, 아니면 0
-                    dietTitle = dietTitle,
-                    dietCategory = dietCategory,
-                    score = score,
-                    ingredientTags = ingredientTags,
-                    time = if (isEditMode) {
-                        // 수정 모드일 때는 기존 날짜 유지
-                        LocalDateTime.of(mealData.time.toLocalDate(), selectedTime)
-                    } else {
-                        // 새로운 기록일 때는 현재 날짜 사용
-                        selectedTime.atDate(LocalDate.now())
-                    },
-                    dietImg = dietImg
-                )
 
-                Log.d("DietLogFragment", "저장할 selectedTime: $selectedTime")
-                Log.d("DietLogFragment", "저장할 dietImg URI: $dietImg")
+            // 시간 계산
+            val calculatedTime = if (isEditMode) {
+                LocalDateTime.of(mealData.time.toLocalDate(), selectedTime)
+            } else {
+                LocalDateTime.of(selectedDate ?: LocalDate.now(), selectedTime)
+            }
 
-                // 업로드용 이미지 File 객체 생성
-                val imageFile: File? = when {
-                    dietImg.startsWith("http://") || dietImg.startsWith("https://") -> {
-                        // 서버 이미지인 경우
-                        null
-                    }
-                    dietImg.startsWith("android.resource://") -> {
-                        val resId = dietImg.substringAfterLast("/").toIntOrNull()
-                        copyResourceToFile(requireContext(), resId ?: R.drawable.img_blank)
-                    }
-                    dietImg.startsWith("content://") -> {
-                        // content:// URI는 반드시 파일로 복사해서 사용해야 함
-                        val uri = Uri.parse(dietImg)
-                        val copiedUri = copyUriToInternal(requireContext(), uri)
-                        copiedUri?.let {
-                            val file = File(it.path ?: "")
-                            if (file.exists()) file else null
+            // 실제 저장 로직을 실행하는 함수
+            fun executeSave() {
+                SaveDialog(requireActivity()) {
+                    // 현재 입력된 값들로 mealData 객체 생성
+                    val currentMealData = DietLogData(
+                        id = if (isEditMode) dietId else 0,
+                        dietTitle = dietTitle,
+                        dietCategory = dietCategory,
+                        score = score,
+                        ingredientTags = ingredientTags,
+                        time = calculatedTime,
+                        dietImg = dietImg
+                    )
+
+                    // 코루틴으로 이미지 처리
+                    lifecycleScope.launch {
+                        // 업로드용 이미지 File 객체 생성
+                        val imageFile: File? = when {
+                            dietImg.startsWith("http://") || dietImg.startsWith("https://") -> {
+                                // 🔥 서버 이미지 처리 로직 수정
+                                Log.d("DietLogFragment", "Processing server image: $dietImg")
+
+                                // 불러온 식단의 서버 이미지를 다운로드해서 파일로 변환
+                                val downloadedFile = downloadImageToFile(dietImg)
+                                if (downloadedFile != null) {
+                                    Log.d("DietLogFragment", "Server image downloaded successfully")
+                                    downloadedFile
+                                } else {
+                                    Log.e("DietLogFragment", "Failed to download server image")
+                                    // 다운로드 실패 시에도 null 반환하지 말고 기본 이미지로 처리
+                                    val defaultImageResId = when (dietCategory) {
+                                        getString(R.string.breakfast) -> R.drawable.ic_meal_morning
+                                        getString(R.string.lunch) -> R.drawable.ic_meal_lunch
+                                        getString(R.string.dinner) -> R.drawable.ic_meal_dinner
+                                        getString(R.string.snack) -> R.drawable.ic_meal_snack
+                                        else -> R.drawable.img_blank
+                                    }
+                                    copyResourceToFile(requireContext(), defaultImageResId)
+                                }
+                            }
+                            dietImg.startsWith("android.resource://") -> {
+                                val resId = dietImg.substringAfterLast("/").toIntOrNull()
+                                copyResourceToFile(requireContext(), resId ?: R.drawable.img_blank)
+                            }
+                            dietImg.startsWith("content://") -> {
+                                val uri = Uri.parse(dietImg)
+                                val copiedUri = copyUriToInternal(requireContext(), uri)
+                                copiedUri?.let {
+                                    val file = File(it.path ?: "")
+                                    if (file.exists()) file else null
+                                }
+                            }
+                            dietImg.startsWith("file://") -> {
+                                val uri = Uri.parse(dietImg)
+                                val file = File(uri.path ?: "")
+                                if (file.exists()) file else null
+                            }
+                            else -> {
+                                if (dietImg.isNotBlank()) {
+                                    val file = File(dietImg)
+                                    if (file.exists()) file else null
+                                } else null
+                            }
+                        }
+
+                        // 메인 스레드에서 UI 업데이트
+                        withContext(Dispatchers.Main) {
+                            // 수정 모드
+                            if (isEditMode) {
+                                try {
+                                    dietLogViewModel.updateDietLog(currentMealData, imageFile)
+                                    Toast.makeText(requireContext(), "식단 기록을 수정하였습니다.", Toast.LENGTH_SHORT).show()
+                                } catch (e: Exception) {
+                                    Log.e("DietLogFragment", "식단 기록 수정 중 오류", e)
+                                    dietLogViewModel.updateToLocalDB(currentMealData)
+                                    Toast.makeText(requireContext(), "식단 기록 수정에 실패했습니다. 로컬에 저장되었습니다.", Toast.LENGTH_SHORT).show()
+                                }
+                            } else {
+                                try {
+                                    if (imageFile != null) {
+                                        dietLogViewModel.saveAndUpload(currentMealData, imageFile)
+                                        Toast.makeText(requireContext(), "식단 기록을 저장하였습니다.", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        Toast.makeText(requireContext(), "이미지 파일 처리에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                                        Log.e("DietLogFragment", "Image file is null for new save")
+                                        return@withContext
+                                    }
+                                } catch (e: Exception) {
+                                    Log.e("DietLogFragment", "식단 기록 저장 중 오류", e)
+                                    dietLogViewModel.saveToLocalDB(currentMealData)
+                                    Toast.makeText(requireContext(), "식단 기록을 저장하지 못했습니다. 로컬에 저장되었습니다.", Toast.LENGTH_SHORT).show()
+                                }
+                            }
                         }
                     }
-                    dietImg.startsWith("file://") -> {
-                        val uri = Uri.parse(dietImg)
-                        val file = File(uri.path ?: "")
-                        if (file.exists()) file else null
-                    }
-                    else -> {
-                        if (dietImg.isNotBlank()) {
-                            val file = File(dietImg)
-                            if (file.exists()) file else null
-                        } else null
-                    }
-                }
+                }.show()
+            }
 
+            // 다이얼로그 조건 검사
+            if (isEditMode) {
+                // 수정 모드: EditNoticedDialog 표시
+                val prefs = requireContext().getSharedPreferences("dialog_prefs", Context.MODE_PRIVATE)
+                val skipEditNotice = prefs.getBoolean("skip_edit_notice", false)
 
-                // 수정 모드
-                if (isEditMode) {
-                    try {
-                        dietLogViewModel.updateDietLog(currentMealData, imageFile)
-                        Toast.makeText(requireContext(), "식단 기록을 수정하였습니다.", Toast.LENGTH_SHORT).show()
-                    } catch (e: Exception) {
-                        Log.e("DietLogFragment", "식단 기록 수정 중 오류", e)
-                        dietLogViewModel.updateToLocalDB(currentMealData)
-                        Toast.makeText(requireContext(), "식단 기록 수정에 실패했습니다. 로컬에 저장되었습니다.", Toast.LENGTH_SHORT).show()
-                    }
+                if (!skipEditNotice) {
+                    // EditNoticedDialog를 먼저 띄우고, 완료 후 저장 다이얼로그 실행
+                    EditNoticedDialog(requireActivity()) { checked ->
+                        if (checked) {
+                            prefs.edit().putBoolean("skip_edit_notice", true).apply()
+                        }
+                        // EditNoticedDialog가 닫힌 후 저장 다이얼로그 실행
+                        executeSave()
+                    }.show()
                 } else {
-                    try {
-                        if (imageFile != null) {
-                            dietLogViewModel.saveAndUpload(currentMealData, imageFile)
-                            Toast.makeText(requireContext(), "식단 기록을 저장하였습니다.", Toast.LENGTH_SHORT).show()
-                        } else {
-                            Toast.makeText(requireContext(), "이미지 파일 처리에 실패했습니다.", Toast.LENGTH_SHORT).show()
-                            Log.e("DietLogFragment", "Image file is null for new save")
-                            return@SaveDialog
-                        }
-                    } catch (e: Exception) {
-                        Log.e("DietLogFragment", "식단 기록 저장 중 오류", e)
-                        dietLogViewModel.saveToLocalDB(currentMealData)
-                        Toast.makeText(requireContext(), "식단 기록을 저장하지 못했습니다. 로컬에 저장되었습니다.", Toast.LENGTH_SHORT).show()
-                    }
+                    // "다시 보지 않기"가 설정되어 있으면 바로 저장 다이얼로그 실행
+                    executeSave()
                 }
-            }.show()
+            } else if ((selectedDate ?: LocalDate.now()).isBefore(LocalDate.now())) {
+                // 새 저장 모드 + 과거 날짜: PreviousNoticedDialog 표시
+                val prefs = requireContext().getSharedPreferences("dialog_prefs", Context.MODE_PRIVATE)
+                val skipPreviousNotice = prefs.getBoolean("skip_previous_notice", false)
+
+                if (!skipPreviousNotice) {
+                    // PreviousNoticedDialog를 먼저 띄우고, 완료 후 저장 다이얼로그 실행
+                    PreviousNoticedDialog(requireActivity()) { checked ->
+                        if (checked) {
+                            prefs.edit().putBoolean("skip_previous_notice", true).apply()
+                        }
+                        // PreviousNoticedDialog가 닫힌 후 저장 다이얼로그 실행
+                        executeSave()
+                    }.show()
+                } else {
+                    // "다시 보지 않기"가 설정되어 있으면 바로 저장 다이얼로그 실행
+                    executeSave()
+                }
+            } else {
+                // 새 저장 모드 + 현재/미래 날짜: 바로 저장 다이얼로그 실행
+                executeSave()
+            }
         }
 
         setupImageSelectionListeners()
         checkAllValid()
+    }
+
+    private suspend fun downloadImageToFile(imageUrl: String): File? {
+        return withContext(Dispatchers.IO) {
+            try {
+                Log.d("DietLogFragment", "Downloading image from: $imageUrl")
+
+                val url = java.net.URL(imageUrl)
+                val connection = url.openConnection()
+                connection.connectTimeout = 10000 // 10초 타임아웃
+                connection.readTimeout = 10000
+                connection.connect()
+
+                val inputStream = connection.getInputStream()
+                val file = File(requireContext().cacheDir, "server_image_${System.currentTimeMillis()}.jpg")
+
+                FileOutputStream(file).use { outputStream ->
+                    val buffer = ByteArray(8192)
+                    var bytesRead: Int
+                    while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                        outputStream.write(buffer, 0, bytesRead)
+                    }
+                }
+
+                inputStream.close()
+
+                if (file.exists() && file.length() > 0) {
+                    Log.d("DietLogFragment", "Image downloaded successfully: ${file.absolutePath}, size: ${file.length()}")
+                    file
+                } else {
+                    Log.e("DietLogFragment", "Downloaded file is empty or doesn't exist")
+                    null
+                }
+            } catch (e: Exception) {
+                Log.e("DietLogFragment", "Failed to download image: ${e.message}", e)
+                null
+            }
+        }
     }
 
     // 이미지 설정 관련 리스너만 모아둔 함수
@@ -536,18 +694,19 @@ class DietLogFragment : Fragment() {
             uri?.let {
                 // 사용자가 갤러리에서 이미지를 선택했음을 표시
                 isUserSelectedImage = true
+                isDefaultImage = false
 
                 // 1. 내부 캐시에 복사. 반환된 URI는 file:// URI 형태일 것.
                 val copiedFileUri = copyUriToInternal(requireContext(), uri)
                 if (copiedFileUri != null) {
-                    dietLogBinding.dietImg.setImageURI(copiedFileUri)
+                    dietLogBinding.imgDiet.setImageURI(copiedFileUri)
                     dietImg = copiedFileUri.toString() // dietImg에 file:// URI 저장
                     Log.d("DietLogFragment", "Image selected and copied to: $dietImg")
                 } else {
                     Toast.makeText(requireContext(), "이미지 로드에 실패했습니다.", Toast.LENGTH_SHORT).show()
                     Log.e("DietLogFragment", "Failed to copy selected image URI.")
                     dietImg = "" // 실패 시 dietImg 초기화
-                    dietLogBinding.dietImg.setImageResource(R.drawable.img_blank)
+                    dietLogBinding.imgDiet.setImageResource(R.drawable.img_blank)
                 }
 
                 // 이미지 생성 시간
@@ -557,30 +716,31 @@ class DietLogFragment : Fragment() {
                     formattedTime = DateTimeFormatter
                         .ofPattern("a h:mm", Locale.ENGLISH)
                         .format(createdDateTime)
-                    dietLogBinding.time12h.text = formattedTime
+                    dietLogBinding.tvTime12h.text = formattedTime
 
                     // 이미지 생성 시간과 현재 시간이 다르면 '현재 시간으로 설정' 체크박스 해제
                     if (createdDateTime.toLocalTime().withSecond(0).withNano(0) != LocalTime.now().withSecond(0).withNano(0))
-                        dietLogBinding.setNowCb.isChecked = false
+                        dietLogBinding.cbSetNow.isChecked = false
                     else
-                        dietLogBinding.setNowCb.isChecked = true
+                        dietLogBinding.cbSetNow.isChecked = true
                 } catch (e: Exception) {
                     Log.e("DietLogFragment", "Failed to get image creation time: ${e.message}")
                     // 시간 가져오기 실패 시 현재 시간으로 유지
-                    dietLogBinding.setNowCb.isChecked = true
+                    dietLogBinding.cbSetNow.isChecked = true
                     selectedTime = LocalTime.now()
                     formattedTime = DateTimeFormatter.ofPattern("a h:mm", Locale.ENGLISH).format(selectedTime)
-                    dietLogBinding.time12h.text = formattedTime
+                    dietLogBinding.tvTime12h.text = formattedTime
                 }
                 checkAllValid()
             }
         }
 
-        dietLogBinding.dietImg.setOnClickListener {
+        dietLogBinding.imgDiet.setOnClickListener {
             SelectImgDialog(requireContext(),
                 {
                     // 기본 이미지 설정 - 이 경우는 사용자가 직접 선택한 것이 아님
                     isUserSelectedImage = false
+                    isDefaultImage = true
 
                     val defaultImageResId = when (dietCategory) {
                         getString(R.string.breakfast) -> R.drawable.ic_meal_morning
@@ -594,13 +754,13 @@ class DietLogFragment : Fragment() {
                     val imageFile = copyResourceToFile(requireContext(), defaultImageResId)
                     if (imageFile != null) {
                         val fileUri = Uri.fromFile(imageFile)
-                        dietLogBinding.dietImg.setImageURI(fileUri)
+                        dietLogBinding.imgDiet.setImageURI(fileUri)
                         dietImg = fileUri.toString() // file:// URI로 저장
                         Log.d("DietLogFragment", "Default resource image converted and set: $dietImg")
                     } else {
                         // 변환 실패 시 기본 처리
                         val uri = Uri.parse("android.resource://${requireContext().packageName}/$defaultImageResId")
-                        dietLogBinding.dietImg.setImageURI(uri)
+                        dietLogBinding.imgDiet.setImageURI(uri)
                         dietImg = uri.toString()
                         Log.w("DietLogFragment", "Failed to convert SVG, using resource URI: $dietImg")
                     }
@@ -628,13 +788,13 @@ class DietLogFragment : Fragment() {
             val imageFile = copyResourceToFile(requireContext(), defaultImageResId)
             if (imageFile != null) {
                 val fileUri = Uri.fromFile(imageFile)
-                dietLogBinding.dietImg.setImageURI(fileUri)
+                dietLogBinding.imgDiet.setImageURI(fileUri)
                 dietImg = fileUri.toString() // file:// URI로 저장
                 Log.d("DietLogFragment", "Initial SVG image converted and set: $dietImg")
             } else {
                 // 변환 실패 시 리소스 URI 사용
                 val uri = Uri.parse("android.resource://${requireContext().packageName}/$defaultImageResId")
-                dietLogBinding.dietImg.setImageURI(uri)
+                dietLogBinding.imgDiet.setImageURI(uri)
                 dietImg = uri.toString()
                 Log.d("DietLogFragment", "Initial image set as resource URI: $dietImg")
             }
@@ -693,6 +853,64 @@ class DietLogFragment : Fragment() {
             else R.color.elixir_gray
         )
     }
+
+    // 선택된 식단 데이터를 바탕으로 UI를 업데이트하는 함수
+    private fun updateUIWithSelectedMeal(mealData: DietLogData) {
+        this.mealData = mealData
+        isEditMode = false
+        dietId = -1
+
+        dietLogBinding.etDietTitle.setText(mealData.dietTitle)
+        dietTitle = mealData.dietTitle
+        dietImg = mealData.dietImg
+        dietCategory = mealData.dietCategory
+        score = mealData.score
+
+        isUserSelectedImage = true
+
+        Glide.with(requireContext())
+            .load(dietImg)
+            .placeholder(R.drawable.img_blank)
+            .error(R.drawable.img_blank)
+            .into(dietLogBinding.imgDiet)
+
+        selectedTime = mealData.time.toLocalTime()
+        selectedHour = selectedTime.hour
+        selectedMin = selectedTime.minute
+        dietLogBinding.cbSetNow.isChecked = false
+        dietLogBinding.tvTime12h.text = mealData.time.format(DateTimeFormatter.ofPattern("a h:mm", Locale.ENGLISH))
+
+        when (score) {
+            1 -> dietLogBinding.rgSelectScore.check(dietLogBinding.btn1.id)
+            2 -> dietLogBinding.rgSelectScore.check(dietLogBinding.btn2.id)
+            3 -> dietLogBinding.rgSelectScore.check(dietLogBinding.btn3.id)
+            4 -> dietLogBinding.rgSelectScore.check(dietLogBinding.btn4.id)
+            5 -> dietLogBinding.rgSelectScore.check(dietLogBinding.btn5.id)
+        }
+
+        when (dietCategory) {
+            getString(R.string.breakfast) -> dietLogBinding.rgSelectDiet.check(dietLogBinding.btnBreakfast.id)
+            getString(R.string.lunch) -> dietLogBinding.rgSelectDiet.check(dietLogBinding.btnLunch.id)
+            getString(R.string.dinner) -> dietLogBinding.rgSelectDiet.check(dietLogBinding.btnDinner.id)
+            getString(R.string.snack) -> dietLogBinding.rgSelectDiet.check(dietLogBinding.btnSnack.id)
+        }
+
+        // 기존 태그 초기화 및 새 태그 추가
+        ingredientTags.clear()
+        ingredientTags.addAll(mealData.ingredientTags)
+        dietLogBinding.cgTagsIngredient.removeAllViews()
+
+        // 식재료 데이터 로드 후 칩 표시
+        dietLogViewModel.loadIngredients()
+        dietLogViewModel.ingredientList.observe(viewLifecycleOwner) { ingredientList ->
+            val ingredientMap = ingredientList.associateBy { it.id }
+            showInitialIngredientChips(ingredientTags = ingredientTags, ingredientMap = ingredientMap,
+                chipGroup = dietLogBinding.cgTagsIngredient, findIngredientChip = dietLogBinding.chipFindIngredient)
+        }
+
+        checkAllValid()
+    }
+
 
     // Photo Picker URI를 내부 캐시에 복사 (압축 제거)
     private fun copyUriToInternal(context: Context, uri: Uri): Uri? {
