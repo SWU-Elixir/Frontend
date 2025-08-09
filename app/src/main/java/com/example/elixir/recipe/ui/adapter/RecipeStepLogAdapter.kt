@@ -1,6 +1,5 @@
-package com.example.elixir.recipe.ui
+package com.example.elixir.recipe.ui.adapter
 
-import android.net.Uri
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView

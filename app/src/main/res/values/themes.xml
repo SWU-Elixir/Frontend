@@ -21,6 +21,11 @@
         <item name="cornerSize">50dp</item>
     </style>
 
+    <style name="ImgButton_Login_Social">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">25dp</item>
+    </style>
+
     <style name="ImgProfile_Comment">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">20dp</item>

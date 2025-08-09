@@ -1,18 +1,25 @@
-package com.example.elixir.recipe.data
+package com.example.elixir.recipe.repository
 
 import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.liveData
+import com.example.elixir.recipe.data.RecipeData
+import com.example.elixir.recipe.data.RecipeItemData
+import com.example.elixir.recipe.data.RecipeListItemData
+import com.example.elixir.recipe.data.SearchItemData
 import com.example.elixir.recipe.data.dao.RecipeDao
 import com.example.elixir.recipe.data.entity.RecipeEntity
+import com.example.elixir.recipe.data.toDto
+import com.example.elixir.recipe.data.toEntity
 import com.example.elixir.recipe.network.api.RecipeApi
-import com.example.elixir.recipe.ui.RecipePagingSource
-import com.example.elixir.recipe.ui.SearchPagingSource
+import com.example.elixir.recipe.ui.paging.RecipePagingSource
+import com.example.elixir.recipe.ui.paging.SearchPagingSource
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -23,52 +30,28 @@ import kotlin.math.max
 
 class RecipeRepository(private val api: RecipeApi, private val dao: RecipeDao) {
     // 레시피 상세 조회 (API로 불러오기, 페이징 적용)
-    fun getRecipes(categoryType: String?, categorySlowAging: String?
-    ): Flow<PagingData<RecipeListItemData>> {
+    fun getRecipes(type: String?, slowAging: String?): LiveData<PagingData<RecipeListItemData>> {
+        Log.d("RecipeFragment", "Repository: type: $type, slowAging: $slowAging")
         return Pager(
             config = PagingConfig(pageSize = 10),
-            pagingSourceFactory = {
-                RecipePagingSource(api, categoryType, categorySlowAging)
-            }
-        ).flow
+            pagingSourceFactory = { RecipePagingSource(api, type, slowAging) }
+        ).liveData
     }
 
     // 레시피 검색
-    fun searchRecipes(keyword: String, categoryType: String?, categorySlowAging: String?
-    ): Flow<PagingData<RecipeListItemData>> {
+    fun searchRecipes(keyword: String?, categoryType: String?, categorySlowAging: String?
+    ): LiveData<PagingData<SearchItemData>> {
         return Pager(
-            config = PagingConfig(pageSize = 10),
-            pagingSourceFactory = {
-                SearchPagingSource(api, keyword, categoryType, categorySlowAging)
-            }
-        ).flow
+            config = PagingConfig(pageSize = 30),
+            pagingSourceFactory = { SearchPagingSource(api, keyword, categoryType, categorySlowAging) }
+        ).liveData
     }
-
-    // 레시피 상세 조회 (API로 불러오기)
-    /*suspend fun getRecipeById(recipeId: Int): Result<RecipeData?> = withContext(Dispatchers.IO) {
-        try {
-            // API에서 레시피 데이터 가져오기
-            val response = api.getRecipeById(recipeId)
-
-            // 데이터를 가져왔다면 데이터 반환. 실패 시 예외 처리
-            if (response.isSuccessful) {
-                val recipe = response.body()?.data
-                Result.success(recipe)
-            } else {
-                Result.failure(Exception("레시피 상세 조회 중 오류가 발생했습니다. 오류코드: ${response.code()}"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }*/
 
     // 상세 레시피 가져오기
     suspend fun getRecipeById(recipeId: Int): RecipeData? = withContext(Dispatchers.IO) {
         try {
-            Log.d("RecipeRepository", "네트워크 요청 시작: recipeId=$recipeId")
             // API에서 레시피 데이터 가져오기
             val response = api.getRecipeById(recipeId)
-            Log.d("RecipeRepository", "네트워크 요청 완료: recipeId=$recipeId")
 
             // 데이터를 가져왔다면 데이터 반환. 실패 시 예외 처리
             if (response.isSuccessful) {

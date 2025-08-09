@@ -116,3 +116,50 @@ data class EmailResponse(
     val message: String,
     val data: Boolean
 )
+
+data class SocialUserInfoData(
+    var email: String,
+    var nickname: String?,
+    var gender: String?,
+    var birthYear: Int?,
+    var profileImage: String?
+)
+
+data class SocialLoginData(
+    var accessToken: String,
+    var refreshToken: String,
+    var loginType: String,
+    var socialUserInfo: SocialUserInfoData,
+    var registered: Boolean
+)
+
+data class SocialLoginResponse(
+    val status: Int,
+    val code: String,
+    val message: String,
+    val data: SocialLoginData
+)
+
+data class AccessTokenRequest(
+    val accessToken: String
+)
+
+data class SocialSignupDto (
+    var gender: String?,
+    var mealStyles: List<String>?,
+    var nickname: String?,
+    var reasons: List<String>?,
+    var recipeStyles: List<String>?,
+    var birthYear: Int?,
+    var email: String,
+    var profileImageUrl: String?,
+    var allergies: List<String>?
+)
+
+data class GoogleSignupResponse (
+    val access_token: String,
+    val expires_in: Int,
+    val scope: String,
+    val token_type: String,
+    val id_token: String
+)

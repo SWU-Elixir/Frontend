@@ -15,7 +15,7 @@ import com.example.elixir.challenge.ui.ChallengeFragment
 import com.example.elixir.chatbot.ui.ChatBotActivity
 import com.example.elixir.databinding.ActivityHomeBinding
 import com.example.elixir.member.ui.MyPageFragment
-import com.example.elixir.recipe.ui.RecipeFragment
+import com.example.elixir.recipe.ui.fragment.RecipeFragment
 
 class HomeActivity : AppCompatActivity() {
 

@@ -1,8 +1,10 @@
 package com.example.elixir.signup
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,11 +19,15 @@ import com.example.elixir.member.viewmodel.MemberViewModel
 import com.example.elixir.member.viewmodel.MemberViewModelFactory
 import com.example.elixir.RetrofitClient
 import com.example.elixir.member.network.MemberDB
+import java.io.File
 
 class SignupFragment : Fragment() {
     private lateinit var signupBinding: FragmentSignupBinding
     private val userModel: UserInfoViewModel by activityViewModels()
     private var profileImageFile: java.io.File? = null
+
+    private var loginType: String? = null
+    private var email: String? = null
 
     // MemberViewModel을 Factory로 생성 (MemberService 제거)
     private val memberViewModel: MemberViewModel by activityViewModels {
@@ -42,72 +48,93 @@ class SignupFragment : Fragment() {
         return signupBinding.root
     }
 
+    @SuppressLint("ResourceAsColor")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        loginType = arguments?.getString("loginType")
+        email = arguments?.getString("email")
 
         with(signupBinding) {
             // 상단 단계 인디케이터 고정, 현재 단계 프래그먼트
             setStepFragment(SurveyIndicatorFragment())
             setSurveyStepFragment(userModel.currentStep)
 
-            // 처음엔 다음 버튼 비활성화
-            btnNext.isEnabled = false
-
             // 이전 버튼 클릭 이벤트 처리
             btnPrev.setOnClickListener {
                 if (userModel.currentStep == 0) {
-                    // 첫 단계일 경우 계정 생성 화면으로 이동
-                    parentFragmentManager.beginTransaction()
-                        .replace(R.id.fragment_registration, CreateAccountFragment())
-                        .commit()
+                    // 일반 로그인 첫 단계일 경우 계정 생성 화면으로 이동, 소셜 로그인이면 이전 버튼 비활성화
+                    if(loginType.isNullOrBlank())
+                        parentFragmentManager.beginTransaction()
+                            .replace(R.id.fragment_registration, CreateAccountFragment())
+                            .commit()
+                    else
+                        btnPrev.isEnabled = false
+
                 } else {
                     // 그 외는 이전 단계로 이동
                     userModel.currentStep -= 1
+                    btnPrev.isEnabled = true
                     setSurveyStepFragment(userModel.currentStep)
                 }
             }
 
             // 다음 버튼 클릭 이벤트 처리
             btnNext.setOnClickListener {
+                // 마지막 단계까지 왔을 때
                 if (userModel.currentStep == userModel.maxStep) {
-                    val signupRequest = userModel.toSignupRequest()
-                    if (signupRequest != null) {
-                        // profileImageFile이 null이 아닐 때만 회원가입 진행
-                        if (profileImageFile != null) {
-                            memberViewModel.signup(signupRequest, profileImageFile)
+                    // 일반 로그인일 경우, 일반 회원가입 진행
+                    if(loginType.isNullOrBlank()) {
+                        // 지금까지 입력받은 값을 바탕으로 일반 회원가입 RequestBody를 생성한 후, 뷰모델에 전달
+                        val signupRequest = userModel.toSignupRequest()
+                        if (signupRequest != null) {
+                            // 프로필 이미지가 들어갈 때만 회원가입
+                            if (profileImageFile != null) {
+                                memberViewModel.signup(signupRequest, profileImageFile)
+                            } else {
+                                Toast.makeText(requireContext(), "프로필 이미지를 선택해주세요.", Toast.LENGTH_SHORT).show()
+                            }
                         } else {
-                            Toast.makeText(requireContext(), "프로필 이미지를 선택해주세요.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), "정보를 모두 입력해주세요.", Toast.LENGTH_SHORT).show()
                         }
                     } else {
-                        Toast.makeText(requireContext(), "입력값을 모두 확인해주세요.", Toast.LENGTH_SHORT).show()
+                        // 지금까지 입력받은 값을 바탕으로 소셜 회원가입 RequestBody를 생성한 후, 뷰모델에 전달
+                        val socialRequest = userModel.toSocialRequest()
+                        if (socialRequest != null) {
+                            Log.d("Signup", "데이터: $socialRequest")
+                            memberViewModel.socialSignup(loginType!!, socialRequest, profileImageFile)
+                        } else {
+                            Toast.makeText(requireContext(), "정보를 모두 입력해주세요.", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 } else {
                     // 다음 단계로 이동
                     userModel.currentStep += 1
                     setSurveyStepFragment(userModel.currentStep)
                 }
+
             }
 
             // 회원가입 결과 관찰
             memberViewModel.signupResult.observe(viewLifecycleOwner) { result ->
                 if (result != null) {
-                    Toast.makeText(requireContext(), "회원가입 성공!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "회원가입이 완료되었습니다.", Toast.LENGTH_SHORT).show()
                     activity?.finish()
                 } else {
-                    Toast.makeText(requireContext(), "회원가입 실패", Toast.LENGTH_LONG).show()
+                    Toast.makeText(requireContext(), "회원가입에 실패하셨습니다.", Toast.LENGTH_LONG).show()
                 }
             }
         }
     }
 
-    // 상단 인디케이터 프래그먼트 삽입
+    // 상단 인디케이터 삽입
     private fun setStepFragment(fragment: Fragment) {
         childFragmentManager.beginTransaction()
             .replace(R.id.survey_step, fragment)
             .commit()
     }
 
-    // 인디케이터 프래그먼트의 상태 업데이트
+    // 인디케이터 업데이트
     private fun updateIndicatorFragment() {
         if (userModel.currentStep >= 1) {
             val indicatorFragment = childFragmentManager.findFragmentById(signupBinding.surveyStep.id) as? SurveyIndicatorFragment
@@ -121,8 +148,8 @@ class SignupFragment : Fragment() {
         }
     }
 
-    // 다음 버튼 상태 설정 함수 (공통)
-    private fun setButtonState(enabled: Boolean) {
+    // 다음 버튼 상태 설정 함수
+    private fun setNextButtonState(enabled: Boolean) {
         signupBinding.btnNext.isEnabled = enabled
         val color = if (enabled) R.color.elixir_orange else R.color.elixir_gray
         signupBinding.btnNext.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), color))
@@ -132,9 +159,12 @@ class SignupFragment : Fragment() {
     private fun handleChipSelection(step: Int, selected: Boolean, dataSetter: () -> Unit) {
         dataSetter() // 데이터를 ViewModel에 저장
         userModel.updateCompletedStep(step, selected) // 완료 여부 저장
-        setButtonState(selected) // 버튼 상태 설정
+        setNextButtonState(selected) // 버튼 상태 설정
         updateIndicatorFragment() // 인디케이터 업데이트
     }
+
+    // 프로필 이미지 처리 함수
+
 
     // 현재 단계에 맞는 설문 프래그먼트 설정
     private fun setSurveyStepFragment(step: Int) {
@@ -162,24 +192,19 @@ class SignupFragment : Fragment() {
 
         // 단계별 프래그먼트 설정
         val fragment = when (step) {
-            0 -> SettingProfileFragment().apply {
-                listener = object : OnProfileCompletedListener {
-                    override fun onProfileCompleted(profileImage: String, nickname: String, gender: String, birthYear: Int) {
-                        // 프로필 이미지 파일 생성
-                        profileImageFile = try {
-                            val imageUri = android.net.Uri.parse(profileImage)
-                            val inputStream = requireContext().contentResolver.openInputStream(imageUri)
-                            val file = java.io.File(requireContext().cacheDir, "profile_image.jpg")
-                            inputStream?.use { input ->
-                                file.outputStream().use { output ->
-                                    input.copyTo(output)
-                                }
-                            }
-                            file
-                        } catch (e: Exception) {
-                            null
-                        }
+            0 -> {
+                val profileDataJson = arguments?.getString("profileData")
 
+                // 소셜 로그인이면 이전 버튼 비활성화
+                if (!loginType.isNullOrBlank()) {
+                    signupBinding.btnPrev.isEnabled = false
+                }
+
+                // 리스너 구현: 프로필 입력 완료 시 뷰 모델을 호출하여 정보 저장.
+                val profileCompletedListener = object : OnProfileCompletedListener {
+                    override fun onProfileCompleted(profileImage: String, nickname: String,
+                        gender: String?, birthYear: Int) {
+                        profileImageFile = makeProfileImageFile(profileImage)
                         userModel.setProfile(profileImage, nickname, gender, birthYear)
                         handleChipSelection(0, true) {}
                     }
@@ -188,16 +213,28 @@ class SignupFragment : Fragment() {
                         handleChipSelection(0, false) {}
                     }
                 }
-            }
 
+                // 프래그먼트 생성 및 리스너 할당 (apply 사용)
+                if (!profileDataJson.isNullOrBlank()) {
+                    SettingProfileFragment.newInstance(profileDataJson, email).apply {
+                        listener = profileCompletedListener
+                    }
+                } else {
+                    SettingProfileFragment().apply {
+                        listener = profileCompletedListener
+                    }
+                }
+            }
             1 -> Survey1Fragment().apply {
+                signupBinding.btnPrev.isEnabled = true
+
                 listener = object : OnChipCompletedListener {
                     override fun onChipSelected(chips: List<String>?) {
                         handleChipSelection(1, true) { userModel.setAllergies(chips) }
                     }
 
                     override fun onChipSelectedNot() {
-                        handleChipSelection(1, false) { userModel.setAllergies(emptyList()) }
+                        handleChipSelection(1, true) { userModel.setAllergies(emptyList()) }
                     }
                 }
             }
@@ -247,7 +284,26 @@ class SignupFragment : Fragment() {
             .commit()
 
         // 버튼 상태 업데이트 (현재 단계의 완료 여부 기준으로)
-        setButtonState(userModel.completedStep.value?.get(step) == true)
+        setNextButtonState(userModel.completedStep.value?.get(step) == true)
+    }
+
+
+
+    // 프로필 이미지 파일 생성 함수
+    fun makeProfileImageFile(profileImage: String): File? {
+        return try {
+            val imageUri = android.net.Uri.parse(profileImage)
+            val inputStream = requireContext().contentResolver.openInputStream(imageUri)
+            val file = File(requireContext().cacheDir, "profile_image.jpg")
+            inputStream?.use { input ->
+                file.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+            file
+        } catch (e: Exception) {
+            null
+        }
     }
 }
 

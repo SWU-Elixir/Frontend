@@ -19,6 +19,7 @@ dependencyResolutionManagement {
         jcenter()
         // calendarview 라이브러리 추가
         maven { url = java.net.URI("https://jitpack.io") }
+        maven { url = java.net.URI("https://devrepo.kakao.com/nexus/content/groups/public/") }
     }
 }
 

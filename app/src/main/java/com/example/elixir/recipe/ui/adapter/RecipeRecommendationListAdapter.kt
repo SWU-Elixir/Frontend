@@ -1,4 +1,4 @@
-package com.example.elixir.recipe.ui
+package com.example.elixir.recipe.ui.adapter
 
 import android.os.Bundle
 import android.util.Log
@@ -10,22 +10,23 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.elixir.R
 import com.example.elixir.databinding.ItemRecipeRecommendationListBinding
-import com.example.elixir.recipe.data.RecipeListItemData
+import com.example.elixir.recipe.data.RecipeItemData
 import com.example.elixir.ingredient.data.IngredientData // IngredientData import 추가
+import com.example.elixir.recipe.ui.fragment.RecipeDetailFragment
 import com.example.elixir.recipe.viewmodel.RecipeViewModel
 import com.google.android.flexbox.FlexDirection // FlexboxLayoutManager를 위한 import 추가
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 
 class RecipeRecommendationListAdapter(
-    private var recipeList: List<RecipeListItemData>,
+    private var recipeList: List<RecipeItemData>,
     private val fragmentManager: FragmentManager,
     private val recipeViewModel: RecipeViewModel,
     // ingredientDataMap을 var로 선언하여 외부에서 업데이트 가능하게 함
     private var ingredientDataMap: Map<Int, IngredientData>?
 ) : RecyclerView.Adapter<RecipeRecommendationListAdapter.RecipeViewHolder>() {
 
-    fun updateData(newRecipeList: List<RecipeListItemData>) {
+    fun updateData(newRecipeList: List<RecipeItemData>) {
         recipeList = newRecipeList
         notifyDataSetChanged()
     }

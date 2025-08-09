@@ -1,7 +1,7 @@
 package com.example.elixir.recipe.data
 
 data class RecipeListData(
-    val content: List<RecipeListItemData>,
+    val content: List<RecipeItemData>,
     val pageable: PageableData,
     val last: Boolean,
     val totalPages: Int,

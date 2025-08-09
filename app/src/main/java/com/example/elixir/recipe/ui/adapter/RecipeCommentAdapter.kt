@@ -1,4 +1,4 @@
-package com.example.elixir.recipe.ui
+package com.example.elixir.recipe.ui.adapter
 
 import android.content.Context
 import android.util.Log

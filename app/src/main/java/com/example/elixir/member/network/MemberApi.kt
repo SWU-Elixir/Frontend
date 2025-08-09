@@ -18,6 +18,20 @@ interface MemberApi {
         @Part profileImage: MultipartBody.Part?
     ): SignupResponse
 
+    @Multipart
+    @POST("/api/member/signup/{loginType}")
+    suspend fun socialSignup(
+        @Path("loginType") loginType: String,
+        @Part("dto") dto: RequestBody,
+        @Part profileImage: MultipartBody.Part?
+    ): SocialLoginResponse
+
+    @POST("/api/auth/oauth/{loginType}")
+    suspend fun socialLogin(
+        @Path("loginType") loginType: String,
+        @Body request: AccessTokenRequest
+    ): SocialLoginResponse
+
     @POST("/api/member/email-verification")
     suspend fun emailVerification(
         @Body body: RequestBody

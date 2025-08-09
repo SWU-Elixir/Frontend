@@ -1,4 +1,4 @@
-package com.example.elixir.adapter
+package com.example.elixir.recipe.ui.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

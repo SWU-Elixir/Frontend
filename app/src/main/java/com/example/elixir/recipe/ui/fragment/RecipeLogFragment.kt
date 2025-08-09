@@ -1,7 +1,6 @@
-package com.example.elixir.recipe.ui
+package com.example.elixir.recipe.ui.fragment
 
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
@@ -17,13 +16,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
-import androidx.core.view.children
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -40,16 +37,16 @@ import com.example.elixir.ingredient.network.IngredientRepository
 import com.example.elixir.ingredient.ui.IngredientSearchFragment
 import com.example.elixir.ingredient.viewmodel.IngredientViewModel
 import com.example.elixir.network.AppDatabase
-import com.example.elixir.recipe.data.CommentItem
 import com.example.elixir.recipe.data.FlavoringItem
 import com.example.elixir.recipe.viewmodel.RecipeViewModel
 import com.example.elixir.recipe.data.RecipeData
-import com.example.elixir.recipe.data.RecipeRepository
+import com.example.elixir.recipe.repository.RecipeRepository
 import com.example.elixir.recipe.data.RecipeStepData
 import com.example.elixir.recipe.data.toEntity
+import com.example.elixir.recipe.ui.adapter.FlavoringLogAdapter
+import com.example.elixir.recipe.ui.adapter.RecipeStepLogAdapter
 import com.example.elixir.recipe.viewmodel.RecipeViewModelFactory
 import com.google.android.material.chip.Chip
-import com.google.android.material.chip.ChipGroup
 import org.threeten.bp.LocalDateTime
 import java.io.File
 import java.io.FileOutputStream

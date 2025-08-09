@@ -51,7 +51,6 @@ class CreateAccountFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         // 초기화 : 뷰 모델에 저장된 데이터가 있다면 불러오기
         val data = userModel.getAccount()
         if(data != null) {
