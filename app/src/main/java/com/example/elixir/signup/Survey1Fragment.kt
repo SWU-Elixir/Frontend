@@ -64,12 +64,23 @@ class Survey1Fragment : Fragment() {
                     if (isChecked) {
                         // 일반 칩이 선택되면, 알러지 정보를 저장하고 해당없음 칩 선택 해제
                         chipNone.isChecked = false
-                        if (allergies?.contains(chip.text.toString()) == false) {
-                            allergies?.add(chip.text.toString())
+
+                        // allergyOyster 선택 시 '굴'
+                        val allergyName = when (chip) {
+                            allergyOyster -> "굴"
+                            else -> chip.text.toString()
                         }
+
+                        if (allergies?.contains(allergyName) == false)
+                            allergies?.add(allergyName)
+
                     } else {
-                        // 모든 칩 선택 해제 시 해당없음 선택
-                        allergies?.remove(chip.text.toString())
+                        // allergyOyster 칩이면 '굴'
+                        val allergyName = when (chip) {
+                            allergyOyster -> "굴"
+                            else -> chip.text.toString()
+                        }
+                        allergies?.remove(allergyName)
 
                         val anyChecked = chipList.any { it.isChecked }
                         if (!anyChecked) {

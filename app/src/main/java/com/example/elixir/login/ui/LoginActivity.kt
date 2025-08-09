@@ -119,6 +119,7 @@ class LoginActivity : AppCompatActivity() {
             result.onSuccess { data ->
                 // 미등록 회원이라면 회원가입 페이지로 넘어감
                 if(!data.registered) {
+                    Log.d("LoginActivity", "socialLoginResult: registered=${data.registered}, data=$data")
                     // 받아온 데이터
                     val profileData = data.socialUserInfo
                     val image = if(profileData.profileImage.isNullOrBlank())
@@ -220,6 +221,7 @@ class LoginActivity : AppCompatActivity() {
                     val accessToken = NaverIdLoginSDK.getAccessToken()
                     Log.d("LoginActivity", "네이버 토큰: $accessToken")
                     memberViewModel.socialLogin("NAVER", accessToken!!)
+
                 }
 
                 override fun onFailure(httpStatus: Int, message: String) {

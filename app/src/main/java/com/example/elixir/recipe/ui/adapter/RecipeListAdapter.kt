@@ -2,13 +2,10 @@ package com.example.elixir.recipe.ui.adapter
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
 import android.widget.AdapterView
 import androidx.fragment.app.FragmentManager
 import androidx.paging.PagingDataAdapter
@@ -17,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.elixir.R
 import com.example.elixir.databinding.ItemRecipeHeaderRecommendBinding
-import com.example.elixir.databinding.ItemRecipeHeaderSearchBinding
 import com.example.elixir.databinding.ItemRecipeHeaderSpinnerBinding
 import com.example.elixir.databinding.ItemRecipeListBinding
 import com.example.elixir.ingredient.data.IngredientData
@@ -97,7 +93,14 @@ class HeaderSpinnerViewHolder(
         val typeAdapter = RecipeListSpinnerAdapter(binding.root.context, typeItems)
         binding.spinnerType.adapter = typeAdapter
 
-        val typeIndex = typeItems.indexOf(selectedType)
+        // 보여지는 종류 값
+        val displayType = when (selectedType) {
+            "음료_차" -> "음료/차"
+            "양념_소스_잼" -> "양념/소스/잼"
+            else -> selectedType
+        }
+
+        val typeIndex = typeItems.indexOf(displayType)
         val validTypeIndex = if (typeIndex >= 0) typeIndex else 0
 
         typeAdapter.setSelectedPosition(validTypeIndex)
@@ -105,17 +108,21 @@ class HeaderSpinnerViewHolder(
 
         binding.spinnerType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                val value = when (val rawValue = parent.getItemAtPosition(position).toString()) {
+                val rawValue = parent.getItemAtPosition(position).toString()
+
+                // UI는 데이터대로 표시
+                val sendValue = when (rawValue) {
                     "음료/차" -> "음료_차"
                     "양념/소스/잼" -> "양념_소스_잼"
                     "종류" -> null
                     else -> rawValue
                 }
 
-                // 값이 바뀌었을 때만 뷰 모델을 갱신하고 서버에 값 요청
-                if (value != lastTypeSelected) {
-                    lastTypeSelected = value
-                    onTypeSelected(value)
+                // 서버 전송용은 _으로 변환
+                if (sendValue != lastTypeSelected) {
+                    lastTypeSelected = sendValue
+                    onTypeSelected(sendValue)
+                    binding.spinnerType.setSelection(position, false)
                     updateResetButtonVisibility()
                 }
             }
@@ -136,12 +143,12 @@ class HeaderSpinnerViewHolder(
         binding.spinnerDifficulty.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 val rawValue = parent.getItemAtPosition(position).toString()
-                val value = if (rawValue == "저속노화") null else rawValue
+                val sendValue = if (rawValue == "저속노화") null else rawValue
 
-                // 값이 바뀌었을 때만 뷰 모델을 갱신하고 서버에 값 요청
-                if (value != lastMethodSelected) {
-                    lastMethodSelected = value
-                    onMethodSelected(value)
+                if (sendValue != lastMethodSelected) {
+                    lastMethodSelected = sendValue
+                    onMethodSelected(sendValue)
+                    binding.spinnerDifficulty.setSelection(position, false)
                     updateResetButtonVisibility()
                 }
             }
@@ -164,6 +171,7 @@ class HeaderSpinnerViewHolder(
         }
     }
 
+    // 리셋 버튼 활성화 할지 체크
     private fun updateResetButtonVisibility() {
         val typeSelected = binding.spinnerType.selectedItem?.toString()?.let {
             it != "종류" && it.isNotBlank()
@@ -363,6 +371,15 @@ class RecipeListAdapter(
             }
         }
     }
+
+    // 식재료 업데이트
+    fun updateIngredientMap(newMap: Map<Int, IngredientData>) {
+        this.ingredientMap = newMap
+        this.ingredientDataMap = newMap  // 추천 레시피 헤더에서도 사용
+        // 전체 아이템에 식재료 태그가 다시 바인딩되도록 갱신
+        notifyDataSetChanged()
+    }
+
 }
 
 class RecipeDiffCallback : DiffUtil.ItemCallback<RecipeListItemData>() {

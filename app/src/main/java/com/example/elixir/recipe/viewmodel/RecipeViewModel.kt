@@ -9,6 +9,7 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import androidx.paging.insertHeaderItem
 import com.example.elixir.recipe.data.RecipeData
 import com.example.elixir.recipe.data.RecipeListItemData
@@ -96,6 +97,8 @@ class RecipeViewModel(private val repository: RecipeRepository) : ViewModel() {
 
         // 헤더는 Adapter에서 처리하므로 여기서는 추가하지 않음
         val newSource = repository.getRecipes(categoryType, categorySlowAging)
+            .cachedIn(viewModelScope)
+
         currentSource = newSource
 
         _recipes.addSource(newSource) {
@@ -126,6 +129,7 @@ class RecipeViewModel(private val repository: RecipeRepository) : ViewModel() {
         }
 
         val newSearchSource = repository.searchRecipes(keyword, categoryType, categorySlowAging)
+            .cachedIn(viewModelScope)
             .asFlow()
             .map { pagingData ->
                 pagingData
