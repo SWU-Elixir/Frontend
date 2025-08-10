@@ -13,7 +13,7 @@ import com.example.elixir.member.network.MemberRepository
 import kotlinx.coroutines.launch
 import com.example.elixir.calendar.data.toEntity
 import com.example.elixir.calendar.network.response.GetMealResponse
-import com.example.elixir.ingredient.data.IngredientData
+import com.example.elixir.ingredient.data.IngredientEntity
 import com.example.elixir.ingredient.network.IngredientRepository
 import java.io.File
 import kotlin.coroutines.cancellation.CancellationException
@@ -42,7 +42,7 @@ class MealViewModel(
     private val _deleteResult = MutableLiveData<Result<Boolean>>()
     val deleteResult: LiveData<Result<Boolean>> get() = _deleteResult
 
-    val ingredientList = MutableLiveData<List<IngredientData>>()
+    val ingredientList = MutableLiveData<List<IngredientEntity>>()
 
 
     // 특정 ID의 식단 기록 가져오기

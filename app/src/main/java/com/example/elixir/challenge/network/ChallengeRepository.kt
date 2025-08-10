@@ -3,7 +3,7 @@ package com.example.elixir.challenge.network
 import android.util.Log
 import androidx.room.Transaction
 import com.example.elixir.challenge.data.ChallengeDao
-import com.example.elixir.challenge.data.ChallengeEntity
+import com.example.elixir.challenge.data.ChallengeDetailEntity
 
 class ChallengeRepository(
     private val api: ChallengeApi,
@@ -11,7 +11,7 @@ class ChallengeRepository(
 ) {
 
     @Transaction
-    suspend fun fetchAndSaveChallengesByYear(year: Int): List<ChallengeEntity> {
+    suspend fun fetchAndSaveChallengesByYear(year: Int): List<ChallengeDetailEntity> {
         return try {
             val response = api.getChallengesByYear(year)
             if (response.status == 200) {
@@ -28,7 +28,7 @@ class ChallengeRepository(
     }
 
     @Transaction
-    suspend fun fetchAndSaveChallengeById(id: Int): List<ChallengeEntity> {
+    suspend fun fetchAndSaveChallengeById(id: Int): List<ChallengeDetailEntity> {
         return try {
             val response = api.getChallengeById(id)
             if (response.status == 200) {
@@ -79,7 +79,7 @@ class ChallengeRepository(
     }
 
     @Transaction
-    suspend fun fetchChallengeCompletion(): List<ChallengeEntity> {
+    suspend fun fetchChallengeCompletion(): List<ChallengeDetailEntity> {
         return try {
             val response = api.getChallengeCompletion()
             if (response.status == 200) {
@@ -96,7 +96,7 @@ class ChallengeRepository(
         }
     }
 
-    suspend fun getChallengesByYearFromDb(year: Int): List<ChallengeEntity> {
+    suspend fun getChallengesByYearFromDb(year: Int): List<ChallengeDetailEntity> {
         return try {
             val challenges = challengeDao.getChallengesByYear(year)
             Log.d("ChallengeRepository", "Retrieved ${challenges.size} challenges for year $year from database")
@@ -107,7 +107,7 @@ class ChallengeRepository(
         }
     }
 
-    suspend fun getChallengeByIdFromDb(id: Int): List<ChallengeEntity> {
+    suspend fun getChallengeByIdFromDb(id: Int): List<ChallengeDetailEntity> {
         return try {
             val challenges = challengeDao.getChallengeById(id)
             Log.d("ChallengeRepository", "Retrieved challenge with id $id from database")
@@ -119,7 +119,7 @@ class ChallengeRepository(
     }
 
 
-    suspend fun getChallengeCompletionFromDb(): List<ChallengeEntity> {
+    suspend fun getChallengeCompletionFromDb(): List<ChallengeDetailEntity> {
         return try {
             val challenges = challengeDao.getAllChallenges()
             challenges

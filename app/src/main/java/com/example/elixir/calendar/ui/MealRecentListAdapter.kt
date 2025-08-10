@@ -11,7 +11,7 @@ import com.bumptech.glide.Glide
 import com.example.elixir.R
 import com.example.elixir.calendar.data.DietLogData
 import com.example.elixir.databinding.ItemMealListBinding
-import com.example.elixir.ingredient.data.IngredientData
+import com.example.elixir.ingredient.data.IngredientEntity
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
@@ -21,7 +21,7 @@ class MealRecentListAdapter(
     private val context: Context,
     private var data: MutableList<DietLogData>,
     private val listener: OnMealClickListener,
-    private var ingredientMap: Map<Int, IngredientData> = emptyMap()
+    private var ingredientMap: Map<Int, IngredientEntity> = emptyMap()
 ) : RecyclerView.Adapter<MealRecentListAdapter.MealLogViewHolder>() { // RecyclerView.Adapter 상속
 
     // ViewHolder 내부 클래스 정의
@@ -115,13 +115,13 @@ class MealRecentListAdapter(
     }
 
     // 재료 맵 업데이트 메소드 (기존과 동일)
-    fun setIngredientMap(map: Map<Int, IngredientData>) {
+    fun setIngredientMap(map: Map<Int, IngredientEntity>) {
         this.ingredientMap = map
         notifyDataSetChanged()
         Log.d("MealListAdapter", "Ingredient map updated. Map size: ${ingredientMap.size}")
     }
 
-    fun getIngredientMap(): Map<Int, IngredientData> {
+    fun getIngredientMap(): Map<Int, IngredientEntity> {
         return ingredientMap
     }
 }

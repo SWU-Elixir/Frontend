@@ -35,16 +35,13 @@ import com.example.elixir.calendar.viewmodel.MealViewModelFactory
 import com.example.elixir.databinding.FragmentDietLogBinding
 import com.example.elixir.dialog.SaveDialog
 import com.example.elixir.ingredient.data.IngredientDao
-import com.example.elixir.ingredient.data.IngredientData
+import com.example.elixir.ingredient.data.IngredientEntity
 import com.example.elixir.ingredient.network.IngredientApi
-import com.example.elixir.ingredient.network.IngredientDB
 import com.example.elixir.ingredient.network.IngredientRepository
 import com.example.elixir.member.data.MemberDao
 import com.example.elixir.member.network.MemberApi
-import com.example.elixir.member.network.MemberDB
 import com.example.elixir.member.network.MemberRepository
 import com.example.elixir.network.AppDatabase
-import androidx.fragment.app.setFragmentResultListener
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.timepicker.MaterialTimePicker
@@ -134,15 +131,17 @@ class DietLogFragment : Fragment() {
         Log.d("DietLogFragment", "Selected date string: $selectedDateStr")
 
         // 데이터베이스와 API 초기화
-        dietDao = AppDatabase.getInstance(requireContext()).dietLogDao()
+        val appDB = AppDatabase.getInstance(requireContext())
+
+        dietDao = appDB.dietLogDao()
         dietApi = RetrofitClient.instanceDietApi
         dietRepository = DietLogRepository(dietDao, dietApi)
 
-        memberDao = MemberDB.getInstance(requireContext()).memberDao()
+        memberDao = appDB.memberDao()
         memberApi = RetrofitClient.instanceMemberApi
         memberRepository = MemberRepository(memberApi, memberDao)
 
-        ingredientDao = IngredientDB.getInstance(requireContext()).ingredientDao()
+        ingredientDao = appDB.ingredientDao()
         ingredientApi = RetrofitClient.instanceIngredientApi
         ingredientRepository = IngredientRepository(ingredientApi, ingredientDao)
 
@@ -975,7 +974,7 @@ class DietLogFragment : Fragment() {
     // 이미 선택된 식재료 태그를 미리 추가
     private fun showInitialIngredientChips(
         ingredientTags: List<Int>,
-        ingredientMap: Map<Int, IngredientData>,
+        ingredientMap: Map<Int, IngredientEntity>,
         chipGroup: ChipGroup,
         findIngredientChip: Chip
     ) {

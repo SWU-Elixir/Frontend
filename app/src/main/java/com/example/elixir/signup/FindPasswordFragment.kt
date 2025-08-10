@@ -16,10 +16,9 @@ import com.example.elixir.R
 import com.example.elixir.databinding.FragmentSignupFindPasswordBinding
 import com.example.elixir.member.viewmodel.MemberViewModel
 import com.example.elixir.RetrofitClient
-import com.example.elixir.member.network.MemberDB
 import com.example.elixir.member.network.MemberRepository
 import com.example.elixir.member.viewmodel.MemberViewModelFactory
-
+import com.example.elixir.network.AppDatabase
 
 class FindPasswordFragment :Fragment() {
     private var _binding: FragmentSignupFindPasswordBinding? = null
@@ -31,7 +30,7 @@ class FindPasswordFragment :Fragment() {
     // ViewModel 선언 추가
     private val memberViewModel: MemberViewModel by activityViewModels {
         val api = RetrofitClient.instanceMemberApi
-        val db = MemberDB.getInstance(requireContext()) // MemberDatabase 사용
+        val db = AppDatabase.getInstance(requireContext()) // MemberDatabase 사용
         val dao = db.memberDao()
         MemberViewModelFactory(MemberRepository(api, dao)) // MemberService 제거
     }

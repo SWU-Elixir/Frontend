@@ -8,7 +8,7 @@ import com.example.elixir.member.data.FollowEntity
 import com.example.elixir.member.data.MemberDao
 import com.example.elixir.member.data.MemberEntity
 import com.example.elixir.member.data.ProfileEntity
-import com.example.elixir.member.data.RecipeEntity
+import com.example.elixir.member.data.RecipeListItem
 import com.example.elixir.signup.SignupRequest
 import com.google.gson.Gson
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -434,67 +434,70 @@ class MemberRepository(
     }
 
     // 레시피 정보
-    suspend fun getMyRecipesFromDb(): List<RecipeEntity> {
-        return try {
-            dao.getRecipes()
-        } catch (e: Exception) {
-            Log.e("MemberRepository", "내 레시피 DB 조회 실패", e)
-            emptyList()
-        }
-    }
+//    suspend fun getMyRecipesFromDb(): List<RecipeListItem> {
+//        return try {
+//            dao.getRecipes()
+//        } catch (e: Exception) {
+//            Log.e("MemberRepository", "내 레시피 DB 조회 실패", e)
+//            emptyList()
+//        }
+//    }
 
     @Transaction
-    suspend fun fetchAndSaveMyRecipes(): List<RecipeEntity> {
+    suspend fun fetchAndSaveMyRecipes(): List<RecipeListItem> {
         return try {
             val response = api.getMyRecipes()
             if (response.status == 200) {
                 val entities = response.data.map {
-                    RecipeEntity(
+                    RecipeListItem(
                         recipeId = it.recipeId,
                         imageUrl = it.imageUrl
                     )
                 }
-                dao.insertRecipes(entities)
+                //dao.insertRecipes(entities)
                 entities
             } else {
                 Log.e("MemberRepository", "내 레시피 API 호출 실패: ${response.message}")
-                getMyRecipesFromDb()
+                //getMyRecipesFromDb()
+                emptyList()
             }
         } catch (e: Exception) {
             Log.e("MemberRepository", "내 레시피 데이터 저장 실패", e)
-            getMyRecipesFromDb()
+            //getMyRecipesFromDb()
+            emptyList()
         }
     }
-
-    suspend fun getScrapRecipesFromDb(): List<RecipeEntity> {
+/*
+    suspend fun getScrapRecipesFromDb(): List<RecipeListItem> {
         return try {
-            dao.getRecipes()
+            //dao.getRecipes()
         } catch (e: Exception) {
             Log.e("MemberRepository", "스크랩 레시피 DB 조회 실패", e)
             emptyList()
         }
-    }
+    }*/
 
-    @Transaction
-    suspend fun fetchAndSaveScrapRecipes(): List<RecipeEntity> {
+    suspend fun fetchAndSaveScrapRecipes(): List<RecipeListItem> {
         return try {
             val response = api.getScrapRecipes()
             if (response.status == 200) {
                 val entities = response.data.map {
-                    RecipeEntity(
+                    RecipeListItem(
                         recipeId = it.recipeId,
                         imageUrl = it.imageUrl
                     )
                 }
-                dao.insertRecipes(entities)
+                //dao.insertRecipes(entities)
                 entities
             } else {
                 Log.e("MemberRepository", "스크랩 레시피 API 호출 실패: ${response.message}")
-                getScrapRecipesFromDb()
+                //getScrapRecipesFromDb()
+                emptyList()
             }
         } catch (e: Exception) {
             Log.e("MemberRepository", "스크랩 레시피 데이터 저장 실패", e)
-            getScrapRecipesFromDb()
+            //getScrapRecipesFromDb()
+            emptyList()
         }
     }
 

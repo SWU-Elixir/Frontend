@@ -4,12 +4,12 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.elixir.databinding.ItemMealListIndeterminateBinding
-import com.example.elixir.ingredient.data.IngredientData
+import com.example.elixir.ingredient.data.IngredientEntity
 
 // 전체 식재료 맵을 같이 전달
 class MealListIngredientAdapter(
     private val ingredients: List<Int>,
-    private val ingredientMap: Map<Int, IngredientData>
+    private val ingredientMap: Map<Int, IngredientEntity>
 ) : RecyclerView.Adapter<MealListIngredientAdapter.IngredientViewHolder>() {
 
     inner class IngredientViewHolder(private val binding: ItemMealListIndeterminateBinding) :

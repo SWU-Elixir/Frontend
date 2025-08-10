@@ -5,11 +5,11 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.elixir.databinding.ItemRecipeRecommendationListIndeterminateBinding // 실제 칩 레이아웃 바인딩으로 변경 고려
-import com.example.elixir.ingredient.data.IngredientData
+import com.example.elixir.ingredient.data.IngredientEntity
 
 class IngredientTagChipMapAdapter(
     private val tagList: List<Int>, // Chip으로 표시할 재료 ID 리스트
-    private val ingredientMap: Map<Int, IngredientData> // ID로 재료를 찾기 위한 Map
+    private val ingredientMap: Map<Int, IngredientEntity> // ID로 재료를 찾기 위한 Map
 ) : RecyclerView.Adapter<IngredientTagChipMapAdapter.TagViewHolder>() {
 
     // 어댑터가 실제로 표시할 재료 이름 목록을 미리 계산하여 저장합니다.

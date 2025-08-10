@@ -11,7 +11,7 @@ import com.bumptech.glide.Glide
 import com.example.elixir.R
 import com.example.elixir.databinding.ItemRecipeRecommendationListBinding
 import com.example.elixir.recipe.data.RecipeItemData
-import com.example.elixir.ingredient.data.IngredientData // IngredientData import 추가
+import com.example.elixir.ingredient.data.IngredientEntity // IngredientData import 추가
 import com.example.elixir.recipe.ui.fragment.RecipeDetailFragment
 import com.example.elixir.recipe.viewmodel.RecipeViewModel
 import com.google.android.flexbox.FlexDirection // FlexboxLayoutManager를 위한 import 추가
@@ -23,7 +23,7 @@ class RecipeRecommendationListAdapter(
     private val fragmentManager: FragmentManager,
     private val recipeViewModel: RecipeViewModel,
     // ingredientDataMap을 var로 선언하여 외부에서 업데이트 가능하게 함
-    private var ingredientDataMap: Map<Int, IngredientData>?
+    private var ingredientDataMap: Map<Int, IngredientEntity>?
 ) : RecyclerView.Adapter<RecipeRecommendationListAdapter.RecipeViewHolder>() {
 
     fun updateData(newRecipeList: List<RecipeItemData>) {
@@ -32,7 +32,7 @@ class RecipeRecommendationListAdapter(
     }
 
     // ingredientDataMap을 업데이트하는 메서드 추가
-    fun updateIngredientMap(newIngredientMap: Map<Int, IngredientData>) {
+    fun updateIngredientMap(newIngredientMap: Map<Int, IngredientEntity>) {
         this.ingredientDataMap = newIngredientMap
         notifyDataSetChanged() // 데이터가 업데이트되었으므로 어댑터 갱신
     }

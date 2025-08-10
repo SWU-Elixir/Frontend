@@ -1,6 +1,6 @@
 package com.example.elixir.challenge.network
 
-import com.example.elixir.challenge.data.ChallengeEntity
+import com.example.elixir.challenge.data.ChallengeDetailEntity
 import com.google.gson.annotations.SerializedName
 
 // 리스트 응답용
@@ -8,7 +8,7 @@ data class ChallengeListResponse(
     val status: Int,
     val code: String,
     val message: String,
-    val data: List<ChallengeEntity>
+    val data: List<ChallengeDetailEntity>
 )
 
 // 단일 챌린지 응답용
@@ -16,7 +16,7 @@ data class ChallengeSingleResponse(
     val status: Int,
     val code: String,
     val message: String,
-    val data: ChallengeEntity
+    val data: ChallengeDetailEntity
 )
 
 data class ChallengeProgress(

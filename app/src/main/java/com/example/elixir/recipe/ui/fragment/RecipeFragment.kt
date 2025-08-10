@@ -19,8 +19,7 @@ import com.example.elixir.R
 import com.example.elixir.RetrofitClient
 import com.example.elixir.ToolbarActivity
 import com.example.elixir.databinding.FragmentRecipeBinding
-import com.example.elixir.ingredient.data.IngredientData
-import com.example.elixir.ingredient.network.IngredientDB
+import com.example.elixir.ingredient.data.IngredientEntity
 import com.example.elixir.ingredient.network.IngredientRepository
 import com.example.elixir.ingredient.viewmodel.IngredientViewModel
 import com.example.elixir.ingredient.viewmodel.IngredientViewModelFactory
@@ -48,7 +47,7 @@ class RecipeFragment : Fragment() {
     private var selectedCategoryType: String? = null
     private var selectedSlowAging: String? = null
 
-    private var ingredientDataMap: Map<Int, IngredientData>? = null
+    private var ingredientDataMap: Map<Int, IngredientEntity>? = null
     private var recommendRecipeList: List<RecipeItemData> = emptyList()
 
     private lateinit var recipeRegisterLauncher: ActivityResultLauncher<Intent>
@@ -86,8 +85,9 @@ class RecipeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         // 레포지토리 초기화
-        val recipeRepo = RecipeRepository(RetrofitClient.instanceRecipeApi, AppDatabase.getInstance(requireContext()).recipeDao())
-        val ingredientRepo = IngredientRepository(RetrofitClient.instanceIngredientApi, IngredientDB.getInstance(requireContext()).ingredientDao())
+        val appDB = AppDatabase.getInstance(requireContext())
+        val recipeRepo = RecipeRepository(RetrofitClient.instanceRecipeApi, appDB.recipeDao())
+        val ingredientRepo = IngredientRepository(RetrofitClient.instanceIngredientApi, appDB.ingredientDao())
 
         // 뷰모델 초기화
         recipeViewModel = ViewModelProvider(requireActivity(), RecipeViewModelFactory(recipeRepo))[RecipeViewModel::class.java]
@@ -151,7 +151,7 @@ class RecipeFragment : Fragment() {
     }
 
     // 레시피 리스트 어댑터 설정
-    private fun setupRecipeListAdapter(ingredientMap: Map<Int, IngredientData>) {
+    private fun setupRecipeListAdapter(ingredientMap: Map<Int, IngredientEntity>) {
         val typeItems = resources.getStringArray(R.array.type_list).toList()
         val methodItems = resources.getStringArray(R.array.method_list).toList()
 

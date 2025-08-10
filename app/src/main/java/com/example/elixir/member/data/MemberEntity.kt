@@ -44,9 +44,8 @@ data class AchievementEntity(
     val type: String
 )
 
-@Entity(tableName = "recipe")
-data class RecipeEntity(
-    @PrimaryKey val recipeId: Int,
+data class RecipeListItem (
+    val recipeId: Int,
     val imageUrl: String
 )
 

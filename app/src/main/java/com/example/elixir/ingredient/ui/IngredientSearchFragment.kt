@@ -11,20 +11,17 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
-import androidx.core.content.ContextCompat
-import androidx.core.widget.ImageViewCompat
 import androidx.fragment.app.Fragment
-import android.content.res.ColorStateList
 import com.example.elixir.R
 import com.example.elixir.databinding.FragmentIndeterminateSearchBinding
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.elixir.ingredient.network.IngredientDB
 import com.example.elixir.ingredient.network.IngredientRepository
 import com.example.elixir.ingredient.viewmodel.IngredientViewModel
 import com.example.elixir.RetrofitClient
-import com.example.elixir.ingredient.data.IngredientData
+import com.example.elixir.ingredient.data.IngredientEntity
 import androidx.recyclerview.widget.RecyclerView
 import com.example.elixir.databinding.ItemRecipeListTagBinding
+import com.example.elixir.network.AppDatabase
 
 class IngredientSearchFragment : Fragment() {
 
@@ -33,7 +30,7 @@ class IngredientSearchFragment : Fragment() {
 
     private lateinit var viewModel: IngredientViewModel
     private lateinit var Adapter: IngredientSearchListAdapter
-    private var allIngredients: List<IngredientData> = emptyList()
+    private var allIngredients: List<IngredientEntity> = emptyList()
 
     private val ingredientCategories = listOf(
         "전체", "농산물", "수산물", "육류", "난류·유제품", "과자·빵·떡",
@@ -59,11 +56,11 @@ class IngredientSearchFragment : Fragment() {
         try {
             // Room DB, Retrofit, Repository, ViewModel 연결
             Log.d("IngredientSearch", "Initializing components...")
-            val db = IngredientDB.getInstance(requireContext())
+            val appDB = AppDatabase.getInstance(requireContext())
             val api = RetrofitClient.instanceIngredientApi
             Log.d("IngredientSearch", "API instance created: ${api != null}")
             
-            val repository = IngredientRepository(api, db.ingredientDao())
+            val repository = IngredientRepository(api, appDB.ingredientDao())
             viewModel = IngredientViewModel(repository)
             Log.d("IngredientSearch", "ViewModel initialized")
 

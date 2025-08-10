@@ -26,14 +26,12 @@ import com.example.elixir.calendar.viewmodel.MealViewModel
 import com.example.elixir.calendar.viewmodel.MealViewModelFactory
 import com.example.elixir.ingredient.data.IngredientDao
 import com.example.elixir.ingredient.network.IngredientApi
-import com.example.elixir.ingredient.network.IngredientDB
 import com.example.elixir.ingredient.network.IngredientRepository
 import com.example.elixir.member.ui.MyPageFragmentId
 import com.example.elixir.member.ui.MyPageImageGridFragment
 import com.example.elixir.member.ui.MypageFollowListFragment
 import com.example.elixir.member.data.MemberDao
 import com.example.elixir.member.network.MemberApi
-import com.example.elixir.member.network.MemberDB
 import com.example.elixir.member.network.MemberRepository
 import com.example.elixir.network.AppDatabase
 import com.example.elixir.recipe.ui.fragment.RecipeLogFragment
@@ -56,6 +54,8 @@ open class ToolbarActivity : AppCompatActivity() {
     private lateinit var dietRepository: DietLogRepository
     private lateinit var memberRepository: MemberRepository
     private lateinit var ingredientRepository: IngredientRepository
+
+    private lateinit var appDB: AppDatabase
 
     private lateinit var dietDao: DietLogDao
     private lateinit var memberDao: MemberDao
@@ -80,15 +80,17 @@ open class ToolbarActivity : AppCompatActivity() {
         setContentView(toolBinding.root)
 
         // 데이터베이스와 API 초기화
-        dietDao = AppDatabase.getInstance(this).dietLogDao()
+        appDB = AppDatabase.getInstance(this)
+
+        dietDao = appDB.dietLogDao()
         dietApi = RetrofitClient.instanceDietApi
         dietRepository = DietLogRepository(dietDao, dietApi)
 
-        memberDao = MemberDB.getInstance(this).memberDao()
+        memberDao = appDB.memberDao()
         memberApi = RetrofitClient.instanceMemberApi
         memberRepository = MemberRepository(memberApi, memberDao)
 
-        ingredientDao = IngredientDB.getInstance(this).ingredientDao()
+        ingredientDao = appDB.ingredientDao()
         ingredientApi = RetrofitClient.instanceIngredientApi
         ingredientRepository = IngredientRepository(ingredientApi, ingredientDao)
 

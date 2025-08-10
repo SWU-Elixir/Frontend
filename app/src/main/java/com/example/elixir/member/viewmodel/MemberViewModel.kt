@@ -10,7 +10,7 @@ import com.example.elixir.member.data.FollowEntity
 import com.example.elixir.member.data.FollowItem
 import com.example.elixir.member.data.MemberEntity
 import com.example.elixir.member.data.ProfileEntity
-import com.example.elixir.member.data.RecipeEntity
+import com.example.elixir.member.data.RecipeListItem
 import com.example.elixir.member.network.MemberRepository // MemberRepository를 import 합니다.
 import com.example.elixir.member.network.SignupResponse
 import com.example.elixir.member.network.SocialLoginData
@@ -34,11 +34,11 @@ class MemberViewModel(private val repository: MemberRepository) : ViewModel() { 
     private val _top3Challenges = MutableLiveData<List<ChallengeEntity>>()
     val top3Challenges: LiveData<List<ChallengeEntity>> = _top3Challenges
 
-    private val _myRecipes = MutableLiveData<List<RecipeEntity>>()
-    val myRecipes: LiveData<List<RecipeEntity>> = _myRecipes
+    private val _myRecipes = MutableLiveData<List<RecipeListItem>>()
+    val myRecipes: LiveData<List<RecipeListItem>> = _myRecipes
 
-    private val _scrapRecipes = MutableLiveData<List<RecipeEntity>>()
-    val scrapRecipes: LiveData<List<RecipeEntity>> = _scrapRecipes
+    private val _scrapRecipes = MutableLiveData<List<RecipeListItem>>()
+    val scrapRecipes: LiveData<List<RecipeListItem>> = _scrapRecipes
 
     private val _myFollowing = MutableLiveData<List<FollowEntity>>()
     val myFollowing: LiveData<List<FollowEntity>> = _myFollowing
@@ -85,8 +85,8 @@ class MemberViewModel(private val repository: MemberRepository) : ViewModel() { 
     private val _memberProfile = MutableLiveData<ProfileEntity?>()
     val memberProfile: LiveData<ProfileEntity?> = _memberProfile
 
-    private val _top3Recipes = MutableLiveData<List<RecipeEntity>>()
-    val top3Recipes: LiveData<List<RecipeEntity>> = _top3Recipes
+    private val _top3Recipes = MutableLiveData<List<RecipeListItem>>()
+    val top3Recipes: LiveData<List<RecipeListItem>> = _top3Recipes
 
     private val _isFollowingUser = MutableLiveData<Boolean>()
     val isFollowingUser: LiveData<Boolean> = _isFollowingUser

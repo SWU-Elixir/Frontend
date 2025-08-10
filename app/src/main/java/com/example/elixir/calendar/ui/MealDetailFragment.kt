@@ -17,9 +17,7 @@ import com.example.elixir.calendar.network.db.DietLogRepository
 import com.example.elixir.calendar.viewmodel.MealViewModel
 import com.example.elixir.calendar.viewmodel.MealViewModelFactory
 import com.example.elixir.databinding.FragmentMealDetailBinding
-import com.example.elixir.ingredient.network.IngredientDB
 import com.example.elixir.ingredient.network.IngredientRepository
-import com.example.elixir.member.network.MemberDB
 import com.example.elixir.member.network.MemberRepository
 import com.example.elixir.network.AppDatabase
 import com.google.android.flexbox.FlexDirection
@@ -61,15 +59,17 @@ class MealDetailFragment : Fragment() {
         val timeGrayBackground = ContextCompat.getDrawable(requireContext(), R.drawable.bg_rect_outline_gray_5)
 
         // -------------- 레포지토리 및 뷰모델 초기화 --------------
-        val dietDao = AppDatabase.getInstance(requireContext()).dietLogDao()
+        val appDB = AppDatabase.getInstance(requireContext())
+
+        val dietDao = appDB.dietLogDao()
         val dietApi = RetrofitClient.instanceDietApi
         dietRepository = DietLogRepository(dietDao, dietApi)
 
-        val memberDao = MemberDB.getInstance(requireContext()).memberDao()
+        val memberDao = appDB.memberDao()
         val memberApi = RetrofitClient.instanceMemberApi
         memberRepository = MemberRepository(memberApi, memberDao)
 
-        val ingredientDao = IngredientDB.getInstance(requireContext()).ingredientDao()
+        val ingredientDao = appDB.ingredientDao()
         val ingredientApi = RetrofitClient.instanceIngredientApi
         ingredientRepository = IngredientRepository(ingredientApi, ingredientDao)
 

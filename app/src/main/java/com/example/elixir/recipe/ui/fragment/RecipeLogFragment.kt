@@ -31,8 +31,7 @@ import com.example.elixir.ToolbarActivity
 import com.example.elixir.databinding.FragmentRecipeLogBinding
 import com.example.elixir.dialog.SaveDialog
 import com.example.elixir.dialog.SelectImgDialog
-import com.example.elixir.ingredient.data.IngredientData
-import com.example.elixir.ingredient.network.IngredientDB
+import com.example.elixir.ingredient.data.IngredientEntity
 import com.example.elixir.ingredient.network.IngredientRepository
 import com.example.elixir.ingredient.ui.IngredientSearchFragment
 import com.example.elixir.ingredient.viewmodel.IngredientViewModel
@@ -93,6 +92,8 @@ class RecipeLogFragment : Fragment() {
 
     private lateinit var pickThumbnailLauncher: ActivityResultLauncher<PickVisualMediaRequest>
 
+    private lateinit var appDB: AppDatabase
+
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
         uri?.let {
             val file = File(requireContext().filesDir, "step_image_${System.currentTimeMillis()}_$selectedPosition.jpg")
@@ -122,8 +123,10 @@ class RecipeLogFragment : Fragment() {
         Log.d("RecipeLogFragment", "recipeThumbnail: ${recipeBinding.recipeThumbnail}")
         chipMap = emptyMap()
 
+        appDB = AppDatabase.getInstance(requireContext())
+
         try {
-            recipeRepository = RecipeRepository(RetrofitClient.instanceRecipeApi, AppDatabase.getInstance(requireContext()).recipeDao())
+            recipeRepository = RecipeRepository(RetrofitClient.instanceRecipeApi, appDB.recipeDao())
 
             // id 값 먼저 가져오기
             recipeId = arguments?.getInt("recipeId") ?: -1
@@ -281,7 +284,7 @@ class RecipeLogFragment : Fragment() {
         try {
             // 식재료 뷰모델 호출 및 데이터 가져오기
             val ingredientRepository = IngredientRepository(RetrofitClient.instanceIngredientApi,
-                IngredientDB.getInstance(requireContext()).ingredientDao())
+                appDB.ingredientDao())
             val ingredientViewModel = IngredientViewModel(ingredientRepository)
 
             ingredientViewModel.loadIngredients()
@@ -331,7 +334,7 @@ class RecipeLogFragment : Fragment() {
         }
     }
 
-    private fun updateIngredientChips(ingredientTags: List<Int>, ingredientMap: Map<Int, IngredientData>) {
+    private fun updateIngredientChips(ingredientTags: List<Int>, ingredientMap: Map<Int, IngredientEntity>) {
         // 기존 칩들 제거 (findIngredient 칩 제외)
         val findIngredientChip = recipeBinding.chipFindIngredient
         val chipsToRemove = mutableListOf<View>()
