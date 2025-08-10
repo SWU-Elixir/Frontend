@@ -25,9 +25,7 @@ import com.example.elixir.calendar.network.db.DietLogRepository
 import com.example.elixir.calendar.viewmodel.MealViewModel
 import com.example.elixir.calendar.viewmodel.MealViewModelFactory
 import com.example.elixir.databinding.FragmentMealRecentListBinding
-import com.example.elixir.ingredient.network.IngredientDB
 import com.example.elixir.ingredient.network.IngredientRepository
-import com.example.elixir.member.network.MemberDB
 import com.example.elixir.member.network.MemberRepository
 import com.example.elixir.network.AppDatabase
 import com.google.gson.Gson
@@ -104,17 +102,19 @@ class MealRecentListFragment : Fragment(), OnMealClickListener {
 
     private fun initializeRepositories() {
         // DietLogRepository 초기화
-        val dietDao = AppDatabase.getInstance(requireContext()).dietLogDao()
+        val appDB = AppDatabase.getInstance(requireContext())
+
+        val dietDao = appDB.dietLogDao()
         val dietApi = RetrofitClient.instanceDietApi
         dietRepository = DietLogRepository(dietDao, dietApi)
 
         // MemberRepository 초기화
-        val memberDao = MemberDB.getInstance(requireContext()).memberDao()
+        val memberDao = appDB.memberDao()
         val memberApi = RetrofitClient.instanceMemberApi
         memberRepository = MemberRepository(memberApi, memberDao)
 
         // IngredientRepository 초기화
-        val ingredientDao = IngredientDB.getInstance(requireContext()).ingredientDao()
+        val ingredientDao = appDB.ingredientDao()
         val ingredientApi = RetrofitClient.instanceIngredientApi
         ingredientRepository = IngredientRepository(ingredientApi, ingredientDao)
     }

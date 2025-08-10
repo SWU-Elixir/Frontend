@@ -1,37 +1,24 @@
 package com.example.elixir.recipe.ui.fragment
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import androidx.paging.PagingData
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.elixir.R
 import com.example.elixir.RetrofitClient
 import com.example.elixir.databinding.FragmentRecipeSearchListBinding
-import com.example.elixir.ingredient.data.IngredientData
-import com.example.elixir.ingredient.network.IngredientDB
+import com.example.elixir.ingredient.data.IngredientEntity
 import com.example.elixir.ingredient.network.IngredientRepository
 import com.example.elixir.ingredient.viewmodel.IngredientViewModel
 import com.example.elixir.ingredient.viewmodel.IngredientViewModelFactory
 import com.example.elixir.network.AppDatabase
-import com.example.elixir.recipe.data.RecipeData
-import com.example.elixir.recipe.data.RecipeListItemData
-import com.example.elixir.recipe.data.SearchItemData
 import com.example.elixir.recipe.repository.RecipeRepository
-import com.example.elixir.recipe.ui.adapter.RecipeListAdapter
 import com.example.elixir.recipe.ui.adapter.SearchListAdapter
 import com.example.elixir.recipe.viewmodel.RecipeViewModel
 import com.example.elixir.recipe.viewmodel.RecipeViewModelFactory
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 
 /**
  * 레시피 검색 결과를 표시하는 프래그먼트
@@ -47,7 +34,7 @@ class SearchListFragment : Fragment() {
     private lateinit var searchListAdapter: SearchListAdapter
 
     // Ingredient 데이터를 Map으로 저장하여 효율적으로 사용
-    private var ingredientDataMap: Map<Int, IngredientData>? = null
+    private var ingredientDataMap: Map<Int, IngredientEntity>? = null
 
     // Repository 및 ViewModel
     private lateinit var recipeRepository: RecipeRepository
@@ -71,9 +58,11 @@ class SearchListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val appDB = AppDatabase.getInstance(requireContext())
+
         // 레포지토리 초기화
-        recipeRepository = RecipeRepository(RetrofitClient.instanceRecipeApi, AppDatabase.getInstance(requireContext()).recipeDao())
-        ingredientRepository = IngredientRepository(RetrofitClient.instanceIngredientApi, IngredientDB.getInstance(requireContext()).ingredientDao())
+        recipeRepository = RecipeRepository(RetrofitClient.instanceRecipeApi, appDB.recipeDao())
+        ingredientRepository = IngredientRepository(RetrofitClient.instanceIngredientApi, appDB.ingredientDao())
 
         // 뷰모델 초기화
         recipeViewModel = ViewModelProvider(this, RecipeViewModelFactory(recipeRepository))[RecipeViewModel::class.java]
@@ -130,7 +119,7 @@ class SearchListFragment : Fragment() {
         }
     }
 
-    private fun setupRecipeListAdapter(ingredientMap: Map<Int, IngredientData>) {
+    private fun setupRecipeListAdapter(ingredientMap: Map<Int, IngredientEntity>) {
         val typeItems = resources.getStringArray(R.array.type_list).toList()
         val methodItems = resources.getStringArray(R.array.method_list).toList()
 

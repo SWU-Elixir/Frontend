@@ -15,12 +15,12 @@ import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.elixir.challenge.viewmodel.ChallengeViewModel
-import com.example.elixir.challenge.data.ChallengeEntity
+import com.example.elixir.challenge.data.ChallengeDetailEntity
 import com.example.elixir.challenge.data.StageItem
-import com.example.elixir.challenge.network.ChallengeDB
 import com.example.elixir.challenge.network.ChallengeRepository
 import java.util.Calendar
 import com.example.elixir.RetrofitClient
+import com.example.elixir.network.AppDatabase
 
 class ChallengeFragment : Fragment() {
 
@@ -54,9 +54,9 @@ class ChallengeFragment : Fragment() {
 
     private fun initializeViewModel() {
         try {
-            val db = ChallengeDB.getInstance(requireContext())
+            val appDB = AppDatabase.getInstance(requireContext())
             val api = RetrofitClient.instanceChallengeApi
-            val repository = ChallengeRepository(api, db.challengeDao())
+            val repository = ChallengeRepository(api, appDB.challengeDao())
 
             viewModel = ChallengeViewModel(repository)
 
@@ -150,7 +150,7 @@ class ChallengeFragment : Fragment() {
         }
     }
 
-    private fun updateSpinner(challenges: List<ChallengeEntity>) {
+    private fun updateSpinner(challenges: List<ChallengeDetailEntity>) {
         if (challenges.isEmpty()) {
             showEmptyState()
             return
@@ -184,7 +184,7 @@ class ChallengeFragment : Fragment() {
     }
 
     // 챌린지에 맞게 UI 갱신
-    private fun updateChallengeUI(challenge: ChallengeEntity) {
+    private fun updateChallengeUI(challenge: ChallengeDetailEntity) {
         Log.d("ChallengeFragment", "UI 업데이트 시작: ${challenge.name} (id: ${challenge.id})")
 
         val currentStage = calculateCurrentStage(challenge)
@@ -230,7 +230,7 @@ class ChallengeFragment : Fragment() {
     }
 
     // 클리어된 단계 수에 따라 현재 스테이지 계산
-    private fun calculateCurrentStage(challenge: ChallengeEntity): Int {
+    private fun calculateCurrentStage(challenge: ChallengeDetailEntity): Int {
         // 각 스테이지의 목표 달성 여부 확인
         val stage1Complete = challenge.step1Goal1Achieved && challenge.step1Goal2Achieved
         val stage2Complete = challenge.step2Goal1Achieved && challenge.step2Goal2Achieved
@@ -247,7 +247,7 @@ class ChallengeFragment : Fragment() {
     }
 
     // ChallengeEntity에서 StageItem 목록 생성
-    private fun createStageGoalsList(challenge: ChallengeEntity): MutableList<StageItem> {
+    private fun createStageGoalsList(challenge: ChallengeDetailEntity): MutableList<StageItem> {
         val stageGoals = mutableListOf<StageItem>()
 
         // Stage 1
@@ -353,7 +353,7 @@ class ChallengeFragment : Fragment() {
         return stageGoals
     }
 
-    private fun showCompletionDialog(challenge: ChallengeEntity, achievementName: String?, achievementImageUrl: String?) {
+    private fun showCompletionDialog(challenge: ChallengeDetailEntity, achievementName: String?, achievementImageUrl: String?) {
         val dialogBinding = DialogChallengeCompletedBinding.inflate(layoutInflater)
 
         Log.d("ChallengeFragment", "챌린지 완료 다이얼로그 표시")

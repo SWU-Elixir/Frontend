@@ -6,7 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.launch
 import android.util.Log
-import com.example.elixir.challenge.data.ChallengeEntity
+import com.example.elixir.challenge.data.ChallengeDetailEntity
 import com.example.elixir.challenge.network.ChallengeRepository
 import kotlinx.coroutines.async
 
@@ -19,24 +19,24 @@ class ChallengeViewModel(
     }
 
     // 연도별 챌린지 목록
-    private val _challenges = MutableLiveData<List<ChallengeEntity>>()
-    val challenges: LiveData<List<ChallengeEntity>> get() = _challenges
+    private val _challenges = MutableLiveData<List<ChallengeDetailEntity>>()
+    val challenges: LiveData<List<ChallengeDetailEntity>> get() = _challenges
 
     // 현재 선택된 챌린지 상세 정보
-    private val _selectedChallenge = MutableLiveData<ChallengeEntity?>()
-    val selectedChallenge: LiveData<ChallengeEntity?> get() = _selectedChallenge
+    private val _selectedChallenge = MutableLiveData<ChallengeDetailEntity?>()
+    val selectedChallenge: LiveData<ChallengeDetailEntity?> get() = _selectedChallenge
 
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> get() = _error
 
-    private val _challengeProgress = MutableLiveData<ChallengeEntity?>()
-    val challengeProgress: LiveData<ChallengeEntity?> get() = _challengeProgress
+    private val _challengeProgress = MutableLiveData<ChallengeDetailEntity?>()
+    val challengeProgress: LiveData<ChallengeDetailEntity?> get() = _challengeProgress
 
-    private val _challengeCompletion = MutableLiveData<ChallengeEntity?>()
-    val challengeCompletion: LiveData<ChallengeEntity?> get() = _challengeCompletion
+    private val _challengeCompletion = MutableLiveData<ChallengeDetailEntity?>()
+    val challengeCompletion: LiveData<ChallengeDetailEntity?> get() = _challengeCompletion
 
     // 현재 연도의 챌린지 목록 저장
-    private var currentYearChallenges: List<ChallengeEntity> = emptyList()
+    private var currentYearChallenges: List<ChallengeDetailEntity> = emptyList()
 
     /**
      * 연도별 챌린지 로드

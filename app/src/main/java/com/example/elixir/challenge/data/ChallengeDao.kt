@@ -4,23 +4,23 @@ import androidx.room.*
 
 @Dao
 interface ChallengeDao {
-    @Query("SELECT * FROM challenge")
-    suspend fun getAllChallenges(): List<ChallengeEntity>
+    @Query("SELECT * FROM challenge_detail")
+    suspend fun getAllChallenges(): List<ChallengeDetailEntity>
 
-    @Query("SELECT * FROM challenge WHERE year = :year")
-    suspend fun getChallengesByYear(year: Int): List<ChallengeEntity>
+    @Query("SELECT * FROM challenge_detail WHERE year = :year")
+    suspend fun getChallengesByYear(year: Int): List<ChallengeDetailEntity>
 
-    @Query("SELECT * FROM challenge WHERE id = :id")
-    suspend fun getChallengeById(id: Int): List<ChallengeEntity>
+    @Query("SELECT * FROM challenge_detail WHERE id = :id")
+    suspend fun getChallengeById(id: Int): List<ChallengeDetailEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertChallenges(challenges: List<ChallengeEntity>)
+    suspend fun insertChallenges(challenges: List<ChallengeDetailEntity>)
 
     @Update
-    suspend fun updateChallenge(challenge: ChallengeEntity)
+    suspend fun updateChallenge(challenge: ChallengeDetailEntity)
 
     @Query("""
-        UPDATE challenge 
+        UPDATE challenge_detail
         SET 
             step1Goal1Achieved = :step1Goal1Achieved,
             step1Goal2Achieved = :step1Goal2Achieved,
@@ -58,5 +58,5 @@ interface ChallengeDao {
 
 
     @Delete
-    suspend fun deleteChallenge(challenge: ChallengeEntity)
+    suspend fun deleteChallenge(challenge: ChallengeDetailEntity)
 }

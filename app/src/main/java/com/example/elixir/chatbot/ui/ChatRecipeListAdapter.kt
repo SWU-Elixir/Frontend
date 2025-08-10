@@ -9,11 +9,11 @@ import com.bumptech.glide.request.RequestOptions
 import com.example.elixir.R
 import com.example.elixir.chatbot.data.ChatRecipe
 import com.example.elixir.databinding.ItemChatRecipeBinding
-import com.example.elixir.ingredient.data.IngredientData
+import com.example.elixir.ingredient.data.IngredientEntity
 
 class ChatRecipeListAdapter(
     private val items: List<ChatRecipe>,
-    private val ingredientMap: Map<Int, IngredientData>,
+    private val ingredientMap: Map<Int, IngredientEntity>,
     private val onClick: (ChatRecipe) -> Unit
 ) : RecyclerView.Adapter<ChatRecipeListAdapter.ViewHolder>() {
 

@@ -16,7 +16,7 @@ import com.example.elixir.R
 import com.example.elixir.databinding.ItemRecipeHeaderRecommendBinding
 import com.example.elixir.databinding.ItemRecipeHeaderSpinnerBinding
 import com.example.elixir.databinding.ItemRecipeListBinding
-import com.example.elixir.ingredient.data.IngredientData
+import com.example.elixir.ingredient.data.IngredientEntity
 import com.example.elixir.recipe.data.RecipeItemData
 import com.example.elixir.recipe.data.RecipeListItemData
 import com.example.elixir.recipe.ui.fragment.RecipeDetailFragment
@@ -45,7 +45,7 @@ class HeaderRecommendViewHolder(
     // 추천 레시피 데이터와 식재료 맵을 받아서 뷰 갱신
     fun bind(
         recommendList: List<RecipeItemData>?,
-        ingredientDataMap: Map<Int, IngredientData>?
+        ingredientDataMap: Map<Int, IngredientEntity>?
     ) {
         // 1. ViewPager2 어댑터 세팅 또는 데이터 갱신
         if (recommendAdapter == null) {
@@ -190,7 +190,7 @@ class ItemViewHolder(val binding: ItemRecipeListBinding,
     private val onBookmarkClick: (RecipeItemData) -> Unit, private val onHeartClick: (RecipeItemData) -> Unit,
     private val fragmentManager: FragmentManager) : RecipeViewHolder(binding.root) {
 
-    fun bind(item: RecipeItemData, ingredientMap: Map<Int, IngredientData>) {
+    fun bind(item: RecipeItemData, ingredientMap: Map<Int, IngredientEntity>) {
         // 레시피 썸네일
         Glide.with(binding.root.context)
             .load(item.imageUrl)
@@ -278,7 +278,7 @@ class ItemViewHolder(val binding: ItemRecipeListBinding,
 }
 
 class RecipeListAdapter(
-    private var ingredientMap: Map<Int, IngredientData>,
+    private var ingredientMap: Map<Int, IngredientEntity>,
     private val onBookmarkClick: (RecipeItemData) -> Unit,
     private val onHeartClick: (RecipeItemData) -> Unit,
     private val fragmentManager: FragmentManager,
@@ -290,7 +290,7 @@ class RecipeListAdapter(
 ) : PagingDataAdapter<RecipeListItemData, RecipeViewHolder>(RecipeDiffCallback()) {
     // 추천, 스티키헤더, 아이템 데이터
     var recommendRecipeList: List<RecipeItemData>? = null
-    private var ingredientDataMap: Map<Int, IngredientData>? = null
+    private var ingredientDataMap: Map<Int, IngredientEntity>? = null
 
     // 검색 스피너 값 정의
     var selectedType: String? = null
@@ -373,7 +373,7 @@ class RecipeListAdapter(
     }
 
     // 식재료 업데이트
-    fun updateIngredientMap(newMap: Map<Int, IngredientData>) {
+    fun updateIngredientMap(newMap: Map<Int, IngredientEntity>) {
         this.ingredientMap = newMap
         this.ingredientDataMap = newMap  // 추천 레시피 헤더에서도 사용
         // 전체 아이템에 식재료 태그가 다시 바인딩되도록 갱신

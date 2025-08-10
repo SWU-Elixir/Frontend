@@ -17,7 +17,7 @@ import com.example.elixir.member.network.MemberRepository
 import com.example.elixir.member.viewmodel.MemberViewModel
 import com.example.elixir.member.viewmodel.MemberViewModelFactory
 import com.example.elixir.RetrofitClient
-import com.example.elixir.member.network.MemberDB
+import com.example.elixir.network.AppDatabase
 
 class MypageFollowListFragment : Fragment() {
     private var _binding: FragmentMypageFollowListBinding? = null
@@ -50,8 +50,10 @@ class MypageFollowListFragment : Fragment() {
         targetMemberId = arguments?.getInt("memberId", -1) ?: -1
         Log.d(TAG, "onCreate - mode: $mode, targetMemberId: $targetMemberId")
 
+        val appDB = AppDatabase.getInstance(requireContext())
+
         // ViewModel 초기화
-        val memberDao = MemberDB.getInstance(requireContext()).memberDao()
+        val memberDao = appDB.memberDao()
         val memberApi = RetrofitClient.instanceMemberApi
         val repository = MemberRepository(memberApi, memberDao)
         val factory = MemberViewModelFactory(repository)

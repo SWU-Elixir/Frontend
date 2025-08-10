@@ -22,7 +22,7 @@ import com.example.elixir.member.viewmodel.MemberViewModel
 import com.example.elixir.member.viewmodel.MemberViewModelFactory
 import com.example.elixir.RetrofitClient
 import com.example.elixir.member.data.ProfileEntity
-import com.example.elixir.member.network.MemberDB
+import com.example.elixir.network.AppDatabase
 
 
 class MyPageFragment : Fragment() {
@@ -52,8 +52,10 @@ class MyPageFragment : Fragment() {
     ): View {
         myPageBinding = FragmentMypageBinding.inflate(inflater, container, false)
 
+        val appDB = AppDatabase.getInstance(requireContext())
+
         // ViewModel 초기화 (Repository와 Dao 주입)
-        val memberDao = MemberDB.getInstance(requireContext()).memberDao()
+        val memberDao = appDB.memberDao()
         val memberApi = RetrofitClient.instanceMemberApi
         val repository = MemberRepository(memberApi, memberDao)
         val factory = MemberViewModelFactory(repository)

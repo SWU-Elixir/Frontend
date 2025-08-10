@@ -18,7 +18,7 @@ import com.example.elixir.member.network.MemberRepository
 import com.example.elixir.member.viewmodel.MemberViewModel
 import com.example.elixir.member.viewmodel.MemberViewModelFactory
 import com.example.elixir.RetrofitClient
-import com.example.elixir.member.network.MemberDB
+import com.example.elixir.network.AppDatabase
 import java.io.File
 
 class SignupFragment : Fragment() {
@@ -32,7 +32,7 @@ class SignupFragment : Fragment() {
     // MemberViewModel을 Factory로 생성 (MemberService 제거)
     private val memberViewModel: MemberViewModel by activityViewModels {
         val api = RetrofitClient.instanceMemberApi
-        val db = MemberDB.getInstance(requireContext())
+        val db = AppDatabase.getInstance(requireContext())
         val dao = db.memberDao()
         MemberViewModelFactory(
             MemberRepository(api, dao)

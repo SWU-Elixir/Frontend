@@ -1,6 +1,7 @@
 package com.example.elixir.member.data
 
 import androidx.room.*
+import com.example.elixir.recipe.data.entity.RecipeEntity
 
 @Dao
 interface MemberDao {
@@ -28,7 +29,7 @@ interface MemberDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAchievements(achievements: List<AchievementEntity>)
 
-    @Query("SELECT * FROM recipe")
+    @Query("SELECT * FROM recipe_table")
     suspend fun getRecipes(): List<RecipeEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

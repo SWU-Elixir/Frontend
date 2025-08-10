@@ -28,10 +28,10 @@ import com.example.elixir.login.data.LoginRequest
 import com.example.elixir.login.data.LoginResponse
 import com.example.elixir.login.network.GoogleSignInHelper
 import com.example.elixir.member.network.GoogleSignupResponse
-import com.example.elixir.member.network.MemberDB
 import com.example.elixir.member.network.MemberRepository
 import com.example.elixir.member.viewmodel.MemberViewModel
 import com.example.elixir.member.viewmodel.MemberViewModelFactory
+import com.example.elixir.network.AppDatabase
 import com.example.elixir.signup.ProfileData
 import com.example.elixir.signup.UserInfoViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -62,7 +62,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var googleSignInHelper: GoogleSignInHelper
     private val memberViewModel: MemberViewModel by viewModels {
         val api = RetrofitClient.instanceMemberApi
-        val db = MemberDB.getInstance(this@LoginActivity)
+        val db = AppDatabase.getInstance(this@LoginActivity)
         val dao = db.memberDao()
         MemberViewModelFactory(
             MemberRepository(api, dao)

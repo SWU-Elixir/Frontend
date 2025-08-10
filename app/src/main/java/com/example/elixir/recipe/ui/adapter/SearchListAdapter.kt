@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,11 +14,10 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import com.bumptech.glide.Glide
 import com.example.elixir.R
-import com.example.elixir.databinding.ItemRecipeHeaderRecommendBinding
 import com.example.elixir.databinding.ItemRecipeHeaderSearchBinding
 import com.example.elixir.databinding.ItemRecipeHeaderSpinnerBinding
 import com.example.elixir.databinding.ItemRecipeListBinding
-import com.example.elixir.ingredient.data.IngredientData
+import com.example.elixir.ingredient.data.IngredientEntity
 import com.example.elixir.recipe.data.RecipeItemData
 import com.example.elixir.recipe.data.SearchItemData
 import com.example.elixir.recipe.ui.fragment.RecipeDetailFragment
@@ -150,9 +148,9 @@ class HeaderSearchSpinnerViewHolder(private val binding: ItemRecipeHeaderSpinner
 }
 
 // 레시피 리스트 아이템 홀더: 아이템 정의 및 스크랩, 좋아요 정의
-class SearchItemViewHolder(val binding: ItemRecipeListBinding, private val ingredientMap: Map<Int, IngredientData>,
-                     private val onBookmarkClick: (RecipeItemData) -> Unit, private val onHeartClick: (RecipeItemData) -> Unit,
-                     private val fragmentManager: FragmentManager
+class SearchItemViewHolder(val binding: ItemRecipeListBinding, private val ingredientMap: Map<Int, IngredientEntity>,
+                           private val onBookmarkClick: (RecipeItemData) -> Unit, private val onHeartClick: (RecipeItemData) -> Unit,
+                           private val fragmentManager: FragmentManager
 ) : RecipeViewHolder(binding.root) {
 
     fun bind(item: RecipeItemData) {
@@ -241,7 +239,7 @@ class SearchItemViewHolder(val binding: ItemRecipeListBinding, private val ingre
 }
 
 class SearchListAdapter(
-    private var ingredientMap: Map<Int, IngredientData>,
+    private var ingredientMap: Map<Int, IngredientEntity>,
     private val onBookmarkClick: (RecipeItemData) -> Unit,
     private val onHeartClick: (RecipeItemData) -> Unit,
     private val fragmentManager: FragmentManager,
@@ -314,7 +312,7 @@ class SearchListAdapter(
         notifyItemChanged(1) // SearchSpinnerHeader 위치
     }
 
-    fun updateIngredientMap(newIngredientMap: Map<Int, IngredientData>) {
+    fun updateIngredientMap(newIngredientMap: Map<Int, IngredientEntity>) {
         ingredientMap = newIngredientMap
         notifyDataSetChanged()
     }

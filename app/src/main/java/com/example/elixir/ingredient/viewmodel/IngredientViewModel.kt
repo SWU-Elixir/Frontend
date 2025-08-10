@@ -2,14 +2,14 @@ package com.example.elixir.ingredient.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.*
-import com.example.elixir.ingredient.data.IngredientData
+import com.example.elixir.ingredient.data.IngredientEntity
 import com.example.elixir.ingredient.network.IngredientRepository
 import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
 
 class IngredientViewModel(private val repository: IngredientRepository) : ViewModel() {
-    private val _ingredients = MutableLiveData<List<IngredientData>>()
-    val ingredients: LiveData<List<IngredientData>> = _ingredients
+    private val _ingredients = MutableLiveData<List<IngredientEntity>>()
+    val ingredients: LiveData<List<IngredientEntity>> = _ingredients
 
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> = _error

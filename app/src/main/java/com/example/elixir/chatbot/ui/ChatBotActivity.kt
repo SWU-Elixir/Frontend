@@ -16,7 +16,7 @@ import com.example.elixir.chatbot.data.ChatRecipe
 import com.example.elixir.chatbot.data.ChatRequestDto
 import com.example.elixir.chatbot.network.ChatGptService
 import com.example.elixir.databinding.ActivityChatbotBinding
-import com.example.elixir.ingredient.data.IngredientData
+import com.example.elixir.ingredient.data.IngredientEntity
 import kotlinx.coroutines.launch
 
 class ChatBotActivity : ToolbarActivity() {
@@ -24,7 +24,7 @@ class ChatBotActivity : ToolbarActivity() {
     private lateinit var binding: ActivityChatbotBinding
     private val chatList = mutableListOf<ChatItem>()
     private lateinit var chatAdapter: ChatAdapter
-    private var ingredientMap: Map<Int, IngredientData> = emptyMap()
+    private var ingredientMap: Map<Int, IngredientEntity> = emptyMap()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

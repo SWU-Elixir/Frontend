@@ -1,19 +1,15 @@
 package com.example.elixir.calendar.ui
 
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
-import androidx.activity.result.ActivityResultLauncher
 import com.bumptech.glide.Glide
 import com.example.elixir.R
 import com.example.elixir.calendar.data.DietLogData
 import com.example.elixir.databinding.ItemMealListBinding
-import com.example.elixir.ingredient.data.IngredientData
+import com.example.elixir.ingredient.data.IngredientEntity
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
@@ -22,7 +18,7 @@ class MealListAdapter(
     private val context: Context,
     private var data: MutableList<DietLogData>,
     private val listener: OnMealClickListener,
-    private var ingredientMap: Map<Int, IngredientData> = emptyMap()
+    private var ingredientMap: Map<Int, IngredientEntity> = emptyMap()
 ) : BaseAdapter() {
     override fun getCount(): Int = data.size
     override fun getItem(position: Int): DietLogData = data[position]
@@ -110,7 +106,7 @@ class MealListAdapter(
         notifyDataSetChanged()
     }
 
-    fun setIngredientMap(map: Map<Int, IngredientData>) {
+    fun setIngredientMap(map: Map<Int, IngredientEntity>) {
         this.ingredientMap = map
         notifyDataSetChanged()
     }

@@ -3,7 +3,7 @@ package com.example.elixir.ingredient.network
 import android.util.Log
 import androidx.room.Transaction
 import com.example.elixir.ingredient.data.IngredientDao
-import com.example.elixir.ingredient.data.IngredientData
+import com.example.elixir.ingredient.data.IngredientEntity
 import kotlinx.coroutines.CancellationException
 
 class IngredientRepository(
@@ -12,7 +12,7 @@ class IngredientRepository(
 ) {
     // API에서 받아와서 DB에 저장
     @Transaction
-    suspend fun fetchAndSaveIngredients(): List<IngredientData> {
+    suspend fun fetchAndSaveIngredients(): List<IngredientEntity> {
         try {
             val response = api.getAllIngredients()
             if (response.status == 200) {
@@ -34,7 +34,7 @@ class IngredientRepository(
 
     // 챌린지 식재료 API에서 받아와서 DB에 저장
     @Transaction
-    suspend fun fetchAndSaveChallengeIngredients(): List<IngredientData> {
+    suspend fun fetchAndSaveChallengeIngredients(): List<IngredientEntity> {
         try {
             val response = api.getChallengeIngredients()
             if (response.status == 200) {
@@ -49,7 +49,7 @@ class IngredientRepository(
     }
 
     // DB에서 불러오기
-    suspend fun getIngredientsFromDb(): List<IngredientData> {
+    suspend fun getIngredientsFromDb(): List<IngredientEntity> {
         return try {
             dao.getAll()
         } catch (e: Exception) {
