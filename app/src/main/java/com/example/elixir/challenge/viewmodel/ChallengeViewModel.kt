@@ -1,194 +1,147 @@
-package com.example.elixir.challenge.viewmodel
+package com.example.elixir.challenge.ui
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import kotlinx.coroutines.launch
-import android.util.Log
 import com.example.elixir.challenge.data.ChallengeDetailEntity
+import com.example.elixir.challenge.network.ChallengeCompletionRawData
+import com.example.elixir.challenge.network.ChallengeProgressData
 import com.example.elixir.challenge.network.ChallengeRepository
-import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 class ChallengeViewModel(
     private val repository: ChallengeRepository
 ) : ViewModel() {
 
+    private val _challenges = MutableStateFlow<List<ChallengeDetailEntity>>(emptyList())
+    val challenges: StateFlow<List<ChallengeDetailEntity>> = _challenges.asStateFlow()
+
+    private val _selectedChallenge = MutableStateFlow<ChallengeDetailEntity?>(null)
+    val selectedChallenge: StateFlow<ChallengeDetailEntity?> = _selectedChallenge.asStateFlow()
+
+    private val _challengeCompletion = MutableStateFlow(ChallengeCompletionRawData())
+    val challengeCompletion: StateFlow<ChallengeCompletionRawData> = _challengeCompletion.asStateFlow()
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+
     companion object {
         private const val TAG = "ChallengeViewModel"
     }
 
-    // 연도별 챌린지 목록
-    private val _challenges = MutableLiveData<List<ChallengeDetailEntity>>()
-    val challenges: LiveData<List<ChallengeDetailEntity>> get() = _challenges
+    fun clearError() {
+        _errorMessage.value = null
+    }
 
-    // 현재 선택된 챌린지 상세 정보
-    private val _selectedChallenge = MutableLiveData<ChallengeDetailEntity?>()
-    val selectedChallenge: LiveData<ChallengeDetailEntity?> get() = _selectedChallenge
-
-    private val _error = MutableLiveData<String?>()
-    val error: LiveData<String?> get() = _error
-
-    private val _challengeProgress = MutableLiveData<ChallengeDetailEntity?>()
-    val challengeProgress: LiveData<ChallengeDetailEntity?> get() = _challengeProgress
-
-    private val _challengeCompletion = MutableLiveData<ChallengeDetailEntity?>()
-    val challengeCompletion: LiveData<ChallengeDetailEntity?> get() = _challengeCompletion
-
-    // 현재 연도의 챌린지 목록 저장
-    private var currentYearChallenges: List<ChallengeDetailEntity> = emptyList()
-
-    /**
-     * 연도별 챌린지 로드
-     * Repository에서 API 실패 시 자동으로 DB 폴백 처리
-     */
     fun loadChallengesByYear(year: Int) {
         viewModelScope.launch {
+            _isLoading.value = true
+            _errorMessage.value = null
             try {
-                _error.value = null
-                Log.d(TAG, "연도별 챌린지 로드 시작: $year")
-
-                // Repository에서 이미 API 실패 시 DB 폴백 처리됨
                 val challenges = repository.fetchAndSaveChallengesByYear(year)
-
-                if (challenges.isNotEmpty()) {
-                    Log.d(TAG, "${challenges.size}개의 챌린지 로드됨")
-                    currentYearChallenges = challenges
-                    _challenges.value = challenges
-                } else {
-                    Log.w(TAG, "로드된 챌린지가 없음")
-                    _error.value = "해당 연도의 챌린지를 찾을 수 없습니다"
+                _challenges.value = challenges
+                if (challenges.isEmpty()) {
+                    _errorMessage.value = null // 빈 상태
                 }
-
             } catch (e: Exception) {
-                Log.e(TAG, "챌린지 로드 중 오류 발생", e)
-                _error.value = when (e) {
-                    is java.net.UnknownHostException -> "인터넷 연결을 확인해주세요"
-                    is retrofit2.HttpException -> "서버 오류가 발생했습니다"
-                    else -> "챌린지 로드 실패: ${e.message}"
+                Log.e(TAG, "챌린지 로드 실패", e)
+                val local = repository.getChallengesByYearFromDb(year)
+                _challenges.value = local
+                if (local.isEmpty()) {
+                    _errorMessage.value = when (e) {
+                        is java.net.UnknownHostException -> "인터넷 연결을 확인해주세요"
+                        is retrofit2.HttpException -> "서버 오류가 발생했습니다."
+                        else -> "챌린지를 불러오는데 실패했습니다."
+                    }
                 }
+            } finally {
+                _isLoading.value = false
             }
         }
     }
 
     /**
-     * 챌린지 상세 정보와 진행도를 함께 로드
+     * 상세 + 진행도 한번에 로드하여 머지
      */
     fun loadChallengeWithProgress(id: Int) {
         viewModelScope.launch {
+            _isLoading.value = true
+            _errorMessage.value = null
             try {
-                _error.value = null
-                Log.d(TAG, "챌린지 상세 정보 및 진행도 로드 시작: $id")
-
-                // 상세 정보와 진행도 정보를 병렬로 가져오기
-                val detailDeferred = async {
-                    // Repository에서 이미 API 실패 시 DB 폴백 처리됨
-                    repository.fetchAndSaveChallengeById(id).firstOrNull()
-                }
-                val progressDeferred = async {
-                    try {
-                        repository.fetchChallengeProgress(id)
-                    } catch (e: Exception) {
-                        Log.w(TAG, "진행도 로드 실패, 기본값 사용", e)
-                        null
-                    }
-                }
-
-                // 두 결과를 동시에 기다림
-                val detail = detailDeferred.await()
-                val progress = progressDeferred.await()
+                // 1) 상세 불러오기
+                val detail = repository.fetchAndSaveChallengeById(id).firstOrNull()
+                    ?: repository.getChallengeByIdFromDb(id).firstOrNull()
 
                 if (detail == null) {
-                    _error.value = "챌린지 상세 정보를 찾을 수 없습니다"
+                    _errorMessage.value = "해당 챌린지를 찾을 수 없습니다."
+                    _isLoading.value = false
                     return@launch
                 }
 
-                // 진행도 정보가 있으면 합치고, 없으면 기본 상세 정보만 사용
-                val merged = if (progress != null) {
+                // 2) 진행도 불러오기
+                val progress = try {
+                    repository.fetchChallengeProgress(id)
+                } catch (e: Exception) {
+                    Log.w(TAG, "진행도 로드 실패, 기본값 사용", e)
+                    ChallengeProgressData(challengeId = detail.id)
+                }
+
+                // 3) 진행도 병합
+                val merged = progress?.let {
                     detail.copy(
-                        step1Goal1Achieved = progress.step1Goal1Achieved,
+                        id = progress?.challengeId.takeIf { it != 0 } ?: detail.id,
+                        step1Goal1Achieved = it.step1Goal1Achieved,
                         step1Goal2Achieved = progress.step1Goal2Achieved,
                         step2Goal1Active = progress.step2Goal1Active,
-                        step2Goal2Active = progress.step2Goal2Active,
                         step2Goal1Achieved = progress.step2Goal1Achieved,
+                        step2Goal2Active = progress.step2Goal2Active,
                         step2Goal2Achieved = progress.step2Goal2Achieved,
                         step3Goal1Active = progress.step3Goal1Active,
-                        step3Goal2Active = progress.step3Goal2Active,
                         step3Goal1Achieved = progress.step3Goal1Achieved,
+                        step3Goal2Active = progress.step3Goal2Active,
                         step3Goal2Achieved = progress.step3Goal2Achieved,
                         step4Goal1Active = progress.step4Goal1Active,
-                        step4Goal2Active = progress.step4Goal2Active,
                         step4Goal1Achieved = progress.step4Goal1Achieved,
+                        step4Goal2Active = progress.step4Goal2Active,
                         step4Goal2Achieved = progress.step4Goal2Achieved,
                         challengeCompleted = progress.challengeCompleted
                     )
-                } else {
-                    detail
                 }
 
+                // 4) 최종 세팅
                 _selectedChallenge.value = merged
-                Log.d(TAG, "챌린지 정보 로드 완료")
-
-            } catch (e: Exception) {
-                Log.e(TAG, "챌린지 정보 로드 실패", e)
-                _error.value = when (e) {
-                    is java.net.UnknownHostException -> "인터넷 연결을 확인해주세요"
-                    is retrofit2.HttpException -> "서버 오류가 발생했습니다"
-                    else -> "챌린지 정보 로드 실패: ${e.message}"
+                if (merged != null) {
+                    Log.d(TAG, "챌린지 상세+진행도 로드 완료: ${merged.name}, id=${merged.id}")
                 }
+            } catch (e: Exception) {
+                Log.e(TAG, "챌린지+진행도 로드 실패", e)
+                _errorMessage.value = "데이터 로드 실패: ${e.message}"
+            } finally {
+                _isLoading.value = false
             }
         }
     }
 
-    /**
-     * 챌린지 완료 정보를 팝업용으로 로드
-     */
-    fun loadChallengeCompletionForPopup(onResult: (Boolean, String?, String?) -> Unit) {
+    fun loadChallengeCompletionForPopup(callback: (Boolean, String?, String?) -> Unit) {
         viewModelScope.launch {
             try {
-                Log.d(TAG, "챌린지 완료 정보 로드 시작")
-                val response = repository.fetchChallengeCompletionRaw()
-                Log.d(TAG, "챌린지 완료 정보 로드 성공")
-                onResult(response.challengeCompleted, response.achievementName, response.achievementImageUrl)
+                val completion = repository.fetchChallengeCompletion()
+                _challengeCompletion.value = completion
+                callback(
+                    completion.challengeCompleted ?: false,
+                    completion.achievementName,
+                    completion.achievementImageUrl
+                )
             } catch (e: Exception) {
-                Log.e(TAG, "챌린지 완료 정보 로드 실패", e)
-                // 실패 시 기본값 반환
-                onResult(false, null, null)
+                _challengeCompletion.value = ChallengeCompletionRawData()
+                callback(false, null, null)
             }
         }
-    }
-
-    /**
-     * DB에서만 연도별 챌린지 조회 (오프라인 전용)
-     */
-    fun loadChallengesByYearFromDbOnly(year: Int) {
-        viewModelScope.launch {
-            try {
-                _error.value = null
-                Log.d(TAG, "DB에서만 연도별 챌린지 로드: $year")
-
-                val challenges = repository.getChallengesByYearFromDb(year)
-
-                if (challenges.isNotEmpty()) {
-                    Log.d(TAG, "DB에서 ${challenges.size}개의 챌린지 로드됨")
-                    currentYearChallenges = challenges
-                    _challenges.value = challenges
-                } else {
-                    Log.w(TAG, "DB에 해당 연도의 챌린지가 없음")
-                    _error.value = "저장된 챌린지를 찾을 수 없습니다"
-                }
-
-            } catch (e: Exception) {
-                Log.e(TAG, "DB 챌린지 로드 실패", e)
-                _error.value = "저장된 데이터 로드 실패: ${e.message}"
-            }
-        }
-    }
-
-    /**
-     * 에러 상태 초기화
-     */
-    fun clearError() {
-        _error.value = null
     }
 }

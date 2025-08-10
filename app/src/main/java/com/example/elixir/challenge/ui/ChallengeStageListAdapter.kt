@@ -11,24 +11,29 @@ import com.example.elixir.databinding.ItemChallengeListBinding
 
 class ChallengeStageListAdapter(
     private val context: Context,
-    private var stageList: MutableList<StageItem>,
-    private var currentStage: Int
+    // 초기화 시 빈 리스트를 받도록 변경
+    private var stageList: List<StageItem> = mutableListOf()
 ) : BaseAdapter() {
 
+    // 어댑터가 내부적으로 관리할 필터링된 리스트
+    private var filteredList: List<StageItem> = emptyList()
+
     override fun getCount(): Int {
-        return stageList.count { it.stepNumber <= currentStage }
+        // 필터링된 리스트의 크기를 반환
+        return filteredList.size
     }
+
     override fun getItem(position: Int): StageItem {
-        val filtered = stageList.filter { it.stepNumber <= currentStage }.reversed()
-        return filtered[position]
+        // 필터링된 리스트에서 아이템을 가져옴
+        return filteredList[position]
     }
+
     override fun getItemId(position: Int): Long = position.toLong()
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val binding: ItemChallengeListBinding
         val view: View
 
-        // 뷰 재사용 로직
         if (convertView == null) {
             binding = ItemChallengeListBinding.inflate(LayoutInflater.from(context), parent, false)
             view = binding.root
@@ -50,7 +55,6 @@ class ChallengeStageListAdapter(
             "점심 챙겨 먹기" -> R.drawable.ic_challenge_meal_time
             "아침 챙겨 먹기" -> R.drawable.ic_challenge_meal_time
             "재철 식재료를 활용한 레시피 작성" -> R.drawable.ic_challenge_recipe_upload
-            "Other" -> R.drawable.ic_challenge_other
             else -> R.drawable.ic_challenge_other // 기본 아이콘
         }
         binding.imgChallengeIcon.setImageResource(iconRes)
@@ -61,11 +65,12 @@ class ChallengeStageListAdapter(
         return view
     }
 
-    fun updateData(newStageList: MutableList<StageItem>, newCurrentStage: Int) {
+    // `updateData` 메서드를 수정하여 필터링 로직을 한 번만 수행하도록 변경
+    fun updateData(newStageList: List<StageItem>, currentStage: Int) {
         this.stageList = newStageList
-        this.currentStage = newCurrentStage
+        // 전달받은 currentStage에 해당하는 아이템만 필터링하여 새로운 리스트를 만듭니다.
+        // 역순으로 정렬하는 로직을 추가하여 최신 스테이지가 상단에 보이도록 합니다.
+        filteredList = newStageList.filter { it.stepNumber <= currentStage }.reversed()
         notifyDataSetChanged()
     }
 }
-
-
