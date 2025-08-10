@@ -17,7 +17,6 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.elixir.challenge.data.ChallengeDetailEntity
 import com.example.elixir.challenge.data.StageItem
 import com.example.elixir.challenge.network.ChallengeRepository
-import com.example.elixir.challenge.network.ChallengeProgressData
 import java.util.Calendar
 import com.example.elixir.RetrofitClient
 import com.example.elixir.network.AppDatabase
@@ -32,6 +31,19 @@ class ChallengeFragment : Fragment() {
     private lateinit var stageAdapter: ChallengeStageListAdapter
     private var lastSelectedChallengeId: Int? = null
     private var isInitialLoad = true
+
+    private val PREFS_NAME = "challenge_prefs"
+    private val KEY_COMPLETION_DIALOG_PREFIX = "completion_dialog_shown_"
+
+    private fun hasShownCompletionDialog(challengeId: Int): Boolean {
+        val prefs = requireContext().getSharedPreferences(PREFS_NAME, 0)
+        return prefs.getBoolean(KEY_COMPLETION_DIALOG_PREFIX + challengeId, false)
+    }
+
+    private fun setShownCompletionDialog(challengeId: Int) {
+        val prefs = requireContext().getSharedPreferences(PREFS_NAME, 0)
+        prefs.edit().putBoolean(KEY_COMPLETION_DIALOG_PREFIX + challengeId, true).apply()
+    }
 
     companion object {
         private const val TAG = "ChallengeFragment"
@@ -238,9 +250,12 @@ class ChallengeFragment : Fragment() {
         binding.ivChallenge.setImageResource(imageRes)
 
         // 모든 스테이지 완료 시 completion 확인
-        if (currentStage == 5) {
-            Log.d(TAG, "모든 스테이지 클리어! 완료 정보 확인 시작...")
-            checkFinalCompletion()
+        if (challenge.challengeCompleted) {
+            if (!hasShownCompletionDialog(challenge.id)) {
+                showCompletionDialog(challenge, challenge.achievementName, challenge.achievementImageUrl)
+            } else {
+                Log.d(TAG, "이미 확인한 완료 다이얼로그 - 표시 안함")
+            }
         }
     }
 
@@ -393,27 +408,25 @@ class ChallengeFragment : Fragment() {
         }
     }
 
-    private fun showCompletionDialog(challenge: ChallengeDetailEntity, achievementName: String?, achievementImageUrl: String?) {
+    private fun showCompletionDialog(
+        challenge: ChallengeDetailEntity,
+        achievementName: String?,
+        achievementImageUrl: String?
+    ) {
         val dialogBinding = DialogChallengeCompletedBinding.inflate(layoutInflater)
-
-        Log.d(TAG, "챌린지 완료 다이얼로그 표시")
 
         dialogBinding.tvDialogTitle.text = achievementName ?: getString(R.string.challenge_completion_title)
         dialogBinding.tvDialogMessage.text = getString(R.string.challenge_completion_message, challenge.name)
 
         if (!achievementImageUrl.isNullOrEmpty()) {
-            try {
-                Glide.with(dialogBinding.root)
-                    .load(achievementImageUrl)
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .placeholder(R.drawable.bg_badge_empty)
-                    .error(R.drawable.bg_badge_empty)
-                    .fitCenter()
-                    .into(dialogBinding.imgDialog)
-            } catch (e: Exception) {
-                Log.e(TAG, "이미지 로딩 실패", e)
-                dialogBinding.imgDialog.setImageResource(R.drawable.bg_badge_empty)
-            }
+            Glide.with(dialogBinding.root)
+                .load(achievementImageUrl)
+                .skipMemoryCache(true)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .placeholder(R.drawable.bg_badge_empty)
+                .error(R.drawable.bg_badge_empty)
+                .fitCenter()
+                .into(dialogBinding.imgDialog)
         } else {
             dialogBinding.imgDialog.setImageResource(R.drawable.bg_badge_empty)
         }
@@ -423,11 +436,13 @@ class ChallengeFragment : Fragment() {
             .create()
 
         dialogBinding.btnDialog.setOnClickListener {
+            setShownCompletionDialog(challenge.id)
             alertDialog.dismiss()
         }
 
         alertDialog.show()
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
