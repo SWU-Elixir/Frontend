@@ -7,32 +7,36 @@
     android:padding="4dp">
 
     <ImageView
-        android:id="@+id/badgeImage"
+        android:id="@+id/imgBadge"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:adjustViewBounds="true"
         android:clipToOutline="true"
-        android:minHeight="100dp"
-        android:minWidth="100dp"
+        android:minHeight="140dp"
+        android:maxHeight="140dp"
+        android:minWidth="140dp"
+        android:maxWidth="140dp"
         android:layout_marginBottom="8dp"/>
 
     <TextView
-        android:id="@+id/badgeTitle"
+        android:id="@+id/tvBadge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="제목"
+        android:text="@string/title"
         android:textSize="15sp"
         android:textStyle="bold"
         android:gravity="center"
         android:layout_marginTop="4dp"
+        android:maxLines="1"
+        android:ellipsize="end"
         android:textColor="#222222"/>
 
     <TextView
-        android:id="@+id/badgeSubtitle"
+        android:id="@+id/tvBadgeSubTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="서브제목"
+        android:text="@string/subtitle"
         android:textSize="12sp"
         android:gravity="center"
         android:layout_marginTop="2dp"

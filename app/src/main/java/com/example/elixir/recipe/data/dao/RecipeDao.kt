@@ -9,33 +9,31 @@ import com.example.elixir.recipe.data.entity.RecipeEntity
 
 @Dao
 interface RecipeDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertRecipes(recipes: List<RecipeEntity>)
-
+    // 상세 레시피 넣기
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertRecipe(recipe: RecipeEntity)
 
+    // 상세 레시피 불러오기
     @Query("SELECT * FROM recipe_table WHERE id = :recipeId")
     suspend fun getRecipeById(recipeId: Int): RecipeEntity?
 
-    @Query("SELECT * FROM recipe_table WHERE categoryType = :categoryType AND categorySlowAging = :categorySlowAging LIMIT :size OFFSET :offset")
-    suspend fun getRecipes(offset: Int, size: Int, categoryType: String, categorySlowAging: String): List<RecipeEntity>
-
-    @Query("SELECT * FROM recipe_table WHERE title LIKE '%' || :keyword || '%' AND categoryType = :categoryType AND categorySlowAging = :categorySlowAging LIMIT :size OFFSET :page")
-    suspend fun searchRecipes(keyword: String, page: Int, size: Int, categoryType: String, categorySlowAging: String): List<RecipeEntity>
-
+    // 레시피 업데이트
     @Update
     suspend fun updateRecipe(recipe: RecipeEntity)
 
+    // 레시피 삭제
     @Query("DELETE FROM recipe_table WHERE id = :recipeId")
     suspend fun deleteRecipeById(recipeId: Int)
 
+    // 레시피 전체 삭제
     @Query("DELETE FROM recipe_table")
     suspend fun deleteAllRecipes()
 
+    // 모든 레시피 불러오기
     @Query("SELECT * FROM recipe_table")
     suspend fun getAllRecipes(): List<RecipeEntity>
 
+    // 레시피 갯수
     @Query("SELECT COUNT(*) FROM recipe_table")
     suspend fun countRecipes(): Int
 
@@ -44,6 +42,6 @@ interface RecipeDao {
     suspend fun updateLikeStatus(recipeId: Int, liked: Boolean, likes: Int)
 
     // 스크랩 상태 업데이트
-    @Query("UPDATE recipe_table SET scrappedByCurrentUser = :scrapped, scraps = :scraps WHERE id = :recipeId")
-    suspend fun updateScrapStatus(recipeId: Int, scrapped: Boolean, scraps: Int)
+    @Query("UPDATE recipe_table SET scrappedByCurrentUser = :scrapped WHERE id = :recipeId")
+    suspend fun updateScrapStatus(recipeId: Int, scrapped: Boolean)
 }

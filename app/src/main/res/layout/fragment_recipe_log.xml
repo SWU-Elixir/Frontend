@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingHorizontal="16dp"
     android:fitsSystemWindows="true"
-    tools:context=".recipe.ui.RecipeLogFragment">
+    tools:context=".recipe.ui.fragment.RecipeLogFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <!-- 레시피명 -->
         <TextView
-            android:id="@+id/recipe_title"
+            android:id="@+id/tvRecipe"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/recipe_name"
@@ -40,7 +40,7 @@
             android:textSize="16sp"
             android:fontFamily="@font/pretendard_medium"
             android:importantForAutofill="no"
-            app:layout_constraintTop_toBottomOf="@id/recipe_title"
+            app:layout_constraintTop_toBottomOf="@id/tvRecipe"
             app:layout_constraintBottom_toTopOf="@id/recipe_thumbnail_text"
             tools:ignore="DuplicateSpeakableTextCheck,VisualLintTextFieldSize,TextContrastCheck" />
 
@@ -150,7 +150,7 @@
 
         <!-- 대표 식재료 태그 -->
         <TextView
-            android:id="@id/represent_ingredient"
+            android:id="@id/tvRepresentIngredient"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
@@ -160,11 +160,11 @@
             android:textSize="18sp"
             android:fontFamily="@font/pretendard_bold"
             app:layout_constraintTop_toBottomOf="@id/select_low_aging"
-            app:layout_constraintBottom_toTopOf="@id/tags_ingredient"
+            app:layout_constraintBottom_toTopOf="@id/cgTagsIngredient"
             app:layout_constraintStart_toStartOf="parent"/>
 
         <TextView
-            android:id="@id/rule_ingredient"
+            android:id="@id/tvRuleIngredient"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
@@ -174,22 +174,22 @@
             android:textSize="12sp"
             android:fontFamily="@font/pretendard_light"
             app:layout_constraintTop_toBottomOf="@id/select_low_aging"
-            app:layout_constraintBottom_toTopOf="@id/tags_ingredient"
+            app:layout_constraintBottom_toTopOf="@id/cgTagsIngredient"
             app:layout_constraintEnd_toEndOf="parent"/>
 
         <!-- 태그 선택지 -->
         <com.google.android.material.chip.ChipGroup
-            android:id="@id/tags_ingredient"
+            android:id="@id/cgTagsIngredient"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="20dp"
             app:chipSpacingHorizontal="8dp"
-            app:layout_constraintTop_toBottomOf="@id/represent_ingredient"
+            app:layout_constraintTop_toBottomOf="@id/tvRepresentIngredient"
             app:layout_constraintBottom_toTopOf="@id/allergy">
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/find_ingredient"
+                android:id="@+id/chipFindIngredient"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/ChipStyle_Short"
@@ -212,7 +212,7 @@
             android:textColor="@color/black"
             android:textSize="18sp"
             android:fontFamily="@font/pretendard_bold"
-            app:layout_constraintTop_toBottomOf="@id/tags_ingredient"
+            app:layout_constraintTop_toBottomOf="@id/cgTagsIngredient"
             app:layout_constraintBottom_toTopOf="@id/tags_allergy"
             app:layout_constraintStart_toStartOf="parent"/>
         <!-- 선택지 -->
@@ -526,6 +526,7 @@
             android:id="@+id/frame_enter_ingredients"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"
             app:layout_constraintTop_toBottomOf="@id/ingredients"
             app:layout_constraintBottom_toTopOf="@id/btn_ingredients_add"/>
 
@@ -567,6 +568,7 @@
             android:id="@+id/frame_enter_seasoning"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"
             app:layout_constraintTop_toBottomOf="@id/seasoning"
             app:layout_constraintBottom_toTopOf="@id/btn_seasoning_add"/>
 
@@ -608,6 +610,7 @@
             android:id="@+id/frame_enter_recipe_step"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"
             app:layout_constraintTop_toBottomOf="@id/recipe_step"
             app:layout_constraintBottom_toTopOf="@id/btn_recipe_step_add"/>
 
@@ -682,4 +685,4 @@
             app:layout_constraintBottom_toBottomOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-</ScrollView>
+</androidx.core.widget.NestedScrollView>

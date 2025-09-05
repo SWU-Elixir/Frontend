@@ -1,93 +1,103 @@
-<LinearLayout
+
+
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:background="@color/white">
+    android:background="@color/white"
+    android:paddingBottom="10dp">
 
-    <!-- 전체 레시피 카드 뷰 감싸는 레이아웃 -->
-    <LinearLayout
-        android:layout_width="match_parent"
+    <!-- 프로필 이미지 -->
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/imgProfile"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintDimensionRatio="1:1"
+        app:shapeAppearanceOverlay="@style/ImgProfile_Comment"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_profile"
+        android:contentDescription="@null"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- memberTitle -->
+    <TextView
+        android:id="@+id/tvMember"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="10dp"
-        tools:ignore="UselessParent">
-        <ImageView
-            android:id="@+id/profileImage"
-            android:layout_width="40dp"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_profile"
-            android:contentDescription="@null"/>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="5dp"
-            android:orientation="vertical">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+        android:maxWidth="120dp"
+        android:text="@string/member_title"
+        android:textColor="@color/elixir_orange"
+        android:textSize="12sp"
+        android:fontFamily="@font/pretendard_medium"
+        app:layout_constraintStart_toEndOf="@id/imgProfile"
+        app:layout_constraintTop_toTopOf="@id/imgProfile"
+        app:layout_constraintBottom_toTopOf="@id/commentText"
+        android:layout_marginStart="8dp"/>
 
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_gravity="center"
-                    android:layout_weight="1">
-                    <TextView
-                        android:id="@+id/memberTitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:maxWidth="120dp"
-                        android:text="@string/member_title"
-                        android:textColor="@color/elixir_orange"
-                        android:textSize="12sp"
-                        android:fontFamily="@font/pretendard_medium"/>
-                    <TextView
-                        android:id="@+id/memberNickname"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:maxWidth="150dp"
-                        android:layout_marginStart="5dp"
-                        android:text="@string/member_nickname"
-                        android:textColor="@color/black"
-                        android:textSize="14sp"
-                        android:fontFamily="@font/pretendard_bold"/>
-                </LinearLayout>
-                <ImageButton
-                    android:id="@+id/menuButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_more"
-                    android:adjustViewBounds="true"
-                    android:background="@android:color/transparent"
-                    android:maxWidth="40dp"
-                    android:maxHeight="40dp"
-                    android:layout_marginStart="3dp"
-                    android:paddingBottom="8dp"
-                    android:scaleType="fitCenter"
-                    app:tint="@color/elixir_darkgray"
-                    tools:ignore="ContentDescription, SpeakableTextPresentCheck" />
-            </LinearLayout>
-            <TextView
-                android:id="@+id/commentText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/recipe_tip_context"
-                android:textColor="@color/black"
-                android:textSize="14sp"
-                android:fontFamily="@font/pretendard_medium"/>
-            <TextView
-                android:id="@+id/dateText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAlignment="textEnd"
-                android:text="@string/comment_date"
-                android:textColor="@color/black"
-                android:textSize="11sp"
-                android:fontFamily="@font/pretendard_light"/>
-        </LinearLayout>
-    </LinearLayout>
-</LinearLayout>
+    <!-- memberNickname -->
+    <TextView
+        android:id="@+id/tvNickname"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxWidth="150dp"
+        android:text="@string/member_nickname"
+        android:textColor="@color/black"
+        android:textSize="14sp"
+        android:layout_marginStart="5dp"
+        android:fontFamily="@font/pretendard_bold"
+        app:layout_constraintStart_toEndOf="@id/tvMember"
+        app:layout_constraintBaseline_toBaselineOf="@id/tvMember" />
+
+    <!-- 메뉴 버튼 -->
+    <ImageButton
+        android:id="@+id/menuButton"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="4dp"
+        android:background="@android:color/transparent"
+        android:paddingBottom="8dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_more"
+        app:tint="@color/elixir_darkgray"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:ignore="ContentDescription, SpeakableTextPresentCheck" />
+
+    <!-- commentText -->
+    <TextView
+        android:id="@+id/commentText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/recipe_tip_context"
+        android:textColor="@color/black"
+        android:textSize="14sp"
+        android:fontFamily="@font/pretendard_medium"
+        app:layout_constraintTop_toBottomOf="@id/imgProfile"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- dateText -->
+    <TextView
+        android:id="@+id/dateText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/comment_date"
+        android:textAlignment="textEnd"
+        android:textColor="@color/black"
+        android:textSize="11sp"
+        android:fontFamily="@font/pretendard_light"
+        app:layout_constraintTop_toBottomOf="@id/commentText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

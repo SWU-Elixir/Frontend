@@ -24,6 +24,21 @@ data class ProfileResponse(
     val data: ProfileEntity
 )
 
+data class ChallengeResponse(
+    val status: Int,
+    val code: String,
+    val message: String,
+    val data: List<ChallengeData>
+)
+
+data class ChallengeData(
+    val year: Int,
+    val month: Int,
+    val achievementName: String,
+    val achievementImageUrl: String,
+    val challengeCompleted: Boolean
+)
+
 data class AchievementResponse(
     val status: Int,
     val code: String,
@@ -32,11 +47,13 @@ data class AchievementResponse(
 )
 
 data class AchievementData(
-    val year: Int,
-    val month: Int,
     val achievementName: String,
     val achievementImageUrl: String,
-    val challengeCompleted: Boolean
+    val completed: Boolean,
+    val level: Int,
+    val type: String,
+    val code: String,
+    val description: String
 )
 
 data class RecipeListResponse(
@@ -98,4 +115,51 @@ data class EmailResponse(
     val code: String,
     val message: String,
     val data: Boolean
+)
+
+data class SocialUserInfoData(
+    var email: String,
+    var nickname: String?,
+    var gender: String?,
+    var birthYear: Int?,
+    var profileImage: String?
+)
+
+data class SocialLoginData(
+    var accessToken: String,
+    var refreshToken: String,
+    var loginType: String,
+    var socialUserInfo: SocialUserInfoData,
+    var registered: Boolean
+)
+
+data class SocialLoginResponse(
+    val status: Int,
+    val code: String,
+    val message: String,
+    val data: SocialLoginData
+)
+
+data class AccessTokenRequest(
+    val accessToken: String
+)
+
+data class SocialSignupDto (
+    var gender: String?,
+    var mealStyles: List<String>?,
+    var nickname: String?,
+    var reasons: List<String>?,
+    var recipeStyles: List<String>?,
+    var birthYear: Int?,
+    var email: String,
+    var profileImageUrl: String?,
+    var allergies: List<String>?
+)
+
+data class GoogleSignupResponse (
+    val access_token: String,
+    val expires_in: Int,
+    val scope: String,
+    val token_type: String,
+    val id_token: String
 )

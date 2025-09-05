@@ -23,8 +23,8 @@ data class ProfileEntity (
     val followingCount: Int
 )
 
-@Entity(tableName = "achievement")
-data class AchievementEntity(
+@Entity(tableName = "challenge")
+data class ChallengeEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val year: Int?,
     val month: Int?,
@@ -33,9 +33,19 @@ data class AchievementEntity(
     val challengeCompleted: Boolean?
 )
 
-@Entity(tableName = "recipe")
-data class RecipeEntity(
-    @PrimaryKey val recipeId: Int,
+@Entity(tableName = "achievement")
+data class AchievementEntity(
+    @PrimaryKey val code: String,
+    val achievementName: String,
+    val description: String,
+    val achievementImageUrl: String,
+    val completed: Boolean,
+    val level: Int,
+    val type: String
+)
+
+data class RecipeListItem (
+    val recipeId: Int,
     val imageUrl: String
 )
 

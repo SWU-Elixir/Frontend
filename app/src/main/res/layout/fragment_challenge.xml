@@ -24,31 +24,31 @@
             android:orientation="vertical"
             android:padding="16dp">
             <Spinner
-                android:id="@+id/challengeSpinner"
+                android:id="@+id/spinnerChallenge"
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
                 android:spinnerMode="dropdown"
                 android:background="@drawable/bg_spinner_challenge"/>
             <TextView
-                android:id="@+id/challengeNo"
+                android:id="@+id/tvNoChallenge"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="200dp"
-                android:text="진행중인 챌린지가 없습니다"
+                android:text="@string/NoChallenge"
                 android:fontFamily="@font/pretendard_medium"
                 android:textColor="@color/elixir_orange"
                 android:textSize="20sp"
                 android:visibility="gone"
                 android:textAlignment="center"/>
             <ImageView
-                android:id="@+id/challengeImage"
+                android:id="@+id/ivChallenge"
                 android:layout_width="match_parent"
                 android:layout_height="400dp"
                 android:scaleType="centerCrop"
                 android:backgroundTint="@color/elixir_gray"
                 android:contentDescription="@null"/>
             <TextView
-                android:id="@+id/challengeTitleText"
+                android:id="@+id/tvTitleChallenge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
@@ -57,7 +57,7 @@
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_bold"/>
             <TextView
-                android:id="@+id/challengePeriodText"
+                android:id="@+id/tvPeriodChallenge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
@@ -66,7 +66,7 @@
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_bold"/>
             <TextView
-                android:id="@+id/challengeSub1"
+                android:id="@+id/tvChallengeSub1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
@@ -76,7 +76,7 @@
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_bold"/>
             <TextView
-                android:id="@+id/challengeGoalText"
+                android:id="@+id/tvGoalChallenge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
@@ -86,7 +86,7 @@
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_medium"/>
             <TextView
-                android:id="@+id/challengeSub3"
+                android:id="@+id/tvChallengeSub2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
@@ -96,7 +96,7 @@
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_bold"/>
             <TextView
-                android:id="@+id/challengeDescriptionText"
+                android:id="@+id/tvDescriptionChallenge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
@@ -106,7 +106,7 @@
                 android:textColor="@color/black"
                 android:fontFamily="@font/pretendard_medium"/>
             <TextView
-                android:id="@+id/challengeSub2"
+                android:id="@+id/tvChallengeSub3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
@@ -117,22 +117,19 @@
                 android:fontFamily="@font/pretendard_bold"/>
 
             <TextView
-                android:id="@+id/challengeWarning"
+                android:id="@+id/tvWarningChallenge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="☛ 식단 기록 미션의 카운트 기준\n  ‘하루 세 끼 식단 기록’과 같은 미션의 경우, 미션을 받기 전에 작성한 식단은 인정되지 않습니다.
-                \n  반드시 미션을 받은 이후부터 작성한 식단만 카운트되므로 유의해 주세요.
-                \n\n☛ 동일 식단으로 여러 미션 동시 클리어 가능 \n  하나의 식단 기록으로 같은 단계 내 여러 미션을 동시에 완료할 수 있습니다.
-                \n  예) 아침 식단 기록 미션과 딸기 챌린지 미션이 동일 단계에 있을 경우, 딸기를 포함한 아침 식단을 기록하면 두 미션이 동시에 완료됩니다."
+                android:text="@string/warningChallenge"
                 android:textSize="15sp"
-                android:textColor="@color/elixir_gray"
+                android:textColor="@color/elixir_darkgray"
                 android:fontFamily="@font/pretendard_medium"/>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/bottomSheet"
+        android:id="@+id/cvBottomSheet"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -161,7 +158,7 @@
                 tools:ignore="ContentDescription" />
 
             <ListView
-                android:id="@+id/challengeStageList"
+                android:id="@+id/listStageChallenge"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:dividerHeight="10dp"

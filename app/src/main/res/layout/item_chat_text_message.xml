@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:padding="8dp">
     <TextView
-        android:id="@+id/chatMessage"
+        android:id="@+id/tvChatMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/bg_rect_filled_orange_cut"

@@ -1,19 +1,15 @@
 package com.example.elixir.calendar.ui
 
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
-import androidx.activity.result.ActivityResultLauncher
 import com.bumptech.glide.Glide
 import com.example.elixir.R
 import com.example.elixir.calendar.data.DietLogData
 import com.example.elixir.databinding.ItemMealListBinding
-import com.example.elixir.ingredient.data.IngredientData
+import com.example.elixir.ingredient.data.IngredientEntity
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
@@ -22,7 +18,7 @@ class MealListAdapter(
     private val context: Context,
     private var data: MutableList<DietLogData>,
     private val listener: OnMealClickListener,
-    private var ingredientMap: Map<Int, IngredientData> = emptyMap()
+    private var ingredientMap: Map<Int, IngredientEntity> = emptyMap()
 ) : BaseAdapter() {
     override fun getCount(): Int = data.size
     override fun getItem(position: Int): DietLogData = data[position]
@@ -44,18 +40,15 @@ class MealListAdapter(
 
         val item = getItem(position)
 
-        Log.d("MealListAdapter", "Loading image for item: ${item.dietTitle}, URI: ${item.dietImg}")
 
-
-        // --- 이미지 처리: Glide를 사용하여 간결하게 처리합니다 ---
+        // --- 이미지 처리
         Glide.with(context)
             .load(item.dietImg)
             .placeholder(R.drawable.img_blank)
             .error(R.drawable.img_blank)
-            .into(binding.dietPicture)
-        // --- 이미지 처리 끝 ---
+            .into(binding.imgDiet)
 
-        binding.dietNameText.text = item.dietTitle
+        binding.tvDietName.text = item.dietTitle
 
         // 식단 점수에 따른 아이콘 설정 (1~5점)
         val iconRes = when (item.score) {
@@ -66,29 +59,25 @@ class MealListAdapter(
             5 -> R.drawable.ic_meal_number5
             else -> R.drawable.ic_meal_number1 // 기본 아이콘
         }
-        binding.dietScore.setImageResource(iconRes)
+        binding.tvScoreLabel.setImageResource(iconRes)
 
-        // --- 재료 목록을 FlexboxLayoutManager를 사용하여 표시 (방어 코드 추가) ---
-        // ingredientTags가 비어있을 경우 RecyclerView를 숨기거나, 빈 어댑터를 설정하여 오류 방지
+
         if (item.ingredientTags.isNullOrEmpty()) {
-            // 재료 태그가 없으면 RecyclerView를 숨깁니다.
-            binding.dietIngredientList.visibility = View.GONE
-            Log.d("MealListAdapter", "No ingredient tags for item: ${item.dietTitle}, hiding RecyclerView.")
-        } else {
-            // 재료 태그가 있으면 RecyclerView를 보여주고 어댑터를 설정합니다.
-            binding.dietIngredientList.visibility = View.VISIBLE
+            // 재료 태그가 없으면 RecyclerView를 숨김
+            binding.rvDietIngredient.visibility = View.GONE
 
-            // FlexboxLayoutManager는 convertView가 처음 생성될 때만 설정하는 것이 효율적입니다.
-            if (binding.dietIngredientList.layoutManager == null) {
+        } else {
+            // 재료 태그가 있으면 RecyclerView를 보여주고 어댑터를 설정
+            binding.rvDietIngredient.visibility = View.VISIBLE
+
+            if (binding.rvDietIngredient.layoutManager == null) {
                 val flexboxLayoutManager = FlexboxLayoutManager(context)
                 flexboxLayoutManager.flexDirection = FlexDirection.ROW // 가로 배치
                 flexboxLayoutManager.justifyContent = JustifyContent.FLEX_START // 시작 지점에서 정렬
-                binding.dietIngredientList.layoutManager = flexboxLayoutManager
-                Log.d("MealListAdapter", "FlexboxLayoutManager set for dietIngredientList.")
+                binding.rvDietIngredient.layoutManager = flexboxLayoutManager
             }
-            binding.dietIngredientList.adapter = MealListIngredientAdapter(item.ingredientTags, ingredientMap)
+            binding.rvDietIngredient.adapter = MealListIngredientAdapter(item.ingredientTags, ingredientMap)
         }
-        // --- 재료 목록 처리 끝 ---
 
 
         view.setOnClickListener {
@@ -96,7 +85,7 @@ class MealListAdapter(
         }
 
         // 식사 시간 표시
-        binding.dietTimesText.text = item.dietCategory
+        binding.tvDietTimes.text = item.dietCategory
 
         return view
     }
@@ -115,12 +104,10 @@ class MealListAdapter(
         data.clear()
         data.addAll(sortedData)
         notifyDataSetChanged()
-        Log.d("MealListAdapter", "Data updated. Total items: ${data.size}")
     }
 
-    fun setIngredientMap(map: Map<Int, IngredientData>) {
+    fun setIngredientMap(map: Map<Int, IngredientEntity>) {
         this.ingredientMap = map
         notifyDataSetChanged()
-        Log.d("MealListAdapter", "Ingredient map updated. Map size: ${ingredientMap.size}")
     }
 }

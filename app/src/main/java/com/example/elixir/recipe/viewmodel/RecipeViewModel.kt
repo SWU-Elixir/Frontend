@@ -1,29 +1,37 @@
-package com.example.elixir.recipe.viewmodel
+﻿package com.example.elixir.recipe.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asFlow
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import androidx.paging.insertHeaderItem
 import com.example.elixir.recipe.data.RecipeData
-import com.example.elixir.recipe.data.RecipeRepository
+import com.example.elixir.recipe.data.RecipeListItemData
+import com.example.elixir.recipe.data.SearchItemData
+import com.example.elixir.recipe.repository.RecipeRepository
 import com.example.elixir.recipe.data.entity.RecipeEntity
-import com.example.elixir.recipe.data.entity.toData
+import com.example.elixir.recipe.data.toData
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import okhttp3.MultipartBody
-import okhttp3.RequestBody
 import java.io.File
 import kotlin.coroutines.cancellation.CancellationException
 
-class RecipeViewModel(
-    private val repository: RecipeRepository
-) : ViewModel() {
+class RecipeViewModel(private val repository: RecipeRepository) : ViewModel() {
 
-    private val _recipeList = MutableLiveData<List<RecipeData>>()
-    val recipeList: LiveData<List<RecipeData>> = _recipeList
+    private val _recipes = MediatorLiveData<PagingData<RecipeListItemData>>()
+    val recipes: LiveData<PagingData<RecipeListItemData>> get() = _recipes
 
-    private val _recipeDetail = MutableLiveData<RecipeData?>()
-    val recipeDetail: LiveData<RecipeData?> = _recipeDetail
+    private val _searchResults = MediatorLiveData<PagingData<SearchItemData>>()
+    val searchResults: LiveData<PagingData<SearchItemData>> get() = _searchResults
+
+    private var currentSource: LiveData<PagingData<RecipeListItemData>>? = null
+    private var currentSearchSource: LiveData<PagingData<SearchItemData>>? = null
 
     private val _uploadResult = MutableLiveData<Result<RecipeData?>>()
     val uploadResult: LiveData<Result<RecipeData?>> = _uploadResult
@@ -40,15 +48,104 @@ class RecipeViewModel(
     private val _errorMessage = MutableLiveData<String>()
     val errorMessage: LiveData<String> = _errorMessage
 
-    // 레시피 목록 불러오기
-    fun getRecipes(page: Int, size: Int, categoryType: String, categorySlowAging: String) {
-        viewModelScope.launch {
-            val recipes = repository.getRecipes(page, size, categoryType, categorySlowAging)
-            _recipeList.value = recipes
+    private val _recipeDetail = MutableLiveData<RecipeData?>()
+    val recipeDetail: LiveData<RecipeData?> = _recipeDetail
+
+    // 카테고리 필터 상태
+    private var categoryType: String? = null
+    private var categorySlowAging: String? = null
+
+    // 검색 키워드
+    private var keyword: String? = null
+
+    // 디바운스 관련 변수
+    private val debounceHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private var debounceRunnable: Runnable? = null
+
+    // 카테고리 필터 변경 함수
+    fun setCategoryType(type: String?) {
+        if (categoryType == type) return                        // 중복 요청 방지
+        categoryType = type
+        Log.d("RecipeViewModel", "categoryType: '$categoryType'")
+        scheduleDebouncedLoad()
+    }
+
+    fun setCategorySlowAging(slowAging: String?) {
+        if (categorySlowAging == slowAging) return              // 중복 요청 방지
+        categorySlowAging = slowAging
+        Log.d("RecipeViewModel", "categorySlowAging: $categorySlowAging")
+        scheduleDebouncedLoad()
+    }
+
+    private fun scheduleDebouncedLoad() {
+        debounceRunnable?.let { debounceHandler.removeCallbacks(it) }
+
+        debounceRunnable = Runnable {
+            loadRecipes()
+        }
+
+        debounceHandler.postDelayed(debounceRunnable!!, 300)
+    }
+
+    fun loadRecipes() {
+        Log.d("RecipeViewModel", "loadRecipes() called")
+
+        currentSource?.let {
+            _recipes.removeSource(it)
+            Log.d("RecipeViewModel", "Previous source removed")
+        }
+
+        // 헤더는 Adapter에서 처리하므로 여기서는 추가하지 않음
+        val newSource = repository.getRecipes(categoryType, categorySlowAging)
+            .cachedIn(viewModelScope)
+
+        currentSource = newSource
+
+        _recipes.addSource(newSource) {
+            Log.d("RecipeViewModel", "New source emitting data")
+            _recipes.value = it
         }
     }
 
-    // 레시피 상세 불러오기
+    // 검색 필터 세팅 함수들
+    fun setSearchKeyword(keyword: String?) {
+        this.keyword = keyword
+        loadSearchResults()
+    }
+
+    fun setSearchCategoryType(type: String?) {
+        categoryType = type
+        loadSearchResults()
+    }
+
+    fun setSearchCategorySlowAging(slowAging: String?) {
+        categorySlowAging = slowAging
+        loadSearchResults()
+    }
+
+    private fun loadSearchResults() {
+        currentSearchSource?.let {
+            _searchResults.removeSource(it)
+        }
+
+        val newSearchSource = repository.searchRecipes(keyword, categoryType, categorySlowAging)
+            .cachedIn(viewModelScope)
+            .asFlow()
+            .map { pagingData ->
+                pagingData
+                    .insertHeaderItem(item = SearchItemData.SearchSpinnerHeader)
+                    .insertHeaderItem(item = SearchItemData.SearchTextHeader)
+            }
+            .asLiveData()
+
+        currentSearchSource = newSearchSource
+
+        _searchResults.addSource(newSearchSource) {
+            _searchResults.value = it
+        }
+    }
+
+
     fun getRecipeById(recipeId: Int) {
         viewModelScope.launch {
             try {
@@ -56,6 +153,7 @@ class RecipeViewModel(
                 // 데이터 요청 코드 (예시)
                 val response = repository.getRecipeById(recipeId)
                 _recipeDetail.value = response
+                Log.d("RecipeViewModel", "recipeDetail 값: $recipeDetail")
             } catch (e: Exception) {
                 // 예외 발생 시 로그
                 Log.e("RecipeViewModel", "코루틴 에러: ${e.message}", e)
@@ -96,7 +194,6 @@ class RecipeViewModel(
             }
         }
     }
-
 
     // 레시피 삭제
     fun deleteRecipe(recipeId: Int) {

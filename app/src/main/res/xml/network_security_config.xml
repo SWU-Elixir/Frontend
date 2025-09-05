@@ -2,5 +2,6 @@
 <network-security-config xmlns:android="http://schemas.android.com/apk/res/android">
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">www.foodsafetykorea.go.kr</domain>
+        <domain includeSubdomains="true">k.kakaocdn.net</domain>
     </domain-config>
 </network-security-config>

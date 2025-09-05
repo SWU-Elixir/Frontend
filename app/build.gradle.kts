@@ -39,6 +39,13 @@ android {
 
         // API 키 설정
         buildConfigField("String", "CHATGPT_API_KEY", "\"${properties.getProperty("CHATGPT_API_KEY", "")}\"")
+        buildConfigField("String", "GOOGLE_CLIENT_KEY", "\"${properties.getProperty("GOOGLE_CLIENT_KEY", "")}\"")
+        buildConfigField("String", "GOOGLE_CLIENT_SECRET_KEY", "\"${properties.getProperty("GOOGLE_CLIENT_SECRET_KEY", "")}\"")
+        buildConfigField("String", "KAKAO_NATIVE_KEY", "\"${properties.getProperty("KAKAO_NATIVE_KEY", "")}\"")
+        buildConfigField("String", "NAVER_CLIENT_KEY", "\"${properties.getProperty("NAVER_CLIENT_KEY", "")}\"")
+        buildConfigField("String", "NAVER_CLIENT_SECRET_KEY", "\"${properties.getProperty("NAVER_CLIENT_SECRET_KEY", "")}\"")
+
+        manifestPlaceholders["KAKAO_REDIRECT_SCHEME"] = "kakao${properties["KAKAO_NATIVE_KEY"]}"
     }
 
     buildTypes {
@@ -112,7 +119,6 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
 
-
     // OkHttp
     implementation (libs.okhttp)
 
@@ -123,4 +129,28 @@ dependencies {
     implementation(libs.glide)
     ksp(libs.glide.compiler)
 
+    // 페이징 라이브러리 추가
+    implementation (libs.androidx.paging.runtime.ktx)
+    implementation (libs.androidx.paging.common.ktx)
+
+    implementation (libs.androidx.lifecycle.livedata)
+    implementation (libs.androidx.lifecycle.livedata.ktx)
+
+    // 구글 로그인
+    implementation (libs.google.services)
+    implementation (libs.firebase.auth)
+    implementation (platform(libs.firebase.bom))
+    implementation (libs.play.services.auth)
+
+    implementation (libs.androidx.credentials)
+    implementation (libs.googleid)
+
+    // 카카오 로그인
+    implementation (libs.v2.all)
+
+    // 네이버 로그인
+    implementation (libs.oauth)
+
+    // WorkManager: 백그라운드 처리용(서버 업로드 등)
+    implementation (libs.androidx.work.runtime.ktx)
 }

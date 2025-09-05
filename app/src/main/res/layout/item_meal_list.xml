@@ -13,7 +13,7 @@
         android:orientation="horizontal"
         android:padding="10dp">
         <ImageView
-            android:id="@+id/dietPicture"
+            android:id="@+id/imgDiet"
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:layout_gravity="center"
@@ -31,7 +31,7 @@
             android:layout_weight="1"
             android:orientation="vertical">
             <TextView
-                android:id="@+id/dietTimesText"
+                android:id="@+id/tvDietTimes"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/diet_category"
@@ -39,7 +39,7 @@
                 android:fontFamily="@font/pretendard_medium"
                 android:textSize="12sp"/>
             <TextView
-                android:id="@+id/dietNameText"
+                android:id="@+id/tvDietName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/diet_name"
@@ -49,9 +49,10 @@
                 android:textSize="18sp"/>
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/dietIngredientList"
+                android:id="@+id/rvDietIngredient"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
                 android:clipToPadding="false"
                 android:orientation="horizontal"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
@@ -60,7 +61,7 @@
 
         </LinearLayout>
         <ImageView
-            android:id="@+id/dietScore"
+            android:id="@+id/tvScoreLabel"
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:layout_gravity="center"

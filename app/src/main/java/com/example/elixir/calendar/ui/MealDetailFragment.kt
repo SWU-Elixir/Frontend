@@ -17,9 +17,7 @@ import com.example.elixir.calendar.network.db.DietLogRepository
 import com.example.elixir.calendar.viewmodel.MealViewModel
 import com.example.elixir.calendar.viewmodel.MealViewModelFactory
 import com.example.elixir.databinding.FragmentMealDetailBinding
-import com.example.elixir.ingredient.network.IngredientDB
 import com.example.elixir.ingredient.network.IngredientRepository
-import com.example.elixir.member.network.MemberDB
 import com.example.elixir.member.network.MemberRepository
 import com.example.elixir.network.AppDatabase
 import com.google.android.flexbox.FlexDirection
@@ -61,15 +59,17 @@ class MealDetailFragment : Fragment() {
         val timeGrayBackground = ContextCompat.getDrawable(requireContext(), R.drawable.bg_rect_outline_gray_5)
 
         // -------------- 레포지토리 및 뷰모델 초기화 --------------
-        val dietDao = AppDatabase.getInstance(requireContext()).dietLogDao()
+        val appDB = AppDatabase.getInstance(requireContext())
+
+        val dietDao = appDB.dietLogDao()
         val dietApi = RetrofitClient.instanceDietApi
         dietRepository = DietLogRepository(dietDao, dietApi)
 
-        val memberDao = MemberDB.getInstance(requireContext()).memberDao()
+        val memberDao = appDB.memberDao()
         val memberApi = RetrofitClient.instanceMemberApi
         memberRepository = MemberRepository(memberApi, memberDao)
 
-        val ingredientDao = IngredientDB.getInstance(requireContext()).ingredientDao()
+        val ingredientDao = appDB.ingredientDao()
         val ingredientApi = RetrofitClient.instanceIngredientApi
         ingredientRepository = IngredientRepository(ingredientApi, ingredientDao)
 
@@ -86,15 +86,15 @@ class MealDetailFragment : Fragment() {
                 .load(dietLogData?.dietImg) // file://, content://, http:// 모두 지원
                 .placeholder(R.drawable.img_blank) // 로딩 중 표시할 이미지
                 .error(R.drawable.img_blank) // 실패 시 표시할 이미지
-                .into(binding.recipeImage)
+                .into(binding.imgRecipe)
         }
 
         // 식사시간 버튼 리스트
         val mealTimeButtons = listOf(
-            binding.mealTimeMorning,
-            binding.mealTimeLunch,
-            binding.mealTimeDinner,
-            binding.mealTimeSnack
+            binding.tvMealTimeMorning,
+            binding.tvMealTimeLunch,
+            binding.tvMealTimeDinner,
+            binding.tvMealTimeSnack
         )
 
         // 모두 초기화
@@ -106,35 +106,35 @@ class MealDetailFragment : Fragment() {
         // 선택된 식사 시간만 오렌지로 변경
         when (dietLogData?.dietCategory) {
             "아침" -> {
-                binding.mealTimeMorning.background = timeOrangeBackground
-                binding.mealTimeMorning.setTextColor(whiteColor)
+                binding.tvMealTimeMorning.background = timeOrangeBackground
+                binding.tvMealTimeMorning.setTextColor(whiteColor)
             }
             "점심" -> {
-                binding.mealTimeLunch.background = timeOrangeBackground
-                binding.mealTimeLunch.setTextColor(whiteColor)
+                binding.tvMealTimeLunch.background = timeOrangeBackground
+                binding.tvMealTimeLunch.setTextColor(whiteColor)
             }
             "저녁" -> {
-                binding.mealTimeDinner.background = timeOrangeBackground
-                binding.mealTimeDinner.setTextColor(whiteColor)
+                binding.tvMealTimeDinner.background = timeOrangeBackground
+                binding.tvMealTimeDinner.setTextColor(whiteColor)
             }
             "간식" -> {
-                binding.mealTimeSnack.background = timeOrangeBackground
-                binding.mealTimeSnack.setTextColor(whiteColor)
+                binding.tvMealTimeSnack.background = timeOrangeBackground
+                binding.tvMealTimeSnack.setTextColor(whiteColor)
             }
         }
 
         // 시간 반영
-        binding.timeText.text = dietLogData?.time?.format(DateTimeFormatter.ofPattern("a h:mm", Locale.ENGLISH))
+        binding.tvTimeText.text = dietLogData?.time?.format(DateTimeFormatter.ofPattern("a h:mm", Locale.ENGLISH))
 
         val score = dietLogData?.score ?: 0
 
         // 점수 버튼 리스트로 묶기
         val scoreButtons = listOf(
-            binding.score1,
-            binding.score2,
-            binding.score3,
-            binding.score4,
-            binding.score5
+            binding.tvScore1,
+            binding.tvScore2,
+            binding.tvScore3,
+            binding.tvScore4,
+            binding.tvScore4
         )
 
         // 1. 모두 초기화 (회색 배경 & 회색 텍스트, 배경Tint 초기화)
@@ -161,12 +161,12 @@ class MealDetailFragment : Fragment() {
             val ingredientTags = dietLogData?.ingredientTags ?: emptyList()
 
             // Adapter 연결
-            binding.tagList.layoutManager = FlexboxLayoutManager(requireContext())
-            binding.tagList.adapter = MealDetailIngredientAdapter(ingredientTags, ingredientMap)
+            binding.listRepresentIngredient.layoutManager = FlexboxLayoutManager(requireContext())
+            binding.listRepresentIngredient.adapter = MealDetailIngredientAdapter(ingredientTags, ingredientMap)
         }
 
         // ------------------------ 리스트 ------------------------
-        binding.tagList.apply {
+        binding.listRepresentIngredient.apply {
             layoutManager = FlexboxLayoutManager(context).apply {
                 flexDirection = FlexDirection.ROW
                 justifyContent = JustifyContent.FLEX_START

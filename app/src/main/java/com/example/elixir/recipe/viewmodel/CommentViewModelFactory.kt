@@ -2,7 +2,7 @@ package com.example.elixir.recipe.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.elixir.recipe.data.CommentRepository
+import com.example.elixir.recipe.repository.CommentRepository
 
 class CommentViewModelFactory(private val commentRepository: CommentRepository) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {

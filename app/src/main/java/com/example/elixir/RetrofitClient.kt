@@ -2,13 +2,13 @@ package com.example.elixir
 
 import android.util.Log
 import com.example.elixir.calendar.network.DietApi
-import com.example.elixir.login.LoginService
+import com.example.elixir.login.network.LoginApi
 import com.example.elixir.ingredient.network.IngredientApi
 import com.example.elixir.challenge.network.ChallengeApi
 import com.example.elixir.member.network.MemberApi
-import com.example.elixir.chatbot.ChatApi
-import com.example.elixir.recipe.network.CommentApi
-import com.example.elixir.recipe.network.RecipeApi
+import com.example.elixir.chatbot.network.ChatApi
+import com.example.elixir.recipe.network.api.CommentApi
+import com.example.elixir.recipe.network.api.RecipeApi
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
@@ -25,8 +25,9 @@ import org.threeten.bp.LocalDateTime
 
 object RetrofitClient {
     // 서버 주소
-    private const val BASE_URL = "https://sean-test.shop/"
-    private var authToken: String? = "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJBQGV4YW1wbGUuY29tIiwiYXV0aCI6IlVTRVIiLCJleHAiOjE3NDk5NzQzODZ9.b2MqQnCE_n_sBNH2MsuaOthJ6hMiB1EWRah5y50JaG_J5XImMb2YgJ1pvYO-LNOf" // Bearer 토큰을 저장할 변수
+    private const val BASE_URL = "https://port-0-elixir-backend-g0424l70py8py.gksl2.cloudtype.app/"
+    private var authToken: String? = "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJBQGV4YW1wbGUuY29tIiwiYXV0aCI6IlVTRVIiLCJleHAiOjE3NTQ4MTQwNTF9.l6zNLxEuj1-VAWgD9W6ujlFtvsJJIqdPATYBgqbrH227xZrS3vDaX8_jqU5Djxbp" // Bearer 토큰을 저장할 변수
+
     private var isRefreshing = false // 토큰 갱신 중인지 여부를 추적하는 플래그
 
     fun setAuthToken(token: String?) {
@@ -117,13 +118,13 @@ object RetrofitClient {
         })
         .create()
 
-    val instance: LoginService by lazy {
+    val instance: LoginApi by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
-            .create(LoginService::class.java)
+            .create(LoginApi::class.java)
     }
 
     val instanceIngredientApi: IngredientApi by lazy {

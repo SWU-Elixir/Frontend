@@ -20,7 +20,7 @@
 
             <!-- 이미지뷰 -->
             <ImageView
-                android:id="@+id/recipeImage"
+                android:id="@+id/imgRecipe"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
@@ -115,7 +115,7 @@
                 android:clipToPadding="false"
                 android:orientation="horizontal"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:listitem="@layout/item_recipe_recommendation_list_indeterminate"/>
+                tools:listitem="@layout/item_recipe_list_tag"/>
         </LinearLayout>
 
     </androidx.cardview.widget.CardView>

@@ -12,10 +12,10 @@ import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import com.example.elixir.calendar.ui.CalendarFragment
 import com.example.elixir.challenge.ui.ChallengeFragment
-import com.example.elixir.chatbot.ChatBotActivity
+import com.example.elixir.chatbot.ui.ChatBotActivity
 import com.example.elixir.databinding.ActivityHomeBinding
-import com.example.elixir.member.MyPageFragment
-import com.example.elixir.recipe.ui.RecipeFragment
+import com.example.elixir.member.ui.MyPageFragment
+import com.example.elixir.recipe.ui.fragment.RecipeFragment
 
 class HomeActivity : AppCompatActivity() {
 
@@ -66,17 +66,17 @@ class HomeActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         // 하단 네비게이션 버튼 및 텍스트 초기화
-        calendarButton = binding.calendarButton
-        recipeButton = binding.recipeButton
-        challengeButton = binding.challengeButton
-        mypageButton = binding.mypageButton
-        chatbotButton = binding.chatbotButton
+        calendarButton = binding.btnCalendar
+        recipeButton = binding.btnRecipe
+        challengeButton = binding.btnChallenge
+        mypageButton = binding.btnMypage
+        chatbotButton = binding.btnChatbot
 
-        calendarTitle = binding.calendarTitle
-        recipeTitle = binding.recipeTitle
-        challengeTitle = binding.challengeTitle
-        mypageTitle = binding.mypageTitle
-        chatbotTitle = binding.chatbotTitle
+        calendarTitle = binding.tvCalendar
+        recipeTitle = binding.tvRecipe
+        challengeTitle = binding.tvChallenge
+        mypageTitle = binding.tvMypage
+        chatbotTitle = binding.tvChatbot
 
         // 최초 실행 시 캘린더 탭을 기본 선택 상태로 설정
         calendarTitle.setTextColor(ContextCompat.getColor(this, R.color.elixir_orange))
@@ -131,7 +131,7 @@ class HomeActivity : AppCompatActivity() {
      * 현재 상태를 이전 상태로 저장
      */
     private fun savePreviousState() {
-        previousFragment = supportFragmentManager.findFragmentById(R.id.fragmentContainer)
+        previousFragment = supportFragmentManager.findFragmentById(R.id.flContainer)
         previousButton = selectedButton
         previousTitle = selectedTitle
     }
@@ -158,11 +158,11 @@ class HomeActivity : AppCompatActivity() {
      */
     private fun getSelectedResId(button: ImageButton?): Int {
         return when (button?.id) {
-            R.id.calendar_button -> R.drawable.ic_navi_calendar_selected
-            R.id.recipe_button -> R.drawable.ic_navi_recipe_selected
-            R.id.challenge_button -> R.drawable.ic_navi_challenge_selected
-            R.id.chatbot_button -> R.drawable.ic_navi_chatbot_selected
-            R.id.mypage_button -> R.drawable.ic_navi_mypage_selected
+            R.id.btnCalendar -> R.drawable.ic_navi_calendar_selected
+            R.id.btnRecipe -> R.drawable.ic_navi_recipe_selected
+            R.id.btnChallenge -> R.drawable.ic_navi_challenge_selected
+            R.id.btnChatbot -> R.drawable.ic_navi_chatbot_selected
+            R.id.btnMypage -> R.drawable.ic_navi_mypage_selected
             else -> R.drawable.ic_navi_calendar_selected
         }
     }
@@ -172,11 +172,11 @@ class HomeActivity : AppCompatActivity() {
      */
     private fun getUnselectedResId(button: ImageButton?): Int {
         return when (button?.id) {
-            R.id.calendar_button -> R.drawable.ic_navi_calendar_normal
-            R.id.recipe_button -> R.drawable.ic_navi_recipe_normal
-            R.id.challenge_button -> R.drawable.ic_navi_challenge_normal
-            R.id.chatbot_button -> R.drawable.ic_navi_chatbot_normal
-            R.id.mypage_button -> R.drawable.ic_navi_mypage_normal
+            R.id.btnCalendar -> R.drawable.ic_navi_calendar_normal
+            R.id.btnRecipe -> R.drawable.ic_navi_recipe_normal
+            R.id.btnChallenge -> R.drawable.ic_navi_challenge_normal
+            R.id.btnChatbot -> R.drawable.ic_navi_chatbot_normal
+            R.id.btnMypage -> R.drawable.ic_navi_mypage_normal
             else -> R.drawable.ic_navi_calendar_normal
         }
     }
@@ -186,7 +186,7 @@ class HomeActivity : AppCompatActivity() {
      */
     private fun replaceFragment(fragment: Fragment) {
         supportFragmentManager.beginTransaction()
-            .replace(R.id.fragmentContainer, fragment)
+            .replace(R.id.flContainer, fragment)
             .commit()
     }
 }

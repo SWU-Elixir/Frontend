@@ -1,25 +1,19 @@
 package com.example.elixir.calendar.viewmodel
 
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.elixir.RetrofitClient
 import com.example.elixir.calendar.data.DietLogData
-import com.example.elixir.calendar.data.DietLogEntity
 import com.example.elixir.calendar.data.MealDto
 import com.example.elixir.calendar.network.db.DietLogRepository
 import com.example.elixir.calendar.network.response.GetScoreResponse
 import com.example.elixir.member.network.MemberRepository
 import kotlinx.coroutines.launch
 import com.example.elixir.calendar.data.toEntity
-import com.example.elixir.calendar.data.toMealDto
 import com.example.elixir.calendar.network.response.GetMealResponse
-import com.example.elixir.calendar.network.response.toEntity
-import com.example.elixir.ingredient.data.IngredientData
+import com.example.elixir.ingredient.data.IngredientEntity
 import com.example.elixir.ingredient.network.IngredientRepository
 import java.io.File
 import kotlin.coroutines.cancellation.CancellationException
@@ -48,7 +42,7 @@ class MealViewModel(
     private val _deleteResult = MutableLiveData<Result<Boolean>>()
     val deleteResult: LiveData<Result<Boolean>> get() = _deleteResult
 
-    val ingredientList = MutableLiveData<List<IngredientData>>()
+    val ingredientList = MutableLiveData<List<IngredientEntity>>()
 
 
     // 특정 ID의 식단 기록 가져오기
@@ -210,6 +204,7 @@ class MealViewModel(
 
     // 식재료 정보 불러오기
     fun loadIngredients() {
+
         viewModelScope.launch {
             try {
                 ingredientList.value = ingredientRepository.fetchAndSaveIngredients()
@@ -221,9 +216,17 @@ class MealViewModel(
     }
 
     // 전체 식단 기록 목록 가져오기 (최근 N일)
-    fun getAllDietLogs(days: Int = 30) {
+    fun get30daysDietLogs(days: Int = 30) {
         viewModelScope.launch {
             val result = dietRepository.getDietLogsForLastDays(days)
+            _dailyDietLogs.value = result ?: emptyList()
+        }
+    }
+
+    // 전체 식단 기록 목록 가져오기
+    fun getAllDietLogs(days: Int = 30) {
+        viewModelScope.launch {
+            val result = dietRepository.getAllDietLogs()
             _dailyDietLogs.value = result ?: emptyList()
         }
     }

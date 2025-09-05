@@ -385,5 +385,23 @@
     <string name="bookmark">북마크</string>
     <string name="chatbot_hint">무엇이든 물어보세요!</string>
     <string name="userDrawal"><u>회원 탈퇴</u></string>
+    <string name="NoChallenge">진행중인 챌린지가 없습니다</string>
+    <string name="warningChallenge">☛ 식단 기록 미션의 카운트 기준\n ‘하루 세 끼 식단 기록’과 같은 미션의 경우, 미션을 받기 전에 작성한 식단은 인정되지 않습니다. \n 반드시 미션을 받은 이후부터 작성한 식단만 카운트되므로 유의해 주세요. \n\n☛ 동일 식단으로 여러 미션 동시 클리어 가능 \n 하나의 식단 기록으로 같은 단계 내 여러 미션을 동시에 완료할 수 있습니다. \n 예) 아침 식단 기록 미션과 딸기 챌린지 미션이 동일 단계에 있을 경우, 딸기를 포함한 아침 식단을 기록하면 두 미션이 동시에 완료됩니다.</string>
+    <string name="editProfile">프로필 수정</string>
+    <string name="loading">로딩중입니다</string>
+    <string name="zero">0</string>
+    <string name="mypageNoChallenge">월별 챌린지에 도전해 보세요!</string>
+    <string name="mypageNoRecipe">아직 작성한 레시피가 없습니다</string>
+    <string name="mypageNoScript">스크랩한 레시피가 없습니다</string>
+    <string name="recipe">레시피</string>
+    <string name="otherBadge">뱃지</string>
+    <string name="searchItem">검색어</string>
+    <string name="title">제목</string>
+    <string name="subtitle">서브제목</string>
+    <string name="EditNoticedTitle">수정 시, 챌린지 및 업적에 \n반영되지 않습니다.</string>
+    <string name="EditNoticedMessage">이미 등록된 식단 또는 레시피를 수정하는 경우,\n챌린지 및 업적에는 반영되지 않습니다.</string>
+    <string name="Noticed1Month">한 달간 이 안내 보지 않기</string>
+    <string name="PreviousNoticedMessage">챌린지 및 업적은 \'당일 식단 기록\'만 인정됩니다. \n\n과거 날짜로 식단을 기록해도 챌린지에는 반영되지 않아요. \n\n기록은 가능하지만, 챌린지 참여를 원하신다면 오늘 날짜에 맞춰 식단을 등록해주세요.</string>
+    <string name="PreviousNoticedTitle">해당 날짜는 \n오늘 이전의 기록입니다.</string>
 
 </resources>

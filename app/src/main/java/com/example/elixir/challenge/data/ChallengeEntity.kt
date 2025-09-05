@@ -6,9 +6,9 @@ import androidx.room.TypeConverters
 import com.example.elixir.challenge.network.IngredientsConverter
 import com.google.gson.annotations.SerializedName
 
-@Entity(tableName = "challenge")
+@Entity(tableName = "challenge_detail")
 @TypeConverters(IngredientsConverter::class)
-data class ChallengeEntity(
+data class ChallengeDetailEntity(
     @PrimaryKey
     @SerializedName("id") val id: Int,
     @SerializedName("name") val name: String,

@@ -12,15 +12,16 @@ import com.example.elixir.databinding.FragmentSurvey4Binding
 class Survey4Fragment : Fragment() {
     private lateinit var survey4Binding: FragmentSurvey4Binding         // 바인딩 객체
     private val userModel: UserInfoViewModel by activityViewModels()    // 뷰 모델 연결
-    private var selectedReasons = mutableListOf<String>()                // 이유 선택
+    private var selectedReasons = mutableListOf<String>()               // 가입 이유 리스트
+    var listener: OnChipCompletedListener? = null                       // 칩 선택 여부를 알려줄 인터페이스
+    private val chipNoneLabel = "특별한 이유 없음"
     private lateinit var reasonMap: Map<String, View>
-    var listener: OnChipCompletedListener? = null               // 칩 선택 여부를 알려줄 인터페이스
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // 바인딩
+        // 바인딩 정의
         survey4Binding = FragmentSurvey4Binding.inflate(inflater, container, false)
         return survey4Binding.root
     }
@@ -28,82 +29,79 @@ class Survey4Fragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 문자열 <-> 뷰 매핑 (String 리소스를 문자열로 변환)
+        // 칩과 서버 전송 텍스트(값) 묶기
         reasonMap = mapOf(
-            getString(R.string.title_antiox) to survey4Binding.reason1,
-            getString(R.string.title_blood) to survey4Binding.reason2,
-            getString(R.string.title_inflam) to survey4Binding.reason3,
-            getString(R.string.title_no_recommend) to survey4Binding.reason4,
+            "항산화강화" to survey4Binding.reason1,
+            "혈당조절" to survey4Binding.reason2,
+            "염증감소" to survey4Binding.reason3,
+            chipNoneLabel to survey4Binding.reason4
         )
-        // 초기 값 설정
-        setReasons()
 
-        // 클릭 리스너 등록
+        // 뷰 모델에 저장된 가입 이유 정보 가져오기
+        val savedReasons = userModel.getSignupReason()
+
+        // 뷰 모델에 저장된 가입 이유가 없을 경우 "특별한 이유 없음"을 선택함
+        selectedReasons = if (savedReasons.isNullOrEmpty()) {
+            mutableListOf(chipNoneLabel)
+        } else {
+            savedReasons.toMutableList()
+        }
+
+        // ViewModel 업데이트 (처음 진입 시 chipNone 선택 반영)
+        if (savedReasons.isNullOrEmpty()) {
+            userModel.setSignupReason(null)
+        }
+
+        updateAllButtonStates()
+        updateSelection() // ✅ 초기 상태도 버튼 활성화 상태 반영
+
         reasonMap.forEach { (label, view) ->
             view.setOnClickListener {
-                if (label == getString(R.string.title_no_recommend)) {
-                    // 다른 모든 선택 해제 후 "특별한 제한 없음"만 추가
+                if (label == chipNoneLabel) {
+                    // "특별한 이유 없음" 클릭 시 모두 해제 후 자신만 선택
                     selectedReasons.clear()
-                    selectedReasons.add(label)
+                    selectedReasons.add(chipNoneLabel)
+                    userModel.setSignupReason(null)
                 } else {
-                    // "특별한 제한 없음"이 선택되어 있다면 해제
-                    selectedReasons.remove(getString(R.string.title_no_recommend))
-
-                    // 토글 동작: 이미 선택되어 있으면 제거, 아니면 추가
                     if (selectedReasons.contains(label)) {
                         selectedReasons.remove(label)
                     } else {
                         selectedReasons.add(label)
                     }
+                    // chipNone 해제
+                    selectedReasons.remove(chipNoneLabel)
+
+                    // 선택 항목이 비었으면 chipNone 자동 선택
+                    if (selectedReasons.isEmpty()) {
+                        selectedReasons.add(chipNoneLabel)
+                        userModel.setSignupReason(null)
+                    } else {
+                        userModel.setSignupReason(selectedReasons)
+                    }
                 }
-                reasonMap.forEach { (label, view) ->
-                    view.isSelected = selectedReasons.contains(label)
-                    updateButtonStyle(view, selectedReasons.contains(label))
-                }
-                // 상태 갱신
+
+                updateAllButtonStates()
                 updateSelection()
             }
         }
-        // 상태 갱신
-        updateSelection()
     }
 
-    // 선택된 버튼 스타일 업데이트
+    private fun updateAllButtonStates() {
+        reasonMap.forEach { (label, view) ->
+            val isSelected = selectedReasons.contains(label)
+            view.isSelected = isSelected
+            updateButtonStyle(view, isSelected)
+        }
+    }
+
     private fun updateButtonStyle(view: View, isSelected: Boolean) {
-        if (isSelected) {
-            // 선택된 상태에 맞는 스타일을 설정 (배경, 색상 등)
-            view.setBackgroundResource(R.drawable.bg_rect_filled_orange)
-        } else {
-            // 선택되지 않은 상태에 맞는 스타일을 설정
-            view.setBackgroundResource(R.drawable.bg_rect_outline_gray)
-        }
+        view.setBackgroundResource(
+            if (isSelected) R.drawable.bg_rect_filled_orange
+            else R.drawable.bg_rect_outline_gray
+        )
     }
 
-    // 선택 이유 불러오기
-    private fun setReasons() {
-        userModel.getSignupReason()?.let { savedReasons ->
-            selectedReasons.clear()
-            selectedReasons.addAll(savedReasons)
-
-            // 버튼 반영
-            reasonMap.forEach { (label, view) ->
-                // view의 선택 상태를 반영
-                view.isSelected = selectedReasons.contains(label)
-                // 선택된 상태에 맞는 배경, 글자
-                updateButtonStyle(view, selectedReasons.contains(label))
-            }
-        }
-    }
-
-    // 작업 상태 갱신 & 값 저장 함수
     private fun updateSelection() {
-        // 리스트에 정보가 저장되어 있는 상태라면 선택한 레시피들을 뷰 모델에 저장
-        // 공백이 아니라면 선택된 상태 -> 다음 버튼 활성화
-        if (selectedReasons.isNotEmpty()) {
-            userModel.setSignupReason(selectedReasons)
-            listener?.onChipSelected(selectedReasons)
-        }
-        // 저장되어 있지 않다면 선택되지 않은 상태 -> 버튼 비활성화
-        else listener?.onChipSelectedNot()
+        listener?.onChipSelected(userModel.getSignupReason())
     }
 }

@@ -6,21 +6,40 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.elixir.recipe.data.CommentItem
-import com.example.elixir.recipe.data.CommentRepository
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import com.example.elixir.recipe.repository.CommentRepository
 import kotlinx.coroutines.launch
+import org.threeten.bp.LocalDateTime
 
 class CommentViewModel(private val repository: CommentRepository) : ViewModel() {
-    private var _comments = MutableLiveData<List<CommentItem>>()
-    var comments: LiveData<List<CommentItem>> = _comments
+    private var _comments = MutableLiveData<List<CommentItem>?>()
+    var comments: LiveData<List<CommentItem>?> = _comments
 
-    private var _uiState = MutableLiveData<CommentUiState>()
-    var uiState: LiveData<CommentUiState> = _uiState
+    private val _error = MutableLiveData<String?>()
+    val error: LiveData<String?> = _error
+
+    private val _isLoading = MutableLiveData<Boolean>()
+    val isLoading: LiveData<Boolean> = _isLoading
+
+    fun getComments(recipeId: Int) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            val result = repository.getComments(recipeId)
+            result.fold(
+                onSuccess = { response ->
+                    _comments.value = response
+                    _error.value = null
+                },
+                onFailure = { error ->
+                    _comments.value = emptyList()
+                    _error.value = error.message ?: "알 수 없는 오류가 발생했습니다."
+                }
+            )
+            _isLoading.value = false
+        }
+    }
 
     // 댓글 업로드
     fun uploadComment(recipeId: Int, content: String) = viewModelScope.launch {
-        _uiState.value = CommentUiState.Loading
         repository.uploadComment(recipeId, content).onSuccess { response ->
                 // 서버에서 받은 댓글 데이터를 리스트에 추가
                 val newComment = CommentItem(
@@ -33,13 +52,10 @@ class CommentViewModel(private val repository: CommentRepository) : ViewModel() 
                     createdAt = response.data.createdAt,
                     updatedAt = response.data.updatedAt
                 )
-                Log.d("CommentViewModel", "uploadComment 성공, addComment 호출 전")
                 addComment(newComment)
-                Log.d("CommentViewModel", "uploadComment 성공, addComment 호출 후")
-                _uiState.value = CommentUiState.Success(response)
             }
             .onFailure { e ->
-                _uiState.value = CommentUiState.Error(e.message ?: "Failed to upload comment")
+                Log.e("CommentViewmodel", "Failed to upload comment: ${e.message}")
             }
     }
 
@@ -51,46 +67,35 @@ class CommentViewModel(private val repository: CommentRepository) : ViewModel() 
 
     // 수정 함수
     fun updateComment(recipeId: Int, commentId: Int, content: String) = viewModelScope.launch {
-        _uiState.value = CommentUiState.Loading
         repository.updateComment(recipeId, commentId, content)
             .onSuccess { response ->
                 // 서버에서 받은 응답으로 댓글 리스트 갱신
                 val currentList = _comments.value ?: emptyList()
+
                 val updatedList = currentList.map { comment ->
                     if (comment.commentId == commentId) {
-                        comment.copy(content = content, updatedAt = response.data!!.updatedAt)
+                        comment.copy(content = content, updatedAt = LocalDateTime.now().toString())
                     } else {
                         comment
                     }
                 }
                 _comments.value = updatedList
-                _uiState.value = CommentUiState.Success(response)
             }
             .onFailure { e ->
-                _uiState.value = CommentUiState.Error(e.message ?: "Failed to update comment")
+                Log.e("CommentViewmodel", "Failed to update comment: ${e.message}")
             }
     }
 
     // 댓글 삭제
     fun deleteComment(recipeId: Int, commentId: Int) = viewModelScope.launch {
-        _uiState.value = CommentUiState.Loading
         repository.deleteComment(recipeId, commentId)
-            .onSuccess { response ->
+            .onSuccess {
                 // 삭제 성공 시 댓글 목록 갱신
                 val currentList = _comments.value ?: emptyList()
                 _comments.value = currentList.filter { it.commentId != commentId }
-                _uiState.value = CommentUiState.Success(response)
             }
             .onFailure { e ->
-                _uiState.value = CommentUiState.Error(e.message ?: "Failed to delete comment")
+                Log.e("CommentViewmodel", "Failed to delete comment: ${e.message}")
             }
     }
-
-}
-
-sealed class CommentUiState {
-    object Idle : CommentUiState()
-    object Loading : CommentUiState()
-    data class Success<T>(val data: T) : CommentUiState()
-    data class Error(val message: String) : CommentUiState()
 }

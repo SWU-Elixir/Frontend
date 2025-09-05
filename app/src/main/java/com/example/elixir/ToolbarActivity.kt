@@ -18,7 +18,7 @@ import com.example.elixir.calendar.network.DietApi
 import com.example.elixir.calendar.network.db.DietLogDao
 import com.example.elixir.calendar.network.db.DietLogRepository
 import com.example.elixir.calendar.ui.MealDetailFragment
-import com.example.elixir.chatbot.ChatBotActivity
+import com.example.elixir.chatbot.ui.ChatBotActivity
 import com.example.elixir.databinding.ActivityToolbarBinding
 import com.example.elixir.dialog.AlertExitDialog
 import com.example.elixir.calendar.ui.DietLogFragment
@@ -26,23 +26,22 @@ import com.example.elixir.calendar.viewmodel.MealViewModel
 import com.example.elixir.calendar.viewmodel.MealViewModelFactory
 import com.example.elixir.ingredient.data.IngredientDao
 import com.example.elixir.ingredient.network.IngredientApi
-import com.example.elixir.ingredient.network.IngredientDB
 import com.example.elixir.ingredient.network.IngredientRepository
-import com.example.elixir.member.MyPageFragmentId
-import com.example.elixir.member.MyPageImageGridFragment
-import com.example.elixir.member.MypageFollowListFragment
+import com.example.elixir.member.ui.MyPageFragmentId
+import com.example.elixir.member.ui.MyPageImageGridFragment
+import com.example.elixir.member.ui.MypageFollowListFragment
 import com.example.elixir.member.data.MemberDao
 import com.example.elixir.member.network.MemberApi
-import com.example.elixir.member.network.MemberDB
 import com.example.elixir.member.network.MemberRepository
 import com.example.elixir.network.AppDatabase
-import com.example.elixir.recipe.ui.RecipeLogFragment
+import com.example.elixir.recipe.ui.fragment.RecipeLogFragment
 import com.example.elixir.signup.CreateAccountFragment
-import com.example.elixir.member.EditProfileFragment
-import com.example.elixir.member.SurveyEditFragment
-import com.example.elixir.recipe.ui.RecipeGuideFragment
+import com.example.elixir.member.ui.EditProfileFragment
+import com.example.elixir.member.ui.SurveyEditFragment
+import com.example.elixir.recipe.ui.fragment.RecipeGuideFragment
 import com.example.elixir.signup.FindPasswordFragment
 import com.example.elixir.signup.SettingProfileFragment
+import com.example.elixir.signup.SignupFragment
 
 open class ToolbarActivity : AppCompatActivity() {
     // 선언부
@@ -55,6 +54,8 @@ open class ToolbarActivity : AppCompatActivity() {
     private lateinit var dietRepository: DietLogRepository
     private lateinit var memberRepository: MemberRepository
     private lateinit var ingredientRepository: IngredientRepository
+
+    private lateinit var appDB: AppDatabase
 
     private lateinit var dietDao: DietLogDao
     private lateinit var memberDao: MemberDao
@@ -79,15 +80,17 @@ open class ToolbarActivity : AppCompatActivity() {
         setContentView(toolBinding.root)
 
         // 데이터베이스와 API 초기화
-        dietDao = AppDatabase.getInstance(this).dietLogDao()
+        appDB = AppDatabase.getInstance(this)
+
+        dietDao = appDB.dietLogDao()
         dietApi = RetrofitClient.instanceDietApi
         dietRepository = DietLogRepository(dietDao, dietApi)
 
-        memberDao = MemberDB.getInstance(this).memberDao()
+        memberDao = appDB.memberDao()
         memberApi = RetrofitClient.instanceMemberApi
         memberRepository = MemberRepository(memberApi, memberDao)
 
-        ingredientDao = IngredientDB.getInstance(this).ingredientDao()
+        ingredientDao = appDB.ingredientDao()
         ingredientApi = RetrofitClient.instanceIngredientApi
         ingredientRepository = IngredientRepository(ingredientApi, ingredientDao)
 
@@ -98,7 +101,7 @@ open class ToolbarActivity : AppCompatActivity() {
             // 회원가입 모드
             1 -> {
                 // 툴바의 제목, 더보기 버튼 안보이게, 작동 x
-                toolBinding.title.visibility = View.INVISIBLE
+                toolBinding.tvTitle.visibility = View.INVISIBLE
                 toolBinding.btnMore.visibility = View.INVISIBLE
 
                 // 뒤로가기 버튼을 누르면 로그인 페이지로 돌아가기
@@ -107,14 +110,31 @@ open class ToolbarActivity : AppCompatActivity() {
                     AlertExitDialog(this).show()
                 }
 
-                // 계정 생성 프래그먼트 띄워주기
-                setFragment(CreateAccountFragment())
+                // 소셜 로그인이면 회원 데이터 값 넘겨주기
+                val loginType = intent.getStringExtra("loginType")
+                val email = intent.getStringExtra("email")
+
+                if (loginType == "GOOGLE" || loginType == "KAKAO" || loginType == "NAVER") {
+                    val profileData = intent.getStringExtra("profileData")
+                    val fragment = SignupFragment().apply {
+                        arguments = Bundle().apply {
+                            putString("loginType", loginType)
+                            putString("email", email)
+                            putString("profileData", profileData)
+                        }
+                    }
+
+                    setFragment(fragment)
+                }
+                // 소셜 로그인 아니면 그냥
+                 else
+                    setFragment(CreateAccountFragment())
             }
 
             // 비밀번호 찾기 모드
             12 -> {
                 // 툴바의 제목, 더보기 버튼 안보이게, 작동 x
-                toolBinding.title.visibility = View.INVISIBLE
+                toolBinding.tvTitle.visibility = View.INVISIBLE
                 toolBinding.btnMore.visibility = View.INVISIBLE
 
                 // 뒤로가기 버튼을 누르면 로그인 페이지로 돌아가기
@@ -139,7 +159,7 @@ open class ToolbarActivity : AppCompatActivity() {
                 mealDataJson = intent.getStringExtra("mealData")
 
                 // 타이틀: yyyy년 m월 d일로
-                toolBinding.title.text = "${year}년 ${month}월 ${day}일"
+                toolBinding.tvTitle.text = "${year}년 ${month}월 ${day}일"
 
                 // 뒤로가기 버튼을 누르면 캘린더 페이지로 돌아가기
                 // 돌아가기 전 다이얼로그 띄우기
@@ -150,6 +170,13 @@ open class ToolbarActivity : AppCompatActivity() {
                 val fragment = DietLogFragment().apply {
                     arguments = Bundle().apply {
                         putString("mealData", mealDataJson)
+
+                        // selectedDate 추가 - LocalDate.parse()가 요구하는 형식으로 전달
+                        val selectedDateStr = String.format("%04d-%02d-%02d", year, month, day)
+                        putString("selectedDate", selectedDateStr)
+
+                        // 디버깅용 로그
+                        Log.d("ToolbarActivity", "Passing selectedDate to fragment: $selectedDateStr")
                     }
                 }
 
@@ -160,7 +187,7 @@ open class ToolbarActivity : AppCompatActivity() {
             // 레시피 기록 모드
             9 -> {
                 // 툴바의 제목, 더보기 버튼 안보이게, 작동 x
-                toolBinding.title.visibility = View.INVISIBLE
+                toolBinding.tvTitle.visibility = View.INVISIBLE
                 toolBinding.btnMore.visibility = View.INVISIBLE
 
                 // 뒤로가기 버튼을 누르면 레시피 리스트 페이지로 이동
@@ -195,7 +222,7 @@ open class ToolbarActivity : AppCompatActivity() {
             // 식단 상세 모드
             4 -> {
                 // 툴바의 제목은 보이게, 더보기 버튼 보이게
-                toolBinding.title.visibility = View.VISIBLE
+                toolBinding.tvTitle.visibility = View.VISIBLE
                 toolBinding.btnMore.visibility = View.VISIBLE
 
                 // 뒤로가기 버튼을 누르면 이전 화면으로 돌아가기
@@ -272,7 +299,7 @@ open class ToolbarActivity : AppCompatActivity() {
 
                 // 식단 이름 불러오기
                 val mealName = intent.getStringExtra("mealName")
-                toolBinding.title.text = mealName
+                toolBinding.tvTitle.text = mealName
 
                 mealDataJson = intent.getStringExtra("mealData")
 
@@ -289,7 +316,7 @@ open class ToolbarActivity : AppCompatActivity() {
             // 내 레시피 모드
             5 -> {
                 // 툴바의 제목은 보이게, 더보기 버튼 안보이게
-                toolBinding.title.visibility = View.VISIBLE
+                toolBinding.tvTitle.visibility = View.VISIBLE
                 toolBinding.btnMore.visibility = View.INVISIBLE
 
                 // 뒤로가기 버튼을 누르면 이전 화면으로 돌아가기
@@ -299,7 +326,7 @@ open class ToolbarActivity : AppCompatActivity() {
 
                 // 제목 설정
                 val title = intent.getStringExtra("title")
-                toolBinding.title.text = title
+                toolBinding.tvTitle.text = title
 
                 // memberId가 있으면 해당 사용자의 레시피, 없으면 현재 사용자의 레시피
                 val memberId = intent.getIntExtra("memberId", -1)
@@ -309,7 +336,7 @@ open class ToolbarActivity : AppCompatActivity() {
             // 내 스크랩 모드
             6 -> {
                 // 툴바의 제목은 보이게, 더보기 버튼 안보이게
-                toolBinding.title.visibility = View.VISIBLE
+                toolBinding.tvTitle.visibility = View.VISIBLE
                 toolBinding.btnMore.visibility = View.INVISIBLE
 
                 // 뒤로가기 버튼을 누르면 이전 화면으로 돌아가기
@@ -319,7 +346,7 @@ open class ToolbarActivity : AppCompatActivity() {
 
                 // 제목 설정
                 val title = intent.getStringExtra("title")
-                toolBinding.title.text = title
+                toolBinding.tvTitle.text = title
 
                 // 스크랩은 항상 현재 사용자의 것만 보여줌
                 setFragment(MyPageImageGridFragment.newInstance(MyPageImageGridFragment.TYPE_SCRAP))
@@ -328,7 +355,7 @@ open class ToolbarActivity : AppCompatActivity() {
             // 내 뱃지 모드
             7 -> {
                 // 툴바의 제목은 보이게, 더보기 버튼 안보이게
-                toolBinding.title.visibility = View.VISIBLE
+                toolBinding.tvTitle.visibility = View.VISIBLE
                 toolBinding.btnMore.visibility = View.INVISIBLE
 
                 // 뒤로가기 버튼을 누르면 이전 화면으로 돌아가기
@@ -338,7 +365,7 @@ open class ToolbarActivity : AppCompatActivity() {
 
                 // 제목 설정
                 val title = intent.getStringExtra("title")
-                toolBinding.title.text = title
+                toolBinding.tvTitle.text = title
 
                 val memberId = intent.getIntExtra("memberId", -1)
                 // 내 스크랩 프래그먼트 띄워주기
@@ -348,7 +375,7 @@ open class ToolbarActivity : AppCompatActivity() {
             // 팔로워 모드
             8 -> {
                 // 툴바의 제목은 보이게, 더보기 버튼 안보이게
-                toolBinding.title.visibility = View.VISIBLE
+                toolBinding.tvTitle.visibility = View.VISIBLE
                 toolBinding.btnMore.visibility = View.INVISIBLE
 
                 // 뒤로가기 버튼을 누르면 이전 화면으로 돌아가기
@@ -358,7 +385,7 @@ open class ToolbarActivity : AppCompatActivity() {
 
                 // 제목 설정
                 val title = intent.getStringExtra("title")
-                toolBinding.title.text = title
+                toolBinding.tvTitle.text = title
 
                 // memberId가 있으면 해당 사용자의 팔로잉, 없으면 현재 사용자의 팔로잉
                 val memberId = intent.getIntExtra("memberId", -1)
@@ -369,7 +396,7 @@ open class ToolbarActivity : AppCompatActivity() {
             // 팔로잉 모드
             11 -> {
                 // 툴바의 제목은 보이게, 더보기 버튼 안보이게
-                toolBinding.title.visibility = View.VISIBLE
+                toolBinding.tvTitle.visibility = View.VISIBLE
                 toolBinding.btnMore.visibility = View.INVISIBLE
 
                 // 뒤로가기 버튼을 누르면 이전 화면으로 돌아가기
@@ -379,7 +406,7 @@ open class ToolbarActivity : AppCompatActivity() {
 
                 // 제목 설정
                 val title = intent.getStringExtra("title")
-                toolBinding.title.text = title
+                toolBinding.tvTitle.text = title
 
                 // memberId가 있으면 해당 사용자의 팔로워, 없으면 현재 사용자의 팔로워
                 val memberId = intent.getIntExtra("memberId", -1)
@@ -390,7 +417,7 @@ open class ToolbarActivity : AppCompatActivity() {
             // 프로필 수정 모드
             10 -> {
                 // 툴바의 제목, 더보기 버튼 안보이게, 작동 x
-                toolBinding.title.visibility = View.INVISIBLE
+                toolBinding.tvTitle.visibility = View.INVISIBLE
                 toolBinding.btnMore.visibility = View.INVISIBLE
 
                 // 뒤로가기 버튼을 누르면 로그인 페이지로 돌아가기
@@ -406,7 +433,7 @@ open class ToolbarActivity : AppCompatActivity() {
             // 상대 프로필
             13 -> {
                 // 툴바의 제목, 더보기 버튼 안보이게, 작동 x
-                toolBinding.title.visibility = View.INVISIBLE
+                toolBinding.tvTitle.visibility = View.INVISIBLE
                 toolBinding.btnMore.visibility = View.INVISIBLE
 
                 // 돌아가기 전 다이얼로그 띄우기
@@ -429,7 +456,7 @@ open class ToolbarActivity : AppCompatActivity() {
             // 프로필 수정 모드
             14 -> {
                 // 툴바의 제목, 더보기 버튼 안보이게, 작동 x
-                toolBinding.title.visibility = View.INVISIBLE
+                toolBinding.tvTitle.visibility = View.INVISIBLE
                 toolBinding.btnMore.visibility = View.INVISIBLE
 
                 // 뒤로가기 버튼을 누르면 로그인 페이지로 돌아가기
@@ -444,7 +471,7 @@ open class ToolbarActivity : AppCompatActivity() {
 
             15 -> {
                 // 툴바의 제목, 더보기 버튼 안보이게, 작동 x
-                toolBinding.title.visibility = View.VISIBLE
+                toolBinding.tvTitle.visibility = View.VISIBLE
                 toolBinding.btnMore.visibility = View.INVISIBLE
 
                 // 뒤로가기 버튼을 누르면 로그인 페이지로 돌아가기
@@ -459,7 +486,7 @@ open class ToolbarActivity : AppCompatActivity() {
 
             16 -> {
                 // 툴바의 제목, 더보기 버튼 안보이게, 작동 x
-                toolBinding.title.visibility = View.VISIBLE
+                toolBinding.tvTitle.visibility = View.VISIBLE
                 toolBinding.btnMore.visibility = View.INVISIBLE
 
                 // 뒤로가기 버튼을 누르면 로그인 페이지로 돌아가기
